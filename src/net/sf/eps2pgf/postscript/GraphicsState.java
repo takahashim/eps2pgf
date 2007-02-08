@@ -112,6 +112,15 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
+     * Returns the mean scaling factor described by the CTM
+     */
+    public double getMeanScaling() {
+        double xScale = Math.sqrt(Math.pow(CTM[0], 2) + Math.pow(CTM[2], 2));
+        double yScale = Math.sqrt(Math.pow(CTM[1], 2) + Math.pow(CTM[3], 2));
+        return 0.5 * (xScale + yScale);
+    }
+    
+    /**
      * Move the current position to a new location (PostScript moveto operator)
      * @param x X-coordinate (before CTM is applied)
      * @param y Y-coordinate (before CTM is applied)
@@ -120,7 +129,7 @@ public class GraphicsState implements Cloneable {
         position[0] = x;
         position[1] = y;
         double[] transformed = applyCTM(position);
-        path.moveto(transformed[0], transformed[1]);
+        path.moveto(transformed[0], transformed[1], x, y);
     }
     
     /**

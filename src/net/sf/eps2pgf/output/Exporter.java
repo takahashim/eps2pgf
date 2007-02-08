@@ -22,8 +22,9 @@
 package net.sf.eps2pgf.output;
 
 import java.io.*;
-import net.sf.eps2pgf.postscript.GraphicsState;
-import net.sf.eps2pgf.postscript.errors.PSError;
+
+import net.sf.eps2pgf.postscript.*;
+import net.sf.eps2pgf.postscript.errors.*;
 
 /**
  * Interface for exporters (e.g. Pgf and Tikz)
@@ -47,7 +48,13 @@ public interface Exporter {
      * Intersects the area inside the current clipping path with the area
      * inside the current path to produce a new, smaller clipping path.
      */
-    public void clip(GraphicsState gstate) throws IOException;
+    public void clip(Path clipPath) throws PSError, IOException;
+    
+    /**
+     * Fills a path
+     * See the PostScript manual (fill operator) for more info.
+     */
+    public void fill(Path path) throws PSError, IOException;
 
     /**
      * Implements PostScript stroke operator
@@ -65,9 +72,20 @@ public interface Exporter {
     public void setlinejoin(int join) throws PSError, IOException;
     
     /**
+     * Implements PostScript operator setlinewidth
+     * @param lineWidth Line width in TeX pt (= 1/72.27 inch)
+     */
+    public void setlinewidth(double lineWidth) throws PSError, IOException;
+    
+    /**
      * Starts a new scope
      */
     public void startScope() throws IOException;
+    
+    /**
+     * Ends the current scope scope
+     */
+    public void endScope() throws IOException;
     
     /**
      * Sets the current color in Red-Green-Blue (RGB)

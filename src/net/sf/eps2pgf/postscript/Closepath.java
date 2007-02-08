@@ -25,5 +25,15 @@ package net.sf.eps2pgf.postscript;
  *
  * @author Paul Wagenaars
  */
-public class Closepath extends PathSection {
+public class Closepath extends PathSection implements Cloneable {
+    /**
+     * Create a clone of this object.
+     * @return Returns clone of this object.
+     */
+    public Closepath clone() {
+        Closepath newSection = new Closepath();
+        newSection.params = params.clone();
+        return newSection;
+    }
+
 }
