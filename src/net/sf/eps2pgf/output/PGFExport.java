@@ -24,18 +24,19 @@ package net.sf.eps2pgf.output;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import net.sf.eps2pgf.postscript.GraphicsState;
-import net.sf.eps2pgf.postscript.Lineto;
-import net.sf.eps2pgf.postscript.Moveto;
-import net.sf.eps2pgf.postscript.PathSection;
-import net.sf.eps2pgf.postscript.errors.PSError;
-import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+
+import net.sf.eps2pgf.postscript.*;
+import net.sf.eps2pgf.postscript.errors.*;
 
 /**
  * Writes PGF files.
  * @author Paul Wagenaars
  */
 public class PGFExport implements Exporter {
+    // All dimension will be rounded to this precision (in centimetres)
+    static final double precision = 0.01;
+    int scopeDepth = 0;
+    
     Writer out;
     
     /**
@@ -62,7 +63,36 @@ public class PGFExport implements Exporter {
      * @throws java.io.IOException Signals that an I/O exception of some sort has occurred.
      */
     public void finish()  throws IOException {
+        for (int i = 0 ; i < scopeDepth ; i++) {
+            out.write("\\end{pgfscope}\n");
+        }
         out.write("\\end{pgfpicture}\n");
+    }
+    
+    /**
+     * Convert a Path to pgf code and write in to the output
+     */
+    void writePath(Path path) throws PSError, IOException {
+        for (int i = 0 ; i < path.sections.size() ; i++) {
+            PathSection section = path.sections.get(i);
+            if (section instanceof Moveto) {
+                // If the path ends with a moveto, the moveto is ignored.
+                if (i < (path.sections.size()-1)) {
+                    double x = precision * Math.round(section.params[0]/precision);
+                    double y = precision * Math.round(section.params[1]/precision);
+                    out.write("\\pgfpathmoveto{\\pgfpoint{" + x + "cm}{" + y + "cm}}");
+                }
+            } else if (section instanceof Lineto) {
+                double x = precision * Math.round(section.params[0]/precision);
+                double y = precision * Math.round(section.params[1]/precision);
+                out.write("\\pgfpathlineto{\\pgfpoint{" + x + "cm}{" + y + "cm}}");
+            } else if (section instanceof Closepath) {
+                out.write("\\pgfpathclose");
+            } else {
+                throw new PSErrorUnimplemented("Can't handle " + section.getClass().getName());
+            }
+        }
+        out.write("\n");
     }
     
     /**
@@ -77,15 +107,18 @@ public class PGFExport implements Exporter {
      * Set the current clipping path in the graphics state as clipping path
      * in the output document.
      */
-    public void clip(GraphicsState gstate) throws IOException {
-        for (int i = 0 ; i < gstate.clippingPath.sections.size() ; i++) {
-            PathSection section = gstate.clippingPath.sections.get(i);
-            if (section instanceof Moveto) {
-                out.write("\\pgfpathmoveto{"+section.params[0]+"}{"+section.params[1]+"}");
-            } else if (section instanceof Lineto) {
-                out.write("\\pgfpathlineto{"+section.params[0]+"}{"+section.params[1]+"}");
-            }
-        }
+    public void clip(Path clipPath) throws PSError, IOException {
+        writePath(clipPath);
+        out.write("\\pgfusepath{clip}\n");
+    }
+    
+    /**
+     * Fills a path
+     * See the PostScript manual (fill operator) for more info.
+     */
+    public void fill(Path path) throws PSError, IOException {
+        writePath(path);
+        out.write("\\pgfusepath{fill}\n");
     }
     
     /**
@@ -126,13 +159,33 @@ public class PGFExport implements Exporter {
         }        
     }
     
+    /**
+     * Implements PostScript operator setlinewidth
+     * @param lineWidth Line width in TeX pt (= 1/72.27 inch)
+     */
+    public void setlinewidth(double lineWidth) throws PSError, IOException {
+        lineWidth = Math.abs(lineWidth);
+        out.write(String.format("\\pgfsetlinewidth{%.3gpt}\n", lineWidth));
+    }
+    
    /**
      * Starts a new scope
      */
     public void startScope() throws IOException {
         out.write("\\begin{pgfscope}\n");
+        scopeDepth++;
     }
     
+    /**
+     * Ends the current scope scope
+     */
+    public void endScope() throws IOException {
+        if (scopeDepth > 0) {
+            out.write("\\end{pgfscope}\n");
+            scopeDepth--;
+        }
+    }
+
     /**
      * Sets the current color
      */

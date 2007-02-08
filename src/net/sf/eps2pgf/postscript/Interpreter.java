@@ -24,13 +24,8 @@ package net.sf.eps2pgf.postscript;
 import java.io.*;
 import java.util.*;
 import net.sf.eps2pgf.collections.ArrayStack;
-import net.sf.eps2pgf.output.Exporter;
-import net.sf.eps2pgf.output.PGFExport;
-import net.sf.eps2pgf.postscript.errors.PSError;
-import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
-import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
-import net.sf.eps2pgf.postscript.errors.PSErrorUnmatchedMark;
+import net.sf.eps2pgf.output.*;
+import net.sf.eps2pgf.postscript.errors.*;
 
 /**
  *
@@ -74,6 +69,7 @@ public class Interpreter {
             op_pstack();
             System.out.println("----- End of stack");
             dictStack.dumpFull();
+            exp.finish();
             throw e;
         }
         System.out.println("----- Start of stack");
@@ -180,12 +176,15 @@ public class Interpreter {
     /** PostScript op: clip */
     public void op_clip() throws PSError, IOException {
         gstate.current.clip();
-        exp.clip(gstate.current);
+        exp.clip(gstate.current.clippingPath);
     }
     
     /** PostScript op: closepath */
     public void op_closepath() throws PSError {
-        gstate.current.path.closepath();
+        double[] startPos = gstate.current.path.closepath();
+        if (startPos != null) {
+            gstate.current.moveto(startPos[0], startPos[1]);
+        }
     }
     
     /** PostScript op: concat */
@@ -325,8 +324,9 @@ public class Interpreter {
     }
     
     /** PostScript op: fill */
-    public void op_fill() throws PSError {
-        throw new PSErrorUnimplemented("operator: fill");
+    public void op_fill() throws PSError, IOException {
+        exp.fill(gstate.current.path);
+        op_newpath();
     }
     
     /** PostScript op: findfont */
@@ -353,8 +353,9 @@ public class Interpreter {
     }
     
     /** PostScript op: grestore */
-    public void op_grestore() throws PSError {
-        throw new PSErrorUnimplemented("operator: grestore");
+    public void op_grestore() throws PSError, IOException {
+        gstate.restoreGstate();
+        exp.endScope();
     }
     
     /** PostScript op: gsave */
@@ -560,7 +561,7 @@ public class Interpreter {
         double y = opStack.pop().toReal();
         double x = opStack.pop().toReal();
         
-        // rectclip in implementedin PostScript. See PostScript manual for
+        // rectclip implemented in PostScript. See PostScript manual for
         // the code below.
         op_newpath();
         gstate.current.moveto(x, y);
@@ -573,13 +574,40 @@ public class Interpreter {
     }
     
     /** PostScript op: rectfill */
-    public void op_rectfill() throws PSError {
-        throw new PSErrorUnimplemented("operator: rectfill");
+    public void op_rectfill() throws PSError, IOException {
+        PSObject heightObj = opStack.pop();
+        if ( (heightObj instanceof PSObjectArray) || (heightObj instanceof PSObjectString) ) {
+            throw new PSErrorUnimplemented("rectclip operator not fully implemented");
+        }
+        double height = heightObj.toReal();
+        double width = opStack.pop().toReal();
+        double y = opStack.pop().toReal();
+        double x = opStack.pop().toReal();
+        
+        // rectfill implemented in PostScript. See PostScript manual for
+        // the code below.
+        op_gsave();
+        op_newpath();
+        gstate.current.moveto(x, y);
+        gstate.current.rlineto(width, 0);
+        gstate.current.rlineto(0, height);
+        gstate.current.rlineto(-width, 0);
+        op_closepath();
+        op_fill();
+        op_grestore();
     }    
     
     /** PostScript op: repeat */
-    public void op_repeat() throws PSError {
-        throw new PSErrorUnimplemented("operator: repeat");
+    public void op_repeat() throws Exception {
+        PSObject obj = opStack.pop();
+        if (!(obj instanceof PSObjectProc)) {
+            throw new PSErrorTypeCheck();
+        }
+        int n = opStack.pop().toNonNegInt();
+        
+        for (int i = 0 ; i < n ; i++) {
+            obj.execute(this);
+        }
     }    
     
     /** PostScript op: restore */
@@ -706,8 +734,16 @@ public class Interpreter {
     }
    
     /** PostScript op: setlinewidth */
-    public void op_setlinewidth() throws PSError {
-        throw new PSErrorUnimplemented("operator: setlinewidth");
+    public void op_setlinewidth() throws PSError, IOException {
+        double lineWidth = opStack.pop().toReal();
+        
+        // Apply CTM to linewidth, now the line width is in cm
+        lineWidth *= gstate.current.getMeanScaling();
+        
+        // For convenience: convert linewidth in cm to TeX pt (=1/72.27 inch)
+        lineWidth = lineWidth / 2.54 * 72.27;
+        
+        exp.setlinewidth(lineWidth);
     }
    
     /** PostScript op: setmatrix */

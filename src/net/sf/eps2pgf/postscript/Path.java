@@ -51,7 +51,7 @@ public class Path implements Cloneable {
     /**
      * Adds a moveto to this path.
      */
-    public void moveto(double x, double y) {
+    public void moveto(double x, double y, double docx, double docy) {
         int len = sections.size();
         if (len > 0) {
             PathSection lastElem = sections.get(len - 1);
@@ -59,7 +59,7 @@ public class Path implements Cloneable {
                 sections.remove(len - 1);
             }
         }
-        sections.add(new Moveto(x, y));
+        sections.add(new Moveto(x, y, docx, docy));
     }
     
     /**
@@ -72,19 +72,31 @@ public class Path implements Cloneable {
     /**
      * Add a straight line to the beginning of this subpath and start a 
      * new subpath.
+     * @return Returns the starting coordinate of this path. (in document
+     * coordinates, before CTM, in pt)
      */
-    public void closepath() {
+    public double[] closepath() {
         int len = sections.size();
         // If the path is empty closepath does nothing
         if (len == 0) {
-            return;
+            return null;
         }
         // If the subpath is already closed closepath does nothing
         if (sections.get(len-1) instanceof Moveto) {
-            return;
+            return null;
         }
         sections.add(new Closepath());
-        sections.add(new Moveto(Double.NaN, Double.NaN));
+        
+        // Search the start of the subpath
+        for (int i = len-1 ; i >= 0 ; i--) {
+            if (sections.get(i) instanceof Moveto) {
+                double[] position = new double[2];
+                position[0] = sections.get(i).params[2];
+                position[1] = sections.get(i).params[3];
+                return position;
+            }
+        }
+        return null;
     }
     
     /**

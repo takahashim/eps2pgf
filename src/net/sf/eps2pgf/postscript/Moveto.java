@@ -25,17 +25,30 @@ package net.sf.eps2pgf.postscript;
  * Path section representing a PostScript moveto operator.
  * @author Paul Wagenaars
  */
-public class Moveto extends PathSection {
+public class Moveto extends PathSection implements Cloneable {
+    
+    /**
+     * Create a new Movoto instance
+     */
+    public Moveto() {
+        for (int i = 0 ; i < params.length ; i++) {
+            params[i] = Double.NaN;
+        }        
+    }
     
     /**
      * Create a new Moveto instance
-     * @param x X-coordinate
-     * @param y Y-coordinate
+     * @param x X-coordinate (in device coordinates, cm)
+     * @param y Y-coordinate (in device coordinates, cm)
+     * @param docx document X-coordinate before CTM (in pt)
+     * @param docy document Y-coordinate before CTM (in pt)
      */
-    public Moveto(double x, double y) {
+    public Moveto(double x, double y, double docx, double docy) {
         params[0] = x;
         params[1] = y;
-        for (int i = 2 ; i < params.length ; i++) {
+        params[2] = docx;
+        params[3] = docy;
+        for (int i = 4 ; i < params.length ; i++) {
             params[i] = Double.NaN;
         }
     }
@@ -46,4 +59,15 @@ public class Moveto extends PathSection {
     public String toString() {
         return String.format("moveto (%.4g, %.4g)", params[0], params[1]);
     }
+    
+    /**
+     * Create a clone of this object.
+     * @return Returns clone of this object.
+     */
+    public Moveto clone() {
+        Moveto newSection = new Moveto();
+        newSection.params = params.clone();
+        return newSection;
+    }
+
 }

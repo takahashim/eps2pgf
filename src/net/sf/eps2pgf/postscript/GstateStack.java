@@ -51,4 +51,14 @@ public class GstateStack {
             throw new PSErrorUnimplemented("Clone method not yet implemented for " + e.getStackTrace());
         }
     }
+
+    /**
+     * Restores the topmost graphics state from the stack.
+     */
+    public void restoreGstate() throws PSError {
+        if (stack.isEmpty()) {
+            return;
+        }
+        current = stack.pop();
+    }
 }

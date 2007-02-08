@@ -25,7 +25,16 @@ package net.sf.eps2pgf.postscript;
  *
  * @author Paul Wagenaars
  */
-public class Lineto extends PathSection {
+public class Lineto extends PathSection implements Cloneable {
+    
+    /**
+     * Create a new Lineto instance
+     */
+    public Lineto() {
+        for (int i = 0 ; i < params.length ; i++) {
+            params[i] = Double.NaN;
+        }
+    }
     
     /**
      * Create a new Lineto instance
@@ -46,4 +55,15 @@ public class Lineto extends PathSection {
     public String toString() {
         return String.format("lineto (%.4g, %.4g)", params[0], params[1]);
     }
+    
+    /**
+     * Create a clone of this object.
+     * @return Returns clone of this object.
+     */
+    public Lineto clone() {
+        Lineto newSection = new Lineto();
+        newSection.params = params.clone();
+        return newSection;
+    }
+
 }
