@@ -133,6 +133,18 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
+     * Draw a line to a point.
+     * @param x X-coordinate (before CTM is applied)
+     * @param y Y-coordinate (before CTM is applied)
+     */
+    public void lineto(double x, double y) {
+        position[0] = x;
+        position[1] = y;
+        double[] transformed = applyCTM(position);
+        path.lineto(transformed[0], transformed[1]);
+    }
+    
+    /**
      * Draw a line to a relative point.
      * @param dx delta X-coordinate (before CTM is applied)
      * @param dy delta Y-coordinate (before CTM is applied)
