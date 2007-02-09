@@ -22,8 +22,8 @@
 package net.sf.eps2pgf.output;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.text.*;
+import java.util.*;
 
 import net.sf.eps2pgf.postscript.*;
 import net.sf.eps2pgf.postscript.errors.*;
@@ -35,6 +35,16 @@ import net.sf.eps2pgf.postscript.errors.*;
 public class PGFExport implements Exporter {
     // All dimension will be rounded to this precision (in centimetres)
     static final double precision = 0.01;
+    
+    // Coordinate format (used to format X- and Y-coordinates)
+    static final DecimalFormat coorFormat = new DecimalFormat("#.##", 
+            new DecimalFormatSymbols(Locale.US));
+    
+    // Length format (used to format linewidth, dash, etc...)
+    static final DecimalFormat lengthFormat = new DecimalFormat("#.###", 
+            new DecimalFormatSymbols(Locale.US));
+    
+    
     int scopeDepth = 0;
     
     Writer out;
@@ -78,13 +88,13 @@ public class PGFExport implements Exporter {
             if (section instanceof Moveto) {
                 // If the path ends with a moveto, the moveto is ignored.
                 if (i < (path.sections.size()-1)) {
-                    double x = precision * Math.round(section.params[0]/precision);
-                    double y = precision * Math.round(section.params[1]/precision);
+                    String x = coorFormat.format(section.params[0]);
+                    String y = coorFormat.format(section.params[1]);
                     out.write("\\pgfpathmoveto{\\pgfpoint{" + x + "cm}{" + y + "cm}}");
                 }
             } else if (section instanceof Lineto) {
-                double x = precision * Math.round(section.params[0]/precision);
-                double y = precision * Math.round(section.params[1]/precision);
+                String x = coorFormat.format(section.params[0]);
+                String y = coorFormat.format(section.params[1]);
                 out.write("\\pgfpathlineto{\\pgfpoint{" + x + "cm}{" + y + "cm}}");
             } else if (section instanceof Closepath) {
                 out.write("\\pgfpathclose");
@@ -99,8 +109,9 @@ public class PGFExport implements Exporter {
      * Implements PostScript stroke operator.
      * @param gstate Current graphics state.
      */
-    public void stroke(GraphicsState gstate) throws IOException {
-        
+    public void stroke(Path path) throws PSError, IOException {
+        writePath(path);
+        out.write("\\pgfusepath{stroke}\n");
     }
     
     /**
@@ -119,6 +130,18 @@ public class PGFExport implements Exporter {
     public void fill(Path path) throws PSError, IOException {
         writePath(path);
         out.write("\\pgfusepath{fill}\n");
+    }
+    
+    /**
+     * Implements PostScript operator setdash
+     */
+    public void setDash(PSObjectArray array, double offset) throws PSError, IOException {
+        out.write("\\pgfsetdash{");
+        
+        for (int i = 0 ; i < array.size() ; i++) {
+            out.write("{" + lengthFormat.format(array.get(i).toReal()) + "cm}");
+        }
+        out.write("}{" + lengthFormat.format(offset) + "cm}\n");
     }
     
     /**
@@ -161,11 +184,11 @@ public class PGFExport implements Exporter {
     
     /**
      * Implements PostScript operator setlinewidth
-     * @param lineWidth Line width in TeX pt (= 1/72.27 inch)
+     * @param lineWidth Line width in cm
      */
     public void setlinewidth(double lineWidth) throws PSError, IOException {
         lineWidth = Math.abs(lineWidth);
-        out.write(String.format("\\pgfsetlinewidth{%.3gpt}\n", lineWidth));
+        out.write("\\pgfsetlinewidth{"+ lengthFormat.format(lineWidth) +"cm}\n");
     }
     
    /**

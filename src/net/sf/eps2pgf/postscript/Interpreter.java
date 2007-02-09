@@ -291,8 +291,9 @@ public class Interpreter {
     }
     
     /** PostScript op: eofill */
-    public void op_eofill() throws PSError {
-        throw new PSErrorUnimplemented("operator: eofill");
+    public void op_eofill() throws PSError, IOException {
+        exp.fill(gstate.current.path);
+        op_newpath();
     }
     
     /** PostScript op: eq */
@@ -443,7 +444,9 @@ public class Interpreter {
     
     /** PostScript op: lineto */
     public void op_lineto() throws PSError {
-        throw new PSErrorUnimplemented("operator: lineto");
+        double y = opStack.pop().toReal();
+        double x = opStack.pop().toReal();
+        gstate.current.lineto(x, y);
     }
     
     /** PostScript op: lt */
@@ -617,7 +620,9 @@ public class Interpreter {
     
     /** PostScript op: rmoveto */
     public void op_rlineto() throws PSError {
-        throw new PSErrorUnimplemented("operator: rlineto");
+        double dy = opStack.pop().toReal();
+        double dx = opStack.pop().toReal();
+        gstate.current.rlineto(dx, dy);
     }    
 
     /** PostScript op: rmoveto */
@@ -698,8 +703,23 @@ public class Interpreter {
     }
    
     /** PostScript op: setdash */
-    public void op_setdash() throws PSError {
-        throw new PSErrorUnimplemented("operator: setdash");
+    public void op_setdash() throws PSError, IOException {
+        double offset = opStack.pop().toReal();
+        PSObject obj = opStack.pop();
+        if (!(obj instanceof PSObjectArray)) {
+            throw new PSErrorTypeCheck();
+        }
+        PSObjectArray array = (PSObjectArray)obj;
+        
+        // Scale all distances
+        double scaling = gstate.current.getMeanScaling();
+        offset *= scaling;
+        for (int i = 0 ; i < array.size() ; i++) {
+            double value = array.get(i).toReal();
+            array.set(i, new PSObjectReal(value*scaling));
+        }
+        
+        exp.setDash(array, offset);
     }
    
     /** PostScript op: setfont */
@@ -740,9 +760,6 @@ public class Interpreter {
         // Apply CTM to linewidth, now the line width is in cm
         lineWidth *= gstate.current.getMeanScaling();
         
-        // For convenience: convert linewidth in cm to TeX pt (=1/72.27 inch)
-        lineWidth = lineWidth / 2.54 * 72.27;
-        
         exp.setlinewidth(lineWidth);
     }
    
@@ -763,8 +780,9 @@ public class Interpreter {
     }
    
     /** PostScript op: stroke */
-    public void op_stroke() throws PSError {
-        throw new PSErrorUnimplemented("operator: stroke");
+    public void op_stroke() throws PSError, IOException {
+        exp.stroke(gstate.current.path);
+        op_newpath();
     }
    
     /** PostScript op: [ */

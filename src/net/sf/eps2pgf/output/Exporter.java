@@ -59,7 +59,12 @@ public interface Exporter {
     /**
      * Implements PostScript stroke operator
      */
-    public void stroke(GraphicsState gstate) throws IOException;
+    public void stroke(Path path) throws PSError, IOException;
+    
+    /**
+     * Implements PostScript operator setdash
+     */
+    public void setDash(PSObjectArray array, double offset) throws PSError, IOException;
     
     /**
      * Implements PostScript operator setlinecap
@@ -73,7 +78,7 @@ public interface Exporter {
     
     /**
      * Implements PostScript operator setlinewidth
-     * @param lineWidth Line width in TeX pt (= 1/72.27 inch)
+     * @param lineWidth Line width in cm
      */
     public void setlinewidth(double lineWidth) throws PSError, IOException;
     
