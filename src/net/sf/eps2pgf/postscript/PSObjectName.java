@@ -46,6 +46,16 @@ public class PSObjectName extends PSObject {
         }
     }
     
+    /**
+     * Create a new instance of PSObjectName
+     * @param str Name of the new PSObjectName object
+     * @param aIsLiteral Indicates whether this object is a literal name
+     */
+    public PSObjectName(String str, boolean aIsLiteral) {
+        name = new String(str);
+        isLiteral = aIsLiteral;
+    }
+    
     /** Creates a new instance of PSObjectName. */
     public PSObjectName(PSObjectName obj) {
         name = new String(obj.name);

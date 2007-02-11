@@ -22,9 +22,8 @@
 package net.sf.eps2pgf.postscript;
 
 import java.util.*;
-import net.sf.eps2pgf.postscript.errors.PSError;
-import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
-import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
+
+import net.sf.eps2pgf.postscript.errors.*;
 
 /** PostScript object: array
  *
@@ -34,6 +33,22 @@ public class PSObjectArray extends PSObject {
     private ArrayList<PSObject> array;
     private int offset;
     private int count;
+
+    /**
+     * Creates a new instance of PSObjectArray
+     * 
+     * @param dblArray Array of doubles
+     */
+    public PSObjectArray(double[] dblArray) {
+        array = new ArrayList<PSObject>(dblArray.length);
+        for (int i = 0 ; i < dblArray.length ; i++) {
+            array.add(new PSObjectReal(dblArray[i]));
+        }
+        
+        // Use the entire array
+        offset = 0;
+        count = Integer.MAX_VALUE;        
+    }
     
     /** Creates a new instance of PSObjectArray */
     public PSObjectArray(PSObject[] objs) {
@@ -68,6 +83,13 @@ public class PSObjectArray extends PSObject {
     /** Returns the number of elements in this array. */
     public int size() {
         return Math.min(count, array.size()-offset);
+    }
+    
+    /**
+     * Insert an element at the specified position in this array.
+     */
+    public void add(int index, PSObject value) throws PSError {
+        array.add(index+offset, value);
     }
     
     /**
@@ -154,4 +176,52 @@ public class PSObjectArray extends PSObject {
     public PSObjectArray getinterval(int index, int count) throws PSError {
         return new PSObjectArray(this, index, count);
     }
+    
+    /** Convert this object to an array. */
+    public PSObjectArray toArray() {
+        return this;
+    }
+    
+    /** Convert this object to a matrix, if possible. */
+    public PSObjectMatrix toMatrix() throws PSError {
+        if (this.size() != 6) {
+            throw new PSErrorRangeCheck();
+        }
+        return new PSObjectMatrix(this.get(0).toReal(), this.get(1).toReal(),
+                this.get(2).toReal(), this.get(3).toReal(),
+                this.get(4).toReal(), this.get(5).toReal());
+    }
+    
+    /**
+     * Copies values from another obj to this object.
+     */
+    public void copyValuesFrom(PSObject obj) throws PSError {
+        PSObjectArray array = obj.toArray();
+        
+        // First remove all current elements from the array
+        for (int i = size()-1 ; i >= 0 ; i--) {
+            remove(i);
+        }
+        
+        // Copies the values
+        for (int i = 0 ; i < array.size() ; i++) {
+            add(i, array.get(i));
+        }
+    }
+    
+    /**
+     * Creates a deep copy of this array.
+     */
+    public PSObjectArray clone() throws CloneNotSupportedException {
+        PSObject[] objs = new PSObject[size()];
+        try {
+            for (int i = 0 ; i < objs.length ; i++) {
+                objs[i] = get(i).clone();
+            }
+        } catch (PSError e) {
+            throw new CloneNotSupportedException();
+        }
+        return new PSObjectArray(objs);
+    }
+
 }

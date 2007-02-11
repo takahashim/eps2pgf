@@ -23,6 +23,8 @@ package net.sf.eps2pgf.postscript;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.*;
+
 import net.sf.eps2pgf.collections.ArrayStack;
 import net.sf.eps2pgf.output.*;
 import net.sf.eps2pgf.postscript.errors.*;
@@ -44,15 +46,21 @@ public class Interpreter {
     // Graphics state
     GstateStack gstate = new GstateStack();
     
+    // Fonts resources
+    Fonts fonts;
+    
     // Exporter, writes the graphics data to file in another format (such as pgf)
     Exporter exp;
     
+    Logger log = Logger.getLogger("global");
+    
     /** Creates a new instance of Interpreter */
-    public Interpreter(LinkedList<PSObject> in, Writer out) {
+    public Interpreter(LinkedList<PSObject> in, Writer out) throws PSError {
         execStack.addObjectList(in);
         
         // Initialize character encodings
         Encoding.initialize();
+        fonts = new Fonts();
         
         // Create new exporter
         exp = new PGFExport(out);
@@ -88,7 +96,6 @@ public class Interpreter {
         }
     }
     
-    
     /** PostScript op: add */
     public void op_add() throws PSError {
         PSObject num2 = opStack.pop();
@@ -123,11 +130,7 @@ public class Interpreter {
     
     /** PostScript op: astore */
     public void op_astore() throws PSError {
-        PSObject obj = opStack.pop();
-        if (!(obj instanceof PSObjectArray)) {
-            throw new PSErrorTypeCheck();
-        }
-        PSObjectArray array = (PSObjectArray)obj;
+        PSObjectArray array = opStack.pop().toArray();
         int n = array.size();
         for (int i = (n-1) ; i >= 0 ; i--) {
             array.set(i, opStack.pop());
@@ -137,11 +140,8 @@ public class Interpreter {
     
     /** PostScript op: begin */
     public void op_begin() throws PSError {
-        PSObject dict = opStack.pop();
-        if (!(dict instanceof PSObjectDict)) {
-            throw new PSErrorTypeCheck();
-        }
-        dictStack.pushDict((PSObjectDict)dict);
+        PSObjectDict dict = opStack.pop().toDict();
+        dictStack.pushDict(dict);
     }
     
     /** PostScript op: bind */
@@ -189,7 +189,8 @@ public class Interpreter {
     
     /** PostScript op: concat */
     public void op_concat() throws PSError {
-        throw new PSErrorUnimplemented("operator: concat");
+        PSObjectMatrix matrix = opStack.pop().toMatrix();
+        gstate.current.CTM.concat(matrix);
     }
     
     /** PostScript op: copy */
@@ -248,7 +249,11 @@ public class Interpreter {
     
     /** PostScript op: currentmatrix */
     public void op_currentmatrix() throws PSError {
-        throw new PSErrorUnimplemented("operator: currentmatrix");
+        PSObject obj = opStack.pop();
+        PSObjectMatrix matrix = obj.toMatrix();
+        matrix.copyValuesFrom(gstate.current.CTM);
+        obj.copyValuesFrom(matrix);
+        opStack.push(obj);
     }
     
     /** PostScript op: def */
@@ -260,16 +265,14 @@ public class Interpreter {
     
     /** PostScript op: definefont */
     public void op_definefont() throws PSError {
-        throw new PSErrorUnimplemented("operator: definefont");
+        PSObjectDict dict = opStack.pop().toDict();
+        PSObject key = opStack.pop();
+        opStack.push( fonts.defineFont(key, dict) );
     }
     
     /** PostScript op: dict */
     public void op_dict() throws PSError {
-        PSObject capacity = opStack.pop();
-        if ( !(capacity instanceof PSObjectReal) && 
-                !(capacity instanceof PSObjectInt) ) {
-            throw new PSErrorTypeCheck();
-        }
+        int capacity = opStack.pop().toNonNegInt();
         opStack.push(new PSObjectDict(capacity));
     }
     
@@ -332,17 +335,40 @@ public class Interpreter {
     
     /** PostScript op: findfont */
     public void op_findfont() throws PSError {
-        throw new PSErrorUnimplemented("operator: findfont");
+        PSObject key = opStack.pop();
+        opStack.push(fonts.findFont(key));
     }
     
     /** PostScript op: forall */
-    public void op_forall() throws PSError {
-        throw new PSErrorUnimplemented("operator: forall");
+    public void op_forall() throws Exception {
+        PSObjectProc proc = opStack.pop().toProc();
+        PSObject obj = opStack.pop();
+        if (obj instanceof PSObjectDict) {
+            PSObjectDict dict = (PSObjectDict)obj;
+            Set<PSObject> keys = dict.keySet();
+            Iterator<PSObject> iter = keys.iterator();
+            while (iter.hasNext()) {
+                PSObject key = iter.next();
+                PSObject value = dict.lookup(key);
+                opStack.push(key);
+                opStack.push(value);
+                proc.execute(this);
+            }
+        } else {
+            throw new PSErrorUnimplemented("operator: forall not FULLY implemented");
+        }
     }
     
     /** PostScript op: get */
     public void op_get() throws PSError {
-        throw new PSErrorUnimplemented("operator: get");
+        PSObject indexKey = opStack.pop();
+        PSObject obj = opStack.pop();
+        if (obj instanceof PSObjectDict) {
+            PSObjectDict dict = (PSObjectDict)obj;
+            opStack.push(dict.lookup(indexKey.toDictKey()));
+        } else {
+            throw new PSErrorUnimplemented("operator: get not FULLY implemented.");
+        }
     }
     
     /** PostScript op: getinterval */
@@ -367,10 +393,7 @@ public class Interpreter {
     
     /** PostScript op: if */
     public void op_if() throws Exception {
-        PSObject proc = opStack.pop();
-        if (!(proc instanceof PSObjectProc)) {
-            throw new PSErrorTypeCheck();
-        }
+        PSObjectProc proc = opStack.pop().toProc();
         boolean bool = opStack.pop().toBool();
         if (bool) {
             proc.execute(this);
@@ -379,21 +402,9 @@ public class Interpreter {
     
     /** PostScript op: ifelse */
     public void op_ifelse() throws Exception {
-        PSObject obj2 = opStack.pop();
-        PSObject obj1 = opStack.pop();
+        PSObjectProc proc2 = opStack.pop().toProc();
+        PSObjectProc proc1 = opStack.pop().toProc();
         boolean bool = opStack.pop().toBool();
-        PSObjectProc proc1;
-        PSObjectProc proc2;
-        if (obj1 instanceof PSObjectProc) {
-            proc1 = (PSObjectProc)obj1;
-        } else {
-            throw new PSErrorTypeCheck();
-        }
-        if (obj2 instanceof PSObjectProc) {
-            proc2 = (PSObjectProc)obj2;
-        } else {
-            throw new PSErrorTypeCheck();
-        }
         
         if (bool) {
             proc1.execute(this);
@@ -423,7 +434,10 @@ public class Interpreter {
     
     /** PostScript op: known */
     public void op_known() throws PSError {
-        throw new PSErrorUnimplemented("operator: known");
+        PSObject key = opStack.pop();
+        PSObjectDict dict = opStack.pop().toDict();
+        boolean containsKey = dict.containsKey(key);
+        opStack.push(new PSObjectBool(containsKey));
     }
     
     /** PostScript op: load */
@@ -439,7 +453,13 @@ public class Interpreter {
     
     /** PostScript op: length */
     public void op_length() throws PSError {
-        throw new PSErrorUnimplemented("operator: length");
+        PSObject obj = opStack.pop();
+        if (obj instanceof PSObjectDict) {
+            PSObjectDict dict = (PSObjectDict)obj;
+            opStack.push(new PSObjectInt(dict.length()));
+        } else {
+            throw new PSErrorUnimplemented("operator: length not FULLY implemented");
+        }
     }
     
     /** PostScript op: lineto */
@@ -461,8 +481,23 @@ public class Interpreter {
     }
     
     /** PostScript op: makefont */
-    public void op_makefont() throws PSError {
-        throw new PSErrorUnimplemented("operator: makefont");
+    public void op_makefont() throws PSError, CloneNotSupportedException {
+        PSObjectMatrix matrix = opStack.pop().toMatrix();
+        PSObjectDict font = opStack.pop().toDict();
+        font = font.clone();
+        PSObjectMatrix fontMatrix = font.lookup("FontMatrix").toMatrix();
+        
+        // Concatenate matrix to fontMatrix and store it back in font
+        fontMatrix.concat(matrix);
+        font.setKey("FontMatrix", fontMatrix);
+        
+        // Calculate the fontsize in LaTeX points
+        PSObjectMatrix ctm = gstate.current.CTM.clone();
+        ctm.concat(fontMatrix);
+        double fontSize = ctm.getMeanScaling() / 2.54 * 72.27;
+        font.setKey("FontSize", new PSObjectReal(fontSize));
+        
+        opStack.push(font);
     }
     
     /** Postscript op: mark */
@@ -500,7 +535,8 @@ public class Interpreter {
     
     /** PostScript op: ne */
     public void op_ne() throws PSError {
-        throw new PSErrorUnimplemented("operator: ne");
+        op_eq();
+        op_not();
     }
 
     /** PostScript op: neg */
@@ -526,6 +562,17 @@ public class Interpreter {
         gstate.current.position[1] = Double.NaN;
     }
     
+    /** PostScript op: not */
+    public void op_not() throws PSError {
+        PSObject obj = opStack.pop();
+        if (obj instanceof PSObjectBool) {
+            PSObjectBool bool = (PSObjectBool)obj;
+            opStack.push(new PSObjectBool( !bool.toBool() ));
+        } else {
+            throw new PSErrorUnimplemented("not operator not FULLY implemented.");
+        }
+    }
+    
     /** PostScript op: null */
     public void op_null() throws PSError {
         opStack.push(new PSObjectNull());
@@ -546,6 +593,19 @@ public class Interpreter {
         for (int i = opStack.size()-1 ; i >= 0 ; i--) {
             System.out.println(opStack.get(i).isis());
         }        
+    }
+    
+    /** PostScript op: put */
+    public void op_put() throws PSError {
+        PSObject any = opStack.pop();
+        PSObject indexKey = opStack.pop();
+        PSObject obj = opStack.pop();
+        if (obj instanceof PSObjectDict) {
+            PSObjectDict dict = (PSObjectDict)obj;
+            dict.setKey(indexKey, any);
+        } else {
+            throw new PSErrorUnimplemented("operator put not FULLY implemented.");
+        }
     }
     
     /** PostScript op: readhexstring */
@@ -602,14 +662,11 @@ public class Interpreter {
     
     /** PostScript op: repeat */
     public void op_repeat() throws Exception {
-        PSObject obj = opStack.pop();
-        if (!(obj instanceof PSObjectProc)) {
-            throw new PSErrorTypeCheck();
-        }
+        PSObjectProc proc = opStack.pop().toProc();
         int n = opStack.pop().toNonNegInt();
         
         for (int i = 0 ; i < n ; i++) {
-            obj.execute(this);
+            proc.execute(this);
         }
     }    
     
@@ -665,35 +722,35 @@ public class Interpreter {
     public void op_rotate() throws PSError {
         PSObject obj = opStack.pop();
         double angle;
-        if (obj instanceof PSObjectArray) {
-            PSObjectArray matrix = (PSObjectArray)obj;
+        if ( (obj instanceof PSObjectArray) || (obj instanceof PSObjectMatrix) ) {
+            PSObjectMatrix matrix = obj.toMatrix();
             angle = opStack.pop().toReal();
             throw new PSErrorUnimplemented("scale operator not yet fully implemented.");
         } else {
             angle = obj.toReal();
-            gstate.current.rotate(angle);
+            gstate.current.CTM.rotate(angle);
         }
     }
    
     /** PostScript op: save */
     public void op_save() throws PSError {
         opStack.push(new PSObjectName("/-save- (dummy)"));
-        System.out.println("WARNING: save operator ignored. This might have an effect on the result.");
+        log.info("save operator ignored. This might have an effect on the result.");
     }
    
     /** PostScript op: scale */
     public void op_scale() throws PSError {
         PSObject obj = opStack.pop();
         double sx, sy;
-        if (obj instanceof PSObjectArray) {
-            PSObjectArray matrix = (PSObjectArray)obj;
+        if ( (obj instanceof PSObjectArray) || (obj instanceof PSObjectMatrix) ) {
+            PSObjectMatrix matrix = obj.toMatrix();
             sy = opStack.pop().toReal();
             sx = opStack.pop().toReal();
             throw new PSErrorUnimplemented("scale operator not yet fully implemented.");
         } else {
             sy = obj.toReal();
             sx = opStack.pop().toReal();
-            gstate.current.scale(sx, sy);
+            gstate.current.CTM.scale(sx, sy);
         }
     }
    
@@ -705,14 +762,10 @@ public class Interpreter {
     /** PostScript op: setdash */
     public void op_setdash() throws PSError, IOException {
         double offset = opStack.pop().toReal();
-        PSObject obj = opStack.pop();
-        if (!(obj instanceof PSObjectArray)) {
-            throw new PSErrorTypeCheck();
-        }
-        PSObjectArray array = (PSObjectArray)obj;
+        PSObjectArray array = opStack.pop().toArray();
         
         // Scale all distances
-        double scaling = gstate.current.getMeanScaling();
+        double scaling = gstate.current.CTM.getMeanScaling();
         offset *= scaling;
         for (int i = 0 ; i < array.size() ; i++) {
             double value = array.get(i).toReal();
@@ -758,7 +811,7 @@ public class Interpreter {
         double lineWidth = opStack.pop().toReal();
         
         // Apply CTM to linewidth, now the line width is in cm
-        lineWidth *= gstate.current.getMeanScaling();
+        lineWidth *= gstate.current.CTM.getMeanScaling();
         
         exp.setlinewidth(lineWidth);
     }
@@ -826,15 +879,15 @@ public class Interpreter {
     public void op_translate() throws PSError {
         PSObject obj = opStack.pop();
         double tx, ty;
-        if (obj instanceof PSObjectArray) {
-            PSObjectArray matrix = (PSObjectArray)obj;
+        if ( (obj instanceof PSObjectArray) || (obj instanceof PSObjectMatrix) ) {
+            PSObjectMatrix matrix = obj.toMatrix();
             ty = opStack.pop().toReal();
             tx = opStack.pop().toReal();
             throw new PSErrorUnimplemented("translate operator not yet fully implemented.");
         } else {
             ty = obj.toReal();
             tx = opStack.pop().toReal();
-            gstate.current.translate(tx, ty);
+            gstate.current.CTM.translate(tx, ty);
         }
     }
     

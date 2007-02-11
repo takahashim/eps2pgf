@@ -40,13 +40,8 @@ public class PSObjectDict extends PSObject {
     }
     
     /** Creates a new instance of PSObjectDict */
-    public PSObjectDict(PSObject obj) {
-        if (obj instanceof PSObjectReal) {
-            double roundedVal = Math.round(((PSObjectReal)obj).value);
-            capacity = (int)roundedVal;
-        } else if (obj instanceof PSObjectInt) {
-            capacity = ((PSObjectInt)obj).value;
-        }
+    public PSObjectDict(int aCapacity) {
+        capacity = aCapacity;
     }
     
     /** Convert this object to string */
@@ -70,9 +65,52 @@ public class PSObjectDict extends PSObject {
         map.put(key, value);
     }
     
+    /** Sets a key in the dictionary */
+    public void setKey(PSObject key, PSObject value) throws PSError {
+        setKey(key.toDictKey(), value);
+    }
+    
+    /**
+     * Set a key in the dictionary
+     */
+    public PSObjectString setKey(String key, String value) {
+        PSObjectString psoValue = new PSObjectString(value);
+        map.put(key, psoValue);
+        return psoValue;
+    }
+    
+    /** Sets a key in the dictionary */
+    public void setKey(PSObject key, String value) throws PSError {
+        setKey(key.toDictKey(), value);
+    }
+    
     /** Looks up a key in this dictionary */
     public PSObject lookup(String key) {
         return map.get(key);
+    }
+    
+    /**
+     * Looks up a key in this dictionary
+     * @param key Dictionary key to look up.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError When key is not a valid dictionary key.
+     * @return Value associated with key.
+     */
+    public PSObject lookup(PSObject key) throws PSError {
+        return this.lookup(key.toDictKey());
+    }
+    
+    /**
+     * Checks whether this dictionary has a specific key. 
+     */
+    public boolean containsKey(String key) {
+        return map.containsKey(key);
+    }
+    
+    /**
+     * Checks whether this dictionary has a specific key. 
+     */
+    public boolean containsKey(PSObject key) throws PSError {
+        return map.containsKey(key.toDictKey());
     }
     
     /** Get the number of elements */
@@ -88,7 +126,29 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
+     * Returs all keys defined in this dictionary.
+     * @return Set with all defined keys.
+     */
+    public Set<PSObject> keySet() {
+        Set<String> strKeys = map.keySet();
+        Iterator<String> strKeyIter = strKeys.iterator();
+        Set<PSObject> keys = new HashSet<PSObject>();
+        while (strKeyIter.hasNext()) {
+            String key = strKeyIter.next();
+            keys.add(new PSObjectName(key, true));
+        }
+        return keys;
+    }
+    
+    /** Convert this object to a dictionary, if possible. */
+    public PSObjectDict toDict() throws PSError {
+        return this;
+    }
+    
+    /**
      * Creates a deep copy of this object.
+     * @throws java.lang.CloneNotSupportedException Clone not supported.
+     * @return Deep copy of this object.
      */
     public PSObjectDict clone() throws CloneNotSupportedException {
         PSObjectDict newDict = new PSObjectDict();
