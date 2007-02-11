@@ -95,4 +95,9 @@ public class PSObjectProc extends PSObject {
         interp.execStack.copyAndAddObjectList(procObjects);
     }
     
+    /** Convert this object to a procedure object, if possible. */
+    public PSObjectProc toProc() throws PSError {
+        return this;
+    }
+
 }

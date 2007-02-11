@@ -32,22 +32,45 @@ public class Encoding {
     
     private static PSObjectName[] standard = new PSObjectName[256];
     private static PSObjectName[] ISOLatin1 = new PSObjectName[256];
+    private static PSObjectName[] symbol = new PSObjectName[256];
     
     /** Initialize encodings. */
     public static void initialize() {
         initNames();
         initStandardEncoding();
         initISOLatin1Encoding();
+        initSymbolEncoding();
     }
     
-    /** Return the standard encoding vector. */
+    /**
+     * Return the standard encoding vector.
+     * @return Standard encoding array (see PostScript manual)
+     */
     public static PSObjectName[] getStandardVector() {
         return standard;
     }
     
-    /** Return the ISO Latin1 encoding vector. */
+    /**
+     * Return the ISO Latin1 encoding vector.
+     * @return ISO Latin1 encoding array (see PostScript manual)
+     */
     public static PSObjectName[] getISOLatin1Vector() {
         return ISOLatin1;
+    }
+    
+    /**
+     * Return the symbol encoding vector
+     * @return Symbol encoding vector array (see PostScript manual)
+     */
+    public static PSObjectName[] getSymbolVector() {
+        return symbol;
+    }
+    
+    /**
+     * Get a list with all possible character names
+     */
+    public static Map<String, PSObjectName> getCharNames() {
+        return names;
     }
     
     /** Initialize character names map. */
@@ -701,6 +724,266 @@ public class Encoding {
         ISOLatin1[253] = names.get("yacute");      //375
         ISOLatin1[254] = names.get("thorn");       //376
         ISOLatin1[255] = names.get("ydieresis");   //377
+    }
+    
+    /** Defines the symbol encoding vector. */
+    private static void initSymbolEncoding() {
+        symbol[0] = names.get(".notdef");     //000
+        symbol[1] = names.get(".notdef");     //001
+        symbol[2] = names.get(".notdef");     //002
+        symbol[3] = names.get(".notdef");     //003
+        symbol[4] = names.get(".notdef");     //004
+        symbol[5] = names.get(".notdef");     //005
+        symbol[6] = names.get(".notdef");     //006
+        symbol[7] = names.get(".notdef");     //007
+        symbol[8] = names.get(".notdef");     //010
+        symbol[9] = names.get(".notdef");     //011
+        symbol[10] = names.get(".notdef");     //012
+        symbol[11] = names.get(".notdef");     //013
+        symbol[12] = names.get(".notdef");     //014
+        symbol[13] = names.get(".notdef");     //015
+        symbol[14] = names.get(".notdef");     //016
+        symbol[15] = names.get(".notdef");     //017
+        symbol[16] = names.get(".notdef");     //020
+        symbol[17] = names.get(".notdef");     //021
+        symbol[18] = names.get(".notdef");     //022
+        symbol[19] = names.get(".notdef");     //023
+        symbol[20] = names.get(".notdef");     //024
+        symbol[21] = names.get(".notdef");     //025
+        symbol[22] = names.get(".notdef");     //026
+        symbol[23] = names.get(".notdef");     //027
+        symbol[24] = names.get(".notdef");     //030
+        symbol[25] = names.get(".notdef");     //031
+        symbol[26] = names.get(".notdef");     //032
+        symbol[27] = names.get(".notdef");     //033
+        symbol[28] = names.get(".notdef");     //034
+        symbol[29] = names.get(".notdef");     //035
+        symbol[30] = names.get(".notdef");     //036
+        symbol[31] = names.get(".notdef");     //037
+        symbol[32] = names.get("space");       //040
+        symbol[33] = names.get("exclam");      //041
+        symbol[34] = names.get("universal");   //042
+        symbol[35] = names.get("numbersign");  //043
+        symbol[36] = names.get("existential"); //044
+        symbol[37] = names.get("percent");     //045
+        symbol[38] = names.get("ampersand");   //046
+        symbol[39] = names.get("suchthat");    //047
+        symbol[40] = names.get("parenleft");   //050
+        symbol[41] = names.get("parenright");  //051
+        symbol[42] = names.get("asterisk");    //052
+        symbol[43] = names.get("plus");        //053
+        symbol[44] = names.get("comma");       //054
+        symbol[45] = names.get("minus");       //055
+        symbol[46] = names.get("period");      //056
+        symbol[47] = names.get("slash");       //057
+        symbol[48] = names.get("zero");        //060
+        symbol[49] = names.get("one");         //061
+        symbol[50] = names.get("two");         //062
+        symbol[51] = names.get("three");       //063
+        symbol[52] = names.get("four");        //064
+        symbol[53] = names.get("five");        //065
+        symbol[54] = names.get("six");         //066
+        symbol[55] = names.get("seven");       //067
+        symbol[56] = names.get("eight");       //070
+        symbol[57] = names.get("nine");        //071
+        symbol[58] = names.get("colon");       //072
+        symbol[59] = names.get("semicolon");   //073
+        symbol[60] = names.get("less");        //074
+        symbol[61] = names.get("equal");       //075
+        symbol[62] = names.get("greater");     //076
+        symbol[63] = names.get("question");    //077
+        symbol[64] = names.get("congruent");   //100
+        symbol[65] = names.get("Alpha");       //101
+        symbol[66] = names.get("Beta");        //102
+        symbol[67] = names.get("Chi");         //103
+        symbol[68] = names.get("Delta");       //104
+        symbol[69] = names.get("Epsilon");     //105
+        symbol[70] = names.get("Phi");         //106
+        symbol[71] = names.get("Gamma");       //107
+        symbol[72] = names.get("Eta");         //110
+        symbol[73] = names.get("Iota");        //111
+        symbol[74] = names.get("theta1");      //112
+        symbol[75] = names.get("Kappa");       //113
+        symbol[76] = names.get("Lambda");      //114
+        symbol[77] = names.get("Mu");          //115
+        symbol[78] = names.get("Nu");          //116
+        symbol[79] = names.get("Omicron");     //117
+        symbol[80] = names.get("Pi");          //120
+        symbol[81] = names.get("Theta");       //121
+        symbol[82] = names.get("Rho");         //122
+        symbol[83] = names.get("Sigma");       //123
+        symbol[84] = names.get("Tau");         //124
+        symbol[85] = names.get("Upsilon");     //125
+        symbol[86] = names.get("sigma1");      //126
+        symbol[87] = names.get("Omega");       //127
+        symbol[88] = names.get("Xi");          //130
+        symbol[89] = names.get("Psi");         //131
+        symbol[90] = names.get("Zeta");        //132
+        symbol[91] = names.get("bracketleft"); //133
+        symbol[92] = names.get("therefore");    //134
+        symbol[93] = names.get("bracketright");//135
+        symbol[94] = names.get("perpendicular"); //136
+        symbol[95] = names.get("underscore");  //137
+        symbol[96] = names.get("radicalex");   //140
+        symbol[97] = names.get("alpha");       //141
+        symbol[98] = names.get("beta");        //142
+        symbol[99] = names.get("chi");         //143
+        symbol[100] = names.get("delta");       //144
+        symbol[101] = names.get("epsilon");     //145
+        symbol[102] = names.get("phi");         //146
+        symbol[103] = names.get("gamma");       //147
+        symbol[104] = names.get("eta");         //150
+        symbol[105] = names.get("iota");        //151
+        symbol[106] = names.get("phi1");        //152
+        symbol[107] = names.get("kappa");       //153
+        symbol[108] = names.get("lambda");      //154
+        symbol[109] = names.get("mu");          //155
+        symbol[110] = names.get("nu");          //156
+        symbol[111] = names.get("omicron");     //157
+        symbol[112] = names.get("pi");          //160
+        symbol[113] = names.get("theta");       //161
+        symbol[114] = names.get("rho");         //162
+        symbol[115] = names.get("sigma");       //163
+        symbol[116] = names.get("tau");         //164
+        symbol[117] = names.get("upsilon");     //165
+        symbol[118] = names.get("omega1");      //166
+        symbol[119] = names.get("omega");       //167
+        symbol[120] = names.get("xi");          //170
+        symbol[121] = names.get("psi");         //171
+        symbol[122] = names.get("zeta");        //172
+        symbol[123] = names.get("braceleft");   //173
+        symbol[124] = names.get("bar");         //174
+        symbol[125] = names.get("braceright");  //175
+        symbol[126] = names.get("similar");     //176
+        symbol[127] = names.get(".notdef");     //177
+        symbol[128] = names.get(".notdef");     //200
+        symbol[129] = names.get(".notdef");     //201
+        symbol[130] = names.get(".notdef");     //202
+        symbol[131] = names.get(".notdef");     //203
+        symbol[132] = names.get(".notdef");     //204
+        symbol[133] = names.get(".notdef");     //205
+        symbol[134] = names.get(".notdef");     //206
+        symbol[135] = names.get(".notdef");     //207
+        symbol[136] = names.get(".notdef");     //210
+        symbol[137] = names.get(".notdef");     //211
+        symbol[138] = names.get(".notdef");     //212
+        symbol[139] = names.get(".notdef");     //213
+        symbol[140] = names.get(".notdef");     //214
+        symbol[141] = names.get(".notdef");     //215
+        symbol[142] = names.get(".notdef");     //216
+        symbol[143] = names.get(".notdef");     //217
+        symbol[144] = names.get(".notdef");     //220
+        symbol[145] = names.get(".notdef");     //221
+        symbol[146] = names.get(".notdef");     //222
+        symbol[147] = names.get(".notdef");     //223
+        symbol[148] = names.get(".notdef");     //224
+        symbol[149] = names.get(".notdef");     //225
+        symbol[150] = names.get(".notdef");     //226
+        symbol[151] = names.get(".notdef");     //227
+        symbol[152] = names.get(".notdef");     //230
+        symbol[153] = names.get(".notdef");     //231
+        symbol[154] = names.get(".notdef");     //232
+        symbol[155] = names.get(".notdef");     //233
+        symbol[156] = names.get(".notdef");     //234
+        symbol[157] = names.get(".notdef");     //235
+        symbol[158] = names.get(".notdef");     //236
+        symbol[159] = names.get(".notdef");     //237
+        symbol[160] = names.get("Euro");        //240
+        symbol[161] = names.get("Upsilon1");    //241
+        symbol[162] = names.get("minute");      //242
+        symbol[163] = names.get("lessequal");   //243
+        symbol[164] = names.get("fraction");    //244
+        symbol[165] = names.get("infinity");    //245
+        symbol[166] = names.get("florin");      //246
+        symbol[167] = names.get("club");        //247
+        symbol[168] = names.get("diamond");     //250
+        symbol[169] = names.get("heart");       //251
+        symbol[170] = names.get("spade");       //252
+        symbol[171] = names.get("arrowboth");   //253
+        symbol[172] = names.get("arrowleft");   //254
+        symbol[173] = names.get("arrowup");     //255
+        symbol[174] = names.get("arrowright");  //256
+        symbol[175] = names.get("arrowdown");   //257
+        symbol[176] = names.get("degree");      //260
+        symbol[177] = names.get("plusminus");   //261
+        symbol[178] = names.get("second");       //262
+        symbol[179] = names.get("greaterequal"); //263
+        symbol[180] = names.get("multiply");     //264
+        symbol[181] = names.get("proportional"); //265
+        symbol[182] = names.get("partialdiff");  //266
+        symbol[183] = names.get("bullet");       //267
+        symbol[184] = names.get("divide") ;      //270
+        symbol[185] = names.get("notequal");     //271
+        symbol[186] = names.get("equivalence");  //272
+        symbol[187] = names.get("approxequal");  //273
+        symbol[188] = names.get("ellipsis");     //274
+        symbol[189] = names.get("arrowvertex");  //275        
+        symbol[190] = names.get("arrowhorizex"); //276
+        symbol[191] = names.get("carriagereturn");//277        
+        symbol[192] = names.get("aleph");        //300
+        symbol[193] = names.get("Ifraktur");     //301
+        symbol[194] = names.get("Rfraktur");     //302
+        symbol[195] = names.get("weierstrass");  //303
+        symbol[196] = names.get("circlemultiply");//304
+        symbol[197] = names.get("circleplus");   //305
+        symbol[198] = names.get("emptyset");     //306
+        symbol[199] = names.get("intersection"); //307
+        symbol[200] = names.get("union");        //310
+        symbol[201] = names.get("propersuperset");//311
+        symbol[202] = names.get("reflexsuperset");//312
+        symbol[203] = names.get("notsubset");    //313
+        symbol[204] = names.get("propersubset"); //314
+        symbol[205] = names.get("reflexsubset"); //315
+        symbol[206] = names.get("element");      //316
+        symbol[207] = names.get("notelement");   //317
+        symbol[208] = names.get("angle");        //320
+        symbol[209] = names.get("gradient");     //321
+        symbol[210] = names.get("registerserif"); //322
+        symbol[211] = names.get("copyrightserif");//323
+        symbol[212] = names.get("trademarkserif");//324
+        symbol[213] = names.get("product");       //325
+        symbol[214] = names.get("radical");       //326
+        symbol[215] = names.get("dotmath");       //327
+        symbol[216] = names.get("logicalnot");    //330
+        symbol[217] = names.get("logicaland");    //331
+        symbol[218] = names.get("logicalor");     //332
+        symbol[219] = names.get("arrowdblboth");  //333
+        symbol[220] = names.get("arrowdblleft");  //334
+        symbol[221] = names.get("arrowdblup");    //335
+        symbol[222] = names.get("arrowdblright"); //336
+        symbol[223] = names.get("arrowdbldown");  //337
+        symbol[224] = names.get("lozenge");       //340
+        symbol[225] = names.get("angleleft");     //341
+        symbol[226] = names.get("registersans");  //342
+        symbol[227] = names.get("copyrightsans"); //343
+        symbol[228] = names.get("trademarksans"); //344
+        symbol[229] = names.get("summation");     //345
+        symbol[230] = names.get("parenlefttp");   //346
+        symbol[231] = names.get("parenleftex");   //347
+        symbol[232] = names.get("parenleftbt");   //350
+        symbol[233] = names.get("bracketlefttp"); //351
+        symbol[234] = names.get("bracketleftex"); //352
+        symbol[235] = names.get("bracketleftbt"); //353
+        symbol[236] = names.get("bracelefttp");   //354
+        symbol[237] = names.get("braceleftmid");  //355
+        symbol[238] = names.get("braceleftbt");   //356
+        symbol[239] = names.get("braceex");       //357
+        symbol[240] = names.get(".notdef");       //360
+        symbol[241] = names.get("angleright");    //361
+        symbol[242] = names.get("integral");      //362
+        symbol[243] = names.get("integraltp");    //363
+        symbol[244] = names.get("integralex");    //364
+        symbol[245] = names.get("integralbt");    //365
+        symbol[246] = names.get("parenrighttp");  //366
+        symbol[247] = names.get("parenrightex");  //367
+        symbol[248] = names.get("parenrightbt");  //370
+        symbol[249] = names.get("bracketrighttp");//371
+        symbol[250] = names.get("bracketrightex");//372
+        symbol[251] = names.get("bracketrightbt");//373
+        symbol[252] = names.get("bracerighttp");  //374
+        symbol[253] = names.get("bracerightmid"); //375
+        symbol[254] = names.get("bracerightbt");  //376
+        symbol[255] = names.get(".notdef");       //377
     }
     
 }

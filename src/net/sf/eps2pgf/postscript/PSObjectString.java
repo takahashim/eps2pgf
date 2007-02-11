@@ -36,7 +36,7 @@ public class PSObjectString extends PSObject {
      */
     public PSObjectString(String str) {
         int len = str.length();
-        if ( (str.charAt(0) == '(') && (str.charAt(len-1) == ')') ) {
+        if ( (len > 0) && (str.charAt(0) == '(') && (str.charAt(len-1) == ')') ) {
             value = parse(str.substring(1, len-1));
         } else {
             value = parse(str);
@@ -129,5 +129,12 @@ public class PSObjectString extends PSObject {
     /** Convert this object to dictionary key, if possible. */
     public String toDictKey() {
         return value;
+    }
+    
+    /**
+     * Creates an exact deep copy of this object.
+     */
+    public PSObjectString clone() {
+        return new PSObjectString(value);
     }
 }

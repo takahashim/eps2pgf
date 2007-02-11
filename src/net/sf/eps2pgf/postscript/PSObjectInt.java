@@ -61,4 +61,11 @@ public class PSObjectInt extends PSObject {
     public double toReal() {
         return (double)value;
     }
+    
+    /**
+     * Creates an exact copy of this object.
+     */
+    public PSObjectInt clone() {
+        return new PSObjectInt(value);
+    }
 }

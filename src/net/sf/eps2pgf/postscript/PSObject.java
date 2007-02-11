@@ -53,6 +53,11 @@ public class PSObject implements Cloneable {
         return this.getClass().getName();
     }
     
+    /** Convert this object to an array, if possible. */
+    public PSObjectArray toArray() throws PSError {
+        throw new PSErrorTypeCheck();
+    }
+    
     /** Convert this object to an integer, if possible. */
     public int toInt() throws PSError {
         throw new PSErrorTypeCheck();
@@ -81,6 +86,29 @@ public class PSObject implements Cloneable {
     public boolean toBool() throws PSError {
         throw new PSErrorTypeCheck();
     }
+    
+    /** Convert this object to a procedure object, if possible. */
+    public PSObjectProc toProc() throws PSError {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /** Convert this object to a dictionary, if possible. */
+    public PSObjectDict toDict() throws PSError {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /** Convert this object to a matrix, if possible. */
+    public PSObjectMatrix toMatrix() throws PSError {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Copies values from another object to this object, if possible.
+     */
+    public void copyValuesFrom(PSObject obj) throws PSError {
+        throw new PSErrorTypeCheck();
+    }
+
     
     /** Creates a copy of this object. */
     public PSObject clone() throws CloneNotSupportedException {

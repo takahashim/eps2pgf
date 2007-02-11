@@ -1,0 +1,198 @@
+/*
+ * PSObjectMatrix.java
+ *
+ * This file is part of Eps2pgf.
+ *
+ * Copyright (C) 2007 Paul Wagenaars <pwagenaars@fastmail.fm>
+ *
+ * Eps2pgf is free software; you can redistribute it and/or modify it under
+ * the terms of version 2 of the GNU General Public License as published by the
+ * Free Software Foundation.
+ *
+ * Eps2pgf is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
+
+package net.sf.eps2pgf.postscript;
+
+import net.sf.eps2pgf.postscript.errors.*;
+
+/**
+ *
+ * @author Paul Wagenaars
+ */
+public class PSObjectMatrix extends PSObject {
+    double[] matrix = new double[6];
+    
+    /**
+     * Creates a new instance of PSObjectMatrix. See PostScript manual
+     * under "4.3 Coordinate Systems and Transformation" for more info.
+     */
+    public PSObjectMatrix(double a, double b, double c, double d, double tx, double ty) {
+        matrix[0] = a;
+        matrix[1] = b;
+        matrix[2] = c;
+        matrix[3] = d;
+        matrix[4] = tx;
+        matrix[5] = ty;
+    }
+    
+    /**
+     * Creates a new instance of PSObjectMatrix. The new matrix is an exact copy of
+     * refMatrix.
+     * 
+     * @param refMatrix PSObjectMatrix to copy.
+     */
+    public PSObjectMatrix(PSObjectMatrix refMatrix) {
+        for (int i = 0 ; i < matrix.length ; i++) {
+            matrix[i] = refMatrix.matrix[i];
+        }
+    }
+    
+    /**
+     * Copies values from another matrix to this matrix.
+     */
+    public void copyValuesFrom(PSObject obj) throws PSError {
+        PSObjectMatrix fromMatrix = obj.toMatrix();
+        for (int i = 0 ; i < matrix.length ; i++) {
+            matrix[i] = fromMatrix.matrix[i];
+        }
+    }
+    
+    /**
+     * Creates a scaled copy of this matrix.
+     */
+    public void scale(double sx, double sy) {
+        // [a b c d xx yy]
+        matrix[0] = sx*matrix[0];
+        matrix[1] = sx*matrix[1];
+        matrix[2] = sy*matrix[2];
+        matrix[3] = sy*matrix[3];
+    }
+    
+    /**
+     * Translates the matrix
+     */
+    public void translate(double tx, double ty) {
+        // [a b c d xx yy]
+        matrix[4] = tx*matrix[0] + ty*matrix[2] + matrix[4];
+        matrix[5] = tx*matrix[1] + ty*matrix[3] + matrix[5];
+    }
+    
+    /**
+     * Rotates the matrix (current transformation matrix)
+     */
+    public void rotate(double angle) {
+        // [a b c d xx yy]
+        double cosa = Math.cos(angle*Math.PI/180);
+        double sina = Math.sin(angle*Math.PI/180);
+        double a = cosa*matrix[0] + sina*matrix[2];
+        double b = cosa*matrix[1] + sina*matrix[3];
+        double c = -sina*matrix[0] + cosa*matrix[2];
+        double d = -sina*matrix[1] + cosa*matrix[3];
+        matrix[0] = a;
+        matrix[1] = b;
+        matrix[2] = c;
+        matrix[3] = d;
+    }
+    
+    /**
+     * Applies the transformation represented by conc to this matrix.
+     * newMatrix = conc * matrix
+     */
+    public void concat(PSObjectMatrix conc) {
+        // [a b c d tx ty] [a b 0 ; c d 0 ; tx ty 1]
+        double a = conc.matrix[0]*matrix[0] + conc.matrix[1]*matrix[2];
+        double b = conc.matrix[0]*matrix[1] + conc.matrix[1]*matrix[3];
+        double c = conc.matrix[2]*matrix[0] + conc.matrix[3]*matrix[2];
+        double d = conc.matrix[2]*matrix[1] + conc.matrix[3]*matrix[3];
+        double tx = conc.matrix[4]*matrix[0] + conc.matrix[5]*matrix[2] + matrix[4];
+        double ty = conc.matrix[4]*matrix[1] + conc.matrix[5]*matrix[3] + matrix[5];
+        matrix[0] = a;
+        matrix[1] = b;
+        matrix[2] = c;
+        matrix[3] = d;
+        matrix[4] = tx;
+        matrix[5] = ty;
+    }
+    
+    /**
+     * Applies this transformation matrix to a point
+     * @param x X-coordinate
+     * @param y Y-coordinate
+     * @return Transformed coordinate
+     */
+    public double[] apply(double x, double y) {
+        // [a b c d tx ty]
+        double[] converted = new double[2];
+        converted[0] = matrix[0]*x + matrix[2]*y + matrix[4];
+        converted[1] = matrix[1]*x + matrix[3]*y + matrix[5];
+        return converted;
+    }
+    
+    /**
+     * Apples this transformation matrix to a point
+     * @param coor Coordinate {x, y}
+     * @return Transformed coordinate
+     */
+    public double[] apply(double[] coor) {
+        return apply(coor[0], coor[1]);
+    }
+    
+    /**
+     * Returns the mean scaling factor described by this matrix
+     * @return Mean scaling factor (= mean(sqrt(a^2+c^2) + sqrt(b^2+d^2)) )
+     */
+    public double getMeanScaling() {
+        double xScale = Math.sqrt(Math.pow(matrix[0], 2) + Math.pow(matrix[2], 2));
+        double yScale = Math.sqrt(Math.pow(matrix[1], 2) + Math.pow(matrix[3], 2));
+        return 0.5 * (xScale + yScale);
+    }
+    
+    /**
+     * Convert this matrix to an array.
+     */
+    public PSObjectArray toArray() {
+        PSObject[] objs = new PSObject[matrix.length];
+        for (int i = 0 ; i < objs.length ; i++) {
+            objs[i] = new PSObjectReal(matrix[i]);
+        }
+        return new PSObjectArray(objs);
+    }
+    
+    /**
+     * Converts this object to a matrix. In this case it simply returns this.
+     * @return This object itself
+     */
+    public PSObjectMatrix toMatrix() {
+        return this;
+    }
+
+    /**
+     * Returns an exact copy of this matrix.
+     * @return Exact copy of this object.
+     */
+    public PSObjectMatrix clone() {
+       return new PSObjectMatrix(this);
+    }
+    
+    /**
+     * Creates a human-readable string representation of this object.
+     */
+    public String isis() {
+        StringBuilder str = new StringBuilder();
+        str.append("[");
+        for (int i = 0 ; i < matrix.length ; i++) {
+            str.append(" " + matrix[i]);
+        }
+        str.append(" ]");
+        return str.toString();
+    }
+
+}

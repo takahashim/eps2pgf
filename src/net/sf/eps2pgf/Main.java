@@ -21,8 +21,8 @@
 
 package net.sf.eps2pgf;
 
-import net.sf.eps2pgf.Converter;
 import java.io.*;
+import java.util.logging.*;
 
 /**
  *
@@ -33,6 +33,8 @@ public class Main {
     static final int versionMajor = 0;
     static final int versionMinor = 1;
     static final int versionRevision = 0;
+    
+    static Logger log = Logger.getLogger("global");
     
     /** Creates a new instance of Main */
     public Main() {
