@@ -50,7 +50,10 @@ public class PSObjectArray extends PSObject {
         count = Integer.MAX_VALUE;        
     }
     
-    /** Creates a new instance of PSObjectArray */
+    /**
+     * Creates a new instance of PSObjectArray
+     * @param objs Objects that will be stored in the new array.
+     */
     public PSObjectArray(PSObject[] objs) {
         array = new ArrayList<PSObject>(objs.length);
         for (int i = 0 ; i < objs.length ; i++) {
@@ -62,9 +65,14 @@ public class PSObjectArray extends PSObject {
         count = Integer.MAX_VALUE;
     }
     
-    /** Creates a new instance of PSObjectArray. The new array is a subset
+    /**
+     * Creates a new instance of PSObjectArray. The new array is a subset
      * of the supplied array. Thery share the data (changing a value is one
      * also changes the value in the other.
+     * @param obj Complete array from which this new PSObjectArray is a subset.
+     * @param index Index of the first element of the subarray in the obj array.
+     * @param newCount Number of items in the subarray.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Indices out of range.
      */
     public PSObjectArray(PSObjectArray obj, int index, int newCount) throws PSError {
         int n = obj.size();
@@ -80,13 +88,19 @@ public class PSObjectArray extends PSObject {
         count = newCount;
     }
     
-    /** Returns the number of elements in this array. */
+    /**
+     * Returns the number of elements in this array.
+     * @return Number of items in this array.
+     */
     public int size() {
         return Math.min(count, array.size()-offset);
     }
     
     /**
      * Insert an element at the specified position in this array.
+     * @param index Index at which the new element will be inserted.
+     * @param value Value of the new element
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
      */
     public void add(int index, PSObject value) throws PSError {
         array.add(index+offset, value);
@@ -94,6 +108,9 @@ public class PSObjectArray extends PSObject {
     
     /**
      * Replace the element with offset with value.
+     * @param index Index of the element to replace.
+     * @param value New value of the element.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
      */
     public void set(int index, PSObject value) throws PSError {
         if ( (index < 0) || (index >= size()) ) {
@@ -104,6 +121,9 @@ public class PSObjectArray extends PSObject {
     
     /**
      * Returns an object from this array.
+     * @param index Index of the element to return.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
+     * @return Value of the specifiec element.
      */
     public PSObject get(int index) throws PSError {
         if ( (index < 0) || (index >= size()) ) {
@@ -114,6 +134,9 @@ public class PSObjectArray extends PSObject {
     
     /**
      * Remove an element from this array.
+     * @param index Index of the element to remove.
+     * @return Removed element.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
      */
     public PSObject remove(int index) throws PSError {
         if ( (index < 0) || (index >= size()) ) {
@@ -123,8 +146,11 @@ public class PSObjectArray extends PSObject {
     }
     
     
-    /** Return PostScript text representation of this object. See the
+    /**
+     * Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
+     * @return String representation of this object.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Something went wrong.
      */
     public String isis() throws PSError {
         StringBuilder str = new StringBuilder();
@@ -139,7 +165,12 @@ public class PSObjectArray extends PSObject {
         return str.toString();
     }
     
-    /** Replace executable name objects with their values */
+    /**
+     * Replace executable name objects with their values
+     * @param interp Interpreter to which the operators must be bound.
+     * @return This array.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Something went wrong.
+     */
     public PSObjectArray bind(Interpreter interp) throws PSError {
         for (int i = 0 ; i < size() ; i++) {
             set(i, get(i).bind(interp));
@@ -147,7 +178,11 @@ public class PSObjectArray extends PSObject {
         return this;
     }
     
-    /** Copies the values from an array into this array. */
+    /**
+     * Copies the values from an array into this array.
+     * @param toBeCopied Object from which the values must be copied
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to copy values.
+     */
     public void copyFrom(PSObjectArray toBeCopied) throws PSError {
         int n = toBeCopied.size();
         int m = size();
@@ -171,18 +206,31 @@ public class PSObjectArray extends PSObject {
         }
     }
     
-    /** Implements PostScript operator getinterval. Returns a new object
-     * with an interval from this object. */
+    /**
+     * Implements PostScript operator getinterval. Returns a new object
+     * with an interval from this object.
+     * @param index Index of the first element of the subarray
+     * @param count Number of items in the subarray
+     * @return Subarray
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of bounds.
+     */
     public PSObjectArray getinterval(int index, int count) throws PSError {
         return new PSObjectArray(this, index, count);
     }
     
-    /** Convert this object to an array. */
+    /**
+     * Convert this object to an array.
+     * @return This array
+     */
     public PSObjectArray toArray() {
         return this;
     }
     
-    /** Convert this object to a matrix, if possible. */
+    /**
+     * Convert this object to a matrix, if possible.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Array is not a valid matrix
+     * @return Matrix representation of this array
+     */
     public PSObjectMatrix toMatrix() throws PSError {
         if (this.size() != 6) {
             throw new PSErrorRangeCheck();
@@ -194,6 +242,8 @@ public class PSObjectArray extends PSObject {
     
     /**
      * Copies values from another obj to this object.
+     * @param obj Object from which the values must be copied
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to copy values from object.
      */
     public void copyValuesFrom(PSObject obj) throws PSError {
         PSObjectArray array = obj.toArray();
@@ -211,6 +261,8 @@ public class PSObjectArray extends PSObject {
     
     /**
      * Creates a deep copy of this array.
+     * @throws java.lang.CloneNotSupportedException Unable to clone this object or one of its sub-objects
+     * @return Deep copy of this array
      */
     public PSObjectArray clone() throws CloneNotSupportedException {
         PSObject[] objs = new PSObject[size()];

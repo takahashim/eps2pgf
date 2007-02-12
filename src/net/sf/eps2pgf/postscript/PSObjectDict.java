@@ -26,7 +26,7 @@ import java.lang.*;
 import net.sf.eps2pgf.postscript.errors.PSError;
 
 /**
- *
+ * Represent PostScript dictionary.
  * @author Paul Wagenaars
  */
 public class PSObjectDict extends PSObject {
@@ -39,17 +39,28 @@ public class PSObjectDict extends PSObject {
         capacity = Integer.MAX_VALUE;
     }
     
-    /** Creates a new instance of PSObjectDict */
+    /**
+     * Creates a new instance of PSObjectDict
+     * @param aCapacity Maximum number of items that can be stored in this dictionary.
+     * This value has no effect. The dictionary size is unlimited.
+     */
     public PSObjectDict(int aCapacity) {
         capacity = aCapacity;
     }
     
-    /** Convert this object to string */
+    /**
+     * Convert this object to string
+     * @return Human-readable string representation of this object.
+     */
     public String toString() {
         return "Dict: (" + length() + " items)";
     }
     
-    /** Dumps the entire dictionary to stdout */
+    /**
+     * Dumps the entire dictionary to stdout
+     * @param preStr String that will be prepended to each line written to output.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError There was an error reading from this dictionary.
+     */
     public void dumpFull(String preStr) throws PSError {
         Set<String> keys = map.keySet();
         for (String key: keys) {
@@ -57,7 +68,11 @@ public class PSObjectDict extends PSObject {
         }
     }
     
-    /** Sets a key in the dictionary */
+    /**
+     * Sets a key in the dictionary
+     * @param key Key of the new dictionary entry.
+     * @param value Value of the new dictionary entry.
+     */
     public void setKey(String key, PSObject value) {
         if (value instanceof PSObjectProc) {
             value.isLiteral = false;
@@ -65,13 +80,21 @@ public class PSObjectDict extends PSObject {
         map.put(key, value);
     }
     
-    /** Sets a key in the dictionary */
+    /**
+     * Sets a key in the dictionary
+     * @param key Key of the new dictionary entry.
+     * @param value Value of the new dictionary entry.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError There was an error creating the new dictionary entry.
+     */
     public void setKey(PSObject key, PSObject value) throws PSError {
         setKey(key.toDictKey(), value);
     }
     
     /**
      * Set a key in the dictionary
+     * @param key Key of the new dictionary entry.
+     * @param value Value of the new dictionary item. Will be converted to a PSObjectString.
+     * @return Created PSObjectString.
      */
     public PSObjectString setKey(String key, String value) {
         PSObjectString psoValue = new PSObjectString(value);
@@ -79,12 +102,21 @@ public class PSObjectDict extends PSObject {
         return psoValue;
     }
     
-    /** Sets a key in the dictionary */
+    /**
+     * Sets a key in the dictionary
+     * @param key Key of the new dictionary entry.
+     * @param value Value of the new dictionary entry.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError There was an error creating the new entry.
+     */
     public void setKey(PSObject key, String value) throws PSError {
         setKey(key.toDictKey(), value);
     }
     
-    /** Looks up a key in this dictionary */
+    /**
+     * Looks up a key in this dictionary
+     * @param key Key of the entry to look up.
+     * @return Object associated with the key.
+     */
     public PSObject lookup(String key) {
         return map.get(key);
     }
@@ -100,26 +132,36 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
-     * Checks whether this dictionary has a specific key. 
+     * Checks whether this dictionary has a specific key.
+     * @param key Key of the entry to check.
+     * @return True when the entry exists, false otherwise.
      */
     public boolean containsKey(String key) {
         return map.containsKey(key);
     }
     
     /**
-     * Checks whether this dictionary has a specific key. 
+     * Checks whether this dictionary has a specific key.
+     * @return True when the entry exists, false otherwise.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to check the supplied key.
+     * @param key Search for an entry with this key.
      */
     public boolean containsKey(PSObject key) throws PSError {
         return map.containsKey(key.toDictKey());
     }
     
-    /** Get the number of elements */
+    /**
+     * Get the number of elements
+     * @return The number of entries in this dictionary.
+     */
     public int length() {
         return map.size();
     }
     
-    /** Return PostScript text representation of this object. See the
+    /**
+     * Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
+     * @return String representing this object.
      */
     public String isis() {
         return "-dict(" + map.size() + ")-";
@@ -140,8 +182,11 @@ public class PSObjectDict extends PSObject {
         return keys;
     }
     
-    /** Convert this object to a dictionary, if possible. */
-    public PSObjectDict toDict() throws PSError {
+    /**
+     * Convert this object to a dictionary, if possible.
+     * @return This dictionary.
+     */
+    public PSObjectDict toDict() {
         return this;
     }
     
