@@ -24,7 +24,8 @@ package net.sf.eps2pgf.postscript;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
- *
+ * Represent a PostScript matrix. This is a six element array with only numeric
+ * items.
  * @author Paul Wagenaars
  */
 public class PSObjectMatrix extends PSObject {
@@ -33,6 +34,18 @@ public class PSObjectMatrix extends PSObject {
     /**
      * Creates a new instance of PSObjectMatrix. See PostScript manual
      * under "4.3 Coordinate Systems and Transformation" for more info.
+     * @param a See PostScript manual  under "4.3 Coordinate Systems and
+     * Transformation" for more info.
+     * @param b See PostScript manual  under "4.3 Coordinate Systems and
+     * Transformation" for more info.
+     * @param c See PostScript manual  under "4.3 Coordinate Systems and
+     * Transformation" for more info.
+     * @param d See PostScript manual  under "4.3 Coordinate Systems and
+     * Transformation" for more info.
+     * @param tx See PostScript manual  under "4.3 Coordinate Systems and
+     * Transformation" for more info.
+     * @param ty See PostScript manual  under "4.3 Coordinate Systems and
+     * Transformation" for more info.
      */
     public PSObjectMatrix(double a, double b, double c, double d, double tx, double ty) {
         matrix[0] = a;
@@ -57,6 +70,8 @@ public class PSObjectMatrix extends PSObject {
     
     /**
      * Copies values from another matrix to this matrix.
+     * @param obj Object from which the values must be copied.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to copy values.
      */
     public void copyValuesFrom(PSObject obj) throws PSError {
         PSObjectMatrix fromMatrix = obj.toMatrix();
@@ -67,6 +82,11 @@ public class PSObjectMatrix extends PSObject {
     
     /**
      * Creates a scaled copy of this matrix.
+     *                       [sx 0  0]
+     * Transformation matrix: [0  sy 0]
+     *                       [0  0  1]
+     * @param sx X-coodinate scaling factor.
+     * @param sy Y-coordinate scaling factor.
      */
     public void scale(double sx, double sy) {
         // [a b c d xx yy]
@@ -78,6 +98,11 @@ public class PSObjectMatrix extends PSObject {
     
     /**
      * Translates the matrix
+     *                         [1  0  0]
+     * Transformation matrix = [0  1  0]
+     *                         [sx sy 1]
+     * @param tx X-coordinate translation
+     * @param ty Y-coordinate translation
      */
     public void translate(double tx, double ty) {
         // [a b c d xx yy]
@@ -87,6 +112,10 @@ public class PSObjectMatrix extends PSObject {
     
     /**
      * Rotates the matrix (current transformation matrix)
+     *                         [cos(a)  sin(a) 0]
+     * Transformation matrix = [-sin(a) cos(a) 0]
+     *                         [  0      0     1]
+     * @param angle Angle in degrees for counterclockwise rotation.
      */
     public void rotate(double angle) {
         // [a b c d xx yy]
@@ -105,6 +134,7 @@ public class PSObjectMatrix extends PSObject {
     /**
      * Applies the transformation represented by conc to this matrix.
      * newMatrix = conc * matrix
+     * @param conc Matrix describing the transformation.
      */
     public void concat(PSObjectMatrix conc) {
         // [a b c d tx ty] [a b 0 ; c d 0 ; tx ty 1]
@@ -157,6 +187,7 @@ public class PSObjectMatrix extends PSObject {
     
     /**
      * Convert this matrix to an array.
+     * @return Array copy of this matrix.
      */
     public PSObjectArray toArray() {
         PSObject[] objs = new PSObject[matrix.length];
@@ -184,6 +215,7 @@ public class PSObjectMatrix extends PSObject {
     
     /**
      * Creates a human-readable string representation of this object.
+     * @return String representation of this object.
      */
     public String isis() {
         StringBuilder str = new StringBuilder();

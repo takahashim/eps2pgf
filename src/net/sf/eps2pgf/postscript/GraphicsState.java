@@ -28,21 +28,34 @@ package net.sf.eps2pgf.postscript;
 public class GraphicsState implements Cloneable {
     // See PostScript manual table 4.1, p. 179 for more info
     
-    // TeX points are 1/72.27 inch, while PostScript points are 1/72 inch.
-    // That is very annoying. The default CTM converts PostScript pt used
-    // in eps files to centimeters.
-    // [a b c d tx ty] -> x' = a*x + b*y + tx ; y' = c*x + d*y * ty
+    /**
+     * Current Transformation Matrix (CTM). All coordinates will be transformed by
+     * this matrix.
+     * TeX points are 1/72.27 inch, while PostScript points are 1/72 inch.
+     * That is very annoying. The default CTM converts PostScript pt used
+     * in eps files to centimeters.
+     * [a b c d tx ty] -> x' = a*x + b*y + tx ; y' = c*x + d*y * ty
+     */
     public PSObjectMatrix CTM = new PSObjectMatrix(2.54/72.0, 0 ,0, 2.54/72.0, 0, 0);
     
-    // Current position in pt before the CTM is applied
+    /**
+     * Current position in pt (before CTM is applied).
+     */
     public double[] position = new double[2];
     
-    // Current path
+    /**
+     * Current path
+     */
     public Path path;
     
-    // Current clipping path;
+    /**
+     * Current clipping path
+     */
     public Path clippingPath;
     
+    /**
+     * Current font
+     */
     public PSObjectDict font;
     
     /**
