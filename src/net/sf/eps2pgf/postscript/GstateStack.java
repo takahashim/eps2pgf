@@ -23,6 +23,7 @@ package net.sf.eps2pgf.postscript;
 
 import net.sf.eps2pgf.collections.ArrayStack;
 import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow;
 import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /** Manages the graphics states (stack, ...)
@@ -44,7 +45,7 @@ public class GstateStack {
     /**
      * Pushes a copy of the current graphics state on the stack.
      */
-    public void saveGstate() throws PSError {
+    public void saveGstate() throws PSErrorUnimplemented {
         try {
             stack.push(current.clone());
         } catch (CloneNotSupportedException e) {
@@ -55,10 +56,11 @@ public class GstateStack {
     /**
      * Restores the topmost graphics state from the stack.
      */
-    public void restoreGstate() throws PSError {
-        if (stack.isEmpty()) {
+    public void restoreGstate() {
+        try {
+            current = stack.pop();
+        } catch (PSErrorStackUnderflow e) {
             return;
         }
-        current = stack.pop();
     }
 }

@@ -24,8 +24,7 @@ package net.sf.eps2pgf.postscript;
 import java.lang.reflect.*;
 import java.util.*;
 import net.sf.eps2pgf.collections.ArrayStack;
-import net.sf.eps2pgf.postscript.errors.PSError;
-import net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess;
+import net.sf.eps2pgf.postscript.errors.*;
 
 /** PostScript dictionary stack
  * See PostScript manual for more info "3.3.9 Dictionary objects"
@@ -80,15 +79,16 @@ public class DictStack {
     }
     
     /** Peeks at the topmost dictionary. */
-    public PSObjectDict peekDict() throws PSError {
-        if (dictStack.size() > 0) {
+    public PSObjectDict peekDict() {
+        try {
             return dictStack.peek();
+        } catch (PSErrorStackUnderflow e) {
+            return userdict;
         }
-        return userdict;
     }
     
     /** Pops the topmost dictionary from the stack. */
-    public PSObjectDict popDict() throws PSError {
+    public PSObjectDict popDict() throws PSErrorStackUnderflow {
         return dictStack.pop();
     }
     
@@ -116,7 +116,7 @@ public class DictStack {
     }
     
     /** Search the dictionary that defines a specific key. */
-    public PSObjectDict where(PSObject key) throws PSError {
+    public PSObjectDict where(PSObject key) throws PSErrorTypeCheck {
         return where(key.toDictKey());
     }
     
@@ -133,23 +133,23 @@ public class DictStack {
     
     
     /** Define key->value in current dictionary. */
-    public void def(String key, PSObject value) throws PSError {
-        if (dictStack.empty()) {
-            userdict.setKey(key, value);
-        } else {
+    public void def(String key, PSObject value) throws PSErrorTypeCheck {
+        try {
             PSObjectDict dict = dictStack.peek();
             dict.setKey(key, value);
-        }        
+        } catch (PSErrorStackUnderflow e) {
+            userdict.setKey(key, value);
+        }
     }
     
     /** Define key->value in current dictionary. */
-    public void def(PSObject key, PSObject value) throws PSError {
+    public void def(PSObject key, PSObject value) throws PSErrorTypeCheck {
         def(key.toDictKey(), value);
     }
     
     
     /** Implement PostScript operator: store */
-    public void store(String key, PSObject value) throws PSError {
+    public void store(String key, PSObject value) throws PSErrorTypeCheck, PSErrorInvalidAccess {
         PSObjectDict dict = where(key);
         if (dict == null) {
             // Key is currently not defined in any dictionary. So define it in
@@ -165,7 +165,7 @@ public class DictStack {
     }
     
     /** Implement PostScript operator: store */
-    public void store(PSObject key, PSObject value) throws PSError {
+    public void store(PSObject key, PSObject value) throws PSErrorTypeCheck, PSErrorInvalidAccess {
         store(key.toDictKey(), value);
     }
     
@@ -182,7 +182,7 @@ public class DictStack {
         System.out.println("");
     }
     
-    public void dumpFull() throws PSError {
+    public void dumpFull() throws PSErrorRangeCheck {
         System.out.println("----- Dictionary stack");
         for(int i = dictStack.size()-1 ; i >= 0 ; i--) {
             PSObjectDict dict = dictStack.get(i);

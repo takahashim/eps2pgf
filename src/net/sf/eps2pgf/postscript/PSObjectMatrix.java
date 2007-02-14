@@ -73,7 +73,7 @@ public class PSObjectMatrix extends PSObject {
      * @param obj Object from which the values must be copied.
      * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to copy values.
      */
-    public void copyValuesFrom(PSObject obj) throws PSError {
+    public void copyValuesFrom(PSObject obj) throws PSErrorRangeCheck, PSErrorTypeCheck {
         PSObjectMatrix fromMatrix = obj.toMatrix();
         for (int i = 0 ; i < matrix.length ; i++) {
             matrix[i] = fromMatrix.matrix[i];

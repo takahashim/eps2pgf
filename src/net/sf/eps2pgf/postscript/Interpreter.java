@@ -300,7 +300,7 @@ public class Interpreter {
     }
     
     /** PostScript op: eq */
-    public void op_eq() throws PSError {
+    public void op_eq() throws PSErrorTypeCheck, PSErrorStackUnderflow {
         PSObject any2 = opStack.pop();
         PSObject any1 = opStack.pop();
         boolean bool;

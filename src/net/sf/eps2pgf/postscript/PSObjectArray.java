@@ -74,7 +74,7 @@ public class PSObjectArray extends PSObject {
      * @param newCount Number of items in the subarray.
      * @throws net.sf.eps2pgf.postscript.errors.PSError Indices out of range.
      */
-    public PSObjectArray(PSObjectArray obj, int index, int newCount) throws PSError {
+    public PSObjectArray(PSObjectArray obj, int index, int newCount) throws PSErrorRangeCheck {
         int n = obj.size();
         if (index >= n) {
             throw new PSErrorRangeCheck();
@@ -102,7 +102,7 @@ public class PSObjectArray extends PSObject {
      * @param value Value of the new element
      * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
      */
-    public void add(int index, PSObject value) throws PSError {
+    public void add(int index, PSObject value) {
         array.add(index+offset, value);
     }
     
@@ -112,7 +112,7 @@ public class PSObjectArray extends PSObject {
      * @param value New value of the element.
      * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
      */
-    public void set(int index, PSObject value) throws PSError {
+    public void set(int index, PSObject value) throws PSErrorRangeCheck {
         if ( (index < 0) || (index >= size()) ) {
             throw new PSErrorRangeCheck();
         }
@@ -125,7 +125,7 @@ public class PSObjectArray extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
      * @return Value of the specifiec element.
      */
-    public PSObject get(int index) throws PSError {
+    public PSObject get(int index) throws PSErrorRangeCheck {
         if ( (index < 0) || (index >= size()) ) {
             throw new PSErrorRangeCheck();
         }
@@ -138,7 +138,7 @@ public class PSObjectArray extends PSObject {
      * @return Removed element.
      * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
      */
-    public PSObject remove(int index) throws PSError {
+    public PSObject remove(int index) throws PSErrorRangeCheck {
         if ( (index < 0) || (index >= size()) ) {
             throw new PSErrorRangeCheck();
         }
@@ -152,7 +152,7 @@ public class PSObjectArray extends PSObject {
      * @return String representation of this object.
      * @throws net.sf.eps2pgf.postscript.errors.PSError Something went wrong.
      */
-    public String isis() throws PSError {
+    public String isis() throws PSErrorRangeCheck {
         StringBuilder str = new StringBuilder();
         str.append("[ ");
         for (int i = 0 ; i < size() ; i++) {
@@ -171,7 +171,7 @@ public class PSObjectArray extends PSObject {
      * @return This array.
      * @throws net.sf.eps2pgf.postscript.errors.PSError Something went wrong.
      */
-    public PSObjectArray bind(Interpreter interp) throws PSError {
+    public PSObjectArray bind(Interpreter interp) throws PSErrorRangeCheck, PSErrorTypeCheck {
         for (int i = 0 ; i < size() ; i++) {
             set(i, get(i).bind(interp));
         }
@@ -183,7 +183,7 @@ public class PSObjectArray extends PSObject {
      * @param toBeCopied Object from which the values must be copied
      * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to copy values.
      */
-    public void copyFrom(PSObjectArray toBeCopied) throws PSError {
+    public void copyFrom(PSObjectArray toBeCopied) throws PSErrorRangeCheck, PSErrorUnimplemented {
         int n = toBeCopied.size();
         int m = size();
         if (m < n) {
@@ -214,7 +214,7 @@ public class PSObjectArray extends PSObject {
      * @return Subarray
      * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of bounds.
      */
-    public PSObjectArray getinterval(int index, int count) throws PSError {
+    public PSObjectArray getinterval(int index, int count) throws PSErrorRangeCheck {
         return new PSObjectArray(this, index, count);
     }
     
@@ -231,7 +231,7 @@ public class PSObjectArray extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSError Array is not a valid matrix
      * @return Matrix representation of this array
      */
-    public PSObjectMatrix toMatrix() throws PSError {
+    public PSObjectMatrix toMatrix() throws PSErrorRangeCheck, PSErrorTypeCheck {
         if (this.size() != 6) {
             throw new PSErrorRangeCheck();
         }
@@ -245,7 +245,7 @@ public class PSObjectArray extends PSObject {
      * @param obj Object from which the values must be copied
      * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to copy values from object.
      */
-    public void copyValuesFrom(PSObject obj) throws PSError {
+    public void copyValuesFrom(PSObject obj) throws PSErrorRangeCheck, PSErrorTypeCheck {
         PSObjectArray array = obj.toArray();
         
         // First remove all current elements from the array
