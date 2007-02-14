@@ -27,7 +27,8 @@ import java.util.logging.*;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
- *
+ * Represents the link between fonts and LaTeX code. It describes how text with
+ * a certain font is converted to LaTeX code.
  * @author Paul Wagenaars
  */
 public class Fonts {
@@ -41,7 +42,7 @@ public class Fonts {
     /**
      * Create a new Fonts instance
      */
-    public Fonts() throws PSError {
+    public Fonts() {
         initStdCharStrings();
         initBaseFontDicts();
     }
@@ -49,7 +50,7 @@ public class Fonts {
     /**
      * Search a font and return it's corresponding font dictionary.
      */
-    public PSObjectDict findFont(PSObject fontNameObj) throws PSError {
+    public PSObjectDict findFont(PSObject fontNameObj) throws PSErrorTypeCheck {
         String fontName = fontNameObj.toDictKey();
         return this.findFont(fontName);
     }
@@ -57,7 +58,7 @@ public class Fonts {
     /**
      * Search a font and return it's corresponding font dictionary.
      */
-    public PSObjectDict findFont(String fontName) throws PSError {
+    public PSObjectDict findFont(String fontName) throws PSErrorTypeCheck {
         for (int i = (fonts.size()-1) ; i >= 0 ; i--) {
             PSObjectDict dict = fonts.get(i);
             PSObject value = dict.lookup("FontName");
@@ -72,7 +73,7 @@ public class Fonts {
     /**
      * Define a new font
      */
-    public PSObjectDict defineFont(PSObject key, PSObjectDict font) throws PSError {
+    public PSObjectDict defineFont(PSObject key, PSObjectDict font) throws PSErrorUnimplemented {
         if (font.containsKey("FID")) {
             throw new PSErrorUnimplemented("Associating a font with more than one key.");
         } else {
@@ -85,7 +86,7 @@ public class Fonts {
         return font;
     }
     
-    private void initBaseFontDicts() throws PSError {
+    private void initBaseFontDicts() {
         String fontNames[] = new String[13];
         String latexPreCode[] = new String[fontNames.length];
         String latexPostCode[] = new String[fontNames.length];

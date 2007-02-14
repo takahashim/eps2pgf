@@ -24,7 +24,8 @@ package net.sf.eps2pgf.postscript;
 import java.awt.event.ItemEvent;
 import java.io.*;
 import java.util.*;
-import net.sf.eps2pgf.postscript.errors.PSError;
+
+import net.sf.eps2pgf.postscript.errors.*;
 
 /**
  * Procedure PostScript object.
@@ -66,7 +67,7 @@ public class PSObjectProc extends PSObject {
     /** Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      */
-    public String isis() throws PSError {
+    public String isis() throws PSErrorRangeCheck {
         StringBuilder str = new StringBuilder();
         Iterator<PSObject> it = procObjects.iterator();
         str.append("{");
@@ -79,7 +80,7 @@ public class PSObjectProc extends PSObject {
     }
     
     /** Replace executable name objects with their values */
-    public PSObject bind(Interpreter interp) throws PSError {
+    public PSObject bind(Interpreter interp) throws PSErrorRangeCheck, PSErrorTypeCheck {
         LinkedList<PSObject> newList = new LinkedList<PSObject>();
         
         while(procObjects.size() > 0) {
@@ -96,7 +97,7 @@ public class PSObjectProc extends PSObject {
     }
     
     /** Convert this object to a procedure object, if possible. */
-    public PSObjectProc toProc() throws PSError {
+    public PSObjectProc toProc() {
         return this;
     }
 

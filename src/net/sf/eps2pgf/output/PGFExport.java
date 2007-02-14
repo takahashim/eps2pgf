@@ -82,7 +82,7 @@ public class PGFExport implements Exporter {
     /**
      * Convert a Path to pgf code and write in to the output
      */
-    void writePath(Path path) throws PSError, IOException {
+    void writePath(Path path) throws IOException, PSErrorUnimplemented {
         for (int i = 0 ; i < path.sections.size() ; i++) {
             PathSection section = path.sections.get(i);
             if (section instanceof Moveto) {
@@ -109,7 +109,7 @@ public class PGFExport implements Exporter {
      * Implements PostScript stroke operator.
      * @param gstate Current graphics state.
      */
-    public void stroke(Path path) throws PSError, IOException {
+    public void stroke(Path path) throws IOException, PSErrorUnimplemented {
         writePath(path);
         out.write("\\pgfusepath{stroke}\n");
     }
@@ -118,7 +118,7 @@ public class PGFExport implements Exporter {
      * Set the current clipping path in the graphics state as clipping path
      * in the output document.
      */
-    public void clip(Path clipPath) throws PSError, IOException {
+    public void clip(Path clipPath) throws IOException, PSErrorUnimplemented {
         writePath(clipPath);
         out.write("\\pgfusepath{clip}\n");
     }
@@ -127,7 +127,7 @@ public class PGFExport implements Exporter {
      * Fills a path
      * See the PostScript manual (fill operator) for more info.
      */
-    public void fill(Path path) throws PSError, IOException {
+    public void fill(Path path) throws IOException, PSErrorUnimplemented {
         writePath(path);
         out.write("\\pgfusepath{fill}\n");
     }
@@ -135,19 +135,25 @@ public class PGFExport implements Exporter {
     /**
      * Implements PostScript operator setdash
      */
-    public void setDash(PSObjectArray array, double offset) throws PSError, IOException {
+    public void setDash(PSObjectArray array, double offset) throws IOException, PSErrorTypeCheck {
         out.write("\\pgfsetdash{");
         
-        for (int i = 0 ; i < array.size() ; i++) {
-            out.write("{" + lengthFormat.format(array.get(i).toReal()) + "cm}");
+        try {
+            int i = 0;
+            while(true) {
+                out.write("{" + lengthFormat.format(array.get(i++).toReal()) + "cm}");
+            }
+        } catch (PSErrorRangeCheck e) {
+                
+        } finally {
+            out.write("}{" + lengthFormat.format(offset) + "cm}\n");
         }
-        out.write("}{" + lengthFormat.format(offset) + "cm}\n");
     }
     
     /**
      * Implements PostScript operator setlinecap
      */
-    public void setlinecap(int cap) throws PSError, IOException {
+    public void setlinecap(int cap) throws IOException, PSErrorRangeCheck {
         switch (cap) {
             case 0:
                 out.write("\\pgfsetbuttcap\n");
@@ -166,7 +172,7 @@ public class PGFExport implements Exporter {
     /**
      * Implements PostScript operator setlinejoin
      */
-    public void setlinejoin(int join) throws PSError, IOException {
+    public void setlinejoin(int join) throws IOException, PSErrorRangeCheck {
         switch (join) {
             case 0:
                 out.write("\\pgfsetmiterjoin\n");
@@ -186,7 +192,7 @@ public class PGFExport implements Exporter {
      * Implements PostScript operator setlinewidth
      * @param lineWidth Line width in cm
      */
-    public void setlinewidth(double lineWidth) throws PSError, IOException {
+    public void setlinewidth(double lineWidth) throws IOException {
         lineWidth = Math.abs(lineWidth);
         out.write("\\pgfsetlinewidth{"+ lengthFormat.format(lineWidth) +"cm}\n");
     }

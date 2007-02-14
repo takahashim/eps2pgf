@@ -48,39 +48,39 @@ public interface Exporter {
      * Intersects the area inside the current clipping path with the area
      * inside the current path to produce a new, smaller clipping path.
      */
-    public void clip(Path clipPath) throws PSError, IOException;
+    public void clip(Path clipPath) throws IOException, PSErrorUnimplemented;
     
     /**
      * Fills a path
      * See the PostScript manual (fill operator) for more info.
      */
-    public void fill(Path path) throws PSError, IOException;
+    public void fill(Path path) throws IOException, PSErrorUnimplemented;
 
     /**
      * Implements PostScript stroke operator
      */
-    public void stroke(Path path) throws PSError, IOException;
+    public void stroke(Path path) throws IOException, PSErrorUnimplemented;
     
     /**
      * Implements PostScript operator setdash
      */
-    public void setDash(PSObjectArray array, double offset) throws PSError, IOException;
+    public void setDash(PSObjectArray array, double offset) throws IOException, PSErrorTypeCheck;
     
     /**
      * Implements PostScript operator setlinecap
      */
-    public void setlinecap(int cap) throws PSError, IOException;
+    public void setlinecap(int cap) throws IOException, PSErrorRangeCheck;
     
     /**
      * Implements PostScript operator setlinejoin
      */
-    public void setlinejoin(int join) throws PSError, IOException;
+    public void setlinejoin(int join) throws IOException, PSErrorRangeCheck;
     
     /**
      * Implements PostScript operator setlinewidth
      * @param lineWidth Line width in cm
      */
-    public void setlinewidth(double lineWidth) throws PSError, IOException;
+    public void setlinewidth(double lineWidth) throws IOException;
     
     /**
      * Starts a new scope

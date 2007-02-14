@@ -23,7 +23,7 @@ package net.sf.eps2pgf.postscript;
 
 import java.util.*;
 import java.lang.*;
-import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.*;
 
 /**
  * Represent PostScript dictionary.
@@ -61,7 +61,7 @@ public class PSObjectDict extends PSObject {
      * @param preStr String that will be prepended to each line written to output.
      * @throws net.sf.eps2pgf.postscript.errors.PSError There was an error reading from this dictionary.
      */
-    public void dumpFull(String preStr) throws PSError {
+    public void dumpFull(String preStr) throws PSErrorRangeCheck {
         Set<String> keys = map.keySet();
         for (String key: keys) {
             System.out.println(preStr + key + " -> " + map.get(key).isis());
@@ -86,7 +86,7 @@ public class PSObjectDict extends PSObject {
      * @param value Value of the new dictionary entry.
      * @throws net.sf.eps2pgf.postscript.errors.PSError There was an error creating the new dictionary entry.
      */
-    public void setKey(PSObject key, PSObject value) throws PSError {
+    public void setKey(PSObject key, PSObject value) throws PSErrorTypeCheck {
         setKey(key.toDictKey(), value);
     }
     
@@ -108,7 +108,7 @@ public class PSObjectDict extends PSObject {
      * @param value Value of the new dictionary entry.
      * @throws net.sf.eps2pgf.postscript.errors.PSError There was an error creating the new entry.
      */
-    public void setKey(PSObject key, String value) throws PSError {
+    public void setKey(PSObject key, String value) throws PSErrorTypeCheck {
         setKey(key.toDictKey(), value);
     }
     
@@ -127,7 +127,7 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSError When key is not a valid dictionary key.
      * @return Value associated with key.
      */
-    public PSObject lookup(PSObject key) throws PSError {
+    public PSObject lookup(PSObject key) throws PSErrorTypeCheck {
         return this.lookup(key.toDictKey());
     }
     
@@ -146,7 +146,7 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to check the supplied key.
      * @param key Search for an entry with this key.
      */
-    public boolean containsKey(PSObject key) throws PSError {
+    public boolean containsKey(PSObject key) throws PSErrorTypeCheck {
         return map.containsKey(key.toDictKey());
     }
     

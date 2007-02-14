@@ -55,7 +55,7 @@ public class ArrayStack<E> extends ArrayList<E> {
     
     /** Pops an object from the top of the stack.
      */
-    public E pop() throws PSError {
+    public E pop() throws PSErrorStackUnderflow {
         int sz = size();
         if (sz <= 0) {
             throw new PSErrorStackUnderflow();
@@ -67,7 +67,7 @@ public class ArrayStack<E> extends ArrayList<E> {
     /** Looks at the n'th item from the top of the stack without removing
      * it. n = 0 corresponds to the top of the stack.
      */
-    public E peek(int n) throws PSError {
+    public E peek(int n) throws PSErrorStackUnderflow {
         int index = size() - 1 - n;
         if (index < 0) {
             throw new PSErrorStackUnderflow();
@@ -79,7 +79,7 @@ public class ArrayStack<E> extends ArrayList<E> {
     /**  Looks at the object at the top of this stack without removing it
      * from the stack.
      */
-    public E peek() throws PSError {
+    public E peek() throws PSErrorStackUnderflow {
         return peek(0);
     }
 }

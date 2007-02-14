@@ -21,9 +21,7 @@
 
 package net.sf.eps2pgf.postscript;
 
-import net.sf.eps2pgf.postscript.errors.PSError;
-import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
-import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.postscript.errors.*;
 
 /** Base class for PostScript objects.
  *
@@ -49,22 +47,22 @@ public class PSObject implements Cloneable {
     /** Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      */
-    public String isis() throws PSError {
+    public String isis() throws PSErrorRangeCheck {
         return this.getClass().getName();
     }
     
     /** Convert this object to an array, if possible. */
-    public PSObjectArray toArray() throws PSError {
+    public PSObjectArray toArray() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
     /** Convert this object to an integer, if possible. */
-    public int toInt() throws PSError {
+    public int toInt() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
     /** Convert this object to a non-negative integer, if possible */
-    public int toNonNegInt() throws PSError {
+    public int toNonNegInt() throws PSErrorRangeCheck, PSErrorTypeCheck {
         int n = toInt();
         if (n < 0) {
             throw new PSErrorRangeCheck();
@@ -73,39 +71,39 @@ public class PSObject implements Cloneable {
     }
     
     /** Convert this object to a real number, if possible. */
-    public double toReal() throws PSError {
+    public double toReal() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
     /** Convert this object to dictionary key, if possible. */
-    public String toDictKey() throws PSError {
+    public String toDictKey() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
     /** Convert this object to a boolean, if possible. */
-    public boolean toBool() throws PSError {
+    public boolean toBool() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
     /** Convert this object to a procedure object, if possible. */
-    public PSObjectProc toProc() throws PSError {
+    public PSObjectProc toProc() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
     /** Convert this object to a dictionary, if possible. */
-    public PSObjectDict toDict() throws PSError {
+    public PSObjectDict toDict() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
     /** Convert this object to a matrix, if possible. */
-    public PSObjectMatrix toMatrix() throws PSError {
+    public PSObjectMatrix toMatrix() throws PSErrorRangeCheck, PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
     /**
      * Copies values from another object to this object, if possible.
      */
-    public void copyValuesFrom(PSObject obj) throws PSError {
+    public void copyValuesFrom(PSObject obj) throws PSErrorRangeCheck, PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
 
@@ -117,14 +115,14 @@ public class PSObject implements Cloneable {
     
     /** Implements PostScript operator getinterval. Returns a new object
      * with an interval from this object. */
-    public PSObject getinterval(int index, int count) throws PSError {
+    public PSObject getinterval(int index, int count) throws PSErrorRangeCheck, PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
     /** Implements bind operator for this object. For most object this wil
      * be the same object, without any change.
      */
-    public PSObject bind(Interpreter interp) throws PSError {
+    public PSObject bind(Interpreter interp) throws PSErrorRangeCheck, PSErrorTypeCheck {
         return this;
     }
 }
