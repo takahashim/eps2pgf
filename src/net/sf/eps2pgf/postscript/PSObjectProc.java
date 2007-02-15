@@ -67,7 +67,7 @@ public class PSObjectProc extends PSObject {
     /** Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      */
-    public String isis() throws PSErrorRangeCheck {
+    public String isis() {
         StringBuilder str = new StringBuilder();
         Iterator<PSObject> it = procObjects.iterator();
         str.append("{");
@@ -80,7 +80,7 @@ public class PSObjectProc extends PSObject {
     }
     
     /** Replace executable name objects with their values */
-    public PSObject bind(Interpreter interp) throws PSErrorRangeCheck, PSErrorTypeCheck {
+    public PSObject bind(Interpreter interp) throws PSErrorTypeCheck {
         LinkedList<PSObject> newList = new LinkedList<PSObject>();
         
         while(procObjects.size() > 0) {
