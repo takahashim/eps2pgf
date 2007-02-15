@@ -152,14 +152,18 @@ public class PSObjectArray extends PSObject {
      * @return String representation of this object.
      * @throws net.sf.eps2pgf.postscript.errors.PSError Something went wrong.
      */
-    public String isis() throws PSErrorRangeCheck {
+    public String isis() {
         StringBuilder str = new StringBuilder();
         str.append("[ ");
-        for (int i = 0 ; i < size() ; i++) {
-            str.append(get(i).isis() + " ");
-            if ( ((i+offset)%15) == 14 ) {
-                str.append("\n");
+        try {
+            for (int i = 0 ; i < size() ; i++) {
+                str.append(get(i).isis() + " ");
+                if ( ((i+offset)%15) == 14 ) {
+                    str.append("\n");
+                }
             }
+        } catch (PSErrorRangeCheck e) {
+            // This can never happen.
         }
         str.append("]");
         return str.toString();
@@ -171,9 +175,13 @@ public class PSObjectArray extends PSObject {
      * @return This array.
      * @throws net.sf.eps2pgf.postscript.errors.PSError Something went wrong.
      */
-    public PSObjectArray bind(Interpreter interp) throws PSErrorRangeCheck, PSErrorTypeCheck {
-        for (int i = 0 ; i < size() ; i++) {
-            set(i, get(i).bind(interp));
+    public PSObjectArray bind(Interpreter interp) throws PSErrorTypeCheck {
+        try {
+            for (int i = 0 ; i < size() ; i++) {
+                set(i, get(i).bind(interp));
+            }
+        } catch (PSErrorRangeCheck e) {
+            // This can never happen
         }
         return this;
     }
@@ -245,17 +253,21 @@ public class PSObjectArray extends PSObject {
      * @param obj Object from which the values must be copied
      * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to copy values from object.
      */
-    public void copyValuesFrom(PSObject obj) throws PSErrorRangeCheck, PSErrorTypeCheck {
+    public void copyValuesFrom(PSObject obj) throws PSErrorTypeCheck {
         PSObjectArray array = obj.toArray();
         
-        // First remove all current elements from the array
-        for (int i = size()-1 ; i >= 0 ; i--) {
-            remove(i);
-        }
+        try {
+            // First remove all current elements from the array
+            for (int i = size()-1 ; i >= 0 ; i--) {
+                remove(i);
+            }
         
-        // Copies the values
-        for (int i = 0 ; i < array.size() ; i++) {
-            add(i, array.get(i));
+            // Copies the values
+            for (int i = 0 ; i < array.size() ; i++) {
+                add(i, array.get(i));
+            }
+        } catch (PSErrorRangeCheck e) {
+            // This can never happen
         }
     }
     
