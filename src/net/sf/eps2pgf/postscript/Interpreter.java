@@ -776,8 +776,16 @@ public class Interpreter {
     }
    
     /** PostScript op: setfont */
-    public void op_setfont() throws PSError {
-        throw new PSErrorUnimplemented("operator: setfont");
+    public void op_setfont() throws PSErrorTypeCheck, PSErrorStackUnderflow {
+        PSObjectDict font = opStack.pop().toDict();
+        // Check few fields required for font dictionaries
+        if (!(font.containsKey("FontType"))) {
+            throw new PSErrorTypeCheck();
+        }
+        if (!(font.containsKey("FontMatrix"))) {
+            throw new PSErrorTypeCheck();
+        }
+        gstate.current.font = font;
     }
    
     /** PostScript op: setrgbcolor */
@@ -822,8 +830,16 @@ public class Interpreter {
     }
    
     /** PostScript op: show */
-    public void op_show() throws PSError {
-        throw new PSErrorUnimplemented("operator: show");
+    public void op_show() throws PSErrorTypeCheck, PSErrorStackUnderflow,
+            PSErrorRangeCheck, PSErrorUnimplemented, IOException {
+        PSObjectString string = opStack.pop().toPSString();
+        PSObjectDict currentFont = gstate.current.font;
+        PSObjectArray encoding = (PSObjectArray)currentFont.lookup("Encoding");
+        PSObjectArray charNames = string.decode(encoding);
+        String text = fonts.charNames2Latex(charNames, currentFont);
+        
+        double[] pos = gstate.current.getCurrentPosInDeviceSpace();
+        exp.show(text, pos, 0);
     }
    
     /** PostScript op: StandardEncoding */

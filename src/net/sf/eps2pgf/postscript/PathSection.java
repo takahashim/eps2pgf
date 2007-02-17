@@ -37,4 +37,16 @@ public class PathSection implements Cloneable {
         newSection.params = params.clone();
         return newSection;
     }
+    
+    /**
+     * Get position in device space coordinates.
+     * @return X- and Y-coordinate in device space. Returns {NaN, NaN} when
+     *         this section has no coordinate.
+     */
+    public double[] deviceCoor() {
+        double[] coor = new double[2];
+        coor[0] = params[0];
+        coor[1] = params[1];
+        return coor;
+    }
 }

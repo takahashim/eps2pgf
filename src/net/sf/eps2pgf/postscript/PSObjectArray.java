@@ -33,6 +33,15 @@ public class PSObjectArray extends PSObject {
     private ArrayList<PSObject> array;
     private int offset;
     private int count;
+    
+    /**
+     * Create a new empty PostScript array
+     */
+    public PSObjectArray() {
+        array = new ArrayList<PSObject>();
+        offset = 0;
+        count = Integer.MAX_VALUE;
+    }
 
     /**
      * Creates a new instance of PSObjectArray

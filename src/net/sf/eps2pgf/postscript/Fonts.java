@@ -43,6 +43,7 @@ public class Fonts {
      * Create a new Fonts instance
      */
     public Fonts() {
+        initSymbolCharStrings();
         initStdCharStrings();
         initBaseFontDicts();
     }
@@ -84,6 +85,30 @@ public class Fonts {
             fonts.add(font);
         }
         return font;
+    }
+    
+    /**
+     * Convert an array of character names to LaTeX code
+     */
+    public String charNames2Latex(PSObjectArray charNames, PSObjectDict font) 
+    throws PSErrorRangeCheck, PSErrorTypeCheck, PSErrorUnimplemented {
+        StringBuilder str = new StringBuilder(charNames.size());
+        PSObjectDict charStrings = (PSObjectDict)font.lookup("CharStrings");
+        PSObjectString preCode = (PSObjectString)font.lookup("LatexPreCode");
+        PSObjectString postCode = (PSObjectString)font.lookup("LatexPostCode");
+        
+        str.append(preCode.value);
+        for (int i = 0 ; i < charNames.size() ; i++) {
+            PSObjectString code = (PSObjectString)charStrings.lookup(charNames.get(i));
+            if (code == null) {
+                throw new PSErrorUnimplemented("CharString for "
+                        + charNames.get(i).isis() + " is unknown.");
+            }
+            str.append(code.value);
+        }
+        str.append(postCode.value);
+        
+        return str.toString();
     }
     
     private void initBaseFontDicts() {
@@ -183,7 +208,9 @@ public class Fonts {
             dict.setKey("Encoding", new PSObjectArray(encoding.get(i)));
             dict.setKey("FontBBox", new PSObjectArray(fontBbox));
             dict.setKey("PaintType", new PSObjectInt(2));
-            dict.setKey("CharStrings", stdCharStrings);
+            dict.setKey("CharStrings", charStrings[i]);
+            dict.setKey("LatexPreCode", latexPreCode[i]);
+            dict.setKey("LatexPostCode", latexPostCode[i]);
             fonts.add(dict);
         }
         
@@ -274,6 +301,7 @@ public class Fonts {
         stdCharStrings.setKey("less", "<");
 
         stdCharStrings.setKey("m", "m");
+        stdCharStrings.setKey("minus", "-");
 
         stdCharStrings.setKey("n", "n");
         stdCharStrings.setKey("nine", "9");
@@ -328,21 +356,7 @@ public class Fonts {
      * See PostScript manual for info on CharStrings
      */
     private void initSymbolCharStrings() {
-        symbolCharStrings.setKey("exclam", "!");
-        symbolCharStrings.setKey("universal", "{\\forall}");
-        symbolCharStrings.setKey("numbersign", "{\\#}");
-        symbolCharStrings.setKey("existential", "{\\exists}");
-        symbolCharStrings.setKey("percent", "{\\%}");
-        symbolCharStrings.setKey("ampersand", "{\\&}");
-        symbolCharStrings.setKey("suchthat", "{\\ni}");
-        symbolCharStrings.setKey("parenleft", "(");
-        symbolCharStrings.setKey("parenright", ")");
-        symbolCharStrings.setKey("asterisk", "*");
-        symbolCharStrings.setKey("plus", "+");
-        symbolCharStrings.setKey("comma", ",");
-        symbolCharStrings.setKey("minus", "-");
-        symbolCharStrings.setKey("period", ".");
-        symbolCharStrings.setKey("slash", "/");
+        symbolCharStrings.setKey(".notdef", "");
         
         symbolCharStrings.setKey("zero", "0");
         symbolCharStrings.setKey("one", "1");
@@ -355,14 +369,6 @@ public class Fonts {
         symbolCharStrings.setKey("eight", "8");
         symbolCharStrings.setKey("nine", "9");
         
-        symbolCharStrings.setKey("colon", ":");
-        symbolCharStrings.setKey("semicolon", ";");
-        symbolCharStrings.setKey("less", "<");
-        symbolCharStrings.setKey("equal", "=");
-        symbolCharStrings.setKey("greater", ">");
-        symbolCharStrings.setKey("question", "?");
-        symbolCharStrings.setKey("congruent", "{\\cong}");
-
         symbolCharStrings.setKey("alpha", "{\\alpha}");
         symbolCharStrings.setKey("beta", "{\\beta}");
         symbolCharStrings.setKey("gamma", "{\\gamma}");
@@ -403,15 +409,41 @@ public class Fonts {
         symbolCharStrings.setKey("Nu", "N");
         symbolCharStrings.setKey("Xi", "{\\Xi}");
         symbolCharStrings.setKey("Omicron", "O");
-        symbolCharStrings.setKey("pi", "{\\Pi}");
-        symbolCharStrings.setKey("rho", "P");
-        symbolCharStrings.setKey("sigma", "{\\Sigma}");
-        symbolCharStrings.setKey("tau", "T");
-        symbolCharStrings.setKey("upsilon", "{\\Upsilon}");
-        symbolCharStrings.setKey("phi", "{\\Phi}");
-        symbolCharStrings.setKey("chi", "X");
-        symbolCharStrings.setKey("psi", "{\\Psi}");
-        symbolCharStrings.setKey("omega", "{\\Omega}");
-    }
+        symbolCharStrings.setKey("Pi", "{\\Pi}");
+        symbolCharStrings.setKey("Rho", "P");
+        symbolCharStrings.setKey("Sigma", "{\\Sigma}");
+        symbolCharStrings.setKey("Tau", "T");
+        symbolCharStrings.setKey("Upsilon", "{\\Upsilon}");
+        symbolCharStrings.setKey("Phi", "{\\Phi}");
+        symbolCharStrings.setKey("Chi", "X");
+        symbolCharStrings.setKey("Psi", "{\\Psi}");
+        symbolCharStrings.setKey("Omega", "{\\Omega}");
+
+        symbolCharStrings.setKey("angle", "{\\angle}");
+        symbolCharStrings.setKey("ampersand", "{\\&}");
+        symbolCharStrings.setKey("asterisk", "*");
+        symbolCharStrings.setKey("colon", ":");
+        symbolCharStrings.setKey("comma", ",");
+        symbolCharStrings.setKey("congruent", "{\\cong}");
+        symbolCharStrings.setKey("equal", "=");
+        symbolCharStrings.setKey("exclam", "!");
+        symbolCharStrings.setKey("existential", "{\\exists}");
+        symbolCharStrings.setKey("greater", ">");
+        symbolCharStrings.setKey("less", "<");
+        symbolCharStrings.setKey("minus", "-");
+        symbolCharStrings.setKey("numbersign", "{\\#}");
+        symbolCharStrings.setKey("parenleft", "(");
+        symbolCharStrings.setKey("parenright", ")");
+        symbolCharStrings.setKey("percent", "{\\%}");
+        symbolCharStrings.setKey("period", ".");
+        symbolCharStrings.setKey("plus", "+");
+        symbolCharStrings.setKey("question", "?");
+        symbolCharStrings.setKey("semicolon", ";");
+        symbolCharStrings.setKey("slash", "/");
+        symbolCharStrings.setKey("suchthat", "{\\ni}");
+        symbolCharStrings.setKey("universal", "{\\forall}");
+        
+
+}
 
 }

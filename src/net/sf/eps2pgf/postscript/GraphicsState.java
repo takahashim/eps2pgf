@@ -21,13 +21,13 @@
 
 package net.sf.eps2pgf.postscript;
 
-/** Structure that holds the graphics state (graphic control parameter).
+/**
+ * Structure that holds the graphics state (graphic control parameter).
+ * See PostScript manual table 4.1, p. 179 for more info.
  *
  * @author Paul Wagenaars
  */
 public class GraphicsState implements Cloneable {
-    // See PostScript manual table 4.1, p. 179 for more info
-    
     /**
      * Current Transformation Matrix (CTM). All coordinates will be transformed by
      * this matrix.
@@ -74,6 +74,8 @@ public class GraphicsState implements Cloneable {
      * @param y Y-coordinate (before CTM is applied)
      */
     public void moveto(double x, double y) {
+        position[0] = x;
+        position[1] = y;
         double[] transformed = CTM.apply(x, y);
         path.moveto(transformed[0], transformed[1], x, y);
     }
@@ -84,6 +86,8 @@ public class GraphicsState implements Cloneable {
      * @param y Y-coordinate (before CTM is applied)
      */
     public void lineto(double x, double y) {
+        position[0] = x;
+        position[1] = y;
         double[] transformed = CTM.apply(x, y);
         path.lineto(transformed[0], transformed[1]);
     }
@@ -98,6 +102,14 @@ public class GraphicsState implements Cloneable {
         position[1] = position[1] + dy;
         double[] transformed = CTM.apply(position);
         path.lineto(transformed[0], transformed[1]);
+    }
+    
+    /**
+     * Retrieves the current position in device space. 
+     * @return X- and Y-coordinate in device space (centimeters)
+     */
+    public double[] getCurrentPosInDeviceSpace() {
+        return path.sections.get(path.sections.size() - 1).deviceCoor();
     }
     
     /**

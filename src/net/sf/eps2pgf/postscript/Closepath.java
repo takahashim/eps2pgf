@@ -21,17 +21,31 @@
 
 package net.sf.eps2pgf.postscript;
 
+import com.sun.org.apache.bcel.internal.verifier.statics.DOUBLE_Upper;
+
 /**
  *
  * @author Paul Wagenaars
  */
 public class Closepath extends PathSection implements Cloneable {
     /**
+     * Create a new Closepath object
+     * @param position Coordinate to where this closepath returns.
+     */
+    public Closepath(double[] position) {
+        params[0] = position[0];
+        params[1] = position[1];
+        for( int i = 2 ; i < params.length ; i++) {
+            params[i] = Double.NaN;
+        }
+    }
+    
+    /**
      * Create a clone of this object.
      * @return Returns clone of this object.
      */
     public Closepath clone() {
-        Closepath newSection = new Closepath();
+        Closepath newSection = new Closepath(params);
         newSection.params = params.clone();
         return newSection;
     }

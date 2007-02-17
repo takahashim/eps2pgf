@@ -234,5 +234,14 @@ public class PGFExport implements Exporter {
         out.write("\\definecolor{eps2pgf_color}{gray}{" + level + "}");
         out.write("\\pgfsetfillcolor{eps2pgf_color}\n");        
     }
+    
+    /**
+     * Draws text
+     */
+    public void show(String text, double[] position, double angle) throws IOException {
+        String x = coorFormat.format(position[0]);
+        String y = coorFormat.format(position[1]);
+        out.write("\\pgftext[bottom,left,x="+x+"cm,y="+y+"cm]{" + text + "}\n");
+    }
 
 }
