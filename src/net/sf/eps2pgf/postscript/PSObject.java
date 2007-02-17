@@ -129,6 +129,15 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * Convert this object to a string object, if possible
+     * @throws PSErrorTypeCheck Unble to convert this object type to a PostScript string object
+     * @return PostScript string object representation of this object
+     */
+    public PSObjectString toPSString() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Convert this object to a dictionary, if possible.
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a dictionary
      * @return Dictionary representation of this object.

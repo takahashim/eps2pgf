@@ -85,18 +85,20 @@ public class Path implements Cloneable {
         if (sections.get(len-1) instanceof Moveto) {
             return null;
         }
-        sections.add(new Closepath());
-        
+
         // Search the start of the subpath
+        double[] position = {Double.NaN, Double.NaN};
         for (int i = len-1 ; i >= 0 ; i--) {
             if (sections.get(i) instanceof Moveto) {
-                double[] position = new double[2];
                 position[0] = sections.get(i).params[2];
                 position[1] = sections.get(i).params[3];
-                return position;
             }
         }
-        return null;
+        
+        Closepath closepath = new Closepath(position);
+        sections.add(closepath);
+
+        return position;
     }
     
     /**

@@ -23,6 +23,8 @@ package net.sf.eps2pgf.postscript;
 
 import java.util.regex.*;
 
+import net.sf.eps2pgf.postscript.errors.*;
+
 /**
  * String PostScript object.
  * @author Wagenaars
@@ -31,15 +33,24 @@ public class PSObjectString extends PSObject {
     String value;
     
     /**
+     * Creates a new empty PostScript string
+     */
+    public PSObjectString() {
+        value = "";
+    }
+    
+    /**
      * Creates a new instance of PSObjectString
-     * @param str String with valid PostScript string.
+     * @param str This object is initialized with a copy of this string. If
+     *            the string is enclosed in round parenthesis ( ) it is
+     *            parsed as PostScript string.
      */
     public PSObjectString(String str) {
         int len = str.length();
         if ( (len > 0) && (str.charAt(0) == '(') && (str.charAt(len-1) == ')') ) {
             value = parse(str.substring(1, len-1));
         } else {
-            value = parse(str);
+            value = new String(str);
         }
     }
     
@@ -110,12 +121,34 @@ public class PSObjectString extends PSObject {
             return false;
         }
     }
+    
+    /**
+     * Convert this object to a string object, if possible
+     * @return PostScript string object representation of this object
+     */
+    public PSObjectString toPSString() {
+        return this;
+    }
 
     /** Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      */
     public String isis() {
         return "(" + value + ")";
+    }
+    
+    /**
+     * Convert this string to an array with character names
+     * @param encoding Encoding to use to decode this string
+     * @return Array with character names
+     */
+    public PSObjectArray decode(PSObjectArray encoding) throws PSErrorRangeCheck {
+        PSObjectArray arr = new PSObjectArray();
+        for (int i = 0 ; i < value.length() ; i++) {
+            int chr = value.charAt(i);
+            arr.add(i, encoding.get(chr));
+        }
+        return arr;
     }
 
     /**

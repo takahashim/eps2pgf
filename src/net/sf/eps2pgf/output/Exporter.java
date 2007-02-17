@@ -101,4 +101,9 @@ public interface Exporter {
      * Sets the current color in gray
      */
     public void setColor(double level) throws IOException;
+    
+    /**
+     * Draws text
+     */
+    public void show(String text, double[] position, double angle)  throws IOException;
 }
