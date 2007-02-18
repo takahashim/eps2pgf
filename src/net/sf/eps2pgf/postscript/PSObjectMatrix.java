@@ -31,6 +31,10 @@ import net.sf.eps2pgf.postscript.errors.*;
 public class PSObjectMatrix extends PSObject {
     double[] matrix = new double[6];
     
+    // Keep track of rotation (for easy reference, instead of deriving it
+    // from the matrix.
+    double rotation = 0;
+    
     /**
      * Creates a new instance of PSObjectMatrix. See PostScript manual
      * under "4.3 Coordinate Systems and Transformation" for more info.
@@ -183,6 +187,16 @@ public class PSObjectMatrix extends PSObject {
         double xScale = Math.sqrt(Math.pow(matrix[0], 2) + Math.pow(matrix[2], 2));
         double yScale = Math.sqrt(Math.pow(matrix[1], 2) + Math.pow(matrix[3], 2));
         return 0.5 * (xScale + yScale);
+    }
+    
+    /**
+     * Determines the rotation for this transformation matrix
+     * @return Rotation in degrees
+     */
+    public double getRotation() {
+        double anglex = Math.atan2(-matrix[2], matrix[0]);
+        double angley = Math.atan2(-matrix[1], -matrix[3]);
+        return 0.5 * (anglex + angley) / Math.PI * 180;
     }
     
     /**

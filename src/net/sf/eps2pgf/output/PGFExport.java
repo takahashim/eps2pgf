@@ -44,6 +44,9 @@ public class PGFExport implements Exporter {
     static final DecimalFormat lengthFormat = new DecimalFormat("#.###", 
             new DecimalFormatSymbols(Locale.US));
     
+    // Font size format (used to set fontsize in pt)
+    static final DecimalFormat fontSizeFormat = new DecimalFormat("#.##",
+            new DecimalFormatSymbols(Locale.US));
     
     int scopeDepth = 0;
     
@@ -240,10 +243,20 @@ public class PGFExport implements Exporter {
     /**
      * Draws text
      */
-    public void show(String text, double[] position, double angle) throws IOException {
+    public void show(String text, double[] position, double angle,
+            double fontsize) throws IOException {
         String x = coorFormat.format(position[0]);
         String y = coorFormat.format(position[1]);
-        out.write("\\pgftext[bottom,left,x="+x+"cm,y="+y+"cm]{" + text + "}\n");
+        
+        // The angle definition in PostScript is just the other way around
+        // as is pgf.
+        String angStr = lengthFormat.format(-angle);
+        
+        text = "{\\fontsize{" + fontSizeFormat.format(fontsize) + "}{" 
+                + fontSizeFormat.format(1.2*fontsize) + "}\\selectfont" + text + "}";
+        out.write(String.format("\\pgftext[base,left,x=%scm,y=%scm,rotate=%s]{%s}\n",
+                x, y, angStr, text));
+        //out.write("\\pgftext[bottom,left,x="+x+"cm,y="+y+"cm]{" + text + "}\n");
     }
 
 }
