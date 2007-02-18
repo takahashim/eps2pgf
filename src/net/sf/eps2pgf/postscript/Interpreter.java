@@ -671,8 +671,18 @@ public class Interpreter {
     }    
     
     /** PostScript op: restore */
-    public void op_restore() throws PSError {
-        throw new PSErrorUnimplemented("operator: restore");
+    public void op_restore() throws PSErrorTypeCheck, PSErrorStackUnderflow {
+        PSObject obj = opStack.pop();
+        
+        // Check whether the popped object is a save object (see op_save())
+        if (!(obj instanceof PSObjectName)) {
+            throw new PSErrorTypeCheck();
+        }
+        if (!((PSObjectName)obj).name.equals("-save- (dummy)")) {
+            throw new PSErrorTypeCheck();
+        }
+        
+        log.info("restore operator ignored. This might have an effect on the result.");
     }    
     
     /** PostScript op: rmoveto */
@@ -840,6 +850,11 @@ public class Interpreter {
         
         double[] pos = gstate.current.getCurrentPosInDeviceSpace();
         exp.show(text, pos, 0);
+    }
+    
+    /** PostScript op: showpage */
+    public void op_showpage() {
+        // This operator has no meaning in eps2pgf
     }
    
     /** PostScript op: StandardEncoding */
