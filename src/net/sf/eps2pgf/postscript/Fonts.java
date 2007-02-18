@@ -314,7 +314,7 @@ public class Fonts {
 
         stdCharStrings.setKey("m", "m");
         stdCharStrings.setKey("macron", "{\\textasciimacron}");
-        stdCharStrings.setKey("minus", "-");
+        stdCharStrings.setKey("minus", "{\\textminus}");
 
         stdCharStrings.setKey("n", "n");
         stdCharStrings.setKey("nine", "9");
@@ -445,7 +445,7 @@ public class Fonts {
         symbolCharStrings.setKey("existential", "{\\exists}");
         symbolCharStrings.setKey("greater", ">");
         symbolCharStrings.setKey("less", "<");
-        symbolCharStrings.setKey("minus", "-");
+        symbolCharStrings.setKey("minus", "{\\textminus}");
         symbolCharStrings.setKey("numbersign", "{\\#}");
         symbolCharStrings.setKey("parenleft", "(");
         symbolCharStrings.setKey("parenright", ")");

@@ -105,5 +105,6 @@ public interface Exporter {
     /**
      * Draws text
      */
-    public void show(String text, double[] position, double angle)  throws IOException;
+    public void show(String text, double[] position, double angle,
+            double fontsize)  throws IOException;
 }

@@ -846,10 +846,16 @@ public class Interpreter {
         PSObjectDict currentFont = gstate.current.font;
         PSObjectArray encoding = (PSObjectArray)currentFont.lookup("Encoding");
         PSObjectArray charNames = string.decode(encoding);
+        PSObjectMatrix fontMatrix = currentFont.lookup("FontMatrix").toMatrix();
         String text = fonts.charNames2Latex(charNames, currentFont);
+        double angle = gstate.current.CTM.getRotation();
+        
+        // Calculate fontsize in LaTeX points (=1/72.27 inch)
+        double fontsize = fontMatrix.getMeanScaling() * gstate.current.CTM.getMeanScaling();
+        fontsize = fontsize / 2.54 * 72.27;
         
         double[] pos = gstate.current.getCurrentPosInDeviceSpace();
-        exp.show(text, pos, 0);
+        exp.show(text, pos, angle, fontsize);
     }
     
     /** PostScript op: showpage */
