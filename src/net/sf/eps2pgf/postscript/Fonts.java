@@ -220,6 +220,7 @@ public class Fonts {
      * Initializes the stdCharStrings dictionary.
      * The keys are the character names, the values are corresponding LaTeX code
      * See PostScript manual for info on CharStrings
+     * Some symbols require the LaTeX package textcomp
      */
     private void initStdCharStrings() {
         stdCharStrings.setKey(".notdef", "");
@@ -256,6 +257,7 @@ public class Fonts {
         stdCharStrings.setKey("Z", "Z");
         
         stdCharStrings.setKey("a", "a");
+        stdCharStrings.setKey("acute", "{\\textasciiacute}");
         stdCharStrings.setKey("ampersand", "{\\&}");
         stdCharStrings.setKey("asciicircum", "{\\textasciicircum}");
         stdCharStrings.setKey("asciitilde", "{\\textasciitilde}");
@@ -264,32 +266,42 @@ public class Fonts {
 
         stdCharStrings.setKey("b", "b");
         stdCharStrings.setKey("backslash", "\\ensuremath{\\backslash}");
-        stdCharStrings.setKey("bar", "|");
+        stdCharStrings.setKey("bar", "{\\textbar}");
         stdCharStrings.setKey("braceleft", "{\\{}");
         stdCharStrings.setKey("braceright", "{\\}}");
         stdCharStrings.setKey("bracketleft", "[");
         stdCharStrings.setKey("bracketright", "]");
+        stdCharStrings.setKey("breve", "{\\textasciibreve}");
 
         stdCharStrings.setKey("c", "c");
+        stdCharStrings.setKey("caron", "{\\textasciicaron}");
+        stdCharStrings.setKey("cedilla", "\\c{}");
+        stdCharStrings.setKey("circumflex", "{\\textasciicircum}");
         stdCharStrings.setKey("colon", ":");
         stdCharStrings.setKey("comma", ",");
 
         stdCharStrings.setKey("d", "d");
+        stdCharStrings.setKey("dieresis", "{\\textasciidieresis}");
         stdCharStrings.setKey("dollar", "{\\$}");
+        stdCharStrings.setKey("dotaccent", "$\\dot{}$");
+        stdCharStrings.setKey("dotlessi", "{\\i}");
 
         stdCharStrings.setKey("e", "e");
         stdCharStrings.setKey("eight", "8");
         stdCharStrings.setKey("equal", "=");
         stdCharStrings.setKey("exclam", "!");
+        stdCharStrings.setKey("exclamdown", "{\\textexclamdown}");
 
         stdCharStrings.setKey("f", "f");
         stdCharStrings.setKey("five", "5");
         stdCharStrings.setKey("four", "4");
 
         stdCharStrings.setKey("g", "g");
+        stdCharStrings.setKey("grave", "{\\textasciigrave}");
         stdCharStrings.setKey("greater", ">");
 
         stdCharStrings.setKey("h", "h");
+        stdCharStrings.setKey("hungarumlaut", "\\H{}");
 
         stdCharStrings.setKey("i", "i");
 
@@ -301,6 +313,7 @@ public class Fonts {
         stdCharStrings.setKey("less", "<");
 
         stdCharStrings.setKey("m", "m");
+        stdCharStrings.setKey("macron", "{\\textasciimacron}");
         stdCharStrings.setKey("minus", "-");
 
         stdCharStrings.setKey("n", "n");
@@ -308,6 +321,7 @@ public class Fonts {
         stdCharStrings.setKey("numbersign", "{\\#}");
 
         stdCharStrings.setKey("o", "o");
+        stdCharStrings.setKey("ogonek", "\\k{}");
         stdCharStrings.setKey("one", "1");
 
         stdCharStrings.setKey("p", "p");
@@ -323,6 +337,7 @@ public class Fonts {
         stdCharStrings.setKey("quoteright", "'");
 
         stdCharStrings.setKey("r", "r");
+        stdCharStrings.setKey("ring", "$\\mathring{}$");
 
         stdCharStrings.setKey("s", "s");
         stdCharStrings.setKey("semicolon", ";");
