@@ -21,6 +21,8 @@
 
 package net.sf.eps2pgf.postscript;
 
+import java.util.logging.*;
+
 /**
  * Structure that holds the graphics state (graphic control parameter).
  * See PostScript manual table 4.1, p. 179 for more info.
@@ -28,6 +30,8 @@ package net.sf.eps2pgf.postscript;
  * @author Paul Wagenaars
  */
 public class GraphicsState implements Cloneable {
+    Logger log = Logger.getLogger("global");
+    
     /**
      * Current Transformation Matrix (CTM). All coordinates will be transformed by
      * this matrix.
@@ -118,8 +122,7 @@ public class GraphicsState implements Cloneable {
      */
     public void clip() {
         if (clippingPath.sections.size() > 0) {
-            System.out.println("WARNING: clip operator is not fully implemented. " +
-                    "This might have an effect on the result.");
+            log.info("Clip operator is not fully implemented. This might have an effect on the result.");
         }
         clippingPath = path.clone();
     }
