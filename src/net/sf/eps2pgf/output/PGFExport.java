@@ -223,6 +223,7 @@ public class PGFExport implements Exporter {
         g = Math.max(Math.min(g, 1.0), 0.0);
         b = Math.max(Math.min(b, 1.0), 0.0);
         out.write("\\definecolor{eps2pgf_color}{rgb}{" + r + "," + g + "," + b + "}");
+        out.write("\\pgfsetstrokecolor{eps2pgf_color}");
         out.write("\\pgfsetfillcolor{eps2pgf_color}\n");
     }
 
@@ -232,6 +233,7 @@ public class PGFExport implements Exporter {
     public void setColor(double level) throws IOException {
         level = Math.max(Math.min(level, 1.0), 0.0);
         out.write("\\definecolor{eps2pgf_color}{gray}{" + level + "}");
+        out.write("\\pgfsetstrokecolor{eps2pgf_color}");
         out.write("\\pgfsetfillcolor{eps2pgf_color}\n");        
     }
     
