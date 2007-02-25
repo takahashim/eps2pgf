@@ -1,5 +1,5 @@
 /*
- * PSErrorInvalidFont.java
+ * ProgramError.java
  *
  * This file is part of Eps2pgf.
  *
@@ -19,16 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-package net.sf.eps2pgf.postscript.errors;
+package net.sf.eps2pgf;
 
 /**
  *
  * @author Paul Wagenaars
  */
-public class PSErrorInvalidFont extends PSError {
+public class ProgramError extends Exception {
     
-    /** Creates a new instance of PSErrorInvalidFont */
-    public PSErrorInvalidFont() {
+    /** Creates a new instance of ProgramError */
+    public ProgramError(String msg) {
+        super(msg);
     }
     
 }

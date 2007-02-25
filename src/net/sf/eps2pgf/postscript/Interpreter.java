@@ -25,6 +25,7 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
+import net.sf.eps2pgf.*;
 import net.sf.eps2pgf.collections.ArrayStack;
 import net.sf.eps2pgf.output.*;
 import net.sf.eps2pgf.postscript.errors.*;
@@ -55,7 +56,7 @@ public class Interpreter {
     Logger log = Logger.getLogger("global");
     
     /** Creates a new instance of Interpreter */
-    public Interpreter(LinkedList<PSObject> in, Writer out) throws PSError {
+    public Interpreter(LinkedList<PSObject> in, Writer out) throws FileNotFoundException {
         execStack.addObjectList(in);
         
         // Initialize character encodings
@@ -265,9 +266,9 @@ public class Interpreter {
     
     /** PostScript op: definefont */
     public void op_definefont() throws PSError {
-        PSObjectDict dict = opStack.pop().toDict();
+        PSObjectFont font = opStack.pop().toFont();
         PSObject key = opStack.pop();
-        opStack.push( fonts.defineFont(key, dict) );
+        opStack.push( fonts.defineFont(key, font) );
     }
     
     /** PostScript op: dict */
@@ -295,7 +296,7 @@ public class Interpreter {
     
     /** PostScript op: eofill */
     public void op_eofill() throws PSError, IOException {
-        exp.fill(gstate.current.path);
+        exp.eofill(gstate.current.path);
         op_newpath();
     }
     
@@ -334,7 +335,7 @@ public class Interpreter {
     }
     
     /** PostScript op: findfont */
-    public void op_findfont() throws PSError {
+    public void op_findfont() throws PSError, ProgramError {
         PSObject key = opStack.pop();
         opStack.push(fonts.findFont(key));
     }
@@ -343,8 +344,8 @@ public class Interpreter {
     public void op_forall() throws Exception {
         PSObjectProc proc = opStack.pop().toProc();
         PSObject obj = opStack.pop();
-        if (obj instanceof PSObjectDict) {
-            PSObjectDict dict = (PSObjectDict)obj;
+        if ((obj instanceof PSObjectDict) || (obj instanceof PSObjectFont)) {
+            PSObjectDict dict = obj.toDict();
             Set<PSObject> keys = dict.keySet();
             Iterator<PSObject> iter = keys.iterator();
             while (iter.hasNext()) {
@@ -363,8 +364,8 @@ public class Interpreter {
     public void op_get() throws PSError {
         PSObject indexKey = opStack.pop();
         PSObject obj = opStack.pop();
-        if (obj instanceof PSObjectDict) {
-            PSObjectDict dict = (PSObjectDict)obj;
+        if ((obj instanceof PSObjectDict) || (obj instanceof PSObjectFont)) {
+            PSObjectDict dict = obj.toDict();
             opStack.push(dict.lookup(indexKey.toDictKey()));
         } else {
             throw new PSErrorUnimplemented("operator: get not FULLY implemented.");
@@ -454,8 +455,8 @@ public class Interpreter {
     /** PostScript op: length */
     public void op_length() throws PSError {
         PSObject obj = opStack.pop();
-        if (obj instanceof PSObjectDict) {
-            PSObjectDict dict = (PSObjectDict)obj;
+        if ((obj instanceof PSObjectDict) || (obj instanceof PSObjectFont)) {
+            PSObjectDict dict = obj.toDict();
             opStack.push(new PSObjectInt(dict.length()));
         } else {
             throw new PSErrorUnimplemented("operator: length not FULLY implemented");

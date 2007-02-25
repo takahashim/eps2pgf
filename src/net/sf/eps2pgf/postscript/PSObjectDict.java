@@ -61,7 +61,7 @@ public class PSObjectDict extends PSObject {
      * @param preStr String that will be prepended to each line written to output.
      * @throws net.sf.eps2pgf.postscript.errors.PSError There was an error reading from this dictionary.
      */
-    public void dumpFull(String preStr) throws PSErrorRangeCheck {
+    public void dumpFull(String preStr) {
         Set<String> keys = map.keySet();
         for (String key: keys) {
             System.out.println(preStr + key + " -> " + map.get(key).isis());
@@ -188,6 +188,13 @@ public class PSObjectDict extends PSObject {
      */
     public PSObjectDict toDict() {
         return this;
+    }
+    
+    /**
+     * Convert this object to a font.
+     */
+    public PSObjectFont toFont() throws PSErrorTypeCheck {
+        return new PSObjectFont(this);
     }
     
     /**

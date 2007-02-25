@@ -79,6 +79,15 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * Convert this object to a name object, if possible.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object to a name
+     * @return Name representation of this object
+     */
+    public PSObjectName toName() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Convert this object to a non-negative integer, if possible
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Integer is negative
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object to an integer
@@ -90,15 +99,6 @@ public class PSObject implements Cloneable {
             throw new PSErrorRangeCheck();
         }
         return n;
-    }
-    
-    /**
-     * Convert this object to a real number, if possible.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unbale to convert this object to a real number
-     * @return Floating-point number representation of this object
-     */
-    public double toReal() throws PSErrorTypeCheck {
-        throw new PSErrorTypeCheck();
     }
     
     /**
@@ -116,6 +116,24 @@ public class PSObject implements Cloneable {
      * @return Boolean representation of this object
      */
     public boolean toBool() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Convert this object to a dictionary, if possible.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a dictionary
+     * @return Dictionary representation of this object.
+     */
+    public PSObjectDict toDict() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Convert this object to a font dictionary, if possible.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a dictionary
+     * @return Dictionary representation of this object.
+     */
+    public PSObjectFont toFont() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
@@ -138,15 +156,6 @@ public class PSObject implements Cloneable {
     }
     
     /**
-     * Convert this object to a dictionary, if possible.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a dictionary
-     * @return Dictionary representation of this object.
-     */
-    public PSObjectDict toDict() throws PSErrorTypeCheck {
-        throw new PSErrorTypeCheck();
-    }
-    
-    /**
      * Convert this object to a matrix, if possible.
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck This object does not have the correct number of elements. A matrix
      * should have six elements.
@@ -154,6 +163,15 @@ public class PSObject implements Cloneable {
      * @return Matrix representation of this object
      */
     public PSObjectMatrix toMatrix() throws PSErrorRangeCheck, PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Convert this object to a real number, if possible.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unbale to convert this object to a real number
+     * @return Floating-point number representation of this object
+     */
+    public double toReal() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
