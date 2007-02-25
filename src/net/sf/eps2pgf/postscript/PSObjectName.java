@@ -96,6 +96,14 @@ public class PSObjectName extends PSObject {
         return name;
     }
     
+    /**
+     * Return this object
+     * @return This object
+     */
+    public PSObjectName toName() {
+        return this;
+    }
+    
     /** Test whether an object is equal to this object. */
     public boolean equals(Object obj) {
         // First check whether the type is the same

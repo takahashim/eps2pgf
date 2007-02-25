@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Standard charstrings</comment>
+
+<entry key=".notdef"></entry>
+<entry key="A">A</entry>
+<entry key="AE">{\AE}</entry>
+<entry key="Aacute">\&apos;A</entry>
+<entry key="Acircumflex">\^A</entry>
+<entry key="Adieresis">\&quot;A</entry>
+<entry key="Agrave">\`A</entry>
+<entry key="B">B</entry>
+<entry key="C">C</entry>
+<entry key="D">D</entry>
+<entry key="E">E</entry>
+<entry key="F">F</entry>
+<entry key="G">G</entry>
+<entry key="H">H</entry>
+<entry key="I">I</entry>
+<entry key="J">J</entry>
+<entry key="K">K</entry>
+<entry key="L">L</entry>
+<entry key="M">M</entry>
+<entry key="N">N</entry>
+<entry key="O">O</entry>
+<entry key="P">P</entry>
+<entry key="Q">Q</entry>
+<entry key="R">R</entry>
+<entry key="S">S</entry>
+<entry key="T">T</entry>
+<entry key="U">U</entry>
+<entry key="V">V</entry>
+<entry key="W">W</entry>
+<entry key="X">X</entry>
+<entry key="Y">Y</entry>
+<entry key="Z">Z</entry>
+        
+<entry key="a">a</entry>
+<entry key="acute">{\textasciiacute}</entry>
+<entry key="ampersand">{\&amp;}</entry>
+<entry key="asciicircum">{\textasciicircum}</entry>
+<entry key="asciitilde">{\textasciitilde}</entry>
+<entry key="asterisk">*</entry>
+<entry key="at">@</entry>
+
+<entry key="b">b</entry>
+<entry key="backslash">\ensuremath{\backslash}</entry>
+<entry key="bar">{\textbar}</entry>
+<entry key="braceleft">{\{}</entry>
+<entry key="braceright">{\}}</entry>
+<entry key="bracketleft">[</entry>
+<entry key="bracketright">]</entry>
+<entry key="breve">{\textasciibreve}</entry>
+
+<entry key="c">c</entry>
+<entry key="caron">{\textasciicaron}</entry>
+<entry key="cedilla">\c{}</entry>
+<entry key="circumflex">{\textasciicircum}</entry>
+<entry key="colon">:</entry>
+<entry key="comma">,</entry>
+
+<entry key="d">d</entry>
+<entry key="dieresis">{\textasciidieresis}</entry>
+<entry key="dollar">{\$}</entry>
+<entry key="dotaccent">$\dot{}$</entry>
+<entry key="dotlessi">{\i}</entry>
+
+<entry key="e">e</entry>
+<entry key="eight">8</entry>
+<entry key="equal">=</entry>
+<entry key="exclam">!</entry>
+<entry key="exclamdown">{\textexclamdown}</entry>
+
+<entry key="f">f</entry>
+<entry key="five">5</entry>
+<entry key="four">4</entry>
+
+<entry key="g">&gt;</entry>
+<entry key="grave">{\textasciigrave}</entry>
+<entry key="greater">></entry>
+
+<entry key="h">h</entry>
+<entry key="hungarumlaut">\H{}</entry>
+
+<entry key="i">i</entry>
+
+<entry key="j">j</entry>
+
+<entry key="k">k</entry>
+
+<entry key="l">l</entry>
+<entry key="less">&lt;</entry>
+
+<entry key="m">m</entry>
+<entry key="macron">{\textasciimacron}</entry>
+<entry key="minus">{\textminus}</entry>
+
+<entry key="n">n</entry>
+<entry key="nine">9</entry>
+<entry key="numbersign">{\#}</entry>
+
+<entry key="o">o</entry>
+<entry key="ogonek">\k{}</entry>
+<entry key="one">1</entry>
+
+<entry key="p">p</entry>
+<entry key="parenleft">(</entry>
+<entry key="parenright">)</entry>
+<entry key="percent">{\%}</entry>
+<entry key="period">.</entry>
+<entry key="plus">+</entry>
+
+<entry key="q">q</entry>
+<entry key="quotedbl">\"</entry>
+<entry key="quoteleft">`</entry>
+<entry key="quoteright">'</entry>
+
+<entry key="r">r</entry>
+<entry key="ring">$\mathring{}$</entry>
+
+<entry key="s">s</entry>
+<entry key="semicolon">;</entry>
+<entry key="seven">7</entry>
+<entry key="six">6</entry>
+<entry key="slash">/</entry>
+<entry key="space"> </entry>
+
+<entry key="t">t</entry>
+<entry key="three">3</entry>
+<entry key="tilde">{\textasciitilde}</entry>
+<entry key="two">2</entry>
+
+<entry key="u">u</entry>
+<entry key="underscore">{\_}</entry>
+
+<entry key="v">v</entry>
+
+<entry key="x">x</entry>
+
+<entry key="y">y</entry>
+
+<entry key="z">z</entry>
+<entry key="zero">0</entry>
+
+</properties>

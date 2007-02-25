@@ -127,12 +127,21 @@ public class PGFExport implements Exporter {
     }
     
     /**
-     * Fills a path
+     * Fills a path using the non-zero rule
      * See the PostScript manual (fill operator) for more info.
      */
     public void fill(Path path) throws IOException, PSErrorUnimplemented {
         writePath(path);
         out.write("\\pgfusepath{fill}\n");
+    }
+        
+    /**
+     * Fills a path using the even-odd rule
+     * See the PostScript manual (eofill operator) for more info.
+     */
+    public void eofill(Path path) throws IOException, PSErrorUnimplemented {
+        writePath(path);
+        out.write("\\pgfseteorule\\pgfusepath{fill}\\pgfsetnonzerorule\n");
     }
     
     /**
@@ -256,7 +265,10 @@ public class PGFExport implements Exporter {
                 + fontSizeFormat.format(1.2*fontsize) + "}\\selectfont" + text + "}";
         out.write(String.format("\\pgftext[base,left,x=%scm,y=%scm,rotate=%s]{%s}\n",
                 x, y, angStr, text));
-        //out.write("\\pgftext[bottom,left,x="+x+"cm,y="+y+"cm]{" + text + "}\n");
+        
+        out.write(String.format("\\pgfpathrectangle{\\pgfpoint{%scm}{%scm}}{\\pgfpoint{%gcm}{%gcm}}\n", 
+                x, y, 8*0.6*fontsize/72*2.54, fontsize/72*2.54));
+        out.write("\\pgfusepath{stroke}\n");
     }
 
 }

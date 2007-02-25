@@ -51,10 +51,16 @@ public interface Exporter {
     public void clip(Path clipPath) throws IOException, PSErrorUnimplemented;
     
     /**
-     * Fills a path
+     * Fills a path using the non-zero rule
      * See the PostScript manual (fill operator) for more info.
      */
     public void fill(Path path) throws IOException, PSErrorUnimplemented;
+
+    /**
+     * Fills a path using the even-odd rule
+     * See the PostScript manual (fill operator) for more info.
+     */
+    public void eofill(Path path) throws IOException, PSErrorUnimplemented;
 
     /**
      * Implements PostScript stroke operator

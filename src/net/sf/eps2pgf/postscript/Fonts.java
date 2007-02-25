@@ -21,68 +21,122 @@
 
 package net.sf.eps2pgf.postscript;
 
+import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
+import net.sf.eps2pgf.*;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
- * Represents the link between fonts and LaTeX code. It describes how text with
- * a certain font is converted to LaTeX code.
+ * Manages font resources
  * @author Paul Wagenaars
  */
 public class Fonts {
-    private ArrayList<PSObjectDict> fonts = new ArrayList<PSObjectDict>();
-    private int nextFID = 0;
-    private PSObjectDict stdCharStrings = new PSObjectDict();
-    private PSObjectDict symbolCharStrings = new PSObjectDict();
+    private Map<String, PSObjectFont> fonts = new HashMap<String, PSObjectFont>();
+    String defaultFont = "Times-Roman";
+    
+    File resourceDir;
     
     Logger log = Logger.getLogger("global");
     
     /**
      * Create a new Fonts instance
      */
-    public Fonts() {
-        initSymbolCharStrings();
-        initStdCharStrings();
-        initBaseFontDicts();
+    public Fonts() throws FileNotFoundException {
+        // Try to find the resource dir
+        File classPath = new File(System.getProperty("java.class.path"));
+        if (!(classPath.isAbsolute())) {
+            classPath = new File(System.getProperty("user.dir"), 
+                    System.getProperty("java.class.path"));
+        }
+        while (classPath != null) {
+            // Check whether this dir has a valid resource subdir
+            // It just checks for a "resources" directory with two known subdirectories
+            resourceDir = new File(classPath, "resources");
+            if (resourceDir.exists()) {
+            File afmDir = new File(resourceDir, "afm");
+                if (afmDir.exists()) {
+                    File fontDescDir = new File(resourceDir, "fontdescriptions");
+                    if (fontDescDir.exists()) {
+                        break;
+                    }
+                }
+            }
+            resourceDir = null;
+            classPath = classPath.getParentFile();
+        }
+        if (resourceDir == null) {
+            throw new FileNotFoundException("Unable to find resource dir.");
+        }
     }
     
     /**
      * Search a font and return it's corresponding font dictionary.
      */
-    public PSObjectDict findFont(PSObject fontNameObj) throws PSErrorTypeCheck {
+    public PSObjectFont findFont(PSObject fontNameObj) throws PSErrorTypeCheck, 
+            PSErrorInvalidFont, ProgramError {
         String fontName = fontNameObj.toDictKey();
-        return this.findFont(fontName);
+        return findFont(fontName);
     }
     
     /**
      * Search a font and return it's corresponding font dictionary.
+     * @param fontName Name of the font
+     * @return Font (dictionary) of the requested font
+     * @throws ProgramError Unable to load the requested font and the default font
      */
-    public PSObjectDict findFont(String fontName) throws PSErrorTypeCheck {
-        for (int i = (fonts.size()-1) ; i >= 0 ; i--) {
-            PSObjectDict dict = fonts.get(i);
-            PSObject value = dict.lookup("FontName");
-            if (fontName.equals(value.toDictKey())) {
-                return dict;
+    public PSObjectFont findFont(String fontName) throws ProgramError {
+        // First we search whether this font has already been loaded
+        if (fonts.containsKey(fontName)) {
+            return fonts.get(fontName);
+        }
+        
+        // Appartly the font hasn't already been loaded.
+        try {
+            return loadFont(fontName);
+        } catch (PSErrorInvalidFont e) {
+            if (fontName.equals(defaultFont)) {
+                throw new ProgramError("Unable to load " + defaultFont + " font.");
+            } else {
+                log.info("Unable to find this font. Substituting font "
+                        + defaultFont + " for " + fontName + ".");
+                return findFont(defaultFont);
             }
         }
-        log.warning("Unable to find font "+fontName+". Substituting font Courier for "+fontName+".");
-        return this.findFont("Courier");
     }
     
     /**
-     * Define a new font
+     * Load a font from the resource directory.
+     * @param fontName Name of the font
+     * @return Font dictionary of the loaded font
      */
-    public PSObjectDict defineFont(PSObject key, PSObjectDict font) throws PSErrorUnimplemented {
-        if (font.containsKey("FID")) {
+    public PSObjectFont loadFont(String fontName) throws PSErrorInvalidFont {
+        log.info("Loading " + fontName + " font from " + resourceDir);
+        PSObjectFont font = new PSObjectFont(resourceDir, fontName);
+        
+        // Now the font is loaded, add it to the fonts list so that it
+        // doesn't need to loaded again.
+        fonts.put(fontName, font);
+        
+        return font;
+    }
+    
+    /**
+     * Define a new font and associate it with a key.
+     * @return Defined font
+     * @param key Key to associate the font with
+     * @param font Font to define
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Part of this method is not implemented
+     * @throws PSErrorTypeCheck Unable to use the key as dictionary key
+     */
+    public PSObjectFont defineFont(PSObject key, PSObjectFont font) 
+            throws PSErrorTypeCheck, PSErrorUnimplemented {
+        if (font.getFID() >= 0) {
             throw new PSErrorUnimplemented("Associating a font with more than one key.");
         } else {
-            font.setKey("FID", new PSObjectInt(nextFID++));
-            if (!key.equals(font.lookup("FontName"))) {
-                throw new PSErrorUnimplemented("Defining a font when key and FontName are different.");
-            }
-            fonts.add(font);
+            font.setFID();
+            fonts.put(key.toDictKey(), font);
         }
         return font;
     }
@@ -91,7 +145,7 @@ public class Fonts {
      * Convert an array of character names to LaTeX code
      */
     public String charNames2Latex(PSObjectArray charNames, PSObjectDict font) 
-    throws PSErrorRangeCheck, PSErrorTypeCheck, PSErrorUnimplemented {
+            throws PSErrorRangeCheck, PSErrorTypeCheck, PSErrorUnimplemented {
         StringBuilder str = new StringBuilder(charNames.size());
         PSObjectDict charStrings = (PSObjectDict)font.lookup("CharStrings");
         PSObjectString preCode = (PSObjectString)font.lookup("LatexPreCode");
@@ -110,355 +164,5 @@ public class Fonts {
         
         return str.toString();
     }
-    
-    private void initBaseFontDicts() {
-        String fontNames[] = new String[13];
-        String latexPreCode[] = new String[fontNames.length];
-        String latexPostCode[] = new String[fontNames.length];
-        ArrayList<PSObjectName[]> encoding = new ArrayList<PSObjectName[]>();
-        PSObjectDict charStrings[] = new PSObjectDict[fontNames.length];
-        
-        fontNames[0] = "/Times-Roman";
-        latexPreCode[0] = "\\textrm{";
-        latexPostCode[0] = "}";
-        encoding.add(0, Encoding.getStandardVector());
-        charStrings[0] = stdCharStrings;
-        
-        fontNames[1] = "/Times-Italic";
-        latexPreCode[1] = "\\textrm{\\textit{";
-        latexPostCode[1] = "}}";
-        encoding.add(1, Encoding.getStandardVector());
-        charStrings[1] = stdCharStrings;
-        
-        fontNames[2] = "/Times-Bold";
-        latexPreCode[2] = "\\textrm{\\textbf{";
-        latexPostCode[2] = "}}";
-        encoding.add(2, Encoding.getStandardVector());
-        charStrings[2] = stdCharStrings;
-        
-        fontNames[3] = "/Times-BoldItalic";
-        latexPreCode[3] = "\\textrm{\\textbf{\\textit{";
-        latexPostCode[3] = "}}}";
-        encoding.add(3, Encoding.getStandardVector());
-        charStrings[3] = stdCharStrings;
-        
-        fontNames[4] = "/Helvetica";
-        latexPreCode[4] = "\\textsf{";
-        latexPostCode[4] = "}";
-        encoding.add(4, Encoding.getStandardVector());
-        charStrings[4] = stdCharStrings;
-        
-        fontNames[5] = "/Helvetica-Oblique";
-        latexPreCode[5] = "\\textsf{\\textsl{";
-        latexPostCode[5] = "}}";
-        encoding.add(5, Encoding.getStandardVector());
-        charStrings[5] = stdCharStrings;
-        
-        fontNames[6] = "/Helvetica-Bold";
-        latexPreCode[6] = "\\textsf{\\textbf{";
-        latexPostCode[6] = "}}";
-        encoding.add(6, Encoding.getStandardVector());
-        charStrings[6] = stdCharStrings;
-        
-        fontNames[7] = "/Helvetica-BoldOblique";
-        latexPreCode[7] = "\\textsf{\\textbf{\\textsl{";
-        latexPostCode[7] = "}}}";
-        encoding.add(7, Encoding.getStandardVector());
-        charStrings[7] = stdCharStrings;
-        
-        fontNames[8] = "/Courier";
-        latexPreCode[8] = "\\texttt{";
-        latexPostCode[8] = "}";
-        encoding.add(8, Encoding.getStandardVector());
-        charStrings[8] = stdCharStrings;
-        
-        fontNames[9] = "/Courier-Oblique";
-        latexPreCode[9] = "\\texttt{\\textsl{";
-        latexPostCode[9] = "}}";
-        encoding.add(9, Encoding.getStandardVector());
-        charStrings[9] = stdCharStrings;
-        
-        fontNames[10] = "/Courier-Bold";
-        latexPreCode[10] = "\\texttt{\\textbf{";
-        latexPostCode[10] = "}}";
-        encoding.add(10, Encoding.getStandardVector());
-        charStrings[10] = stdCharStrings;
-        
-        fontNames[11] = "/Courier-BoldOblique";
-        latexPreCode[11] = "\\texttt{\\textbf{\\textsl{";
-        latexPostCode[11] = "}}}";
-        encoding.add(11, Encoding.getStandardVector());
-        charStrings[11] = stdCharStrings;
-        
-        fontNames[12] = "/Symbol";
-        latexPreCode[12] = "$";
-        latexPostCode[12] = "$";
-        encoding.add(12, Encoding.getSymbolVector());
-        charStrings[12] = symbolCharStrings;
-        
-        // Create font dictionaries for all 13 base postscript fonts
-        // See PostScript manual under "5.2 Font Dictionaries"
-        double[] fontBbox = {0, 0, 1, 1};
-        for (int i = 0 ; i < fontNames.length ; i++) {
-            PSObjectDict dict = new PSObjectDict();
-            dict.setKey("FontType", new PSObjectInt(1));
-            dict.setKey("FontMatrix", new PSObjectMatrix(1,0,0,1,0,0));
-            dict.setKey("FontName", new PSObjectName(fontNames[i]));
-            dict.setKey("FID", new PSObjectInt(nextFID++));
-            dict.setKey("Encoding", new PSObjectArray(encoding.get(i)));
-            dict.setKey("FontBBox", new PSObjectArray(fontBbox));
-            dict.setKey("PaintType", new PSObjectInt(2));
-            dict.setKey("CharStrings", charStrings[i]);
-            dict.setKey("LatexPreCode", latexPreCode[i]);
-            dict.setKey("LatexPostCode", latexPostCode[i]);
-            fonts.add(dict);
-        }
-        
-    }
-    
-    /**
-     * Initializes the stdCharStrings dictionary.
-     * The keys are the character names, the values are corresponding LaTeX code
-     * See PostScript manual for info on CharStrings
-     * Some symbols require the LaTeX package textcomp
-     */
-    private void initStdCharStrings() {
-        stdCharStrings.setKey(".notdef", "");
-        stdCharStrings.setKey("A", "A");
-        stdCharStrings.setKey("AE", "{\\AE}");
-        stdCharStrings.setKey("Aacute", "\\'A");
-        stdCharStrings.setKey("Acircumflex", "\\^A");
-        stdCharStrings.setKey("Adieresis", "\\\"A");
-        stdCharStrings.setKey("Agrave", "\\`A");
-        stdCharStrings.setKey("B", "B");
-        stdCharStrings.setKey("C", "C");
-        stdCharStrings.setKey("D", "D");
-        stdCharStrings.setKey("E", "E");
-        stdCharStrings.setKey("F", "F");
-        stdCharStrings.setKey("G", "G");
-        stdCharStrings.setKey("H", "H");
-        stdCharStrings.setKey("I", "I");
-        stdCharStrings.setKey("J", "J");
-        stdCharStrings.setKey("K", "K");
-        stdCharStrings.setKey("L", "L");
-        stdCharStrings.setKey("M", "M");
-        stdCharStrings.setKey("N", "N");
-        stdCharStrings.setKey("O", "O");
-        stdCharStrings.setKey("P", "P");
-        stdCharStrings.setKey("Q", "Q");
-        stdCharStrings.setKey("R", "R");
-        stdCharStrings.setKey("S", "S");
-        stdCharStrings.setKey("T", "T");
-        stdCharStrings.setKey("U", "U");
-        stdCharStrings.setKey("V", "V");
-        stdCharStrings.setKey("W", "W");
-        stdCharStrings.setKey("X", "X");
-        stdCharStrings.setKey("Y", "Y");
-        stdCharStrings.setKey("Z", "Z");
-        
-        stdCharStrings.setKey("a", "a");
-        stdCharStrings.setKey("acute", "{\\textasciiacute}");
-        stdCharStrings.setKey("ampersand", "{\\&}");
-        stdCharStrings.setKey("asciicircum", "{\\textasciicircum}");
-        stdCharStrings.setKey("asciitilde", "{\\textasciitilde}");
-        stdCharStrings.setKey("asterisk", "*");
-        stdCharStrings.setKey("at", "@");
-
-        stdCharStrings.setKey("b", "b");
-        stdCharStrings.setKey("backslash", "\\ensuremath{\\backslash}");
-        stdCharStrings.setKey("bar", "{\\textbar}");
-        stdCharStrings.setKey("braceleft", "{\\{}");
-        stdCharStrings.setKey("braceright", "{\\}}");
-        stdCharStrings.setKey("bracketleft", "[");
-        stdCharStrings.setKey("bracketright", "]");
-        stdCharStrings.setKey("breve", "{\\textasciibreve}");
-
-        stdCharStrings.setKey("c", "c");
-        stdCharStrings.setKey("caron", "{\\textasciicaron}");
-        stdCharStrings.setKey("cedilla", "\\c{}");
-        stdCharStrings.setKey("circumflex", "{\\textasciicircum}");
-        stdCharStrings.setKey("colon", ":");
-        stdCharStrings.setKey("comma", ",");
-
-        stdCharStrings.setKey("d", "d");
-        stdCharStrings.setKey("dieresis", "{\\textasciidieresis}");
-        stdCharStrings.setKey("dollar", "{\\$}");
-        stdCharStrings.setKey("dotaccent", "$\\dot{}$");
-        stdCharStrings.setKey("dotlessi", "{\\i}");
-
-        stdCharStrings.setKey("e", "e");
-        stdCharStrings.setKey("eight", "8");
-        stdCharStrings.setKey("equal", "=");
-        stdCharStrings.setKey("exclam", "!");
-        stdCharStrings.setKey("exclamdown", "{\\textexclamdown}");
-
-        stdCharStrings.setKey("f", "f");
-        stdCharStrings.setKey("five", "5");
-        stdCharStrings.setKey("four", "4");
-
-        stdCharStrings.setKey("g", "g");
-        stdCharStrings.setKey("grave", "{\\textasciigrave}");
-        stdCharStrings.setKey("greater", ">");
-
-        stdCharStrings.setKey("h", "h");
-        stdCharStrings.setKey("hungarumlaut", "\\H{}");
-
-        stdCharStrings.setKey("i", "i");
-
-        stdCharStrings.setKey("j", "j");
-
-        stdCharStrings.setKey("k", "k");
-
-        stdCharStrings.setKey("l", "l");
-        stdCharStrings.setKey("less", "<");
-
-        stdCharStrings.setKey("m", "m");
-        stdCharStrings.setKey("macron", "{\\textasciimacron}");
-        stdCharStrings.setKey("minus", "{\\textminus}");
-
-        stdCharStrings.setKey("n", "n");
-        stdCharStrings.setKey("nine", "9");
-        stdCharStrings.setKey("numbersign", "{\\#}");
-
-        stdCharStrings.setKey("o", "o");
-        stdCharStrings.setKey("ogonek", "\\k{}");
-        stdCharStrings.setKey("one", "1");
-
-        stdCharStrings.setKey("p", "p");
-        stdCharStrings.setKey("parenleft", "(");
-        stdCharStrings.setKey("parenright", ")");
-        stdCharStrings.setKey("percent", "{\\%}");
-        stdCharStrings.setKey("period", ".");
-        stdCharStrings.setKey("plus", "+");
-
-        stdCharStrings.setKey("q", "q");
-        stdCharStrings.setKey("quotedbl", "\"");
-        stdCharStrings.setKey("quoteleft", "`");
-        stdCharStrings.setKey("quoteright", "'");
-
-        stdCharStrings.setKey("r", "r");
-        stdCharStrings.setKey("ring", "$\\mathring{}$");
-
-        stdCharStrings.setKey("s", "s");
-        stdCharStrings.setKey("semicolon", ";");
-        stdCharStrings.setKey("seven", "7");
-        stdCharStrings.setKey("six", "6");
-        stdCharStrings.setKey("slash", "/");
-        stdCharStrings.setKey("space", " ");
-
-        stdCharStrings.setKey("t", "t");
-        stdCharStrings.setKey("three", "3");
-        stdCharStrings.setKey("tilde", "{\\textasciitilde}");
-        stdCharStrings.setKey("two", "2");
-
-        stdCharStrings.setKey("u", "u");
-        stdCharStrings.setKey("underscore", "{\\_}");
-
-        stdCharStrings.setKey("v", "v");
-
-        stdCharStrings.setKey("x", "x");
-
-        stdCharStrings.setKey("y", "y");
-
-        stdCharStrings.setKey("z", "z");
-        stdCharStrings.setKey("zero", "0");
-    }
-    
-
-    /**
-     * Initializes the symbolCharStrings dictionary.
-     * The keys are the character names, the values are corresponding LaTeX code
-     * See PostScript manual for info on CharStrings
-     */
-    private void initSymbolCharStrings() {
-        symbolCharStrings.setKey(".notdef", "");
-        
-        symbolCharStrings.setKey("zero", "0");
-        symbolCharStrings.setKey("one", "1");
-        symbolCharStrings.setKey("two", "2");
-        symbolCharStrings.setKey("three", "3");
-        symbolCharStrings.setKey("four", "4");
-        symbolCharStrings.setKey("five", "5");
-        symbolCharStrings.setKey("six", "6");
-        symbolCharStrings.setKey("seven", "7");
-        symbolCharStrings.setKey("eight", "8");
-        symbolCharStrings.setKey("nine", "9");
-        
-        symbolCharStrings.setKey("alpha", "{\\alpha}");
-        symbolCharStrings.setKey("beta", "{\\beta}");
-        symbolCharStrings.setKey("gamma", "{\\gamma}");
-        symbolCharStrings.setKey("delta", "{\\delta}");
-        symbolCharStrings.setKey("epsilon", "{\\epsilon}");
-        symbolCharStrings.setKey("zeta", "{\\zeta}");
-        symbolCharStrings.setKey("eta", "{\\eta}");
-        symbolCharStrings.setKey("theta", "{\\theta}");
-        symbolCharStrings.setKey("iota", "{\\iota}");
-        symbolCharStrings.setKey("kappa", "{\\kappa}");
-        symbolCharStrings.setKey("lambda", "{\\lambda}");
-        symbolCharStrings.setKey("mu", "{\\mu}");
-        symbolCharStrings.setKey("nu", "{\\nu}");
-        symbolCharStrings.setKey("xi", "{\\xi}");
-        symbolCharStrings.setKey("omicron", "o");
-        symbolCharStrings.setKey("pi", "{\\pi}");
-        symbolCharStrings.setKey("rho", "{\\rho}");
-        symbolCharStrings.setKey("sigma", "{\\sigma}");
-        symbolCharStrings.setKey("tau", "{\\tau}");
-        symbolCharStrings.setKey("upsilon", "{\\upsilon}");
-        symbolCharStrings.setKey("phi", "{\\phi}");
-        symbolCharStrings.setKey("chi", "{\\chi}");
-        symbolCharStrings.setKey("psi", "{\\psi}");
-        symbolCharStrings.setKey("omega", "{\\omega}");
-        
-        symbolCharStrings.setKey("Alpha", "A");
-        symbolCharStrings.setKey("Beta", "B");
-        symbolCharStrings.setKey("Gamma", "{\\Gamma}");
-        symbolCharStrings.setKey("Delta", "{\\Delta}");
-        symbolCharStrings.setKey("Epsilon", "E");
-        symbolCharStrings.setKey("Zeta", "Z");
-        symbolCharStrings.setKey("Eta", "H");
-        symbolCharStrings.setKey("Theta", "{\\Theta}");
-        symbolCharStrings.setKey("Iota", "I");
-        symbolCharStrings.setKey("Kappa", "K");
-        symbolCharStrings.setKey("Lambda", "{\\Lambda}");
-        symbolCharStrings.setKey("Mu", "M");
-        symbolCharStrings.setKey("Nu", "N");
-        symbolCharStrings.setKey("Xi", "{\\Xi}");
-        symbolCharStrings.setKey("Omicron", "O");
-        symbolCharStrings.setKey("Pi", "{\\Pi}");
-        symbolCharStrings.setKey("Rho", "P");
-        symbolCharStrings.setKey("Sigma", "{\\Sigma}");
-        symbolCharStrings.setKey("Tau", "T");
-        symbolCharStrings.setKey("Upsilon", "{\\Upsilon}");
-        symbolCharStrings.setKey("Phi", "{\\Phi}");
-        symbolCharStrings.setKey("Chi", "X");
-        symbolCharStrings.setKey("Psi", "{\\Psi}");
-        symbolCharStrings.setKey("Omega", "{\\Omega}");
-
-        symbolCharStrings.setKey("angle", "{\\angle}");
-        symbolCharStrings.setKey("ampersand", "{\\&}");
-        symbolCharStrings.setKey("asterisk", "*");
-        symbolCharStrings.setKey("colon", ":");
-        symbolCharStrings.setKey("comma", ",");
-        symbolCharStrings.setKey("congruent", "{\\cong}");
-        symbolCharStrings.setKey("equal", "=");
-        symbolCharStrings.setKey("exclam", "!");
-        symbolCharStrings.setKey("existential", "{\\exists}");
-        symbolCharStrings.setKey("greater", ">");
-        symbolCharStrings.setKey("less", "<");
-        symbolCharStrings.setKey("minus", "{\\textminus}");
-        symbolCharStrings.setKey("numbersign", "{\\#}");
-        symbolCharStrings.setKey("parenleft", "(");
-        symbolCharStrings.setKey("parenright", ")");
-        symbolCharStrings.setKey("percent", "{\\%}");
-        symbolCharStrings.setKey("period", ".");
-        symbolCharStrings.setKey("plus", "+");
-        symbolCharStrings.setKey("question", "?");
-        symbolCharStrings.setKey("semicolon", ";");
-        symbolCharStrings.setKey("slash", "/");
-        symbolCharStrings.setKey("suchthat", "{\\ni}");
-        symbolCharStrings.setKey("universal", "{\\forall}");
-        
-
-}
 
 }
