@@ -106,6 +106,14 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * Add an element to the end to this array.
+     * @param value Value of the new element
+     */
+    public void add(PSObject value) {
+        array.add(value);
+    }
+    
+    /**
      * Insert an element at the specified position in this array.
      * @param index Index at which the new element will be inserted.
      * @param value Value of the new element

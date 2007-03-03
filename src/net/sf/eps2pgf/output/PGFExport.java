@@ -265,10 +265,24 @@ public class PGFExport implements Exporter {
                 + fontSizeFormat.format(1.2*fontsize) + "}\\selectfont" + text + "}";
         out.write(String.format("\\pgftext[base,left,x=%scm,y=%scm,rotate=%s]{%s}\n",
                 x, y, angStr, text));
-        
-        out.write(String.format("\\pgfpathrectangle{\\pgfpoint{%scm}{%scm}}{\\pgfpoint{%gcm}{%gcm}}\n", 
-                x, y, 8*0.6*fontsize/72*2.54, fontsize/72*2.54));
-        out.write("\\pgfusepath{stroke}\n");
+    }
+    
+    /**
+     * Draws a red dot (usefull for debugging, don't use otherwise)
+     */
+    public void drawDot(double[] coor) throws IOException {
+        out.write("\\begin{pgfscope}\\pgfsetfillcolor{red}\\pgfpathcircle{\\pgfpoint{"
+                + coor[0] + "cm}{" + coor[1] + "cm}}{0.25pt}\\pgfusepath{fill}\\end{pgfscope}\n");
+    }
+    
+    /**
+     * Draws a blue rectangle (usefull for debugging, don't use otherwise)
+     */
+    public void drawRect(double[] lowerLeft, double[] upperRight) throws IOException {
+        out.write("\\begin{pgfscope}\\pgfsetstrokecolor{blue}\\pgfsetlinewidth{0.1pt}\\pgfpathrectangle{\\pgfpoint{"
+                + lowerLeft[0] + "cm}{" + lowerLeft[1] + "cm}}{\\pgfpoint{"
+                + (upperRight[0]-lowerLeft[0]) +"cm}{" + (upperRight[1]-lowerLeft[1])
+                + "cm}}\\pgfusepath{stroke}\\end{pgfscope}\n");
     }
 
 }

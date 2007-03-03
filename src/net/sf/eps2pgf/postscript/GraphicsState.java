@@ -60,7 +60,7 @@ public class GraphicsState implements Cloneable {
     /**
      * Current font
      */
-    public PSObjectDict font;
+    public PSObjectFont font;
     
     /**
      * Creates a new default graphics state.
@@ -68,7 +68,7 @@ public class GraphicsState implements Cloneable {
     public GraphicsState() {
         path = new Path();
         clippingPath = new Path();
-        font = new PSObjectDict();
+        font = new PSObjectFont();
     }
     
     

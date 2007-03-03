@@ -21,6 +21,8 @@
 
 package net.sf.eps2pgf.postscript;
 
+import org.fontbox.afm.*;
+
 import net.sf.eps2pgf.postscript.errors.*;
 
 /** Base class for PostScript objects.
@@ -134,6 +136,15 @@ public class PSObject implements Cloneable {
      * @return Dictionary representation of this object.
      */
     public PSObjectFont toFont() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Convert this object to a FontBox FontMetric object, if possible
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a FontMetric
+     * @return FontMetric object
+     */
+    public FontMetric toFontMetric() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     

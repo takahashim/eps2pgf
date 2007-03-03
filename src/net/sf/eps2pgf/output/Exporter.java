@@ -113,4 +113,14 @@ public interface Exporter {
      */
     public void show(String text, double[] position, double angle,
             double fontsize)  throws IOException;
+    
+    /**
+     * Draws a red dot (usefull for debugging, don't use otherwise)
+     */
+    public void drawDot(double[] coor) throws IOException;
+    
+    /**
+     * Draws a blue rectangle (usefull for debugging, don't use otherwise)
+     */
+    public void drawRect(double[] lowerLeft, double[] upperRight) throws IOException;
 }
