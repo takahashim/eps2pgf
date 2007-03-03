@@ -141,28 +141,5 @@ public class Fonts {
         return font;
     }
     
-    /**
-     * Convert an array of character names to LaTeX code
-     */
-    public String charNames2Latex(PSObjectArray charNames, PSObjectDict font) 
-            throws PSErrorRangeCheck, PSErrorTypeCheck, PSErrorUnimplemented {
-        StringBuilder str = new StringBuilder(charNames.size());
-        PSObjectDict charStrings = (PSObjectDict)font.lookup("CharStrings");
-        PSObjectString preCode = (PSObjectString)font.lookup("LatexPreCode");
-        PSObjectString postCode = (PSObjectString)font.lookup("LatexPostCode");
-        
-        str.append(preCode.value);
-        for (int i = 0 ; i < charNames.size() ; i++) {
-            PSObjectString code = (PSObjectString)charStrings.lookup(charNames.get(i));
-            if (code == null) {
-                throw new PSErrorUnimplemented("CharString for "
-                        + charNames.get(i).isis() + " is unknown.");
-            }
-            str.append(code.value);
-        }
-        str.append(postCode.value);
-        
-        return str.toString();
-    }
 
 }

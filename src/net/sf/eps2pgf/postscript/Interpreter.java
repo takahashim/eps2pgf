@@ -25,6 +25,9 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 
+import org.fontbox.afm.*;
+import org.fontbox.util.BoundingBox;
+
 import net.sf.eps2pgf.*;
 import net.sf.eps2pgf.collections.ArrayStack;
 import net.sf.eps2pgf.output.*;
@@ -788,14 +791,7 @@ public class Interpreter {
    
     /** PostScript op: setfont */
     public void op_setfont() throws PSErrorTypeCheck, PSErrorStackUnderflow {
-        PSObjectDict font = opStack.pop().toDict();
-        // Check few fields required for font dictionaries
-        if (!(font.containsKey("FontType"))) {
-            throw new PSErrorTypeCheck();
-        }
-        if (!(font.containsKey("FontMatrix"))) {
-            throw new PSErrorTypeCheck();
-        }
+        PSObjectFont font = opStack.pop().toFont();
         gstate.current.font = font;
     }
    
@@ -842,20 +838,52 @@ public class Interpreter {
    
     /** PostScript op: show */
     public void op_show() throws PSErrorTypeCheck, PSErrorStackUnderflow,
-            PSErrorRangeCheck, PSErrorUnimplemented, IOException {
+            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, IOException {
         PSObjectString string = opStack.pop().toPSString();
-        PSObjectDict currentFont = gstate.current.font;
-        PSObjectArray encoding = (PSObjectArray)currentFont.lookup("Encoding");
-        PSObjectArray charNames = string.decode(encoding);
-        PSObjectMatrix fontMatrix = currentFont.lookup("FontMatrix").toMatrix();
-        String text = fonts.charNames2Latex(charNames, currentFont);
+        PSObjectFont currentFont = gstate.current.font;
+        
+        PSObjectArray charNames = string.decode(currentFont.getEncoding());
+        
+        String text = currentFont.charNames2charStrings(charNames);
         double angle = gstate.current.CTM.getRotation();
         
         // Calculate fontsize in LaTeX points (=1/72.27 inch)
+        PSObjectMatrix fontMatrix = currentFont.getFontMatrix();
         double fontsize = fontMatrix.getMeanScaling() * gstate.current.CTM.getMeanScaling();
         fontsize = fontsize / 2.54 * 72.27;
         
         double[] pos = gstate.current.getCurrentPosInDeviceSpace();
+        
+        BoundingBox bbox = currentFont.getBBox(charNames);
+        double[] posBl = new double[2];
+        posBl[0] = pos[0] + bbox.getLowerLeftX()/72*2.54*fontsize;
+        posBl[1] = pos[1];
+        
+        double[] posbl = new double[2];
+        posbl[0] = posBl[0];
+        posbl[1] = pos[1] + bbox.getLowerLeftY()/72*2.54*fontsize;
+        
+        double[] postl = new double[2];
+        postl[0] = posBl[0];
+        postl[1] = pos[1] + bbox.getUpperRightY()/72*2.54*fontsize;
+        
+        double[] postr = new double[2];
+        postr[0] = pos[0] + bbox.getUpperRightX()/72*2.54*fontsize;
+        postr[1] = postl[1];
+        
+        double[] posbr = new double[2];
+        posbr[0] = postr[0];
+        posbr[1] = posbl[1];
+        
+        exp.drawRect(posbl, postr);
+
+        exp.drawDot(postl);
+        exp.drawDot(posBl);
+        exp.drawDot(posbl);
+        
+        exp.drawDot(postr);
+        exp.drawDot(posbr);
+        
         exp.show(text, pos, angle, fontsize);
     }
     
