@@ -21,7 +21,6 @@
 
 package net.sf.eps2pgf.postscript;
 
-import com.sun.org.apache.bcel.internal.verifier.statics.DOUBLE_Upper;
 import java.io.*;
 import java.util.*;
 import java.util.logging.*;
@@ -29,7 +28,6 @@ import java.util.logging.*;
 import org.fontbox.afm.*;
 import org.fontbox.util.BoundingBox;
 
-import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
@@ -229,8 +227,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
         BoundingBox bbox = new BoundingBox();
 
         // Determine upper and lower boundary of bounding box
-        float minY = Float.POSITIVE_INFINITY;
-        float maxY = Float.NEGATIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
         CharMetric cmFirstChar = new CharMetric();
         CharMetric cmLastChar = new CharMetric();
         for (int i = 0 ; i < charNames.size() ; i++) {
@@ -255,14 +253,14 @@ public class PSObjectFont extends PSObject implements Cloneable {
         }
         
         // Determin left and right boundary of bounding box
-        float leftX = cmFirstChar.getBoundingBox().getLowerLeftX()/1000;
-        float rightX = getWidth(charNames) - cmLastChar.getWx()/1000
+        double leftX = cmFirstChar.getBoundingBox().getLowerLeftX()/1000;
+        double rightX = getWidth(charNames) - cmLastChar.getWx()/1000
                 + cmLastChar.getBoundingBox().getUpperRightX()/1000;
 
-        bbox.setLowerLeftX(leftX);
-        bbox.setLowerLeftY(minY/1000);
-        bbox.setUpperRightX(rightX);
-        bbox.setUpperRightY(maxY/1000);
+        bbox.setLowerLeftX(new Float(leftX));
+        bbox.setLowerLeftY(new Float(minY/1000));
+        bbox.setUpperRightX(new Float(rightX));
+        bbox.setUpperRightY(new Float(maxY/1000));
         return  bbox;
     }
     
@@ -357,7 +355,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @param secondChar Second kerning character
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This font does not contain font metric data
      */
-    public float getKernX(String firstChar, String secondChar) throws PSErrorTypeCheck {
+    public double getKernX(String firstChar, String secondChar) throws PSErrorTypeCheck {
         FontMetric fm = getFontMetric();
         List kernPairs = fm.getKernPairs();
         for (Object obj : kernPairs) {
@@ -377,9 +375,9 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Font metric field in this font is invalid of undefined
      * @return Width of the string in pt (= 1/72 inch)
      */
-    public float getWidth(PSObjectArray charNames) throws PSErrorTypeCheck, PSErrorUndefined {
+    public double getWidth(PSObjectArray charNames) throws PSErrorTypeCheck, PSErrorUndefined {
         charNames = replaceLigatures(charNames);
-        float width = 0;
+        double width = 0;
         for (int i = 0 ; i < charNames.size() ; i++) {
             try {
                 String charName = charNames.get(i).toName().name;
