@@ -112,12 +112,12 @@ public interface Exporter {
      * Draws text
      */
     public void show(String text, double[] position, double angle,
-            double fontsize)  throws IOException;
+            double fontsize, String anchor) throws IOException;
     
     /**
      * Draws a red dot (usefull for debugging, don't use otherwise)
      */
-    public void drawDot(double[] coor) throws IOException;
+    public void drawDot(double x, double y) throws IOException;
     
     /**
      * Draws a blue rectangle (usefull for debugging, don't use otherwise)

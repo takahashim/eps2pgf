@@ -32,7 +32,7 @@ import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
  */
 public class GstateStack {
     private ArrayStack<GraphicsState> stack;
-    GraphicsState current;
+    public GraphicsState current;
     
     /**
      * Creates a new instance of GstateStack

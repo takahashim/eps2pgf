@@ -56,6 +56,9 @@ public class Interpreter {
     // Exporter, writes the graphics data to file in another format (such as pgf)
     Exporter exp;
     
+    // Text handler, handles text in the postscript code
+    TextHandler textHandler = new TextHandler(gstate);
+    
     Logger log = Logger.getLogger("global");
     
     /** Creates a new instance of Interpreter */
@@ -840,51 +843,54 @@ public class Interpreter {
     public void op_show() throws PSErrorTypeCheck, PSErrorStackUnderflow,
             PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, IOException {
         PSObjectString string = opStack.pop().toPSString();
-        PSObjectFont currentFont = gstate.current.font;
         
-        PSObjectArray charNames = string.decode(currentFont.getEncoding());
+        double[] dpos = textHandler.showText(exp, string);
         
-        String text = currentFont.charNames2charStrings(charNames);
-        double angle = gstate.current.CTM.getRotation();
-        
-        // Calculate fontsize in LaTeX points (=1/72.27 inch)
-        PSObjectMatrix fontMatrix = currentFont.getFontMatrix();
-        double fontsize = fontMatrix.getMeanScaling() * gstate.current.CTM.getMeanScaling();
-        fontsize = fontsize / 2.54 * 72.27;
-        
-        double[] pos = gstate.current.getCurrentPosInDeviceSpace();
-        
-        BoundingBox bbox = currentFont.getBBox(charNames);
-        double[] posBl = new double[2];
-        posBl[0] = pos[0] + bbox.getLowerLeftX()/72*2.54*fontsize;
-        posBl[1] = pos[1];
-        
-        double[] posbl = new double[2];
-        posbl[0] = posBl[0];
-        posbl[1] = pos[1] + bbox.getLowerLeftY()/72*2.54*fontsize;
-        
-        double[] postl = new double[2];
-        postl[0] = posBl[0];
-        postl[1] = pos[1] + bbox.getUpperRightY()/72*2.54*fontsize;
-        
-        double[] postr = new double[2];
-        postr[0] = pos[0] + bbox.getUpperRightX()/72*2.54*fontsize;
-        postr[1] = postl[1];
-        
-        double[] posbr = new double[2];
-        posbr[0] = postr[0];
-        posbr[1] = posbl[1];
-        
-        exp.drawRect(posbl, postr);
-
-        exp.drawDot(postl);
-        exp.drawDot(posBl);
-        exp.drawDot(posbl);
-        
-        exp.drawDot(postr);
-        exp.drawDot(posbr);
-        
-        exp.show(text, pos, angle, fontsize);
+//        PSObjectFont currentFont = gstate.current.font;
+//        
+//        PSObjectArray charNames = string.decode(currentFont.getEncoding());
+//        
+//        String text = currentFont.charNames2charStrings(charNames);
+//        double angle = gstate.current.CTM.getRotation();
+//        
+//        // Calculate fontsize in LaTeX points (=1/72.27 inch)
+//        PSObjectMatrix fontMatrix = currentFont.getFontMatrix();
+//        double fontsize = fontMatrix.getMeanScaling() * gstate.current.CTM.getMeanScaling();
+//        fontsize = fontsize / 2.54 * 72.27;
+//        
+//        double[] pos = gstate.current.getCurrentPosInDeviceSpace();
+//        
+//        BoundingBox bbox = currentFont.getBBox(charNames);
+//        double[] posBl = new double[2];
+//        posBl[0] = pos[0] + bbox.getLowerLeftX()/72*2.54*fontsize;
+//        posBl[1] = pos[1];
+//        
+//        double[] posbl = new double[2];
+//        posbl[0] = posBl[0];
+//        posbl[1] = pos[1] + bbox.getLowerLeftY()/72*2.54*fontsize;
+//        
+//        double[] postl = new double[2];
+//        postl[0] = posBl[0];
+//        postl[1] = pos[1] + bbox.getUpperRightY()/72*2.54*fontsize;
+//        
+//        double[] postr = new double[2];
+//        postr[0] = pos[0] + bbox.getUpperRightX()/72*2.54*fontsize;
+//        postr[1] = postl[1];
+//        
+//        double[] posbr = new double[2];
+//        posbr[0] = postr[0];
+//        posbr[1] = posbl[1];
+//        
+//        exp.drawRect(posbl, postr);
+//
+//        exp.drawDot(postl);
+//        exp.drawDot(posBl);
+//        exp.drawDot(posbl);
+//        
+//        exp.drawDot(postr);
+//        exp.drawDot(posbr);
+//        
+//        exp.show(text, pos, angle, fontsize);
     }
     
     /** PostScript op: showpage */

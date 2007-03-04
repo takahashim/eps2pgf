@@ -251,28 +251,57 @@ public class PGFExport implements Exporter {
     
     /**
      * Draws text
+     * @param text Exact text to draw
+     * @param position Text anchor point in [cm, cm]
+     * @param angle Text angle in degrees
+     * @param fontsize in PostScript pt (= 1/72 pt)
+     * @param anchor String with two characters:
+     *               t - top, c - center, B - baseline b - bottom
+     *               l - left, c - center, r - right
+     *               e.g. Br = baseline,right
      */
     public void show(String text, double[] position, double angle,
-            double fontsize) throws IOException {
+            double fontsize, String anchor) throws IOException {
         String x = coorFormat.format(position[0]);
         String y = coorFormat.format(position[1]);
         
+        // Process anchor
+        String posOpts = "";
+        // Vertical alignment
+        if (anchor.contains("t")) {
+            posOpts = "top,";
+        } else if (anchor.contains("B")) {
+            posOpts = "base,";
+        } else if (anchor.contains("b")) {
+            posOpts = "bottom,";
+        }
+        
+        // Horizontal alignment
+        if (anchor.contains("l")) {
+            posOpts += "left,";
+        } else if (anchor.contains("r")) {
+            posOpts += "right,";
+        }
+        
+        // Convert fontsize in PostScript pt to TeX pt
+        fontsize = fontsize / 72 * 72.27;
+        
         // The angle definition in PostScript is just the other way around
         // as is pgf.
-        String angStr = lengthFormat.format(-angle);
+        String angStr = lengthFormat.format(angle);
         
         text = "{\\fontsize{" + fontSizeFormat.format(fontsize) + "}{" 
                 + fontSizeFormat.format(1.2*fontsize) + "}\\selectfont" + text + "}";
-        out.write(String.format("\\pgftext[base,left,x=%scm,y=%scm,rotate=%s]{%s}\n",
-                x, y, angStr, text));
+        out.write(String.format("\\pgftext[%sx=%scm,y=%scm,rotate=%s]{%s}\n",
+                posOpts, x, y, angStr, text));
     }
     
     /**
      * Draws a red dot (usefull for debugging, don't use otherwise)
      */
-    public void drawDot(double[] coor) throws IOException {
+    public void drawDot(double x, double y) throws IOException {
         out.write("\\begin{pgfscope}\\pgfsetfillcolor{red}\\pgfpathcircle{\\pgfpoint{"
-                + coor[0] + "cm}{" + coor[1] + "cm}}{0.25pt}\\pgfusepath{fill}\\end{pgfscope}\n");
+                + x + "cm}{" + y + "cm}}{0.25pt}\\pgfusepath{fill}\\end{pgfscope}\n");
     }
     
     /**
