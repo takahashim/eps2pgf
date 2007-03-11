@@ -1,5 +1,5 @@
 ============================================================================
-                              Eps2pgf v0.1.0
+                              Eps2pgf v0.2.0
 ============================================================================
 
 Website: http://sourceforge.net/projects/eps2pgf
@@ -29,3 +29,12 @@ You should have received a copy of the GNU General Public License along with
 this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. 
 ----------------------------------------------------------------------------
+
+----------------------------------------------------------------------------
+Changelog
+----------------------------------------------------------------------------
+v0.2.0 (2007-??-??)
+  - ???
+
+v0.1.0 (2007-03-11)
+  - initial release
