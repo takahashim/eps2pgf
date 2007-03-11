@@ -94,7 +94,7 @@
 
 <entry key="m">m</entry>
 <entry key="macron">{\textasciimacron}</entry>
-<entry key="minus">{\textminus}</entry>
+<entry key="minus">$-$</entry>
 
 <entry key="n">n</entry>
 <entry key="nine">9</entry>
