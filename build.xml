@@ -66,4 +66,14 @@
     nbproject/build-impl.xml file. 
 
     -->
+    <target name="-post-jar">
+        <delete file="${dist.jar.dir}/README.txt" />
+        <copy file="${basedir}/otherfiles/README.txt" todir="${dist.jar.dir}" />
+        <copy file="${basedir}/otherfiles/LICENSE.txt" todir="${dist.jar.dir}" />
+        
+        <mkdir dir="${dist.jar.dir}/resources" />
+        <copy todir="${dist.jar.dir}/resources">
+            <fileset dir="${basedir}/resources" />
+        </copy>
+    </target>
 </project>
