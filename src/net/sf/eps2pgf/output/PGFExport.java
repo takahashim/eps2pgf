@@ -110,7 +110,9 @@ public class PGFExport implements Exporter {
     
     /**
      * Implements PostScript stroke operator.
-     * @param gstate Current graphics state.
+     * @param path Path to stroke
+     * @throws java.io.IOException Unable to write output
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Encountered an unimplemented path section
      */
     public void stroke(Path path) throws IOException, PSErrorUnimplemented {
         writePath(path);
@@ -120,6 +122,9 @@ public class PGFExport implements Exporter {
     /**
      * Set the current clipping path in the graphics state as clipping path
      * in the output document.
+     * @param clipPath Path to use for clipping
+     * @throws java.io.IOException Unable to write output
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Encountered an unimplemented path element
      */
     public void clip(Path clipPath) throws IOException, PSErrorUnimplemented {
         writePath(clipPath);
@@ -129,6 +134,9 @@ public class PGFExport implements Exporter {
     /**
      * Fills a path using the non-zero rule
      * See the PostScript manual (fill operator) for more info.
+     * @param path Path to use for filling
+     * @throws java.io.IOException Unable to write output
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Encountered a path element type that is not yet implemented
      */
     public void fill(Path path) throws IOException, PSErrorUnimplemented {
         writePath(path);
@@ -138,6 +146,9 @@ public class PGFExport implements Exporter {
     /**
      * Fills a path using the even-odd rule
      * See the PostScript manual (eofill operator) for more info.
+     * @param path Path to use for eofill
+     * @throws java.io.IOException Unable to write output
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Encountered a path element type that has not yet been implemented
      */
     public void eofill(Path path) throws IOException, PSErrorUnimplemented {
         writePath(path);
@@ -146,6 +157,10 @@ public class PGFExport implements Exporter {
     
     /**
      * Implements PostScript operator setdash
+     * @param array Array with dash pattern (see PostScript manual for definition)
+     * @param offset Dash pattern offset (see PostScript manual for info)
+     * @throws java.io.IOException Unable to write output
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One or more element in the array is not a number
      */
     public void setDash(PSObjectArray array, double offset) throws IOException, PSErrorTypeCheck {
         out.write("\\pgfsetdash{");
@@ -164,6 +179,9 @@ public class PGFExport implements Exporter {
     
     /**
      * Implements PostScript operator setlinecap
+     * @param cap Cap type (see PostScript manual for info)
+     * @throws java.io.IOException Unable to write output
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Invalid cap type
      */
     public void setlinecap(int cap) throws IOException, PSErrorRangeCheck {
         switch (cap) {
@@ -183,6 +201,9 @@ public class PGFExport implements Exporter {
     
     /**
      * Implements PostScript operator setlinejoin
+     * @param join Join type (see PostScript manual)
+     * @throws java.io.IOException Unable to write output
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Invalid join type
      */
     public void setlinejoin(int join) throws IOException, PSErrorRangeCheck {
         switch (join) {
@@ -203,6 +224,7 @@ public class PGFExport implements Exporter {
     /**
      * Implements PostScript operator setlinewidth
      * @param lineWidth Line width in cm
+     * @throws java.io.IOException Unable to write output
      */
     public void setlinewidth(double lineWidth) throws IOException {
         lineWidth = Math.abs(lineWidth);
@@ -211,6 +233,7 @@ public class PGFExport implements Exporter {
     
    /**
      * Starts a new scope
+     * @throws java.io.IOException Unable to write output
      */
     public void startScope() throws IOException {
         out.write("\\begin{pgfscope}\n");
@@ -219,6 +242,7 @@ public class PGFExport implements Exporter {
     
     /**
      * Ends the current scope scope
+     * @throws java.io.IOException There was an error write to the output
      */
     public void endScope() throws IOException {
         if (scopeDepth > 0) {
@@ -229,6 +253,10 @@ public class PGFExport implements Exporter {
 
     /**
      * Sets the current color
+     * @param r Red value
+     * @param g Green value
+     * @param b Blue value
+     * @throws java.io.IOException Unable to write output
      */
     public void setColor(double r, double g, double b) throws IOException {
         r = Math.max(Math.min(r, 1.0), 0.0);
@@ -241,6 +269,8 @@ public class PGFExport implements Exporter {
 
     /**
      * Sets the current color in gray
+     * @param level Grayscale level
+     * @throws java.io.IOException Unable to write output
      */
     public void setColor(double level) throws IOException {
         level = Math.max(Math.min(level, 1.0), 0.0);
@@ -259,6 +289,7 @@ public class PGFExport implements Exporter {
      *               t - top, c - center, B - baseline b - bottom
      *               l - left, c - center, r - right
      *               e.g. Br = baseline,right
+     * @throws java.io.IOException Unable to write output
      */
     public void show(String text, double[] position, double angle,
             double fontsize, String anchor) throws IOException {
@@ -298,6 +329,9 @@ public class PGFExport implements Exporter {
     
     /**
      * Draws a red dot (usefull for debugging, don't use otherwise)
+     * @param x X-coordinate (cm)
+     * @param y Y-coordinate (cm)
+     * @throws java.io.IOException Unable to write output
      */
     public void drawDot(double x, double y) throws IOException {
         out.write("\\begin{pgfscope}\\pgfsetfillcolor{red}\\pgfpathcircle{\\pgfpoint{"
@@ -306,6 +340,9 @@ public class PGFExport implements Exporter {
     
     /**
      * Draws a blue rectangle (usefull for debugging, don't use otherwise)
+     * @param lowerLeft X- and Y-coordinate (in cm) of lower left corner
+     * @param upperRight X- and Y-coordinate (in cm) of upper right corner
+     * @throws java.io.IOException Unable to write output
      */
     public void drawRect(double[] lowerLeft, double[] upperRight) throws IOException {
         out.write("\\begin{pgfscope}\\pgfsetstrokecolor{blue}\\pgfsetlinewidth{0.1pt}\\pgfpathrectangle{\\pgfpoint{"
