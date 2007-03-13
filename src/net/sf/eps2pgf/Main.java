@@ -25,7 +25,7 @@ import java.io.*;
 import java.util.logging.*;
 
 /**
- *
+ * Main class of Eps2pgf program
  * @author Paul Wagenaars
  */
 public class Main {
@@ -38,7 +38,9 @@ public class Main {
     static Logger log = Logger.getLogger("global");
     
     /**
+     * Main program method
      * @param args the command line arguments
+     * @throws java.lang.Exception Something went wrong
      */
     public static void main(String[] args) throws Exception {
         opts.parse(args);
@@ -78,6 +80,7 @@ public class Main {
     
     /**
      * Creates a string with the program name and version
+     * @return Application name followed by the version number
      */
     public static String getNameVersion() {
         return appName + " v" + versionMajor + "." + versionMinor + "." + versionRevision;
