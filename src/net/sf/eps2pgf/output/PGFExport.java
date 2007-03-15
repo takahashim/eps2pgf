@@ -231,6 +231,13 @@ public class PGFExport implements Exporter {
         out.write("\\pgfsetlinewidth{"+ lengthFormat.format(lineWidth) +"cm}\n");
     }
     
+    /**
+     * Sets the miter limit
+     */
+    public void setmiterlimit(double miterLimit) throws IOException {
+        out.write("\\pgfsetmiterlimit{" + miterLimit + "}\n");
+    }
+    
    /**
      * Starts a new scope
      * @throws java.io.IOException Unable to write output

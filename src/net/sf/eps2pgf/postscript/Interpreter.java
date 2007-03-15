@@ -34,18 +34,18 @@ import net.sf.eps2pgf.output.*;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
- *
+ * Interprets a PostScript document and produces output
  * @author Paul Wagenaars
  */
 public class Interpreter {
     // Operand stack (see PostScript manual for more info)
     ArrayStack<PSObject> opStack = new ArrayStack<PSObject>();
     
-    // Execution stack
-    ExecStack execStack = new ExecStack();
-    
     // Dictionary stack
     DictStack dictStack = new DictStack(this);
+    
+    // Base of execution stack (this is basically the document)
+    LinkedList<PSObject> docObjects;
     
     // Graphics state
     GstateStack gstate = new GstateStack();
@@ -61,9 +61,14 @@ public class Interpreter {
     
     Logger log = Logger.getLogger("global");
     
-    /** Creates a new instance of Interpreter */
+    /**
+     * Creates a new instance of Interpreter
+     * @param in PostScript document
+     * @param out Destination for output code
+     * @throws java.io.FileNotFoundException Unable to find font resources
+     */
     public Interpreter(LinkedList<PSObject> in, Writer out) throws FileNotFoundException {
-        execStack.addObjectList(in);
+        docObjects = in;
         
         // Initialize character encodings
         Encoding.initialize();
@@ -73,12 +78,14 @@ public class Interpreter {
         exp = new PGFExport(out);
     }
     
+    /**
+     * Start interpreting PostScript document
+     * @throws java.lang.Exception Something went wrong in the interpretation process
+     */
     public void start() throws Exception {
         exp.init();
         try {
-            while (!execStack.empty()) {
-                processObject(execStack.getNext());
-            }
+            processObjects(docObjects);
         } catch (PSError e) {
             System.out.println("----- Start of stack");
             op_pstack();
@@ -90,6 +97,22 @@ public class Interpreter {
         exp.finish();
     }
     
+    /**
+     * Process/interpret a list of PostScript objects
+     * @param objList List with PostScript objects to process
+     * @throws java.lang.Exception Something went wrong while processing the object
+     */
+    public void processObjects(LinkedList<PSObject> objList) throws Exception {
+        for (int i = 0 ; i < objList.size() ; i++) {
+            processObject(objList.get(i));
+        }        
+    }
+    
+    /**
+     * Process/interpret a single PostScript object
+     * @param obj PostScript object to process
+     * @throws java.lang.Exception Something went wrong while processing the object
+     */
     public void processObject(PSObject obj) throws Exception {
         //System.out.println("-=- " + obj.isis());
         if (obj.isLiteral) {
@@ -99,8 +122,12 @@ public class Interpreter {
         }
     }
     
-    /** PostScript op: add */
-    public void op_add() throws PSError {
+    /**
+     * PostScript op: add
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Not enough object on stack
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One or both objects on stack are not numeric
+     */
+    public void op_add() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject num2 = opStack.pop();
         PSObject num1 = opStack.pop();
         if ( (num1 instanceof PSObjectInt) && (num2 instanceof PSObjectInt) ) {
@@ -110,45 +137,90 @@ public class Interpreter {
         }
     }
     
-    /** PostScript op: arc */
-    public void op_arc() throws PSError {
+    /**
+     * PostScript op: arc
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented This operator is not (yet) implemented
+     */
+    public void op_arc() throws PSErrorUnimplemented {
         throw new PSErrorUnimplemented("operator: arc");
     }
     
-    /** PostScript op: arcn */
-    public void op_arcn() throws PSError {
+    /**
+     * PostScript op: arcn
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented This operator is not (yet) implemented
+     */
+    public void op_arcn() throws PSErrorUnimplemented {
         throw new PSErrorUnimplemented("operator: arcn");
     }
     
-    /** PostScript op: array */
-    public void op_array() throws PSError {
+    /**
+     * PostScript op: array
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Not enough objects on stack
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Topmost object is not a number
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Topmost object is negative
+     */
+    public void op_array() throws PSErrorStackUnderflow, PSErrorTypeCheck, PSErrorRangeCheck {
         int n = opStack.pop().toNonNegInt();
         op_sqBrackLeft();
         PSObjectNull nullObj = new PSObjectNull();
         for (int i = 0 ; i < n ; i++) {
             opStack.push(nullObj);
         }
-        op_sqBrackRight();
+        try {
+            op_sqBrackRight();
+        } catch (PSErrorUnmatchedMark e) {
+            // Since the op_sqBrackLeft call is a few lines up this error can never happen
+        }
     }
     
-    /** PostScript op: astore */
-    public void op_astore() throws PSError {
+    /**
+     * PostScript op: ashow
+     */
+    public void op_ashow() throws PSErrorTypeCheck, PSErrorStackUnderflow,
+            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, IOException {
+        log.fine("ashow operator encoutered. ashow is not implemented, instead the normal show is used.");
+        PSObjectString string = opStack.pop().toPSString();
+        double ay = opStack.pop().toReal();
+        double ax = opStack.pop().toReal();
+        opStack.push(string);
+        op_show();
+    }
+    
+    
+    /**
+     * PostScript op: astore
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Operand stack underflow
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Operand of wrong type
+     */
+    public void op_astore() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObjectArray array = opStack.pop().toArray();
         int n = array.size();
-        for (int i = (n-1) ; i >= 0 ; i--) {
-            array.set(i, opStack.pop());
+        try {
+            for (int i = (n-1) ; i >= 0 ; i--) {
+                array.set(i, opStack.pop());
+            }
+        } catch (PSErrorRangeCheck e) {
+            // due to the for-loop this can never happen
         }
         opStack.push(array);
     }
     
-    /** PostScript op: begin */
-    public void op_begin() throws PSError {
+    /**
+     * PostScript op: begin
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Operand stack underflow
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Operand is not a dictionary
+     */
+    public void op_begin() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObjectDict dict = opStack.pop().toDict();
         dictStack.pushDict(dict);
     }
     
-    /** PostScript op: bind */
-    public void op_bind() throws PSError {
+    /**
+     * PostScript op: bind
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Operand stack underflow
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Operand is not object type that can be binded
+     */
+    public void op_bind() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.peek();
         if (obj instanceof PSObjectProc) {
             PSObjectProc proc = (PSObjectProc)obj;
@@ -166,9 +238,14 @@ public class Interpreter {
         opStack.clear();
     }
     
-    /** PostScript op: cleartomark */
-    public void op_cleartomark() throws PSError {
-        for (int i = 0 ; i < opStack.size() ; i++) {
+    /**
+     * PostScript op: cleartomark
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnmatchedMark Unable to find mark object on stack
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Operand stack underflow
+     */
+    public void op_cleartomark() throws PSErrorUnmatchedMark, PSErrorStackUnderflow {
+        int n = opStack.size();
+        for (int i = 0 ; i < n ; i++) {
             if (opStack.pop() instanceof PSObjectMark) {
                 return;
             }
@@ -176,14 +253,18 @@ public class Interpreter {
         throw new PSErrorUnmatchedMark();
     }
     
-    /** PostScript op: clip */
-    public void op_clip() throws PSError, IOException {
+    /**
+     * PostScript op: clip
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Operator not fully implemented
+     * @throws java.io.IOException Unable to write output
+     */
+    public void op_clip() throws PSErrorUnimplemented, IOException {
         gstate.current.clip();
         exp.clip(gstate.current.clippingPath);
     }
     
     /** PostScript op: closepath */
-    public void op_closepath() throws PSError {
+    public void op_closepath() {
         double[] startPos = gstate.current.path.closepath();
         if (startPos != null) {
             gstate.current.moveto(startPos[0], startPos[1]);
@@ -229,7 +310,7 @@ public class Interpreter {
     }
     
     /** PostScript op: counttomark */
-    public void op_counttomark() throws PSError {
+    public void op_counttomark() throws PSErrorUnmatchedMark {
         int n = opStack.size();
         for (int i = n-1 ; i >= 0 ; i--) {
             if (opStack.get(i) instanceof PSObjectMark) {
@@ -300,6 +381,13 @@ public class Interpreter {
     public void op_eofill() throws PSError, IOException {
         exp.eofill(gstate.current.path);
         op_newpath();
+    }
+    
+    /**
+     * PostScript op: errordict
+     */
+    public void op_errordict() throws PSErrorUnimplemented {
+        throw new PSErrorUnimplemented("errordict operator");
     }
     
     /** PostScript op: eq */
@@ -484,7 +572,8 @@ public class Interpreter {
     }
     
     /** PostScript op: makefont */
-    public void op_makefont() throws PSError, CloneNotSupportedException {
+    public void op_makefont() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
+            PSErrorRangeCheck, CloneNotSupportedException {
         PSObjectMatrix matrix = opStack.pop().toMatrix();
         PSObjectDict font = opStack.pop().toDict();
         font = font.clone();
@@ -591,8 +680,10 @@ public class Interpreter {
         opStack.pop();
     }
     
-    /** PostScript op: pstack */
-    public void op_pstack() throws PSError {
+    /** 
+     * PostScript op: pstack
+     */
+    public void op_pstack() {
         for (int i = opStack.size()-1 ; i >= 0 ; i--) {
             System.out.println(opStack.get(i).isis());
         }        
@@ -614,7 +705,14 @@ public class Interpreter {
     /** PostScript op: readhexstring */
     public void op_readhexstring() throws PSError {
         throw new PSErrorUnimplemented("operator: readhexstring");
-    }    
+    }
+    
+    /**
+     * PostScript op: readonly
+     */
+    public void op_readonly() {
+        log.info("readonly operator encountered. This feature is not implemented. This may lead to incorrect results.");
+    }
     
     /** PostScript op: rectclip */
     public void op_rectclip() throws PSError, IOException {
@@ -766,6 +864,34 @@ public class Interpreter {
             gstate.current.CTM.scale(sx, sy);
         }
     }
+    
+    /**
+     * PostScript operator: scalefont
+     */
+    public void op_scalefont() throws PSErrorStackUnderflow, PSErrorTypeCheck, CloneNotSupportedException {
+        double scale = opStack.pop().toReal();
+        
+        // "font scale scalefont" is equivalent to 
+        // "font [scale 0 0 scale 0 0] makefont""
+        op_sqBrackLeft();
+        opStack.push(new PSObjectReal(scale));
+        opStack.push(new PSObjectReal(0));
+        opStack.push(new PSObjectReal(0));
+        opStack.push(new PSObjectReal(scale));
+        opStack.push(new PSObjectReal(0));
+        opStack.push(new PSObjectReal(0));
+        try {
+            op_sqBrackRight();
+        } catch (PSErrorUnmatchedMark e) {
+            // This can never happen. The left square bracket (op_sqBrackLeft)
+            // is a few lines up.
+        }
+        try {
+            op_makefont();
+        } catch (PSErrorRangeCheck e) {
+            // This can never happen. A correct matrix is created above
+        }
+    }
    
     /** PostScript op: setcmykcolor */
     public void op_setcmykcolor() throws PSError {
@@ -786,6 +912,16 @@ public class Interpreter {
         }
         
         exp.setDash(array, offset);
+    }
+    
+    /**
+     * PostScript op: setflat
+     */
+    public void op_setflat() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        double num = opStack.pop().toReal();
+        num = Math.max(num, 0.2);
+        num = Math.min(num, 100);
+        // This operator doesn't do anything in eps2pgf. It is handled by PGF.
     }
    
     /** PostScript op: setfont */
@@ -834,6 +970,18 @@ public class Interpreter {
     public void op_setmatrix() throws PSError {
         throw new PSErrorUnimplemented("operator: setmatrix");
     }
+    
+    /**
+     * PostScript op: setmiterlimit
+     */
+    public void op_setmiterlimit() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
+            PSErrorRangeCheck, IOException {
+        double num = opStack.pop().toReal();
+        if (num < 1.0) {
+            throw new PSErrorRangeCheck();
+        }
+        exp.setmiterlimit(num);
+    }
    
     /** PostScript op: show */
     public void op_show() throws PSErrorTypeCheck, PSErrorStackUnderflow,
@@ -854,6 +1002,34 @@ public class Interpreter {
         PSObjectName[] encodingVector = Encoding.getStandardVector();
         opStack.push(new PSObjectArray(encodingVector));
     }
+    
+    /**
+     * PostScript op: stopped
+     * @throws PSErrorStackUnderflow Operand stack is empty
+     * @throws PSErrorUnimplemented Executed code contains postscript code that is not yet implemented in eps2pgf
+     * @throws Another exception occured. If this happens it's a bug in eps2pgf
+     */
+    public void op_stopped() throws PSErrorStackUnderflow, PSErrorUnimplemented, Exception {
+        PSObject any = opStack.pop();
+        try {
+            // If it is a procedure, make it executable so that it will be executed
+            if (any instanceof PSObjectProc) {
+                any.isLiteral = false;
+            }
+            processObject(any);
+        } catch (PSErrorUnimplemented e) {
+            // Don't catch unimplemented errors since they indicate that
+            // eps2pgf is not fully implemented. It is not an actual
+            // postscript error
+            throw e;
+        } catch (PSError e) {
+            opStack.push(new PSObjectBool(true));
+            return;
+        } catch (Exception e) {
+            throw e;
+        }
+        opStack.push(new PSObjectBool(false));
+    }
    
     /** PostScript op: stroke */
     public void op_stroke() throws PSError, IOException {
@@ -866,8 +1042,8 @@ public class Interpreter {
         opStack.push(new PSObjectMark());
     }
     
-    /** PostScript op: [ */
-    public void op_sqBrackRight() throws PSError {
+    /** PostScript op: ] */
+    public void op_sqBrackRight() throws PSErrorStackUnderflow, PSErrorTypeCheck, PSErrorUnmatchedMark {
         op_counttomark();
         int n = opStack.pop().toInt();
         PSObject[] objs = new PSObject[n];
@@ -896,6 +1072,30 @@ public class Interpreter {
         } else {
             opStack.push(new PSObjectReal( num1.toReal() - num2.toReal() ));
         }
+    }
+    
+    /**
+     * PostScript op: transform
+     */
+    public void op_transform() throws PSErrorStackUnderflow, PSErrorTypeCheck, PSErrorRangeCheck {
+        PSObject obj = opStack.pop();
+        PSObjectMatrix matrix = null;
+        try {
+            matrix = obj.toMatrix();
+        } catch (PSErrorTypeCheck e) {
+            
+        }
+        double y;
+        if (matrix == null) {
+            matrix = gstate.current.CTM;
+            y = obj.toReal();
+        } else {
+            y = opStack.pop().toReal();
+        }
+        double x = opStack.pop().toReal();
+        double transformed[] = matrix.apply(x, y);
+        opStack.push(new PSObjectReal(transformed[0]));
+        opStack.push(new PSObjectReal(transformed[1]));
     }
     
     /** PostScript op: translate */
