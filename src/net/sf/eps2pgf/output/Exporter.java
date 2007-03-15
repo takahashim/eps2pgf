@@ -89,16 +89,6 @@ public interface Exporter {
     public void setlinewidth(double lineWidth) throws IOException;
     
     /**
-     * Starts a new scope
-     */
-    public void startScope() throws IOException;
-    
-    /**
-     * Ends the current scope scope
-     */
-    public void endScope() throws IOException;
-    
-    /**
      * Sets the current color in Red-Green-Blue (RGB)
      */
     public void setColor(double r, double g, double b) throws IOException;
@@ -107,6 +97,21 @@ public interface Exporter {
      * Sets the current color in gray
      */
     public void setColor(double level) throws IOException;
+    
+    /**
+     * Sets the miter limit
+     */
+    public void setmiterlimit(double num) throws IOException;
+    
+    /**
+     * Starts a new scope
+     */
+    public void startScope() throws IOException;
+    
+    /**
+     * Ends the current scope scope
+     */
+    public void endScope() throws IOException;
     
     /**
      * Draws text

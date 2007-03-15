@@ -93,7 +93,7 @@ public class PSObjectProc extends PSObject {
     
     /** Executes this object in the supplied interpreter */
     public void execute(Interpreter interp) throws Exception {
-        interp.execStack.copyAndAddObjectList(procObjects);
+        interp.processObjects(procObjects);
     }
     
     /** Convert this object to a procedure object, if possible. */

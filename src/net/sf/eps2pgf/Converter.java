@@ -46,7 +46,9 @@ public class Converter {
         outFile = new File(targetFilename);
     }
     
-    /** Starts the actual conversion.
+    /**
+     * Starts the actual conversion.
+     * @throws java.lang.Exception Something went wrong
      */
     public void convert() throws Exception {
         // Parse input file
