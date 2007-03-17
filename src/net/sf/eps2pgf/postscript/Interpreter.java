@@ -45,7 +45,7 @@ public class Interpreter {
     DictStack dictStack = new DictStack(this);
     
     // Base of execution stack (this is basically the document)
-    LinkedList<PSObject> docObjects;
+    List<PSObject> docObjects;
     
     // Graphics state
     GstateStack gstate = new GstateStack();
@@ -67,7 +67,7 @@ public class Interpreter {
      * @param out Destination for output code
      * @throws java.io.FileNotFoundException Unable to find font resources
      */
-    public Interpreter(LinkedList<PSObject> in, Writer out) throws FileNotFoundException {
+    public Interpreter(List<PSObject> in, Writer out) throws FileNotFoundException {
         docObjects = in;
         
         // Initialize character encodings
@@ -102,24 +102,10 @@ public class Interpreter {
      * @param objList List with PostScript objects to process
      * @throws java.lang.Exception Something went wrong while processing the object
      */
-    public void processObjects(LinkedList<PSObject> objList) throws Exception {
+    public void processObjects(List<PSObject> objList) throws Exception {
         for (int i = 0 ; i < objList.size() ; i++) {
-            processObject(objList.get(i));
+            objList.get(i).process(this);
         }        
-    }
-    
-    /**
-     * Process/interpret a single PostScript object
-     * @param obj PostScript object to process
-     * @throws java.lang.Exception Something went wrong while processing the object
-     */
-    public void processObject(PSObject obj) throws Exception {
-        //System.out.println("-=- " + obj.isis());
-        if (obj.isLiteral) {
-            opStack.push(obj);
-        } else {
-            obj.execute(this);
-        }
     }
     
     /**
@@ -523,6 +509,32 @@ public class Interpreter {
         opStack.push(new PSObjectArray(encodingVector));
     }
     
+    /**
+     * PostScript op: itransform
+     */
+    public void op_itransform() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
+            PSErrorRangeCheck {
+        PSObject obj = opStack.pop();
+        PSObjectMatrix matrix = null;
+        try {
+            matrix = obj.toMatrix();
+        } catch (PSErrorTypeCheck e) {
+            
+        }
+        double y;
+        if (matrix == null) {
+            matrix = gstate.current.CTM;
+            y = obj.toReal();
+        } else {
+            y = opStack.pop().toReal();
+        }
+        double x = opStack.pop().toReal();
+        
+        double[] itransformed = matrix.inverseApply(x, y);
+        opStack.push(new PSObjectReal(itransformed[0]));
+        opStack.push(new PSObjectReal(itransformed[1]));
+    }
+    
     /** PostScript op: known */
     public void op_known() throws PSError {
         PSObject key = opStack.pop();
@@ -842,6 +854,19 @@ public class Interpreter {
             gstate.current.CTM.rotate(angle);
         }
     }
+    
+    /**
+     * PostScript op: round
+     */
+    public void op_round() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject obj = opStack.pop();
+        if (obj instanceof PSObjectInt) {
+            opStack.push(obj);
+        } else {
+            PSObjectReal rounded = new PSObjectReal(Math.round(obj.toReal()));
+            opStack.push(rounded);
+        }
+    }
    
     /** PostScript op: save */
     public void op_save() throws PSError {
@@ -1012,11 +1037,7 @@ public class Interpreter {
     public void op_stopped() throws PSErrorStackUnderflow, PSErrorUnimplemented, Exception {
         PSObject any = opStack.pop();
         try {
-            // If it is a procedure, make it executable so that it will be executed
-            if (any instanceof PSObjectProc) {
-                any.isLiteral = false;
-            }
-            processObject(any);
+            any.execute(this);
         } catch (PSErrorUnimplemented e) {
             // Don't catch unimplemented errors since they indicate that
             // eps2pgf is not fully implemented. It is not an actual

@@ -96,6 +96,16 @@ public class PSObjectProc extends PSObject {
         interp.processObjects(procObjects);
     }
     
+    /**
+     * Process this object in the supplied interpreter. This is the way
+     * objects from the operand stack are processed.
+     * @param interp Interpreter in which this object is processed.
+     * @throws java.lang.Exception An error occured during the execution of this object.
+     */
+    public void process(Interpreter interp) throws Exception {
+        interp.opStack.push(this);
+    }
+    
     /** Convert this object to a procedure object, if possible. */
     public PSObjectProc toProc() {
         return this;

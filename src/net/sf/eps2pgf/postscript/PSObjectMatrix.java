@@ -180,6 +180,27 @@ public class PSObjectMatrix extends PSObject {
     }
     
     /**
+     * Applies inverse transformation to a point
+     * @param x X-coordinate
+     * @param y Y-coordinate
+     * @return Inverse transformed coordinate
+     */
+    public double[] inverseApply(double x, double y) {
+        double a = matrix[0];
+        double b = matrix[1];
+        double c = matrix[2];
+        double d = matrix[3];
+        double tx = matrix[4];
+        double ty = matrix[5];
+        
+        double[] coor = new double[2];
+        
+        coor[0] = (d*x-c*y+c*ty-d*tx)/(-c*b+a*d);
+        coor[1] = -(-a*y-b*tx+a*ty+b*x)/(-c*b+a*d);
+        return coor;
+    }
+    
+    /**
      * Returns the mean scaling factor described by this matrix
      * @return Mean scaling factor (= mean(sqrt(a^2+c^2) + sqrt(b^2+d^2)) )
      */
