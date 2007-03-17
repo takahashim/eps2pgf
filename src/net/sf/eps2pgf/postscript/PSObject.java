@@ -31,11 +31,6 @@ import net.sf.eps2pgf.postscript.errors.*;
  */
 public class PSObject implements Cloneable {
     /**
-     * Is this object literal or executable?
-     */
-    public boolean isLiteral = true;
-    
-    /**
      * Checks whether the supplied string is of this type.
      * @param str String to be checked.
      * @return Return true when the string of the objects type.
@@ -50,6 +45,16 @@ public class PSObject implements Cloneable {
      * @throws java.lang.Exception An error occured during the execution of this object.
      */
     public void execute(Interpreter interp) throws Exception {
+        interp.opStack.push(this);
+    }
+    
+    /**
+     * Process this object in the supplied interpreter. This is the way
+     * objects from the operand stack are processed.
+     * @param interp Interpreter in which this object is processed.
+     * @throws java.lang.Exception An error occured during the execution of this object.
+     */
+    public void process(Interpreter interp) throws Exception {
         interp.opStack.push(this);
     }
     

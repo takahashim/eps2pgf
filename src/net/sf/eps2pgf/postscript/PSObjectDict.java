@@ -74,9 +74,6 @@ public class PSObjectDict extends PSObject {
      * @param value Value of the new dictionary entry.
      */
     public void setKey(String key, PSObject value) {
-        if (value instanceof PSObjectProc) {
-            value.isLiteral = false;
-        }
         map.put(key, value);
     }
     

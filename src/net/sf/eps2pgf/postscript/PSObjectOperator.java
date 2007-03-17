@@ -38,10 +38,7 @@ public class PSObjectOperator extends PSObject {
      */
     public PSObjectOperator(String nm, Method op) {
         name = nm;
-        opMethod = op;
-        
-        // An operator is always executable
-        isLiteral = false;
+        opMethod = op;        
     }
     
     /** Return PostScript text representation of this object. See the
@@ -51,7 +48,11 @@ public class PSObjectOperator extends PSObject {
         return "--" + name + "--";
     }
     
-    /** Executes this operator */
+    /**
+     * Executes this object in the supplied interpreter
+     * @param interp Interpreter in which this object is executed.
+     * @throws java.lang.Exception An error occured during the execution of this object.
+     */
     public void execute(Interpreter interp) throws Exception {
         try {
             opMethod.invoke(interp);
@@ -63,4 +64,15 @@ public class PSObjectOperator extends PSObject {
             }
         }
     }
+    
+    /**
+     * Process this object in the supplied interpreter. This is the way
+     * objects from the operand stack are processed.
+     * @param interp Interpreter in which this object is processed.
+     * @throws java.lang.Exception An error occured during the execution of this object.
+     */
+    public void process(Interpreter interp) throws Exception {
+        execute(interp);
+    }
+
 }

@@ -30,6 +30,7 @@ import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
  */
 public class PSObjectName extends PSObject {
     String name;
+    Boolean isLiteral;
     
     /**
      * Creates a new instance of PSObjectName
@@ -82,13 +83,34 @@ public class PSObjectName extends PSObject {
         }
     }
     
-    /** Execute this object */
+    /**
+     * Executes this object in the supplied interpreter
+     * @param interp Interpreter in which this object is executed.
+     * @throws java.lang.Exception An error occured during the execution of this object.
+     */
     public void execute(Interpreter interp) throws Exception {
-        PSObject obj = interp.dictStack.lookup(name);
-        if (obj == null) {
-            throw new PSErrorUndefined(name);
+        if (isLiteral) {
+            // Literal name, just push it on the stack
+            interp.opStack.push(this);
+        } else {
+            // Executable name, look it up in the dict stack and execute
+            // the associated object.
+            PSObject obj = interp.dictStack.lookup(name);
+            if (obj == null) {
+                throw new PSErrorUndefined(name);
+            }
+            obj.execute(interp);
         }
-        interp.processObject(obj);
+    }
+    
+    /**
+     * Process this object in the supplied interpreter. This is the way
+     * objects from the operand stack are processed.
+     * @param interp Interpreter in which this object is processed.
+     * @throws java.lang.Exception An error occured during the execution of this object.
+     */
+    public void process(Interpreter interp) throws Exception {
+        execute(interp);
     }
     
     /** Convert this object to dictionary key, if possible. */
