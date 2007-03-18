@@ -97,6 +97,25 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
+     * Add a curveto section to the current path
+     * @param x1 X-coordinate of first control point
+     * @param y1 Y-coordinate of first control point
+     * @param x2 X-coordinate of second control point
+     * @param y2 Y-coordinate of second control point
+     * @param x3 X-coordinate of end point
+     * @param y3 Y-coordinate of end point
+     */
+    public void curveto(double x1, double y1, double x2, double y2, 
+            double x3, double y3) {
+        position[0] = x3;
+        position[1] = y3;
+        double[] coor1 = CTM.apply(x1, y1);
+        double[] coor2 = CTM.apply(x2, y2);
+        double[] coor3 = CTM.apply(x3, y3);
+        path.curveto(coor1, coor2, coor3);
+    }
+    
+    /**
      * Draw a line to a relative point.
      * @param dx delta X-coordinate (before CTM is applied)
      * @param dy delta Y-coordinate (before CTM is applied)
