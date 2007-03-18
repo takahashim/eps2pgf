@@ -1011,8 +1011,6 @@ public class Interpreter {
         
         // Apply CTM to linewidth, now the line width is in micrometer
         lineWidth *= gstate.current.CTM.getMeanScaling();
-        // Convert micrometer to mm
-        lineWidth /= 1000;
         
         exp.setlinewidth(lineWidth);
     }
