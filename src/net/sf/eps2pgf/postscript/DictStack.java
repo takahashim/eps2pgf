@@ -50,13 +50,15 @@ public class DictStack {
     /** Fill the system dictionary */
     private void fillSystemDict(Interpreter interp) {
         Method[] mthds = interp.getClass().getMethods();
+        HashMap<String, String> replaceNames = new HashMap<String, String>();
+        replaceNames.put("sqBrackLeft",  "[");
+        replaceNames.put("sqBrackRight", "]");
+        replaceNames.put("dblLessBrackets", "<<");
+        replaceNames.put("dblGreaterBrackets", ">>");
         
         for (int i = 0 ; i < mthds.length ; i++) {
             Method mthd = mthds[i];
             String name = mthd.getName();
-            HashMap<String, String> replaceNames = new HashMap<String, String>();
-            replaceNames.put("sqBrackLeft",  "[");
-            replaceNames.put("sqBrackRight", "]");
             
             // PostScript operator methods start with op_ All other methods
             // can be skipped.
@@ -88,8 +90,12 @@ public class DictStack {
     }
     
     /** Pops the topmost dictionary from the stack. */
-    public PSObjectDict popDict() throws PSErrorStackUnderflow {
-        return dictStack.pop();
+    public PSObjectDict popDict() throws PSErrorDictStackUnderflow {
+        try {
+            return dictStack.pop();
+        } catch (PSErrorStackUnderflow e) {
+            throw new PSErrorDictStackUnderflow();
+        }
     }
     
     /** Search the dictionary that defines a specific key. */

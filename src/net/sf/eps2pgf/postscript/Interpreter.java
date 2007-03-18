@@ -309,7 +309,7 @@ public class Interpreter {
     }
     
     /** PostScript op: currentdict */
-    public void op_currentdict() throws PSError {
+    public void op_currentdict() {
         opStack.push(dictStack.peekDict());
     }
     
@@ -350,6 +350,38 @@ public class Interpreter {
         gstate.current.curveto(x1,y1, x2,y2, x3,y3);
     }
     
+    /**
+     * PostScript op: >>
+     * this operator is equivalent to the following code (from PostScript manual)
+     * counttomark 2 idiv
+     * dup dict
+     * begin
+     *   {def} repeat
+     *   pop
+     *   currentdict
+     * end
+     */
+    public void op_dblGreaterBrackets() throws PSErrorStackUnderflow, 
+            PSErrorUnmatchedMark, PSErrorTypeCheck, PSErrorRangeCheck, 
+            PSErrorDictStackUnderflow, IOException, Exception {
+        PSObjectProc defProc = new PSObjectProc("{def}");
+        
+        op_counttomark(); opStack.push(new PSObjectInt(2)); op_idiv();
+        op_dup(); op_dict();
+        op_begin();
+          opStack.push(defProc); op_repeat();
+          op_pop();
+          op_currentdict();
+        op_end();
+    }
+    
+    /**
+     * PostScript op: <<
+     */
+    public void op_dblLessBrackets() {
+        op_mark();
+    }
+    
     /** PostScript op: def */
     public void op_def() throws PSError {
         PSObject value = opStack.pop();
@@ -365,7 +397,8 @@ public class Interpreter {
     }
     
     /** PostScript op: dict */
-    public void op_dict() throws PSError {
+    public void op_dict() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
+            PSErrorRangeCheck {
         int capacity = opStack.pop().toNonNegInt();
         opStack.push(new PSObjectDict(capacity));
     }
@@ -378,12 +411,12 @@ public class Interpreter {
     }
     
     /** PostScript op: dup */
-    public void op_dup() throws PSError {
+    public void op_dup() throws PSErrorStackUnderflow {
         opStack.push(opStack.peek());
     }
     
     /** PostScript op: end */
-    public void op_end() throws PSError {
+    public void op_end() throws PSErrorDictStackUnderflow {
         dictStack.popDict();
     }
     
@@ -490,6 +523,16 @@ public class Interpreter {
     public void op_gsave() throws PSError, IOException {
         gstate.saveGstate();
         exp.startScope();
+    }
+    
+    /**
+     * PostScript op: idiv
+     */
+    public void op_idiv() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        int int2 = opStack.pop().toInt();
+        int int1 = opStack.pop().toInt();
+        int quotient = int1 / int2;
+        opStack.push(new PSObjectInt(quotient));
     }
     
     /** PostScript op: if */
@@ -707,7 +750,7 @@ public class Interpreter {
     }
     
     /** PostScript op: pop */
-    public void op_pop() throws PSError {
+    public void op_pop() throws PSErrorStackUnderflow {
         opStack.pop();
     }
     
@@ -793,7 +836,8 @@ public class Interpreter {
     }    
     
     /** PostScript op: repeat */
-    public void op_repeat() throws Exception {
+    public void op_repeat() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
+            PSErrorRangeCheck, Exception {
         PSObjectProc proc = opStack.pop().toProc();
         int n = opStack.pop().toNonNegInt();
         
