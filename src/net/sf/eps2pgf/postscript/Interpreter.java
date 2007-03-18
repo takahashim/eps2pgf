@@ -163,7 +163,8 @@ public class Interpreter {
      * PostScript op: ashow
      */
     public void op_ashow() throws PSErrorTypeCheck, PSErrorStackUnderflow,
-            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, IOException {
+            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, 
+            PSErrorNoCurrentPoint, IOException {
         log.fine("ashow operator encoutered. ashow is not implemented, instead the normal show is used.");
         PSObjectString string = opStack.pop().toPSString();
         double ay = opStack.pop().toReal();
@@ -1008,8 +1009,10 @@ public class Interpreter {
     public void op_setlinewidth() throws PSError, IOException {
         double lineWidth = opStack.pop().toReal();
         
-        // Apply CTM to linewidth, now the line width is in cm
+        // Apply CTM to linewidth, now the line width is in micrometer
         lineWidth *= gstate.current.CTM.getMeanScaling();
+        // Convert micrometer to mm
+        lineWidth /= 1000;
         
         exp.setlinewidth(lineWidth);
     }
@@ -1033,7 +1036,8 @@ public class Interpreter {
    
     /** PostScript op: show */
     public void op_show() throws PSErrorTypeCheck, PSErrorStackUnderflow,
-            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, IOException {
+            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, 
+            PSErrorNoCurrentPoint, IOException {
         PSObjectString string = opStack.pop().toPSString();
         
         double[] dpos = textHandler.showText(exp, string);

@@ -84,7 +84,7 @@ public interface Exporter {
     
     /**
      * Implements PostScript operator setlinewidth
-     * @param lineWidth Line width in cm
+     * @param lineWidth Line width in mm
      */
     public void setlinewidth(double lineWidth) throws IOException;
     

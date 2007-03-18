@@ -91,21 +91,21 @@ public class PGFExport implements Exporter {
             if (section instanceof Moveto) {
                 // If the path ends with a moveto, the moveto is ignored.
                 if (i < (path.sections.size()-1)) {
-                    String x = coorFormat.format(section.params[0]);
-                    String y = coorFormat.format(section.params[1]);
+                    String x = coorFormat.format(1e-4*section.params[0]);
+                    String y = coorFormat.format(1e-4*section.params[1]);
                     out.write("\\pgfpathmoveto{\\pgfpoint{" + x + "cm}{" + y + "cm}}");
                 }
             } else if (section instanceof Lineto) {
-                String x = coorFormat.format(section.params[0]);
-                String y = coorFormat.format(section.params[1]);
+                String x = coorFormat.format(1e-4*section.params[0]);
+                String y = coorFormat.format(1e-4*section.params[1]);
                 out.write("\\pgfpathlineto{\\pgfpoint{" + x + "cm}{" + y + "cm}}");
             } else if (section instanceof Curveto) {
-                String x1 = coorFormat.format(section.params[0]);
-                String y1 = coorFormat.format(section.params[1]);
-                String x2 = coorFormat.format(section.params[2]);
-                String y2 = coorFormat.format(section.params[3]);
-                String x3 = coorFormat.format(section.params[4]);
-                String y3 = coorFormat.format(section.params[5]);
+                String x1 = coorFormat.format(1e-4*section.params[0]);
+                String y1 = coorFormat.format(1e-4*section.params[1]);
+                String x2 = coorFormat.format(1e-4*section.params[2]);
+                String y2 = coorFormat.format(1e-4*section.params[3]);
+                String x3 = coorFormat.format(1e-4*section.params[4]);
+                String y3 = coorFormat.format(1e-4*section.params[5]);
                 out.write("\\pgfpathcurveto");
                 out.write("{\\pgfpoint{" + x1 + "cm}{" + y1 + "cm}}");
                 out.write("{\\pgfpoint{" + x2 + "cm}{" + y2 + "cm}}");
@@ -234,12 +234,12 @@ public class PGFExport implements Exporter {
     
     /**
      * Implements PostScript operator setlinewidth
-     * @param lineWidth Line width in cm
+     * @param lineWidth Line width in mm
      * @throws java.io.IOException Unable to write output
      */
     public void setlinewidth(double lineWidth) throws IOException {
         lineWidth = Math.abs(lineWidth);
-        out.write("\\pgfsetlinewidth{"+ lengthFormat.format(lineWidth) +"cm}\n");
+        out.write("\\pgfsetlinewidth{"+ lengthFormat.format(lineWidth) +"mm}\n");
     }
     
     /**

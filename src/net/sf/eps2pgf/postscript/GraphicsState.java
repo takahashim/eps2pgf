@@ -38,10 +38,10 @@ public class GraphicsState implements Cloneable {
      * this matrix.
      * TeX points are 1/72.27 inch, while PostScript points are 1/72 inch.
      * That is very annoying. The default CTM converts PostScript pt used
-     * in eps files to centimeters.
+     * in eps files to micrometers.
      * [a b c d tx ty] -> x' = a*x + b*y + tx ; y' = c*x + d*y * ty
      */
-    public PSObjectMatrix CTM = new PSObjectMatrix(2.54/72.0, 0 ,0, 2.54/72.0, 0, 0);
+    public PSObjectMatrix CTM = new PSObjectMatrix(25.4*1000/72.0, 0 ,0, 25.4*1000/72.0, 0, 0);
     
     /**
      * Current position in pt (before CTM is applied).
@@ -130,7 +130,7 @@ public class GraphicsState implements Cloneable {
     
     /**
      * Retrieves the current position in device space. 
-     * @return X- and Y-coordinate in device space (centimeters)
+     * @return X- and Y-coordinate in device space (micrometers)
      */
     public double[] getCurrentPosInDeviceSpace() throws PSErrorNoCurrentPoint {
         if (path.sections.size() == 0) {
