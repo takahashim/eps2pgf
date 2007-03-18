@@ -305,4 +305,11 @@ public class PSObjectArray extends PSObject {
         return new PSObjectArray(objs);
     }
 
+    /**
+     * Implements PostScript operate: length
+     * @return Length of this object
+     */
+    public int length() {
+        return size();
+    }
 }

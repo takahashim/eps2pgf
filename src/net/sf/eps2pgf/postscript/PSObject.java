@@ -236,4 +236,13 @@ public class PSObject implements Cloneable {
     public PSObject bind(Interpreter interp) throws PSErrorTypeCheck {
         return this;
     }
+    
+    /**
+     * Implements PostScript operate: length
+     * @return Length of this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to get the length of this object type
+     */
+    public int length() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
 }
