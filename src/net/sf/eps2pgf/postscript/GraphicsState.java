@@ -22,6 +22,7 @@
 package net.sf.eps2pgf.postscript;
 
 import java.util.logging.*;
+import net.sf.eps2pgf.postscript.errors.PSErrorNoCurrentPoint;
 
 /**
  * Structure that holds the graphics state (graphic control parameter).
@@ -131,7 +132,10 @@ public class GraphicsState implements Cloneable {
      * Retrieves the current position in device space. 
      * @return X- and Y-coordinate in device space (centimeters)
      */
-    public double[] getCurrentPosInDeviceSpace() {
+    public double[] getCurrentPosInDeviceSpace() throws PSErrorNoCurrentPoint {
+        if (path.sections.size() == 0) {
+            throw new PSErrorNoCurrentPoint();
+        }
         return path.sections.get(path.sections.size() - 1).deviceCoor();
     }
     

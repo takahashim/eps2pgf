@@ -201,6 +201,16 @@ public class PSObjectMatrix extends PSObject {
     }
     
     /**
+     * Applies inverse transformation to a point
+     * @param x X-coordinate
+     * @param y Y-coordinate
+     * @return Inverse transformed coordinate
+     */
+    public double[] inverseApply(double[] coor) {
+        return inverseApply(coor[0], coor[1]);
+    }
+    
+    /**
      * Returns the mean scaling factor described by this matrix
      * @return Mean scaling factor (= mean(sqrt(a^2+c^2) + sqrt(b^2+d^2)) )
      */

@@ -327,6 +327,16 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: currentpoint
+     */
+    public void op_currentpoint() throws PSErrorNoCurrentPoint {
+        double[] currentDevice = gstate.current.getCurrentPosInDeviceSpace();
+        double[] currentUser = gstate.current.CTM.inverseApply(currentDevice);
+        opStack.push(new PSObjectReal(currentUser[0]));
+        opStack.push(new PSObjectReal(currentUser[1]));
+    }
+    
+    /**
      * PostScript op: curveto
      */
     public void op_curveto() throws PSErrorStackUnderflow, PSErrorTypeCheck {
