@@ -38,8 +38,8 @@ public class Moveto extends PathSection implements Cloneable {
     
     /**
      * Create a new Moveto instance
-     * @param x X-coordinate (in device coordinates, cm)
-     * @param y Y-coordinate (in device coordinates, cm)
+     * @param x X-coordinate (in device coordinates, micrometer)
+     * @param y Y-coordinate (in device coordinates, micrometer)
      * @param docx user space X-coordinate before CTM (in pt)
      * @param docy user space Y-coordinate before CTM (in pt)
      */

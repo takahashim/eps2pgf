@@ -47,7 +47,7 @@ public class TextHandler {
      */
     public double[] showText(Exporter exp, PSObjectString string) 
             throws PSErrorTypeCheck, PSErrorRangeCheck, PSErrorUndefined, 
-            PSErrorUnimplemented, IOException {
+            PSErrorUnimplemented, PSErrorNoCurrentPoint, IOException {
         PSObjectFont currentFont = gstate.current.font;
         
         PSObjectArray charNames = string.decode(currentFont.getEncoding());
@@ -59,7 +59,7 @@ public class TextHandler {
         // Calculate fontsize in points (=1/72 inch)
         PSObjectMatrix fontMatrix = currentFont.getFontMatrix();
         double scaling = fontMatrix.getMeanScaling() * gstate.current.CTM.getMeanScaling();
-        double fontsize = scaling / 2.54 * 72;  // convert cm to pt
+        double fontsize = scaling / 1000 / 25.4 * 72;  // convert micrometer to pt
         
         BoundingBox bbox = currentFont.getBBox(charNames);
         
