@@ -46,6 +46,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
     public PSObjectFont() {
         dict = new PSObjectDict();
         setFID();
+        dict.setKey("FontType", new PSObjectInt(1));
+        dict.setKey("FontMatrix", new PSObjectMatrix(1,0,0,1,0,0));
     }
     
     /**
