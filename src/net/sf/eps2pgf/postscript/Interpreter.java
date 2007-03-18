@@ -579,14 +579,9 @@ public class Interpreter {
     }
     
     /** PostScript op: length */
-    public void op_length() throws PSError {
+    public void op_length() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.pop();
-        if ((obj instanceof PSObjectDict) || (obj instanceof PSObjectFont)) {
-            PSObjectDict dict = obj.toDict();
-            opStack.push(new PSObjectInt(dict.length()));
-        } else {
-            throw new PSErrorUnimplemented("operator: length not FULLY implemented");
-        }
+        opStack.push(new PSObjectInt(obj.length()));
     }
     
     /** PostScript op: lineto */

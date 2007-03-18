@@ -164,4 +164,13 @@ public class PSObjectName extends PSObject {
             }
         }
     }
+    
+    /**
+     * Implements PostScript operate: length
+     * @return Length of this object
+     */
+    public int length() {
+        return name.length();
+    }
+
 }

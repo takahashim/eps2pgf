@@ -123,6 +123,14 @@ public class PSObjectString extends PSObject {
     }
     
     /**
+     * Implements PostScript operate: length
+     * @return Length of this object
+     */
+    public int length() {
+        return value.length();
+    }
+
+    /**
      * Convert this object to a string object, if possible
      * @return PostScript string object representation of this object
      */
