@@ -179,12 +179,12 @@ public class PGFExport implements Exporter {
         try {
             int i = 0;
             while(true) {
-                out.write("{" + lengthFormat.format(array.get(i++).toReal()) + "cm}");
+                out.write("{" + lengthFormat.format(1e-4*array.get(i++).toReal()) + "cm}");
             }
         } catch (PSErrorRangeCheck e) {
                 
         } finally {
-            out.write("}{" + lengthFormat.format(offset) + "cm}\n");
+            out.write("}{" + lengthFormat.format(1e-4*offset) + "cm}\n");
         }
     }
     
@@ -234,12 +234,12 @@ public class PGFExport implements Exporter {
     
     /**
      * Implements PostScript operator setlinewidth
-     * @param lineWidth Line width in mm
+     * @param lineWidth Line width in micrometer
      * @throws java.io.IOException Unable to write output
      */
     public void setlinewidth(double lineWidth) throws IOException {
         lineWidth = Math.abs(lineWidth);
-        out.write("\\pgfsetlinewidth{"+ lengthFormat.format(lineWidth) +"mm}\n");
+        out.write("\\pgfsetlinewidth{"+ lengthFormat.format(1e-3*lineWidth) +"mm}\n");
     }
     
     /**
@@ -300,7 +300,7 @@ public class PGFExport implements Exporter {
     /**
      * Draws text
      * @param text Exact text to draw
-     * @param position Text anchor point in [cm, cm]
+     * @param position Text anchor point in [micrometer, micrometer]
      * @param angle Text angle in degrees
      * @param fontsize in PostScript pt (= 1/72 pt)
      * @param anchor String with two characters:
@@ -311,8 +311,8 @@ public class PGFExport implements Exporter {
      */
     public void show(String text, double[] position, double angle,
             double fontsize, String anchor) throws IOException {
-        String x = coorFormat.format(position[0]);
-        String y = coorFormat.format(position[1]);
+        String x = coorFormat.format(1e-4*position[0]);
+        String y = coorFormat.format(1e-4*position[1]);
         
         // Process anchor
         String posOpts = "";
@@ -347,25 +347,25 @@ public class PGFExport implements Exporter {
     
     /**
      * Draws a red dot (usefull for debugging, don't use otherwise)
-     * @param x X-coordinate (cm)
-     * @param y Y-coordinate (cm)
+     * @param x X-coordinate (micrometer)
+     * @param y Y-coordinate (micrometer)
      * @throws java.io.IOException Unable to write output
      */
     public void drawDot(double x, double y) throws IOException {
         out.write("\\begin{pgfscope}\\pgfsetfillcolor{red}\\pgfpathcircle{\\pgfpoint{"
-                + x + "cm}{" + y + "cm}}{0.25pt}\\pgfusepath{fill}\\end{pgfscope}\n");
+                + 1e-4*x + "cm}{" + 1e-4*y + "cm}}{0.25pt}\\pgfusepath{fill}\\end{pgfscope}\n");
     }
     
     /**
      * Draws a blue rectangle (usefull for debugging, don't use otherwise)
-     * @param lowerLeft X- and Y-coordinate (in cm) of lower left corner
-     * @param upperRight X- and Y-coordinate (in cm) of upper right corner
+     * @param lowerLeft X- and Y-coordinate (in micrometer) of lower left corner
+     * @param upperRight X- and Y-coordinate (in micrometer) of upper right corner
      * @throws java.io.IOException Unable to write output
      */
     public void drawRect(double[] lowerLeft, double[] upperRight) throws IOException {
         out.write("\\begin{pgfscope}\\pgfsetstrokecolor{blue}\\pgfsetlinewidth{0.1pt}\\pgfpathrectangle{\\pgfpoint{"
-                + lowerLeft[0] + "cm}{" + lowerLeft[1] + "cm}}{\\pgfpoint{"
-                + (upperRight[0]-lowerLeft[0]) +"cm}{" + (upperRight[1]-lowerLeft[1])
+                + 1e-4*lowerLeft[0] + "cm}{" + 1e-4*lowerLeft[1] + "cm}}{\\pgfpoint{"
+                + 1e-4*(upperRight[0]-lowerLeft[0]) +"cm}{" + 1e-4*(upperRight[1]-lowerLeft[1])
                 + "cm}}\\pgfusepath{stroke}\\end{pgfscope}\n");
     }
 
