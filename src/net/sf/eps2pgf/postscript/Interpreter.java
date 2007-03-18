@@ -326,6 +326,19 @@ public class Interpreter {
         opStack.push(obj);
     }
     
+    /**
+     * PostScript op: curveto
+     */
+    public void op_curveto() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        double y3 = opStack.pop().toReal();
+        double x3 = opStack.pop().toReal();
+        double y2 = opStack.pop().toReal();
+        double x2 = opStack.pop().toReal();
+        double y1 = opStack.pop().toReal();
+        double x1 = opStack.pop().toReal();
+        gstate.current.curveto(x1,y1, x2,y2, x3,y3);
+    }
+    
     /** PostScript op: def */
     public void op_def() throws PSError {
         PSObject value = opStack.pop();

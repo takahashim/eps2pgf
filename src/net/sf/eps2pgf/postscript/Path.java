@@ -70,6 +70,16 @@ public class Path implements Cloneable {
     }
     
     /**
+     * Adds a curveto to this path
+     * @param control1 First Bezier control point
+     * @param control2 Second Bezier control point
+     * @param end Endpoint
+     */
+    public void curveto(double[] control1, double[] control2, double[] end) {
+        sections.add(new Curveto(control1, control2, end));
+    }
+    
+    /**
      * Add a straight line to the beginning of this subpath and start a 
      * new subpath.
      * @return Returns the starting coordinate of this path. (in document

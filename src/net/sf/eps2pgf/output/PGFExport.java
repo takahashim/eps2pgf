@@ -99,6 +99,17 @@ public class PGFExport implements Exporter {
                 String x = coorFormat.format(section.params[0]);
                 String y = coorFormat.format(section.params[1]);
                 out.write("\\pgfpathlineto{\\pgfpoint{" + x + "cm}{" + y + "cm}}");
+            } else if (section instanceof Curveto) {
+                String x1 = coorFormat.format(section.params[0]);
+                String y1 = coorFormat.format(section.params[1]);
+                String x2 = coorFormat.format(section.params[2]);
+                String y2 = coorFormat.format(section.params[3]);
+                String x3 = coorFormat.format(section.params[4]);
+                String y3 = coorFormat.format(section.params[5]);
+                out.write("\\pgfpathcurveto");
+                out.write("{\\pgfpoint{" + x1 + "cm}{" + y1 + "cm}}");
+                out.write("{\\pgfpoint{" + x2 + "cm}{" + y2 + "cm}}");
+                out.write("{\\pgfpoint{" + x3 + "cm}{" + y3 + "cm}}");
             } else if (section instanceof Closepath) {
                 out.write("\\pgfpathclose");
             } else {
