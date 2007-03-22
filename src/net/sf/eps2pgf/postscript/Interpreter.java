@@ -1070,6 +1070,15 @@ public class Interpreter {
         }
         exp.setmiterlimit(num);
     }
+    
+    /**
+     * PostScript op: shfill
+     */
+    public void op_shfill() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
+            PSErrorUnimplemented, PSErrorRangeCheck, IOException {
+        PSObjectDict dict = opStack.pop().toDict();
+        exp.shfill(dict);
+    }
    
     /** PostScript op: show */
     public void op_show() throws PSErrorTypeCheck, PSErrorStackUnderflow,

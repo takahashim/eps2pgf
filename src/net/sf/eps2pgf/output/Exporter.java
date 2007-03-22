@@ -61,6 +61,12 @@ public interface Exporter {
      * See the PostScript manual (fill operator) for more info.
      */
     public void eofill(Path path) throws IOException, PSErrorUnimplemented;
+    
+    /**
+     * Shading fill (shfill PostScript operator)
+     */
+    public void shfill(PSObjectDict dict) throws PSErrorUnimplemented, 
+            PSErrorTypeCheck, PSErrorRangeCheck, IOException;
 
     /**
      * Implements PostScript stroke operator
