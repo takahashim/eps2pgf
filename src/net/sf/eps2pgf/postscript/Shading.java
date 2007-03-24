@@ -32,6 +32,33 @@ public class Shading {
     String ColorSpace;
     
     /**
+     * Create a new shading of the type defined in the supplied shading dictionary.
+     * @param dict PostScript shading dictionary
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck One or more required fields were not found in the dictionary
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One of the fields has an invalid type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented A feature is not (yet) implemented
+     * @return New shading object
+     */
+    public static Shading newShading(PSObjectDict dict) throws PSErrorRangeCheck, 
+            PSErrorTypeCheck, PSErrorUnimplemented {
+        PSObject shadingTypeObj = dict.lookup("ShadingType");
+        if (shadingTypeObj == null) {
+            throw new PSErrorRangeCheck();
+        }
+
+        Shading newShading;
+        switch (shadingTypeObj.toInt()) {
+            case 3:
+                newShading = new RadialShading(dict);
+                break;
+            default:
+                throw new PSErrorUnimplemented("Shading type " + shadingTypeObj.toInt());
+        }
+        
+        return newShading;
+    }
+    
+    /**
      * Load the entries common to all types of shading dictionaries
      */
     void loadCommonEntries(PSObjectDict dict) throws PSErrorRangeCheck, 

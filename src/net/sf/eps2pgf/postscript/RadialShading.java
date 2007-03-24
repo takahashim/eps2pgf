@@ -42,7 +42,12 @@ public class RadialShading extends Shading {
     /**
      * Creates a new instance of RadialShading
      */
-    public RadialShading(PSObjectDict dict) throws PSErrorTypeCheck, PSErrorRangeCheck {
+    public RadialShading(PSObjectDict dict) throws PSErrorTypeCheck, 
+            PSErrorRangeCheck, PSErrorUnimplemented {
+        // First, load the entries common to all shading types
+        loadCommonEntries(dict);
+        
+        // Load all type specific entries
         PSObjectArray coords = dict.lookup("Coords").toArray();
         x0 = coords.get(0).toReal();
         y0 = coords.get(1).toReal();
@@ -70,6 +75,16 @@ public class RadialShading extends Shading {
         }
         
         PSObject functionObj = dict.lookup("Function");
+        if (functionObj == null) {
+            throw new PSErrorRangeCheck();
+        }
+        if (functionObj instanceof PSObjectDict) {
+            
+        } else if (functionObj instanceof PSObjectArray) {
+            throw new PSErrorUnimplemented("Defining a function with an array");
+        } else {
+            throw new PSErrorTypeCheck();
+        }
     }
     
     

@@ -129,6 +129,21 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
+     * Return value associated with key. Same as lookup, except that a
+     * PSErrorRangeCheck is thrown when the item doesn't exist.
+     * @param key Key for which the associated value will be returned
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Requested key is not defined in this dictionary
+     * @return Value associated with key
+     */
+    public PSObject get(String key) throws PSErrorRangeCheck {
+        PSObject value = lookup(key);
+        if (value == null) {
+            throw new PSErrorRangeCheck();
+        }
+        return value;
+    }
+    
+    /**
      * Checks whether this dictionary has a specific key.
      * @param key Key of the entry to check.
      * @return True when the entry exists, false otherwise.
