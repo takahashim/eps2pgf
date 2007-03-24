@@ -252,6 +252,39 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * Converts this PostScript array to a double[] array with the requested size.
+     * @param k Required number of items in the array. If the actual number of
+     * items is different a PSErrorRangeCheck is thrown.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck The number of items in this array is not the same as the required
+     * number of items.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One or more items in this array can not be converted to a double.
+     * @return Array with doubles
+     */
+    public double[] toDoubleArray(int k) throws PSErrorRangeCheck, 
+            PSErrorTypeCheck {
+        if (k != size()) {
+            throw new PSErrorRangeCheck();
+        }
+        return toDoubleArray();
+    }
+    
+    /**
+     * Convert this PostScript array to a double[] array.
+     */
+    public double[] toDoubleArray() throws PSErrorTypeCheck {
+        double newArray[] = new double[size()];
+        try {
+            for (int i = 0 ; i < size() ; i++) {
+                newArray[i] = get(i).toReal();
+            }
+        } catch (PSErrorRangeCheck e) {
+            // This can never happen
+        }
+        
+        return newArray;
+    }
+    
+    /**
      * Convert this object to a matrix, if possible.
      * @throws net.sf.eps2pgf.postscript.errors.PSError Array is not a valid matrix
      * @return Matrix representation of this array

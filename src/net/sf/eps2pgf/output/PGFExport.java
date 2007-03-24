@@ -171,65 +171,7 @@ public class PGFExport implements Exporter {
      */
     public void shfill(PSObjectDict dict) throws PSErrorTypeCheck, 
             PSErrorUnimplemented, PSErrorRangeCheck, IOException {
-        PSObject shadingTypeObj = dict.lookup("ShadingType");
-        if (shadingTypeObj == null) {
-            throw new PSErrorRangeCheck();
-        }
-        PSObject colorSpaceObj = dict.lookup("ColorSpace");
-        if (colorSpaceObj == null) {
-            throw new PSErrorRangeCheck();
-        }
-        
-        System.out.println("ShadingType " + shadingTypeObj.isis());
-        System.out.println("ColorSpace " + colorSpaceObj.isis());
-        
-        if (colorSpaceObj.toDictKey().equals("DeviveRGB")) {
-            switch (shadingTypeObj.toInt()) {
-                case 3:
-                    // radial shading
-                    
-                    break;
-                default:
-                    throw new PSErrorUnimplemented("ShadingType " + shadingTypeObj.toInt());
-            }
-            
-        } else {
-            throw new PSErrorUnimplemented("Colorspace " + colorSpaceObj.toDictKey());
-        }
-    }
-    
-    /**
-     * Declare radial shading
-     */
-    void declareRadialShading(PSObjectDict dict) throws PSErrorTypeCheck, 
-            PSErrorRangeCheck {
-        PSObjectArray coords = dict.lookup("Coords").toArray();
-        double x0 = coords.get(0).toReal();
-        double y0 = coords.get(1).toReal();
-        double r0 = coords.get(2).toReal();
-        double x1 = coords.get(3).toReal();
-        double y1 = coords.get(4).toReal();
-        double r1 = coords.get(5).toReal();
-        
-        PSObjectArray domain = dict.lookup("Domain").toArray();
-        double t0, t1;
-        if (domain == null) {
-            t0 = 0;
-            t1 = 1;
-        } else {
-            t0 = domain.get(0).toReal();
-            t1 = domain.get(1).toReal();
-        }
-        
-        PSObjectArray extend = dict.lookup("Extend").toArray();
-        boolean extend0, extend1;
-        if (extend == null) {
-            extend0 = false;
-            extend1 = false;
-        } else {
-            extend0 = extend.get(0).toBool();
-            extend1 = extend.get(1).toBool();
-        }
+        Shading shading = Shading.newShading(dict);
     }
     
     /**
