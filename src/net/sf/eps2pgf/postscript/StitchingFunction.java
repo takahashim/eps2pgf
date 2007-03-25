@@ -26,7 +26,7 @@ import java.util.*;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
- *
+ * Represents a PostScript function of type 3 (stitching function)
  * @author Paul Wagenaars
  */
 public class StitchingFunction extends PSFunction {
@@ -42,7 +42,13 @@ public class StitchingFunction extends PSFunction {
     // domain of the the domain de?ned by corresponding function. 
     double[] encode;
     
-    /** Creates a new instance of StitchingFunction */
+    /**
+     * Creates a new instance of StitchingFunction
+     * @param dict Dictionary describing the function
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck A required key was not found or one of the entries is out of range
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One of the entries has an invalid type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented A feature is not (yet) implemented
+     */
     public StitchingFunction(PSObjectDict dict) throws PSErrorRangeCheck, 
             PSErrorTypeCheck, PSErrorUnimplemented {
         // First, load all common entries
@@ -68,4 +74,49 @@ public class StitchingFunction extends PSFunction {
         encode = dict.get("Encode").toArray().toDoubleArray(2*k);
     }
     
+    /**
+     * Evaluate this function for a set of input values
+     * @param input values
+     * @return output values
+     */
+    public double[] evaluate(double[] input) throws PSErrorRangeCheck, 
+            PSErrorUnimplemented {
+        input = evaluatePreProcess(input);
+        
+        double x = input[0];
+        
+        // Search in which range x falls
+        int subFunc = -1;
+        for (int i = 0 ; i < (k-1) ; i++) {
+            if (x < bounds[i]) {
+                subFunc = i;
+                break;
+            }
+        }
+        if (subFunc < 0) {
+            subFunc = k-1;
+        }
+        
+        // encode x value as described by encoding vector
+        double bound0;
+        double bound1;
+        if (subFunc == 0) {
+            bound0 = domain[0];
+            bound1 = bounds[0];
+        } else if (subFunc == (k-1)) {
+            bound0 = bounds[k-1];
+            bound1 = domain[1];
+        } else {
+            bound0 = bounds[subFunc-1];
+            bound1 = bounds[subFunc];
+        }
+        double encode0 = encode[2*subFunc];
+        double encode1 = encode[2*subFunc+1];
+        x = (x-bound0)/(bound1-bound0) * (encode1-encode0) + encode0;
+        
+        double[] encInput = {x};
+        double[] y = functions.get(subFunc).evaluate(encInput);
+        
+        return evaluatePostProcess(y);
+    }
 }
