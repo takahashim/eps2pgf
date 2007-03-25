@@ -33,9 +33,6 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class PGFExport implements Exporter {
-    // All dimension will be rounded to this precision (in centimetres)
-    static final double precision = 0.01;
-    
     // Coordinate format (used to format X- and Y-coordinates)
     static final DecimalFormat coorFormat = new DecimalFormat("#.##", 
             new DecimalFormatSymbols(Locale.US));
@@ -46,6 +43,10 @@ public class PGFExport implements Exporter {
     
     // Font size format (used to set fontsize in pt)
     static final DecimalFormat fontSizeFormat = new DecimalFormat("#.##",
+            new DecimalFormatSymbols(Locale.US));
+    
+    // Colors (in range from 0.0 to 1.0) has at least 16-bit per channel accuracy
+    static final DecimalFormat colorFormat = new DecimalFormat("#.######",
             new DecimalFormatSymbols(Locale.US));
     
     int scopeDepth = 0;
@@ -169,9 +170,47 @@ public class PGFExport implements Exporter {
     /**
      * Shading fill (shfill PostScript operator)
      */
-    public void shfill(PSObjectDict dict) throws PSErrorTypeCheck, 
+    public void shfill(PSObjectDict dict, PSObjectMatrix CTM) throws PSErrorTypeCheck, 
             PSErrorUnimplemented, PSErrorRangeCheck, IOException {
         Shading shading = Shading.newShading(dict);
+        if (shading instanceof RadialShading) {
+            radialShading((RadialShading)shading, CTM);
+        } else {
+            throw new PSErrorUnimplemented("Shading of this type " + shading);
+        }
+    }
+    
+    /**
+     * Create a radial shading
+     */
+    void radialShading(RadialShading shading, PSObjectMatrix CTM) throws IOException, 
+            PSErrorRangeCheck, PSErrorUnimplemented {
+        // Convert coordinates and radii from user space to coordinate space
+        double[] coor0 = CTM.apply(shading.getCoord(0.0));
+        double[] coor1 = CTM.apply(shading.getCoord(1.0));
+        double scaling = CTM.getMeanScaling();
+        
+        startScope();
+        out.write("\\pgfdeclareradialshading{eps2pgfshading}{\\pgfpoint{");
+        out.write(coorFormat.format(1e-4*(coor1[0]-coor0[0])) + "cm}{");
+        out.write(coorFormat.format(1e-4*(coor1[1]-coor0[1])) + "cm}}{");
+        for (double s = 0.0 ; s < 1 ; s += 0.01) {
+            if (s > 0.0) {
+                out.write(";");
+            }
+            double r = scaling*shading.getRadius(s);
+            double[] color = shading.getColor(s);
+            out.write("rgb(" + lengthFormat.format(1e-4*r) + "cm)=");
+            out.write("(" + colorFormat.format(color[0]));
+            out.write("," + colorFormat.format(color[1]));
+            out.write("," + colorFormat.format(color[2]) + ")");
+        }
+        out.write("}");
+        out.write("\\pgflowlevelobj{\\pgftransformshift{\\pgfpoint{");
+        out.write(lengthFormat.format(1e-4*coor0[0]) + "cm}{");
+        out.write(lengthFormat.format(1e-4*coor0[1]) + "cm}}}");
+        out.write("{\\pgfuseshading{eps2pgfshading}}");
+        endScope();
     }
     
     /**
@@ -288,7 +327,8 @@ public class PGFExport implements Exporter {
         r = Math.max(Math.min(r, 1.0), 0.0);
         g = Math.max(Math.min(g, 1.0), 0.0);
         b = Math.max(Math.min(b, 1.0), 0.0);
-        out.write("\\definecolor{eps2pgf_color}{rgb}{" + r + "," + g + "," + b + "}");
+        out.write("\\definecolor{eps2pgf_color}{rgb}{" + colorFormat.format(r) +
+                "," + colorFormat.format(g) + "," + colorFormat.format(b) + "}");
         out.write("\\pgfsetstrokecolor{eps2pgf_color}");
         out.write("\\pgfsetfillcolor{eps2pgf_color}\n");
     }
@@ -300,7 +340,7 @@ public class PGFExport implements Exporter {
      */
     public void setColor(double level) throws IOException {
         level = Math.max(Math.min(level, 1.0), 0.0);
-        out.write("\\definecolor{eps2pgf_color}{gray}{" + level + "}");
+        out.write("\\definecolor{eps2pgf_color}{gray}{" + colorFormat.format(level) + "}");
         out.write("\\pgfsetstrokecolor{eps2pgf_color}");
         out.write("\\pgfsetfillcolor{eps2pgf_color}\n");        
     }

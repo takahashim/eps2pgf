@@ -63,10 +63,7 @@ public class Shading {
      */
     void loadCommonEntries(PSObjectDict dict) throws PSErrorRangeCheck, 
             PSErrorUnimplemented, PSErrorTypeCheck {
-        PSObject colSpaceObj = dict.lookup("ColorSpace");
-        if (colSpaceObj == null) {
-            throw new PSErrorRangeCheck();
-        }
+        PSObject colSpaceObj = dict.get("ColorSpace");
         if (colSpaceObj instanceof PSObjectName) {
             ColorSpace = ((PSObjectName)colSpaceObj).name;
         } else if (colSpaceObj instanceof PSObjectArray) {

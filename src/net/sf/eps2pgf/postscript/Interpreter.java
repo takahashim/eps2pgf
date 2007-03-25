@@ -1077,7 +1077,7 @@ public class Interpreter {
     public void op_shfill() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
             PSErrorUnimplemented, PSErrorRangeCheck, IOException {
         PSObjectDict dict = opStack.pop().toDict();
-        exp.shfill(dict);
+        exp.shfill(dict, gstate.current.CTM);
     }
    
     /** PostScript op: show */

@@ -39,6 +39,8 @@ public class RadialShading extends Shading {
     // Extend shading beyond the starting and ending circles
     boolean extendStart, extendEnd;
     
+    PSFunction function;
+    
     /**
      * Creates a new instance of RadialShading
      */
@@ -48,7 +50,7 @@ public class RadialShading extends Shading {
         loadCommonEntries(dict);
         
         // Load all type specific entries
-        PSObjectArray coords = dict.lookup("Coords").toArray();
+        PSObjectArray coords = dict.get("Coords").toArray();
         x0 = coords.get(0).toReal();
         y0 = coords.get(1).toReal();
         r0 = coords.get(2).toReal();
@@ -74,12 +76,9 @@ public class RadialShading extends Shading {
             extendEnd = extend.get(1).toBool();
         }
         
-        PSObject functionObj = dict.lookup("Function");
-        if (functionObj == null) {
-            throw new PSErrorRangeCheck();
-        }
+        PSObject functionObj = dict.get("Function");
         if (functionObj instanceof PSObjectDict) {
-            
+            function = PSFunction.newFunction(functionObj.toDict());
         } else if (functionObj instanceof PSObjectArray) {
             throw new PSErrorUnimplemented("Defining a function with an array");
         } else {
@@ -87,7 +86,49 @@ public class RadialShading extends Shading {
         }
     }
     
+    /**
+     * Get the X- and Y-coordinate corresponding to a certain value of s
+     * @param s Parametric variable ranging from 0.0 to 1.0, where 0.0 corresponds
+     *          with the starting circle and 1.0 with the ending circle.
+     * @return Array of two values: X-coordinate and Y-coordinate
+     */
+    public double[] getCoord(double s) {
+        double[] out = new double[2];
+        out[0] = x0 + s*(x1-x0);
+        out[1] = y0 + s*(y1-y0);
+        return out;
+    }
     
+    /**
+     * Get the radius corresponding to a certain value of s
+     * @param s Parametric variable ranging from 0.0 to 1.0, where 0.0 corresponds
+     *          with the starting circle and 1.0 with the ending circle.
+     * @return Radius for the requested s
+     */
+    public double getRadius(double s) {
+        return r0 + s*(r1-r0);
+    }
     
-    
+    /**
+     * Gets the color corresponding to a certain value of s
+     * @param s Parametric variable ranging from 0.0 to 1.0, where 0.0 corresponds
+     *          with the starting circle and 1.0 with the ending circle.
+     * @return Array with values of color components. Check the ColorSpace for which
+     *         value in the array is which component.
+     */
+    public double[] getColor(double s) throws PSErrorRangeCheck, 
+            PSErrorUnimplemented {
+        // First, we must convert s to t
+        double t = s*(t1-t0) + t0;
+        double[] in = {t};
+        double[] color = function.evaluate(in);
+        for (int i = 0 ; i < color.length ; i++) {
+            if (color[i] < 0) {
+                color[i] = 0.0;
+            } else if (color[i] > 1) {
+                color[i] = 1.0;
+            }
+        }
+        return color;
+    }
 }
