@@ -65,7 +65,7 @@ public interface Exporter {
     /**
      * Shading fill (shfill PostScript operator)
      */
-    public void shfill(PSObjectDict dict, PSObjectMatrix CTM) throws PSErrorTypeCheck, 
+    public void shfill(PSObjectDict dict, GraphicsState gstate) throws PSErrorTypeCheck, 
             PSErrorUnimplemented, PSErrorRangeCheck, IOException;
 
     /**

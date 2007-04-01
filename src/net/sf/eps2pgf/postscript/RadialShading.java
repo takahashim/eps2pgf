@@ -21,6 +21,8 @@
 
 package net.sf.eps2pgf.postscript;
 
+import java.util.*;
+
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
@@ -28,21 +30,52 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class RadialShading extends Shading {
-    // Coordinate and radius of starting circle
-    double x0, y0, r0;
-    // Coordinate and radius of ending circle
-    double x1, y1, r1;
+    /**
+     * X-coordinate of first point (see PostScript doc for more info)
+     */
+    public double x0;
     
-    // Limiting values of parametric variable t
-    double t0, t1;
+    /**
+     * Y-coordinate of first point (see PostScript doc for more info)
+     */
+    public double y0;
+
+    /**
+     * First radius (see PostScript doc for more info)
+     */
+    public double r0;
+
+    /**
+     * X-coordinate of second point (see PostScript doc for more info)
+     */
+    public double x1;
+
+    /**
+     * Y-coordinate of second point (see PostScript doc for more info)
+     */
+    public double y1;
+
+    /**
+     * Second radius (see PostScript doc for more info)
+     */
+    public double r1;
     
-    // Extend shading beyond the starting and ending circles
-    boolean extendStart, extendEnd;
+    /**
+     * Extend shading beyond first point? (see PostScript doc for more info)
+     */
+    public boolean extend0;
     
-    PSFunction function;
+    /**
+     * Extend shading beyong second point? (see PostScript doc for more info)
+     */
+    public boolean extend1;
     
     /**
      * Creates a new instance of RadialShading
+     * @param dict PostScript dictionary describing the shading
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One or more entries has an invalid type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck One or more entries are out of range
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented A required feature is not implemented
      */
     public RadialShading(PSObjectDict dict) throws PSErrorTypeCheck, 
             PSErrorRangeCheck, PSErrorUnimplemented {
@@ -58,32 +91,15 @@ public class RadialShading extends Shading {
         y1 = coords.get(4).toReal();
         r1 = coords.get(5).toReal();
         
-        PSObjectArray domain = dict.lookup("Domain").toArray();
-        if (domain == null) {
-            t0 = 0;
-            t1 = 1;
-        } else {
-            t0 = domain.get(0).toReal();
-            t1 = domain.get(1).toReal();
-        }
-        
         PSObjectArray extend = dict.lookup("Extend").toArray();
         if (extend == null) {
-            extendStart = false;
-            extendEnd = false;
+            extend0 = false;
+            extend1 = false;
         } else {
-            extendStart = extend.get(0).toBool();
-            extendEnd = extend.get(1).toBool();
+            extend0 = extend.get(0).toBool();
+            extend1 = extend.get(1).toBool();
         }
         
-        PSObject functionObj = dict.get("Function");
-        if (functionObj instanceof PSObjectDict) {
-            function = PSFunction.newFunction(functionObj.toDict());
-        } else if (functionObj instanceof PSObjectArray) {
-            throw new PSErrorUnimplemented("Defining a function with an array");
-        } else {
-            throw new PSErrorTypeCheck();
-        }
     }
     
     /**
@@ -110,25 +126,87 @@ public class RadialShading extends Shading {
     }
     
     /**
-     * Gets the color corresponding to a certain value of s
-     * @param s Parametric variable ranging from 0.0 to 1.0, where 0.0 corresponds
-     *          with the starting circle and 1.0 with the ending circle.
-     * @return Array with values of color components. Check the ColorSpace for which
-     *         value in the array is which component.
+     * Find the s value for a given radius (inverse of getRadius)
+     * @param radius Radius
+     * @return S-value corresponding to radius
      */
-    public double[] getColor(double s) throws PSErrorRangeCheck, 
-            PSErrorUnimplemented {
-        // First, we must convert s to t
-        double t = s*(t1-t0) + t0;
-        double[] in = {t};
-        double[] color = function.evaluate(in);
-        for (int i = 0 ; i < color.length ; i++) {
-            if (color[i] < 0) {
-                color[i] = 0.0;
-            } else if (color[i] > 1) {
-                color[i] = 1.0;
-            }
+    public double getSForRadius(double radius) {
+        if (r1 != r0) {
+            return (radius - r0)/(r1-r0);
+        } else {
+            return Double.POSITIVE_INFINITY;
         }
-        return color;
+    }
+    
+    /**
+     * Find the s value for given x-value
+     * @param x X-coordinate
+     * @return S-value corresponding to x-coordinate
+     */
+    public double getSForXValue(double x) {
+        if (x0 != x1) {
+            return (x - x0)/(x1-x0);
+        } else {
+            return Double.POSITIVE_INFINITY;
+        }
+    }
+
+    /**
+     * Find the s value for given y-value
+     * @param y Y-coordinate
+     * @return S-value corresponding to y-coordinate
+     */
+    public double getSForYValue(double y) {
+        if (y0 != y1) {
+            return (y - y0)/(y1-y0);
+        } else {
+            return Double.POSITIVE_INFINITY;
+        }
+    }
+    
+    /**
+     * Find the smallest (absolute) s value (within the given limit) for
+     * which the x-value or y-value is -<value> or <value> or the radius
+     * is zero or <value>.
+     * @param value Distance
+     * @param minS Minimal s-value
+     * @param maxS Maximum s-value
+     * @return Smallest s-value corresponding to distance
+     */
+    public double getSForDistance(double value, double minS, double maxS) {
+        double ret = Double.POSITIVE_INFINITY;
+        double s;
+        
+        // Check radius
+        s = getSForRadius(0);
+        if ((s >= minS) && (s <= maxS) && (Math.abs(s) < Math.abs(ret))) {
+            ret = s;
+        }
+        s = getSForRadius(value);
+        if ((s >= minS) && (s <= maxS) && (Math.abs(s) < Math.abs(ret))) {
+            ret = s;
+        }
+        
+        // Check X-value
+        s = getSForXValue(-value);
+        if ((s >= minS) && (s <= maxS) && (Math.abs(s) < Math.abs(ret))) {
+            ret = s;
+        }
+        s = getSForXValue(value);
+        if ((s >= minS) && (s <= maxS) && (Math.abs(s) < Math.abs(ret))) {
+            ret = s;
+        }
+        
+        // Check Y-value
+        s = getSForYValue(-value);
+        if ((s >= minS) && (s <= maxS) && (Math.abs(s) < Math.abs(ret))) {
+            ret = s;
+        }
+        s = getSForYValue(value);
+        if ((s >= minS) && (s <= maxS) && (Math.abs(s) < Math.abs(ret))) {
+            ret = s;
+        }
+        
+        return ret;
     }
 }

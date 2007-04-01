@@ -211,13 +211,26 @@ public class PSObjectMatrix extends PSObject {
     }
     
     /**
+     * Returns the x-scaling factor described by this matrix
+     */
+    public double getXScaling() {
+        return Math.sqrt(Math.pow(matrix[0], 2) + Math.pow(matrix[2], 2));
+    }
+    
+    /**
+     * Returns the y-scaling factor described by this matrix
+     */
+    public double getYScaling() {
+        return Math.sqrt(Math.pow(matrix[1], 2) + Math.pow(matrix[3], 2));
+    }
+    
+    
+    /**
      * Returns the mean scaling factor described by this matrix
      * @return Mean scaling factor (= mean(sqrt(a^2+c^2) + sqrt(b^2+d^2)) )
      */
     public double getMeanScaling() {
-        double xScale = Math.sqrt(Math.pow(matrix[0], 2) + Math.pow(matrix[2], 2));
-        double yScale = Math.sqrt(Math.pow(matrix[1], 2) + Math.pow(matrix[3], 2));
-        return 0.5 * (xScale + yScale);
+        return 0.5 * (getXScaling() + getYScaling());
     }
     
     /**

@@ -170,11 +170,11 @@ public class PGFExport implements Exporter {
     /**
      * Shading fill (shfill PostScript operator)
      */
-    public void shfill(PSObjectDict dict, PSObjectMatrix CTM) throws PSErrorTypeCheck, 
+    public void shfill(PSObjectDict dict, GraphicsState gstate) throws PSErrorTypeCheck, 
             PSErrorUnimplemented, PSErrorRangeCheck, IOException {
         Shading shading = Shading.newShading(dict);
         if (shading instanceof RadialShading) {
-            radialShading((RadialShading)shading, CTM);
+            radialShading((RadialShading)shading, gstate);
         } else {
             throw new PSErrorUnimplemented("Shading of this type " + shading);
         }
@@ -183,33 +183,64 @@ public class PGFExport implements Exporter {
     /**
      * Create a radial shading
      */
-    void radialShading(RadialShading shading, PSObjectMatrix CTM) throws IOException, 
+    void radialShading(RadialShading shading, GraphicsState gstate) throws IOException, 
             PSErrorRangeCheck, PSErrorUnimplemented {
         // Convert coordinates and radii from user space to coordinate space
-        double[] coor0 = CTM.apply(shading.getCoord(0.0));
-        double[] coor1 = CTM.apply(shading.getCoord(1.0));
-        double scaling = CTM.getMeanScaling();
+        // PGF does not support the Extend parameters for shadings. So we
+        // try to emulate the effect.
+        double scaling = gstate.CTM.getMeanScaling();
+        double xScale = gstate.CTM.getXScaling();
+        double yScale = gstate.CTM.getYScaling();
+        double angle = gstate.CTM.getRotation();
+        double[] coor0 = gstate.CTM.apply(shading.getCoord(0.0));
+        double[] coor1 = gstate.CTM.apply(shading.getCoord(1.0));
+
+        double max_s = 1.0;
+        if (shading.extend1) {
+            // Find the s value for which the radius is big (0.3 metres ~ a4 paper)
+            max_s = shading.getSForDistance(0.3*1e6/scaling, 1, Double.POSITIVE_INFINITY);
+            coor1 = gstate.CTM.apply(shading.getCoord(max_s));
+        }
         
         startScope();
         out.write("\\pgfdeclareradialshading{eps2pgfshading}{\\pgfpoint{");
         out.write(coorFormat.format(1e-4*(coor1[0]-coor0[0])) + "cm}{");
         out.write(coorFormat.format(1e-4*(coor1[1]-coor0[1])) + "cm}}{");
-        for (double s = 0.0 ; s < 1 ; s += 0.01) {
-            if (s > 0.0) {
+        double[] sFit = shading.fitLinearSegmentsOnColor(0.01);        
+        for (int i = 0 ; i < sFit.length ; i++) {
+            if (i > 0) {
                 out.write(";");
             }
-            double r = scaling*shading.getRadius(s);
-            double[] color = shading.getColor(s);
+            double r = scaling*shading.getRadius(sFit[i]);
+            double[] color = shading.getColor(sFit[i]);
             out.write("rgb(" + lengthFormat.format(1e-4*r) + "cm)=");
             out.write("(" + colorFormat.format(color[0]));
             out.write("," + colorFormat.format(color[1]));
             out.write("," + colorFormat.format(color[2]) + ")");
         }
+        if (max_s > 1.0) {
+            double r = scaling*shading.getRadius(max_s);
+            double[] color = shading.getColor(1.0);
+            out.write(";rgb(" + lengthFormat.format(1e-4*r) + "cm)=");
+            out.write("(" + colorFormat.format(color[0]));
+            out.write("," + colorFormat.format(color[1]));
+            out.write("," + colorFormat.format(color[2]) + ")");
+        }
         out.write("}");
-        out.write("\\pgflowlevelobj{\\pgftransformshift{\\pgfpoint{");
+        out.write("\\pgflowlevelobj{");
+        out.write("\\pgftransformshift{\\pgfpoint{");
         out.write(lengthFormat.format(1e-4*coor0[0]) + "cm}{");
-        out.write(lengthFormat.format(1e-4*coor0[1]) + "cm}}}");
-        out.write("{\\pgfuseshading{eps2pgfshading}}");
+        out.write(lengthFormat.format(1e-4*coor0[1]) + "cm}}");
+        if (angle != 0) {
+            out.write("\\pgftransformrotate{"+coorFormat.format(-angle)+"}");
+        }
+        if (xScale != scaling) {
+            out.write("\\pgftransformxscale{" + xScale/scaling + "}");
+        }
+        if (yScale != scaling) {
+            out.write("\\pgftransformyscale{" + yScale/scaling + "}");
+        }
+        out.write("}{\\pgfuseshading{eps2pgfshading}}");
         endScope();
     }
     
