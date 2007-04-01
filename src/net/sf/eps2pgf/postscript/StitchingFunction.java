@@ -102,7 +102,11 @@ public class StitchingFunction extends PSFunction {
         double bound1;
         if (subFunc == 0) {
             bound0 = domain[0];
-            bound1 = bounds[0];
+            if (k > 1) {
+                bound1 = bounds[0];
+            } else {
+                bound1 = domain[1];
+            }
         } else if (subFunc == (k-1)) {
             bound0 = bounds[k-2];
             bound1 = domain[1];
