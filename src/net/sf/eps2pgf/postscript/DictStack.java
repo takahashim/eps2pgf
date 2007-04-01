@@ -49,6 +49,7 @@ public class DictStack {
     
     /** Fill the system dictionary */
     private void fillSystemDict(Interpreter interp) {
+        // Add operators
         Method[] mthds = interp.getClass().getMethods();
         HashMap<String, String> replaceNames = new HashMap<String, String>();
         replaceNames.put("sqBrackLeft",  "[");
@@ -73,6 +74,9 @@ public class DictStack {
             PSObjectOperator op = new PSObjectOperator(name, mthd);
             systemdict.setKey(name, op);
         }
+        
+        // Add other entries
+        systemdict.setKey("userdict", userdict);
     }
 
     /** Push a dictionary onto the stack */

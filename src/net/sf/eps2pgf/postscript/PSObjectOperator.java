@@ -75,4 +75,11 @@ public class PSObjectOperator extends PSObject {
         execute(interp);
     }
 
+    /**
+     * Checks whether this object is executable
+     * @return Returns true if this object is executable
+     */
+    public boolean isExecutable() {
+        return true;
+    }
 }

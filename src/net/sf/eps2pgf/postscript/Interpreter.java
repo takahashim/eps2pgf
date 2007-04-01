@@ -448,12 +448,22 @@ public class Interpreter {
         opStack.push(new PSObjectBool(bool));
     }
     
-    /** PostScript op: exch */
-    public void op_exch() throws PSError {
+    /**
+     * PostScript op: exch
+     */
+    public void op_exch() throws PSErrorStackUnderflow {
         PSObject any2 = opStack.pop();
         PSObject any1 = opStack.pop();
         opStack.push(any2);
         opStack.push(any1);
+    }
+    
+    /**
+     * PostScript op: exec
+     */
+    public void op_exec() throws PSErrorStackUnderflow, Exception {
+        PSObject any = opStack.pop();
+        any.execute(this);
     }
     
     /** PostScript op: false */
@@ -1211,6 +1221,15 @@ public class Interpreter {
     /** PostScript op: true */
     public void op_true() {
         opStack.push(new PSObjectBool(true));
+    }
+    
+    /**
+     * PostScript op: xcheck
+     */
+    public void op_xcheck() throws PSErrorStackUnderflow {
+        PSObject any = opStack.pop();
+        PSObjectBool check = new PSObjectBool(any.isExecutable());
+        opStack.push(check);
     }
     
     /** PostScript op: where */
