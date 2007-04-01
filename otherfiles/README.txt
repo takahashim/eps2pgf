@@ -34,7 +34,8 @@ this program; if not, write to the Free Software Foundation, Inc.,
 Changelog
 ----------------------------------------------------------------------------
 v0.2.0 (2007-??-??)
-  - ???
+  - New: added several PostScript commands
+  - New: Radial shadings 
 
 v0.1.0 (2007-03-11)
   - initial release
