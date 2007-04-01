@@ -32,9 +32,7 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class PSObjectProc extends PSObject {
-    static int nextId = 1;
-    int id;
-    private LinkedList<PSObject> procObjects;
+    private List<PSObject> procObjects;
     
     /**
      * Creates a new instance of PSObjectProc
@@ -42,7 +40,6 @@ public class PSObjectProc extends PSObject {
      * @throws java.io.IOException Unable to read the string from a StringBuffer.  
      */
     public PSObjectProc(String str) throws IOException {
-        id = nextId++;
         str = str.substring(1,str.length()-1);
         
         StringReader strReader = new StringReader(str);
@@ -84,7 +81,7 @@ public class PSObjectProc extends PSObject {
         LinkedList<PSObject> newList = new LinkedList<PSObject>();
         
         while(procObjects.size() > 0) {
-            PSObject obj = procObjects.poll();
+            PSObject obj = procObjects.remove(0);
             newList.add(obj.bind(interp));
         }
         procObjects = newList;
@@ -117,5 +114,13 @@ public class PSObjectProc extends PSObject {
      */
     public boolean isExecutable() {
         return true;
+    }
+    
+    /**
+     * Convert this object to a literal object
+     * @return This object converted to a literal object
+     */
+    public PSObject toLiteral() {
+        return new PSObjectArray(procObjects);
     }
 }

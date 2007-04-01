@@ -82,4 +82,12 @@ public class PSObjectOperator extends PSObject {
     public boolean isExecutable() {
         return true;
     }
+    
+    /**
+     * Convert this object to a name literal object
+     * @return This object converted to a literal object
+     */
+    public PSObject toLiteral() {
+        return new PSObjectName(name, true);
+    }
 }

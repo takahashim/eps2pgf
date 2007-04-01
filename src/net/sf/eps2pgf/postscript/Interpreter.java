@@ -318,6 +318,14 @@ public class Interpreter {
         throw new PSErrorUnimplemented("operator: currentfile");
     }
     
+    /**
+     * PostScript op: currentflat
+     */
+    public void op_currentflat() {
+        // pgf does not support changing the flatness
+        opStack.push(new PSObjectReal(0.2));
+    }
+    
     /** PostScript op: currentmatrix */
     public void op_currentmatrix() throws PSError {
         PSObject obj = opStack.pop();
@@ -348,6 +356,14 @@ public class Interpreter {
         double y1 = opStack.pop().toReal();
         double x1 = opStack.pop().toReal();
         gstate.current.curveto(x1,y1, x2,y2, x3,y3);
+    }
+    
+    /**
+     * PostScript op: cvlit
+     */
+    public void op_cvlit() throws PSErrorStackUnderflow, PSErrorUnimplemented {
+        PSObject any = opStack.pop();
+        opStack.push(any.toLiteral());
     }
     
     /**

@@ -180,5 +180,13 @@ public class PSObjectName extends PSObject {
     public boolean isExecutable() {
         return !isLiteral;
     }
-
+    
+    /**
+     * Convert this object to a literal object
+     * @return This object converted to a literal object
+     */
+    public PSObject toLiteral() {
+        isLiteral = true;
+        return this;
+    }
 }
