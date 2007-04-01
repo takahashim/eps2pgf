@@ -189,8 +189,8 @@ public class PGFExport implements Exporter {
         // PGF does not support the Extend parameters for shadings. So we
         // try to emulate the effect.
         double scaling = gstate.CTM.getMeanScaling();
-        double xScale = gstate.CTM.getXScaling();
-        double yScale = gstate.CTM.getYScaling();
+        double xScale = gstate.CTM.getXScaling() / scaling;
+        double yScale = gstate.CTM.getYScaling() / scaling;
         double angle = gstate.CTM.getRotation();
         double[] coor0 = gstate.CTM.apply(shading.getCoord(0.0));
         double[] coor1 = gstate.CTM.apply(shading.getCoord(1.0));
@@ -204,8 +204,8 @@ public class PGFExport implements Exporter {
         
         startScope();
         out.write("\\pgfdeclareradialshading{eps2pgfshading}{\\pgfpoint{");
-        out.write(coorFormat.format(1e-4*(coor1[0]-coor0[0])) + "cm}{");
-        out.write(coorFormat.format(1e-4*(coor1[1]-coor0[1])) + "cm}}{");
+        out.write(coorFormat.format(1e-4*(coor0[0]-coor1[0])/xScale) + "cm}{");
+        out.write(coorFormat.format(1e-4*(coor0[1]-coor1[1])/yScale) + "cm}}{");
         double[] sFit = shading.fitLinearSegmentsOnColor(0.01);        
         for (int i = 0 ; i < sFit.length ; i++) {
             if (i > 0) {
@@ -229,16 +229,16 @@ public class PGFExport implements Exporter {
         out.write("}");
         out.write("\\pgflowlevelobj{");
         out.write("\\pgftransformshift{\\pgfpoint{");
-        out.write(lengthFormat.format(1e-4*coor0[0]) + "cm}{");
-        out.write(lengthFormat.format(1e-4*coor0[1]) + "cm}}");
+        out.write(lengthFormat.format(1e-4*coor1[0]) + "cm}{");
+        out.write(lengthFormat.format(1e-4*coor1[1]) + "cm}}");
         if (angle != 0) {
             out.write("\\pgftransformrotate{"+coorFormat.format(-angle)+"}");
         }
-        if (xScale != scaling) {
-            out.write("\\pgftransformxscale{" + xScale/scaling + "}");
+        if (xScale != 1) {
+            out.write("\\pgftransformxscale{" + xScale + "}");
         }
-        if (yScale != scaling) {
-            out.write("\\pgftransformyscale{" + yScale/scaling + "}");
+        if (yScale != 1) {
+            out.write("\\pgftransformyscale{" + yScale + "}");
         }
         out.write("}{\\pgfuseshading{eps2pgfshading}}");
         endScope();
