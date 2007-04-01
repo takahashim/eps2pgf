@@ -245,4 +245,12 @@ public class PSObject implements Cloneable {
     public int length() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
+    
+    /**
+     * Checks whether this object is executable
+     * @return Returns true if this object is executable
+     */
+    public boolean isExecutable() {
+        return false;
+    }
 }

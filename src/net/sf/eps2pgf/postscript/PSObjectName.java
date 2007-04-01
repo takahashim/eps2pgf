@@ -173,4 +173,12 @@ public class PSObjectName extends PSObject {
         return name.length();
     }
 
+    /**
+     * Checks whether this object is executable
+     * @return Returns true if this object is executable
+     */
+    public boolean isExecutable() {
+        return !isLiteral;
+    }
+
 }

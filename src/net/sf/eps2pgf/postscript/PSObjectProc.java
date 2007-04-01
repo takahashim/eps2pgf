@@ -111,4 +111,11 @@ public class PSObjectProc extends PSObject {
         return this;
     }
 
+    /**
+     * Checks whether this object is executable
+     * @return Returns true if this object is executable
+     */
+    public boolean isExecutable() {
+        return true;
+    }
 }
