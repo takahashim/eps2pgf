@@ -30,7 +30,7 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class PSObjectArray extends PSObject {
-    private ArrayList<PSObject> array;
+    private List<PSObject> array;
     private int offset;
     private int count;
     
@@ -70,6 +70,16 @@ public class PSObjectArray extends PSObject {
         }
         
         // Use the entire array
+        offset = 0;
+        count = Integer.MAX_VALUE;
+    }
+    
+    /**
+     * Create a new instance of PSObjectArray
+     * @param objs List with objects that make up the new array
+     */
+    public PSObjectArray(List<PSObject> objs) {
+        array = objs;
         offset = 0;
         count = Integer.MAX_VALUE;
     }

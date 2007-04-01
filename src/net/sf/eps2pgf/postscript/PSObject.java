@@ -253,4 +253,17 @@ public class PSObject implements Cloneable {
     public boolean isExecutable() {
         return false;
     }
+    
+    /**
+     * Convert this object to a literal object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Converting this object type to literal is not yet supported
+     * @return This object converted to a literal object
+     */
+    public PSObject toLiteral() throws PSErrorUnimplemented {
+        if (isExecutable()) {
+            throw new PSErrorUnimplemented("Making this object literal");
+        } else {
+            return this;
+        }
+    }
 }
