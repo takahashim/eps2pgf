@@ -11,7 +11,27 @@ Introduction
 Convert Encapsulated PostScript (EPS) graphics files to the Portable
 Graphics Format (PGF, http://sourceforge.net/projects/pgf/) for inclusion in
 LaTeX documents. Texts in the figure are typeset by LaTeX
+----------------------------------------------------------------------------
 
+----------------------------------------------------------------------------
+Usage
+----------------------------------------------------------------------------
+Run Eps2pgf with the --help option to get information on how to convert an
+EPS file to PGF. After the PGF file has been created it can be included in a
+LaTeX document. A minimal example LaTeX document is listed below.
+
+\documentclass{article}
+
+\usepackage{pgf}
+
+\begin{document}
+  \begin{figure}
+    \centering
+    \input{figure.pgf}
+    \caption{Figure created by Eps2pgf}
+  \end{figure}	
+\end{document}
+----------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------
 License
@@ -33,7 +53,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 ----------------------------------------------------------------------------
 Changelog
 ----------------------------------------------------------------------------
-v0.2.0 (2007-??-??)
+v0.2.0 (2007-04-06)
   - New: added several PostScript commands
   - New: Radial shadings 
 
