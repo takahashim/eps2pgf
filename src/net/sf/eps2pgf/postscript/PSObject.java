@@ -77,11 +77,47 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * Return this value rounded upwards
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
+     * @return Value of this object rounded upwards
+     */
+    public PSObject ceiling() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Return this value rounded downwards
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
+     * @return Value of this object rounded downwards
+     */
+    public PSObject floor() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Returns the negative value of this object, if possible
      * @return Negative value of this object
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
      */
     public PSObject neg() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Return this value rounded to the nearest integer
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
+     * @return Value of this object rounded to the nearest integer
+     */
+    public PSObject round() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Return this value towards zero
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
+     * @return Value of this object towards zero
+     */
+    public PSObject truncate() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
