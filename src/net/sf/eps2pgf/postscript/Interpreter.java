@@ -1120,6 +1120,16 @@ public class Interpreter {
     public void op_showpage() {
         // This operator has no meaning in eps2pgf
     }
+    
+    /**
+     * PostScript op: sqrt
+     */
+    public void op_sqrt() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorRangeCheck {
+        double x = opStack.pop().toNonNegReal();
+        x = Math.sqrt(x);
+        opStack.push(new PSObjectReal(x));
+    }
    
     /** PostScript op: StandardEncoding */
     public void op_StandardEncoding() {

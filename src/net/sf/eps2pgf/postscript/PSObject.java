@@ -109,6 +109,20 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * Convert this object to a non-negative double, if possible
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Real number is negative
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object to a double
+     * @return Doubler representation of this object
+     */
+    public double toNonNegReal() throws PSErrorRangeCheck, PSErrorTypeCheck {
+        double x = toReal();
+        if (x < 0) {
+            throw new PSErrorRangeCheck();
+        }
+        return x;
+    }
+    
+    /**
      * Convert this object to dictionary key, if possible.
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a dict key
      * @return Dictionary key that represents this object
