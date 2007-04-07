@@ -109,6 +109,14 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: abs
+     */
+    public void op_abs() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject obj = opStack.pop();
+        opStack.push(obj.abs());
+    }
+    
+    /**
      * PostScript op: add
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Not enough object on stack
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One or both objects on stack are not numeric
@@ -748,6 +756,15 @@ public class Interpreter {
             opStack.push(new PSObjectReal(identityMatrix[i]));
         }
         op_sqBrackRight();
+    }
+    
+    /**
+     * PostScript operator: mod
+     */
+    public void op_mod() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        int int2 = opStack.pop().toInt();
+        int int1 = opStack.pop().toInt();
+        opStack.push(new PSObjectInt( int1 % int2 ));
     }
     
     /** PostScript op: moveto */
