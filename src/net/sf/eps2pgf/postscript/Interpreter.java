@@ -499,6 +499,41 @@ public class Interpreter {
         opStack.push(fonts.findFont(key));
     }
     
+    /**
+     * PostScript op: for
+     */
+    public void op_for() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            Exception {
+        PSObjectProc proc = opStack.pop().toProc();
+        double limit = opStack.pop().toReal();
+        double inc = opStack.pop().toReal();
+        double initial = opStack.pop().toReal();
+        
+        // Prevent (virtually) infinite loops
+        if (inc == 0) {
+            return;
+        } else if ( (inc > 0) && (limit <= initial) ) {
+            return;
+        } else if ( (inc < 0) && (limit >= initial) ) {
+            return;
+        }
+        
+        // Execute the for loop
+        double control = initial;
+        while (true) {
+            if ( (inc > 0) && (control > limit) ) {
+                break;
+            } else if ( (inc < 0) && (control < limit) ) {
+                break;
+            }
+            
+            opStack.push(new PSObjectReal(control));
+            proc.execute(this);
+            
+            control += inc;
+        }
+    }
+    
     /** PostScript op: forall */
     public void op_forall() throws Exception {
         PSObjectProc proc = opStack.pop().toProc();
