@@ -72,11 +72,35 @@ public class PSObjectReal extends PSObject {
     }
 
     /**
+     * Return this value rounded upwards
+     * @return Value of this object rounded upwards
+     */
+    public PSObject ceiling() {
+        return new PSObjectReal(Math.ceil(value));
+    }
+
+    /**
+     * Return this value rounded downwards
+     * @return Value of this object rounded downwards
+     */
+    public PSObject floor() {
+        return new PSObjectReal(Math.floor(value));
+    }
+
+    /**
      * Returns the negative value of this double
      * @return Absolute value of this double
      */
     public PSObjectReal neg() {
         return new PSObjectReal(-value);
+    }
+
+    /**
+     * Return this value rounded to the nearest integer
+     * @return Value of this object rounded to the nearest integer
+     */
+    public PSObject round() {
+        return new PSObjectReal(Math.round(value));
     }
 
     /**
@@ -97,6 +121,18 @@ public class PSObjectReal extends PSObject {
         return value;
     }
     
+    /**
+     * Return this value rounded towards zero
+     * @return Value of this object rounded towards zero
+     */
+    public PSObject truncate() {
+        if (value > 0) {
+            return floor();
+        } else {
+            return ceiling();
+        }
+    }
+
     /** Creates and returns a copy of this object. */
     public PSObjectReal clone() {
         return new PSObjectReal(value);

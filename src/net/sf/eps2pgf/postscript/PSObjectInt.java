@@ -57,6 +57,22 @@ public class PSObjectInt extends PSObject {
     }
     
     /**
+     * Return this value rounded upwards
+     * @return New object with same integer
+     */
+    public PSObjectInt ceiling() {
+        return new PSObjectInt(value);
+    }
+
+    /**
+     * Return this value rounded downwards
+     * @return New object with same integer
+     */
+    public PSObjectInt floor() {
+        return new PSObjectInt(value);
+    }
+
+    /**
      * Returns the negative value of this integer
      * @return Absolute value of this integer
      */
@@ -69,6 +85,14 @@ public class PSObjectInt extends PSObject {
         }
     }
     
+    /**
+     * Return this value rounded to the nearest integer
+     * @return New object with same integer
+     */
+    public PSObjectInt round() {
+        return new PSObjectInt(value);
+    }
+
     /**
      * Convert this object to a human readable string.
      * @return Human readable string.
@@ -87,6 +111,14 @@ public class PSObjectInt extends PSObject {
         return (double)value;
     }
     
+    /**
+     * Return this value rounded towards zero
+     * @return New object with same integer
+     */
+    public PSObjectInt truncate() {
+        return new PSObjectInt(value);
+    }
+
     /**
      * Creates an exact copy of this object.
      */

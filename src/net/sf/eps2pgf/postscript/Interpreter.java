@@ -228,6 +228,14 @@ public class Interpreter {
         }
     }
     
+    /**
+     * PostScript op: ceiling
+     */
+    public void op_ceiling() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject obj = opStack.pop();
+        opStack.push(obj.ceiling());
+    }
+    
     /** PostScript op: clear */
     public void op_clear() {
         opStack.clear();
@@ -513,6 +521,14 @@ public class Interpreter {
     public void op_findfont() throws PSError, ProgramError {
         PSObject key = opStack.pop();
         opStack.push(fonts.findFont(key));
+    }
+    
+    /**
+     * PostScript op: floor
+     */
+    public void op_floor() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject obj = opStack.pop();
+        opStack.push(obj.floor());
     }
     
     /**
@@ -999,12 +1015,7 @@ public class Interpreter {
      */
     public void op_round() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.pop();
-        if (obj instanceof PSObjectInt) {
-            opStack.push(obj);
-        } else {
-            PSObjectReal rounded = new PSObjectReal(Math.round(obj.toReal()));
-            opStack.push(rounded);
-        }
+        opStack.push(obj.round());
     }
    
     /** PostScript op: save */
@@ -1305,6 +1316,14 @@ public class Interpreter {
     /** PostScript op: true */
     public void op_true() {
         opStack.push(new PSObjectBool(true));
+    }
+    
+    /**
+     * PostScript op: truncate
+     */
+    public void op_truncate() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject obj = opStack.pop();
+        opStack.push(obj.truncate());
     }
     
     /**
