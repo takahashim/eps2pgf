@@ -72,6 +72,14 @@ public class PSObjectReal extends PSObject {
     }
 
     /**
+     * Returns the negative value of this double
+     * @return Absolute value of this double
+     */
+    public PSObjectReal neg() {
+        return new PSObjectReal(-value);
+    }
+
+    /**
      * Convert this object to a human readable string.
      * @return Human readable string.
      */
