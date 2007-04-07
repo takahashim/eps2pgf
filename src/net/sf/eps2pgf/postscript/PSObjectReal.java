@@ -52,7 +52,6 @@ public class PSObjectReal extends PSObject {
         } catch (NumberFormatException e) {
             return false;
         }
-        //System.out.println("Real: " + Double.parseDouble(str));
         return true;
     }
     

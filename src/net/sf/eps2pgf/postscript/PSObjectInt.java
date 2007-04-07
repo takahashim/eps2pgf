@@ -29,11 +29,19 @@ public class PSObjectInt extends PSObject {
     int value;
     
     /**
-     * Creates a new instance of PSObjectReal
-     * @param str String with valid real.
+     * Creates a new instance of PSObjectInt
+     * @param i Value of new integer object.
      */
     public PSObjectInt(int i) {
         value = i;
+    }
+    
+    /**
+     * Creates a new instance of PSObjectInt
+     * @param str String representing an integer
+     */
+    public PSObjectInt(String str) {
+        value = Integer.parseInt(str);
     }
     
     /** Return PostScript text representation of this object. See the
@@ -70,6 +78,20 @@ public class PSObjectInt extends PSObject {
      */
     public PSObjectInt floor() {
         return new PSObjectInt(value);
+    }
+    
+    /**
+     * Check whether a string is a integer
+     * @param str String to check.
+     * @return Returns true when str is a valid integer. Returns false otherwise.
+     */
+    public static boolean isType(String str) {
+        try {
+            Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
     }
 
     /**
