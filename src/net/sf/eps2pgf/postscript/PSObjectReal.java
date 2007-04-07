@@ -62,7 +62,15 @@ public class PSObjectReal extends PSObject {
     public String isis() {
         return String.valueOf(value);
     }
-    
+
+    /**
+     * Returns the absolute value of this integer
+     * @return Absolute value of this object
+     */
+    public PSObjectReal abs() {
+        return new PSObjectReal(Math.abs(value));
+    }
+
     /**
      * Convert this object to a human readable string.
      * @return Human readable string.

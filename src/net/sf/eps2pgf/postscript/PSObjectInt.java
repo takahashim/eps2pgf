@@ -43,6 +43,18 @@ public class PSObjectInt extends PSObject {
         return String.valueOf(value);
     }
 
+    /**
+     * Returns the absolute value of this integer
+     * @return Absolute value of this object
+     */
+    public PSObject abs() {
+        if (value == Integer.MIN_VALUE) {
+            double dbl = (double)value;
+            return new PSObjectReal(Math.abs(dbl));
+        } else {
+            return new PSObjectInt(Math.abs(value));
+        }
+    }
     
     /**
      * Convert this object to a human readable string.
