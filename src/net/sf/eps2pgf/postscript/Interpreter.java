@@ -289,6 +289,14 @@ public class Interpreter {
         }
     }
     
+    /**
+     * PostScript op: cos
+     */
+    public void op_cos() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        double angle = opStack.pop().toReal();
+        opStack.push(new PSObjectReal(Math.cos(angle*Math.PI/180)));
+    }
+    
     /** PostScript op: count */
     public void op_count() {
         int count = opStack.size();
@@ -1154,6 +1162,14 @@ public class Interpreter {
     /** PostScript op: showpage */
     public void op_showpage() {
         // This operator has no meaning in eps2pgf
+    }
+    
+    /**
+     * PostScript op: sin
+     */
+    public void op_sin() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        double angle = opStack.pop().toReal();
+        opStack.push(new PSObjectReal(Math.sin(angle*Math.PI/180)));
     }
     
     /**
