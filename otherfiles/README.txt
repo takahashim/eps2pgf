@@ -16,9 +16,10 @@ LaTeX documents. Texts in the figure are typeset by LaTeX
 ----------------------------------------------------------------------------
 Usage
 ----------------------------------------------------------------------------
-Run Eps2pgf with the --help option to get information on how to convert an
-EPS file to PGF. After the PGF file has been created it can be included in a
-LaTeX document. A minimal example LaTeX document is listed below.
+Run Eps2pgf (e.g. java -jar eps2pgf.jar) with the --help option to get
+information on how to convert an EPS file to PGF. After the PGF file has
+been created it can be included in a LaTeX document. A minimal example LaTeX
+document is listed below.
 
 \documentclass{article}
 
@@ -54,8 +55,8 @@ this program; if not, write to the Free Software Foundation, Inc.,
 Changelog
 ----------------------------------------------------------------------------
 v0.2.0 (2007-04-06)
-  - New: added several PostScript commands
-  - New: radial shadings 
+  - Added: added several PostScript commands
+  - Added: radial shadings 
 
 v0.1.0 (2007-03-11)
   - Initial release
