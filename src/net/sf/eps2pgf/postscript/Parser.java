@@ -154,7 +154,9 @@ public class Parser {
      * @param str String to convert.
      */
     static PSObject convertToPSObject(String str) throws IOException {
-        if (PSObjectReal.isType(str)) {
+        if (PSObjectInt.isType(str)) {
+            return new PSObjectInt(str);
+        } else if (PSObjectReal.isType(str)) {
             return new PSObjectReal(str);
         } else if (PSObjectProc.isType(str)) {
             return new PSObjectProc(str);
