@@ -83,7 +83,7 @@ public class Main {
      * @return Application name followed by the version number
      */
     public static String getNameVersion() {
-        return appName + " v" + versionMajor + "." + versionMinor + "." + versionRevision;
+        return appName + " " + versionMajor + "." + versionMinor + "." + versionRevision;
     }
     
     /**
@@ -93,8 +93,8 @@ public class Main {
         System.out.println(getNameVersion());
         System.out.println("Copyright (C) 2007 Paul Wagenaars <pwagenaars@fastmail.fm>");
         System.out.println(appName + " comes with ABSOLUTELY NO WARRANTY. This is free software, and you");
-        System.out.println("are welcome to redistribute it under certain conditions. See version 2");
-        System.out.println("of the GNU General Public License for details.");
+        System.out.println("are welcome to redistribute it under certain conditions. See version 2 of");
+        System.out.println("the GNU General Public License for details.");
     }
 
     /**
