@@ -55,7 +55,7 @@ Changelog
 ----------------------------------------------------------------------------
 v0.2.0 (2007-04-06)
   - New: added several PostScript commands
-  - New: Radial shadings 
+  - New: radial shadings 
 
 v0.1.0 (2007-03-11)
-  - initial release
+  - Initial release
