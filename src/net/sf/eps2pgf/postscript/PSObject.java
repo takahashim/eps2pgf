@@ -77,6 +77,15 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * Returns the negative value of this object, if possible
+     * @return Negative value of this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
+     */
+    public PSObject neg() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Convert this object to an array, if possible.
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can't convert this object to an array.
      * @return Array representation of this object.

@@ -57,6 +57,19 @@ public class PSObjectInt extends PSObject {
     }
     
     /**
+     * Returns the negative value of this integer
+     * @return Absolute value of this integer
+     */
+    public PSObject neg() {
+        if (value == Integer.MIN_VALUE) {
+            double dbl = (double)value;
+            return new PSObjectReal(-dbl);
+        } else {
+            return new PSObjectInt(-value);
+        }
+    }
+    
+    /**
      * Convert this object to a human readable string.
      * @return Human readable string.
      */

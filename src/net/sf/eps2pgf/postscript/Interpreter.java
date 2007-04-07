@@ -794,17 +794,7 @@ public class Interpreter {
     /** PostScript op: neg */
     public void op_neg() throws PSError {
         PSObject obj = opStack.pop();
-        if (obj instanceof PSObjectInt) {
-            PSObjectInt intObj = (PSObjectInt)obj;
-            intObj.value = -intObj.value;
-            opStack.push(intObj);
-        } else if (obj instanceof PSObjectReal) {
-            PSObjectReal realObj = (PSObjectReal)obj;
-            realObj.value = -realObj.value;
-            opStack.push(realObj);
-        } else {
-            throw new PSErrorTypeCheck();
-        }
+        opStack.push(obj.neg());
     }
 
     /** PostScript op: newpath */
