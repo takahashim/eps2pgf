@@ -197,6 +197,19 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: atan
+     */
+    public void op_atan() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        double den = opStack.pop().toReal();
+        double num = opStack.pop().toReal();
+        double result = Math.atan2(num, den) / Math.PI * 180;
+        // Java atan method returns in range -180 to 180, while the PostScript
+        // function should return in range 0-360
+        result = (result + 360.0) % 360.0;
+        opStack.push(new PSObjectReal(result));
+    }
+    
+    /**
      * PostScript op: begin
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Operand stack underflow
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Operand is not a dictionary
