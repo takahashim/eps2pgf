@@ -154,7 +154,7 @@ public class PSObjectString extends PSObject {
         PSObjectArray arr = new PSObjectArray();
         for (int i = 0 ; i < value.length() ; i++) {
             int chr = value.charAt(i);
-            arr.add(i, encoding.get(chr));
+            arr.addAt(i, encoding.get(chr));
         }
         return arr;
     }

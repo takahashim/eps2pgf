@@ -21,6 +21,8 @@
 
 package net.sf.eps2pgf.postscript;
 
+import net.sf.eps2pgf.postscript.errors.*;
+
 /** PostScript object: integer
  *
  * @author Paul Wagenaars
@@ -65,6 +67,29 @@ public class PSObjectInt extends PSObject {
     }
     
     /**
+     * Returns the sum of this object and the passed object, if both are numeric
+     * @param obj Object that will be added to this object
+     * @return Sum of this object and passed object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
+     */
+    public PSObject add(PSObject obj) throws PSErrorTypeCheck {
+        if (obj instanceof PSObjectReal) {
+            return obj.add(this);
+        } else {
+            int num2 = obj.toInt();
+            // Do some simplistic overflow detection
+            if ( (value >= Integer.MAX_VALUE/2) || (num2 >= Integer.MAX_VALUE/2) ||
+                    (value <= Integer.MIN_VALUE/2) || (num2 <= Integer.MIN_VALUE/2)) {
+                double valuedbl = this.toReal();
+                double num2dbl = obj.toReal();
+                return new PSObjectReal(valuedbl + num2dbl);
+            } else {
+                return new PSObjectInt(value + num2);
+            }
+        }
+    }
+
+    /**
      * Return this value rounded upwards
      * @return New object with same integer
      */
@@ -93,6 +118,34 @@ public class PSObjectInt extends PSObject {
         }
         return true;
     }
+    
+    /**
+     * Multiply this object with another object
+     * @param obj Multiplication of this object and passed object
+     * @return Multiplication object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object(s) are not numeric
+     */
+    public PSObject mul(PSObject obj) throws PSErrorTypeCheck {
+        if (obj instanceof PSObjectReal) {
+            double num2 = obj.toReal();
+            double valuedbl = this.toReal();
+            return new PSObjectReal(valuedbl * num2);
+        } else {
+            int num2 = obj.toInt();
+            
+            // Simple (non-perfect) overflow check
+            int maxNum = Math.max(Math.abs(value), Math.abs(num2));
+            int minNum = Math.min(Math.abs(value), Math.abs(num2));
+            if (maxNum >= (Integer.MAX_VALUE/minNum)) {
+                double num2dbl = obj.toReal();
+                double valuedbl = this.toReal();
+                return new PSObjectReal(valuedbl * num2dbl);
+            } else {
+                // We can safely do an integer multiplication
+                return new PSObjectInt(value * num2);
+            }
+        }
+    }
 
     /**
      * Returns the negative value of this integer
@@ -113,6 +166,31 @@ public class PSObjectInt extends PSObject {
      */
     public PSObjectInt round() {
         return new PSObjectInt(value);
+    }
+
+    /**
+     * Subtract an object from this object
+     * @param obj Object that will be subtracted from this object
+     * @return Passed object subtracted from this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
+     */
+    public PSObject sub(PSObject obj) throws PSErrorTypeCheck {
+        if (obj instanceof PSObjectReal) {
+                double valuedbl = this.toReal();
+                double num2dbl = obj.toReal();
+                return new PSObjectReal(valuedbl - num2dbl);
+        } else {
+            int num2 = obj.toInt();
+            // Do some simplistic overflow detection
+            if ( (value >= Integer.MAX_VALUE/2) || (num2 >= Integer.MAX_VALUE/2) ||
+                    (value <= Integer.MIN_VALUE/2) || (num2 <= Integer.MIN_VALUE/2)) {
+                double valuedbl = this.toReal();
+                double num2dbl = obj.toReal();
+                return new PSObjectReal(valuedbl - num2dbl);
+            } else {
+                return new PSObjectInt(value - num2);
+            }
+        }
     }
 
     /**

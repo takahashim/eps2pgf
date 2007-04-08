@@ -21,6 +21,8 @@
 
 package net.sf.eps2pgf.postscript;
 
+import net.sf.eps2pgf.postscript.errors.*;
+
 /** PostScript object: real
  *
  * @author Paul Wagenaars
@@ -71,6 +73,17 @@ public class PSObjectReal extends PSObject {
     }
 
     /**
+     * Returns the sum of this object and the passed object, if both are numeric
+     * @param obj Object that will be added to this object
+     * @return Sum of this object and passed object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
+     */
+    public PSObject add(PSObject obj) throws PSErrorTypeCheck {
+        double num2 = obj.toReal();
+        return new PSObjectReal(value + num2);
+    }
+
+    /**
      * Return this value rounded upwards
      * @return Value of this object rounded upwards
      */
@@ -84,6 +97,17 @@ public class PSObjectReal extends PSObject {
      */
     public PSObject floor() {
         return new PSObjectReal(Math.floor(value));
+    }
+
+    /**
+     * Multiply this object with another object
+     * @param obj Multiplication of this object and passed object
+     * @return Multiplication object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object(s) are not numeric
+     */
+    public PSObject mul(PSObject obj) throws PSErrorTypeCheck {
+        double num2 = obj.toReal();
+        return new PSObjectReal(value * num2);
     }
 
     /**
@@ -103,6 +127,17 @@ public class PSObjectReal extends PSObject {
     }
 
     /**
+     * Subtract an object from this object
+     * @param obj Object that will be subtracted from this object
+     * @return Passed object subtracted from this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
+     */
+    public PSObject sub(PSObject obj) throws PSErrorTypeCheck {
+        double num2 = obj.toReal();
+        return new PSObjectReal(value - num2);
+    }
+
+    /**
      * Convert this object to a human readable string.
      * @return Human readable string.
      */
@@ -110,11 +145,6 @@ public class PSObjectReal extends PSObject {
         return "Real: " + value;
     }
     
-    /** Convert this object to the nearest integer. */
-    public int toInt() {
-        return (int)Math.round(value);
-    }
-
     /** Convert this object to a real number, if possible. */
     public double toReal() {
         return value;

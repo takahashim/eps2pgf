@@ -124,11 +124,7 @@ public class Interpreter {
     public void op_add() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject num2 = opStack.pop();
         PSObject num1 = opStack.pop();
-        if ( (num1 instanceof PSObjectInt) && (num2 instanceof PSObjectInt) ) {
-            opStack.push(new PSObjectInt( num1.toInt() + num2.toInt() ));
-        } else {
-            opStack.push(new PSObjectReal( num1.toReal() + num2.toReal() ));
-        }
+        opStack.push(num1.add(num2));
     }
     
     /**
@@ -794,11 +790,7 @@ public class Interpreter {
     public void op_mul() throws PSError {
         PSObject num2 = opStack.pop();
         PSObject num1 = opStack.pop();
-        if ( (num1 instanceof PSObjectInt) && (num2 instanceof PSObjectInt) ) {
-            opStack.push(new PSObjectInt( num1.toInt() * num2.toInt() ));
-        } else {
-            opStack.push(new PSObjectReal( num1.toReal() * num2.toReal() ));
-        }
+        opStack.push(num1.mul(num2));;
     }
     
     /** PostScript op: ne */
@@ -1266,11 +1258,7 @@ public class Interpreter {
     public void op_sub() throws PSError {
         PSObject num2 = opStack.pop();
         PSObject num1 = opStack.pop();
-        if ( (num1 instanceof PSObjectInt) && (num2 instanceof PSObjectInt) ) {
-            opStack.push(new PSObjectInt( num1.toInt() - num2.toInt() ));
-        } else {
-            opStack.push(new PSObjectReal( num1.toReal() - num2.toReal() ));
-        }
+        opStack.push(num1.sub(num2));
     }
     
     /**

@@ -77,6 +77,16 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * Returns the sum of this object and the passed object, if both are numeric
+     * @param obj Object that will be added to this object
+     * @return Sum of this object and passed object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object(s) are not numeric
+     */
+    public PSObject add(PSObject obj) throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Return this value rounded upwards
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
      * @return Value of this object rounded upwards
@@ -95,6 +105,16 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * Multiply this object with another object
+     * @param obj Multiplication of this object and passed object
+     * @return Multiplication object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object(s) are not numeric
+     */
+    public PSObject mul(PSObject obj) throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+
+    /**
      * Returns the negative value of this object, if possible
      * @return Negative value of this object
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
@@ -109,6 +129,16 @@ public class PSObject implements Cloneable {
      * @return Value of this object rounded to the nearest integer
      */
     public PSObject round() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Subtract an object from this object
+     * @param obj Object that will be subtracted from this object
+     * @return Passed object subtracted from this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object(s) are not numeric
+     */
+    public PSObject sub(PSObject obj) throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     

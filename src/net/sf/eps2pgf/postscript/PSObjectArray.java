@@ -116,20 +116,12 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
-     * Add an element to the end to this array.
-     * @param value Value of the new element
-     */
-    public void add(PSObject value) {
-        array.add(value);
-    }
-    
-    /**
      * Insert an element at the specified position in this array.
      * @param index Index at which the new element will be inserted.
      * @param value Value of the new element
      * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
      */
-    public void add(int index, PSObject value) {
+    public void addAt(int index, PSObject value) {
         array.add(index+offset, value);
     }
     
@@ -324,7 +316,7 @@ public class PSObjectArray extends PSObject {
         
             // Copies the values
             for (int i = 0 ; i < array.size() ; i++) {
-                add(i, array.get(i));
+                addAt(i, array.get(i));
             }
         } catch (PSErrorRangeCheck e) {
             // This can never happen
