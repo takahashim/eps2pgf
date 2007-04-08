@@ -515,6 +515,16 @@ public class Interpreter {
         any.execute(this);
     }
     
+    /**
+     * PostScript op: exp
+     */
+    public void op_exp() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        double exponent = opStack.pop().toReal();
+        double base = opStack.pop().toReal();
+        double result = Math.pow(base, exponent);
+        opStack.push(new PSObjectReal(result));
+    }
+    
     /** PostScript op: false */
     public void op_false() {
         opStack.push(new PSObjectBool(false));
@@ -734,6 +744,24 @@ public class Interpreter {
         double y = opStack.pop().toReal();
         double x = opStack.pop().toReal();
         gstate.current.lineto(x, y);
+    }
+    
+    /**
+     * PostScript op: ln
+     */
+    public void op_ln() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        double num = opStack.pop().toReal();
+        double result = Math.log(num);
+        opStack.push(new PSObjectReal(result));
+    }
+    
+    /**
+     * PostScript op: log
+     */
+    public void op_log() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        double num = opStack.pop().toReal();
+        double result = Math.log10(num);
+        opStack.push(new PSObjectReal(result));
     }
     
     /** PostScript op: lt */
