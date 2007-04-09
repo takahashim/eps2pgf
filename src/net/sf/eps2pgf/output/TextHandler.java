@@ -94,7 +94,7 @@ public class TextHandler {
     }
     
     /**
-     * Determine the position of an anchor relative to the bounding box.
+     * Determine the position of an anchor relative to the current position
      * @param anchor Follows psfrag. A combination of two characters that
      *               describe vertical and horizontal alignment. Vertical
      *               alignment: t - top, c - center, B - baselinem b - bottom
