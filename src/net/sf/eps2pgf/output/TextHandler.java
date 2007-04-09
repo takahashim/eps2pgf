@@ -48,6 +48,18 @@ public class TextHandler {
     public double[] showText(Exporter exp, PSObjectString string) 
             throws PSErrorTypeCheck, PSErrorRangeCheck, PSErrorUndefined, 
             PSErrorUnimplemented, PSErrorNoCurrentPoint, IOException {
+        return showText(exp, string, false);
+    }
+    
+    /**
+     * Shows text in the output
+     * @param exp Exporter to which the output will be sent
+     * @param noOutput Don't show the text in the output if set true.
+     * @return Displacement vector [dx, dy] in user space coordinates
+     */
+    public double[] showText(Exporter exp, PSObjectString string, boolean noOutput) 
+            throws PSErrorTypeCheck, PSErrorRangeCheck, PSErrorUndefined, 
+            PSErrorUnimplemented, PSErrorNoCurrentPoint, IOException {        
         PSObjectFont currentFont = gstate.current.font;
         
         PSObjectArray charNames = string.decode(currentFont.getEncoding());
@@ -56,41 +68,49 @@ public class TextHandler {
         
         double angle = -gstate.current.CTM.getRotation();
         
-        // Calculate fontsize in points (=1/72 inch)
+        // Calculate scaling and fontsize in points (=1/72 inch)
         PSObjectMatrix fontMatrix = currentFont.getFontMatrix();
         double scaling = fontMatrix.getMeanScaling() * gstate.current.CTM.getMeanScaling();
         double fontsize = scaling / 1000 / 25.4 * 72;  // convert micrometer to pt
-        
-        BoundingBox bbox = currentFont.getBBox(charNames);
-        
-        double[] pos = gstate.current.getCurrentPosInDeviceSpace();
-        double[] dpos;
-                
-//        dpos = getAnchor("tl", bbox, scaling, angle);
-//        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//        dpos = getAnchor("bl", bbox, scaling, angle);
-//        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//        dpos = getAnchor("tr", bbox, scaling, angle);
-//        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//        dpos = getAnchor("br", bbox, scaling, angle);
-//        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//        dpos = getAnchor("cc", bbox, scaling, angle);
-//        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//        dpos = getAnchor("tc", bbox, scaling, angle);
-//        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//        dpos = getAnchor("bc", bbox, scaling, angle);
-//        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//        dpos = getAnchor("cl", bbox, scaling, angle);
-//        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//        dpos = getAnchor("cr", bbox, scaling, angle);
-//        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-        
-        dpos = getAnchor("cc", bbox, scaling, angle);
-        pos[0] += dpos[0];
-        pos[1] += dpos[1];
-        exp.show(text, pos, angle, fontsize, "cc");
 
-        return new double[2];
+        // Draw text
+        if (!noOutput) {
+            BoundingBox bbox = currentFont.getBBox(charNames);
+
+            double[] pos = gstate.current.getCurrentPosInDeviceSpace();
+            double[] dpos;
+
+    //        dpos = getAnchor("tl", bbox, scaling, angle);
+    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+    //        dpos = getAnchor("bl", bbox, scaling, angle);
+    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+    //        dpos = getAnchor("tr", bbox, scaling, angle);
+    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+    //        dpos = getAnchor("br", bbox, scaling, angle);
+    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+    //        dpos = getAnchor("cc", bbox, scaling, angle);
+    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+    //        dpos = getAnchor("tc", bbox, scaling, angle);
+    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+    //        dpos = getAnchor("bc", bbox, scaling, angle);
+    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+    //        dpos = getAnchor("cl", bbox, scaling, angle);
+    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+    //        dpos = getAnchor("cr", bbox, scaling, angle);
+    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+
+            dpos = getAnchor("cc", bbox, scaling, angle);
+            double textPos[] = new double[2];
+            textPos[0] = pos[0] + dpos[0];
+            textPos[1] = pos[1] + dpos[1];
+            exp.show(text, textPos, angle, fontsize, "cc");
+        }
+
+        // Determine current point shift in user space coordinates
+        double showShift[] = shiftPos(currentFont.getWidth(charNames), 0, scaling, angle);
+        showShift = gstate.current.CTM.inverseApplyShift(showShift);
+        
+        return showShift;
     }
     
     /**
@@ -132,11 +152,23 @@ public class TextHandler {
             x = 0.5 * (unitBbox.getLowerLeftX() + unitBbox.getUpperRightX());
         }
         
+        return shiftPos(x, y, scaling, angle);
+    }
+    
+    /**
+     * Scale and rotate the translation vector {dx, dy}
+     * @param dx Delta x shift (before scaling and rotation)
+     * @param dy Delta y shift (before scaling and rotation)
+     * @param scaling Scaling for shift
+     * @param angle Angle (in degrees) for rotation
+     * @return New translation vector
+     */
+    double[] shiftPos(double dx, double dy, double scaling, double angle) {
         angle = Math.toRadians(angle);
-        double[] pos = new double[2];
-        pos[0] = scaling * (x*Math.cos(angle) - y*Math.sin(angle));
-        pos[1] = scaling * (x*Math.sin(angle) + y*Math.cos(angle));
-        return pos;
+        double[] newPos = new double[2];
+        newPos[0] = scaling * (dx*Math.cos(angle) - dy*Math.sin(angle));
+        newPos[1] = scaling * (dx*Math.sin(angle) + dy*Math.cos(angle));
+        return newPos;        
     }
     
 }

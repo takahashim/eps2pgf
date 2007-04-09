@@ -117,6 +117,18 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
+     * Move to a relative point.
+     * @param dx delta X-coordinate (before CTM is applied)
+     * @param dy delta Y-coordinate (before CTM is applied)
+     */
+    public void rmoveto(double dx, double dy) {
+        position[0] = position[0] + dx;
+        position[1] = position[1] + dy;
+        double[] transformed = CTM.apply(position);
+        path.moveto(transformed[0], transformed[1], position[0], position[1]);
+    }
+    
+    /**
      * Draw a line to a relative point.
      * @param dx delta X-coordinate (before CTM is applied)
      * @param dy delta Y-coordinate (before CTM is applied)
@@ -148,6 +160,22 @@ public class GraphicsState implements Cloneable {
             log.info("Clip operator is not fully implemented. This might have an effect on the result.");
         }
         clippingPath = path.clone();
+    }
+    
+    /**
+     * Updates the field current position by retrieving the last coordinate
+     * of the current path and transforming it back to user space
+     * coordinates. This is usually done after the CTM has been altered.
+     */
+    public void updatePosition() {
+        try {
+            double[] posd = getCurrentPosInDeviceSpace();
+            position = CTM.inverseApply(posd);
+        } catch (PSErrorNoCurrentPoint e) {
+            // Apparently there is no current point
+            position[0] = Double.NaN;
+            position[1] = Double.NaN;
+        }
     }
     
     /**
