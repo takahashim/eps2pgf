@@ -96,6 +96,15 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * Produce a text representation of this object (see PostScript
+     * operator 'cvs' for more info)
+     * @return Text representation
+     */
+    public String cvs() {
+        return "--nostringval--";
+    }
+    
+    /**
      * Return this value rounded downwards
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
      * @return Value of this object rounded downwards

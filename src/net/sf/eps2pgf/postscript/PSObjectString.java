@@ -160,7 +160,16 @@ public class PSObjectString extends PSObject {
     public String isis() {
         return "(" + value + ")";
     }
-    
+
+    /**
+     * Produce a text representation of this object (see PostScript
+     * operator 'cvs' for more info)
+     * @return Text representation
+     */
+    public String cvs() {
+        return value;
+    }    
+
     /**
      * Convert this string to an array with character names
      * @param encoding Encoding to use to decode this string
@@ -173,6 +182,18 @@ public class PSObjectString extends PSObject {
             arr.addAt(i, encoding.get(chr));
         }
         return arr;
+    }
+    
+    /**
+     * Overwrites this string with a new value.
+     * @param newStr New value for this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck The new string is longer than the current string
+     */
+    public void overwrite(String newStr) throws PSErrorRangeCheck {
+        if (newStr.length() > value.length()) {
+            throw new PSErrorRangeCheck();
+        }
+        value = newStr;
     }
 
     /**

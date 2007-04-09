@@ -49,6 +49,15 @@ public class PSObjectOperator extends PSObject {
     }
     
     /**
+     * Produce a text representation of this object (see PostScript
+     * operator 'cvs' for more info)
+     * @return Text representation
+     */
+    public String cvs() {
+        return name;
+    }
+    
+    /**
      * Executes this object in the supplied interpreter
      * @param interp Interpreter in which this object is executed.
      * @throws java.lang.Exception An error occured during the execution of this object.

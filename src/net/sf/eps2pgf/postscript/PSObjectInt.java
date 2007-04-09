@@ -98,6 +98,15 @@ public class PSObjectInt extends PSObject {
     }
 
     /**
+     * Produce a text representation of this object (see PostScript
+     * operator 'cvs' for more info)
+     * @return Text representation
+     */
+    public String cvs() {
+        return String.valueOf(value);
+    }
+    
+    /**
      * Return this value rounded downwards
      * @return New object with same integer
      */

@@ -401,6 +401,17 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: cvs
+     */
+    public void op_cvs() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorRangeCheck {
+        PSObjectString string = opStack.pop().toPSString();
+        PSObject any = opStack.pop();
+        string.overwrite(any.cvs());
+        opStack.push(string);
+    }
+    
+    /**
      * PostScript op: >>
      * this operator is equivalent to the following code (from PostScript manual)
      * counttomark 2 idiv
