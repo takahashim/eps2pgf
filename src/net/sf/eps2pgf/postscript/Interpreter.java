@@ -449,6 +449,7 @@ public class Interpreter {
     /** PostScript op: dict */
     public void op_dict() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
             PSErrorRangeCheck {
+        
         int capacity = opStack.pop().toNonNegInt();
         opStack.push(new PSObjectDict(capacity));
     }
@@ -886,7 +887,7 @@ public class Interpreter {
     public void op_pstack() {
         for (int i = opStack.size()-1 ; i >= 0 ; i--) {
             System.out.println(opStack.get(i).isis());
-        }        
+        }
     }
     
     /** PostScript op: put */
@@ -1211,19 +1212,10 @@ public class Interpreter {
     public void op_show() throws PSErrorTypeCheck, PSErrorStackUnderflow,
             PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, 
             PSErrorNoCurrentPoint, IOException {
+        
         PSObjectString string = opStack.pop().toPSString();
-        
-        double pos[] = gstate.current.position;
-        double posd[] = gstate.current.CTM.apply(pos);
-        exp.drawDot(posd[0], posd[1]);
-        
         double[] dpos = textHandler.showText(exp, string);
         gstate.current.rmoveto(dpos[0], dpos[1]);
-        
-        pos = gstate.current.position;
-        posd = gstate.current.CTM.apply(pos);
-        exp.drawDot(posd[0], posd[1]);
-        
     }
     
     /** PostScript op: showpage */
@@ -1279,6 +1271,19 @@ public class Interpreter {
         opStack.push(new PSObjectBool(false));
     }
    
+    /**
+     * PostScript op: stringwidth
+     */
+    public void op_stringwidth() throws PSErrorTypeCheck, PSErrorStackUnderflow,
+            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, 
+            PSErrorNoCurrentPoint, IOException {
+        
+        PSObjectString string = opStack.pop().toPSString();
+        double[] dpos = textHandler.showText(exp, string, true);
+        opStack.push(new PSObjectReal(dpos[0]));
+        opStack.push(new PSObjectReal(dpos[1]));
+    }
+
     /** PostScript op: stroke */
     public void op_stroke() throws PSError, IOException {
         exp.stroke(gstate.current.path);

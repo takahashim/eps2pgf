@@ -66,7 +66,7 @@ public class TextHandler {
         
         String text = currentFont.charNames2charStrings(charNames);
         
-        double angle = -gstate.current.CTM.getRotation();
+        double angle = gstate.current.CTM.getRotation();
         
         // Calculate scaling and fontsize in points (=1/72 inch)
         PSObjectMatrix fontMatrix = currentFont.getFontMatrix();
@@ -80,24 +80,24 @@ public class TextHandler {
             double[] pos = gstate.current.getCurrentPosInDeviceSpace();
             double[] dpos;
 
-    //        dpos = getAnchor("tl", bbox, scaling, angle);
-    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-    //        dpos = getAnchor("bl", bbox, scaling, angle);
-    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-    //        dpos = getAnchor("tr", bbox, scaling, angle);
-    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-    //        dpos = getAnchor("br", bbox, scaling, angle);
-    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-    //        dpos = getAnchor("cc", bbox, scaling, angle);
-    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-    //        dpos = getAnchor("tc", bbox, scaling, angle);
-    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-    //        dpos = getAnchor("bc", bbox, scaling, angle);
-    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-    //        dpos = getAnchor("cl", bbox, scaling, angle);
-    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-    //        dpos = getAnchor("cr", bbox, scaling, angle);
-    //        exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+//            dpos = getAnchor("tl", bbox, scaling, angle);
+//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+//            dpos = getAnchor("bl", bbox, scaling, angle);
+//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+//            dpos = getAnchor("tr", bbox, scaling, angle);
+//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+//            dpos = getAnchor("br", bbox, scaling, angle);
+//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+//            dpos = getAnchor("cc", bbox, scaling, angle);
+//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+//            dpos = getAnchor("tc", bbox, scaling, angle);
+//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+//            dpos = getAnchor("bc", bbox, scaling, angle);
+//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+//            dpos = getAnchor("cl", bbox, scaling, angle);
+//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+//            dpos = getAnchor("cr", bbox, scaling, angle);
+//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
 
             dpos = getAnchor("cc", bbox, scaling, angle);
             double textPos[] = new double[2];

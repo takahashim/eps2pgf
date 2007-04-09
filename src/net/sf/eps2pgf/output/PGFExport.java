@@ -232,7 +232,7 @@ public class PGFExport implements Exporter {
         out.write(lengthFormat.format(1e-4*coor1[0]) + "cm}{");
         out.write(lengthFormat.format(1e-4*coor1[1]) + "cm}}");
         if (angle != 0) {
-            out.write("\\pgftransformrotate{"+coorFormat.format(-angle)+"}");
+            out.write("\\pgftransformrotate{"+coorFormat.format(angle)+"}");
         }
         if (xScale != 1) {
             out.write("\\pgftransformxscale{" + xScale + "}");
@@ -432,7 +432,7 @@ public class PGFExport implements Exporter {
      */
     public void drawDot(double x, double y) throws IOException {
         out.write("\\begin{pgfscope}\\pgfsetfillcolor{red}\\pgfpathcircle{\\pgfpoint{"
-                + 1e-4*x + "cm}{" + 1e-4*y + "cm}}{2pt}\\pgfusepath{fill}\\end{pgfscope}\n");
+                + 1e-4*x + "cm}{" + 1e-4*y + "cm}}{0.5pt}\\pgfusepath{fill}\\end{pgfscope}\n");
     }
     
     /**
