@@ -287,6 +287,7 @@ public class Interpreter {
     public void op_concat() throws PSError {
         PSObjectMatrix matrix = opStack.pop().toMatrix();
         gstate.current.CTM.concat(matrix);
+        gstate.current.updatePosition();
     }
     
     /** PostScript op: copy */
@@ -1040,6 +1041,7 @@ public class Interpreter {
         } else {
             angle = obj.toReal();
             gstate.current.CTM.rotate(angle);
+            gstate.current.updatePosition();
         }
     }
     
@@ -1070,6 +1072,7 @@ public class Interpreter {
             sy = obj.toReal();
             sx = opStack.pop().toReal();
             gstate.current.CTM.scale(sx, sy);
+            gstate.current.updatePosition();
         }
     }
     
@@ -1206,7 +1209,16 @@ public class Interpreter {
             PSErrorNoCurrentPoint, IOException {
         PSObjectString string = opStack.pop().toPSString();
         
+        double pos[] = gstate.current.position;
+        double posd[] = gstate.current.CTM.apply(pos);
+        exp.drawDot(posd[0], posd[1]);
+        
         double[] dpos = textHandler.showText(exp, string);
+        gstate.current.rmoveto(dpos[0], dpos[1]);
+        
+        pos = gstate.current.position;
+        posd = gstate.current.CTM.apply(pos);
+        exp.drawDot(posd[0], posd[1]);
         
     }
     
@@ -1339,6 +1351,7 @@ public class Interpreter {
             ty = obj.toReal();
             tx = opStack.pop().toReal();
             gstate.current.CTM.translate(tx, ty);
+            gstate.current.updatePosition();
         }
     }
     

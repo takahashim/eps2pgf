@@ -202,12 +202,39 @@ public class PSObjectMatrix extends PSObject {
     
     /**
      * Applies inverse transformation to a point
-     * @param x X-coordinate
-     * @param y Y-coordinate
+     * @param coor Coordinate
      * @return Inverse transformed coordinate
      */
     public double[] inverseApply(double[] coor) {
         return inverseApply(coor[0], coor[1]);
+    }
+    
+    /**
+     * Applies inverse transformation to a translation (i.e. tx and ty are ignored)
+     * @param x dx translation
+     * @param y dy translation
+     * @return Inverse transformed translation
+     */
+    public double[] inverseApplyShift(double x, double y) {
+        double a = matrix[0];
+        double b = matrix[1];
+        double c = matrix[2];
+        double d = matrix[3];
+        
+        double[] coor = new double[2];
+        
+        coor[0] = (d*x-c*y)/(-c*b+a*d);
+        coor[1] = -(-a*y+b*x)/(-c*b+a*d);
+        return coor;
+    }
+    
+    /**
+     * Applies inverse transformation to a translation (i.e. tx and ty are ignored)
+     * @param coor Translation vector {dx, dy}
+     * @return Inverse transformed translation
+     */
+    public double[] inverseApplyShift(double[] coor) {
+        return inverseApplyShift(coor[0], coor[1]);
     }
     
     /**

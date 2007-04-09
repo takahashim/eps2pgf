@@ -432,7 +432,7 @@ public class PGFExport implements Exporter {
      */
     public void drawDot(double x, double y) throws IOException {
         out.write("\\begin{pgfscope}\\pgfsetfillcolor{red}\\pgfpathcircle{\\pgfpoint{"
-                + 1e-4*x + "cm}{" + 1e-4*y + "cm}}{0.25pt}\\pgfusepath{fill}\\end{pgfscope}\n");
+                + 1e-4*x + "cm}{" + 1e-4*y + "cm}}{2pt}\\pgfusepath{fill}\\end{pgfscope}\n");
     }
     
     /**
