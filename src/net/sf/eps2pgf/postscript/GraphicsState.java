@@ -121,7 +121,10 @@ public class GraphicsState implements Cloneable {
      * @param dx delta X-coordinate (before CTM is applied)
      * @param dy delta Y-coordinate (before CTM is applied)
      */
-    public void rmoveto(double dx, double dy) {
+    public void rmoveto(double dx, double dy) throws PSErrorNoCurrentPoint {
+        if (position[0] == Double.NaN) {
+            throw new PSErrorNoCurrentPoint();
+        }
         position[0] = position[0] + dx;
         position[1] = position[1] + dy;
         double[] transformed = CTM.apply(position);
@@ -133,7 +136,10 @@ public class GraphicsState implements Cloneable {
      * @param dx delta X-coordinate (before CTM is applied)
      * @param dy delta Y-coordinate (before CTM is applied)
      */
-    public void rlineto(double dx, double dy) {
+    public void rlineto(double dx, double dy) throws PSErrorNoCurrentPoint {
+        if (position[0] == Double.NaN) {
+            throw new PSErrorNoCurrentPoint();
+        }
         position[0] = position[0] + dx;
         position[1] = position[1] + dy;
         double[] transformed = CTM.apply(position);
