@@ -76,9 +76,9 @@
 <entry key="five">5</entry>
 <entry key="four">4</entry>
 
-<entry key="g">&gt;</entry>
+<entry key="g">g</entry>
 <entry key="grave">{\textasciigrave}</entry>
-<entry key="greater">></entry>
+<entry key="greater">&gt;</entry>
 
 <entry key="h">h</entry>
 <entry key="hungarumlaut">\H{}</entry>
