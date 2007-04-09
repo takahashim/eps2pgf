@@ -423,7 +423,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
                         Ligature lig = (Ligature)obj;
                         if (nextChar.equals(lig.getSuccessor())) {
                             PSObjectName name = new PSObjectName(lig.getLigature(), true);
-                            arr.add(name);
+                            arr.addToEnd(name);
                             i++;
                             ligFound = true;
                             break;
@@ -432,7 +432,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
                 }
                 
                 if (!ligFound) {
-                    arr.add(charName);
+                    arr.addToEnd(charName);
                 }
             } catch (PSErrorRangeCheck e) {
                 // This can never happen inside the for loop
@@ -448,6 +448,13 @@ public class PSObjectFont extends PSObject implements Cloneable {
         return arr;
     }
     
+    /**
+     * Get the number of elements
+     * @return The number of dictionary entries in this font.
+     */
+    public int length() {
+        return dict.length();
+    }
     
     /**
      * Return the dictionary used by this font
