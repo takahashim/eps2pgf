@@ -84,6 +84,10 @@ public class Interpreter {
      */
     public void start() throws Exception {
         exp.init();
+        
+        // Default line width in PostScript is 1pt, while in PGF it is 0.4pt
+        exp.setlinewidth(gstate.current.CTM.getMeanScaling());
+        
         try {
             processObjects(docObjects);
         } catch (PSError e) {
