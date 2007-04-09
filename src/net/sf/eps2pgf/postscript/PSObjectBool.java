@@ -33,6 +33,19 @@ public class PSObjectBool extends PSObject {
         value = bool;
     }
     
+    /**
+     * Produce a text representation of this object (see PostScript
+     * operator 'cvs' for more info)
+     * @return Text representation
+     */
+    public String cvs() {
+        if (value) {
+            return "true";
+        } else {
+            return "false";
+        }
+    }    
+
     /** Convert this object to a boolean, if possible. */
     public boolean toBool() {
         return value;

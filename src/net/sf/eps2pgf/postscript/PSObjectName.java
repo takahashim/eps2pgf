@@ -137,6 +137,15 @@ public class PSObjectName extends PSObject {
         return ((isLiteral == objName.isLiteral) && name.equals(objName.name));
     }
     
+    /**
+     * Produce a text representation of this object (see PostScript
+     * operator 'cvs' for more info)
+     * @return Text representation
+     */
+    public String cvs() {
+        return name;
+    }
+    
     /** Return a hash code for this object. */
     public int hashCode() {
         if (isLiteral) {

@@ -90,6 +90,15 @@ public class PSObjectReal extends PSObject {
     public PSObject ceiling() {
         return new PSObjectReal(Math.ceil(value));
     }
+    
+    /**
+     * Produce a text representation of this object (see PostScript
+     * operator 'cvs' for more info)
+     * @return Text representation
+     */
+    public String cvs() {
+        return String.valueOf(value);
+    }
 
     /**
      * Return this value rounded downwards
