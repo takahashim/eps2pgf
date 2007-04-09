@@ -40,6 +40,22 @@ public class PSObjectString extends PSObject {
     }
     
     /**
+     * Create a new PostScript string with n \u0000 characters
+     * @param n Number of \u0000 characters in the new string
+     */
+    public PSObjectString(int n) throws PSErrorRangeCheck {
+        if (n < 0) {
+            throw new PSErrorRangeCheck();
+        }
+        StringBuilder str = new StringBuilder(n);
+        for (int i = 0 ; i < n ; i++) {
+            str.append("\u0000");
+        }
+        
+        value = str.toString();
+    }
+    
+    /**
      * Creates a new instance of PSObjectString
      * @param str This object is initialized with a copy of this string. If
      *            the string is enclosed in round parenthesis ( ) it is

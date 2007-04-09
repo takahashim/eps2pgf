@@ -1270,6 +1270,15 @@ public class Interpreter {
         }
         opStack.push(new PSObjectBool(false));
     }
+    
+    /**
+     * PostScript op: string
+     */
+    public void op_string() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorRangeCheck {
+        int n = opStack.pop().toNonNegInt();
+        opStack.push(new PSObjectString(n));
+    }
    
     /**
      * PostScript op: stringwidth
