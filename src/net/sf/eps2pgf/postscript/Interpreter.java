@@ -988,15 +988,19 @@ public class Interpreter {
     }    
     
     /** PostScript op: rmoveto */
-    public void op_rlineto() throws PSError {
+    public void op_rlineto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorNoCurrentPoint {
         double dy = opStack.pop().toReal();
         double dx = opStack.pop().toReal();
         gstate.current.rlineto(dx, dy);
     }    
 
     /** PostScript op: rmoveto */
-    public void op_rmoveto() throws PSError {
-        throw new PSErrorUnimplemented("operator: rmoveto");
+    public void op_rmoveto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorNoCurrentPoint {
+        double dy = opStack.pop().toReal();
+        double dx = opStack.pop().toReal();
+        gstate.current.rmoveto(dx, dy);
     }    
 
     /** PostScript op: roll */
