@@ -265,9 +265,7 @@ public class PSObjectMatrix extends PSObject {
      * @return Rotation in degrees
      */
     public double getRotation() {
-        double anglex = Math.atan2(-matrix[2], matrix[0]);
-        double angley = Math.atan2(-matrix[1], -matrix[3]);
-        return 0.5 * (anglex + angley) / Math.PI * 180;
+        return Math.atan2(matrix[1], matrix[0]) / Math.PI * 180;
     }
     
     /**
