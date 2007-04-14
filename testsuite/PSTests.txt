@@ -1,0 +1,2 @@
+copy (string): (1234567890) dup (xxxxx) exch copy pop (xxxxx67890) eq
+add (test 1): 1 2 add 3 eq
