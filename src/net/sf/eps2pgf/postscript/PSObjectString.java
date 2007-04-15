@@ -255,7 +255,7 @@ public class PSObjectString extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck The new string is longer than the current string
      */
     public void overwrite(String newStr) throws PSErrorRangeCheck {
-        putinterval(newStr, 0);
+        putinterval(0, newStr);
         count = newStr.length();
     }
     
@@ -282,13 +282,24 @@ public class PSObjectString extends PSObject {
     
     /**
      * PostScript operator putinterval
+     * @param index Start index of subsequence
      * @param newStr String to put in this string
      */
-    public void putinterval(String newStr, int index) throws PSErrorRangeCheck {
+    public void putinterval(int index, String newStr) throws PSErrorRangeCheck {
         if (newStr.length() > (count-index)) {
             throw new PSErrorRangeCheck();
         }
-        value.replace(offset+index, newStr.length(), newStr);
+        value.replace(offset+index, offset+index+newStr.length(), newStr);
+    }
+    
+    /**
+     * PostScript operator putinterval
+     * @param index Start index of subsequence
+     * @param obj Subsequence
+     */
+    public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck, PSErrorRangeCheck {
+        String str = obj.toPSString().toString();
+        putinterval(index, str);
     }
 
     /**

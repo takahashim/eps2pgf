@@ -896,6 +896,15 @@ public class Interpreter {
         obj.put(indexKey, any);
     }
     
+    /** PostScript op: putinterval */
+    public void op_putinterval() throws PSErrorRangeCheck,
+            PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject subseq = opStack.pop();
+        int index = opStack.pop().toNonNegInt();
+        PSObject seq = opStack.pop();
+        seq.putinterval(index, subseq);
+    }
+    
     /** PostScript op: readhexstring */
     public void op_readhexstring() throws PSError {
         throw new PSErrorUnimplemented("operator: readhexstring");
