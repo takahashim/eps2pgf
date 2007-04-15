@@ -123,4 +123,12 @@ public class PSObjectProc extends PSObject {
     public PSObject toLiteral() {
         return new PSObjectArray(procObjects);
     }
+
+    /**
+     * Returns the type of this object
+     * @return Type of this object (see PostScript manual for possible values)
+     */
+    public String type() {
+        return "arraytype";
+    }
 }

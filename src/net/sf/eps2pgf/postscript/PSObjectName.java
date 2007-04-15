@@ -126,17 +126,6 @@ public class PSObjectName extends PSObject {
         return this;
     }
     
-    /** Test whether an object is equal to this object. */
-    public boolean equals(Object obj) {
-        // First check whether the type is the same
-        if (!(obj instanceof PSObjectName)) {
-            return false;
-        }
-        
-        PSObjectName objName = (PSObjectName)obj;
-        return ((isLiteral == objName.isLiteral) && name.equals(objName.name));
-    }
-    
     /**
      * Produce a text representation of this object (see PostScript
      * operator 'cvs' for more info)
@@ -144,6 +133,24 @@ public class PSObjectName extends PSObject {
      */
     public String cvs() {
         return name;
+    }
+    
+    /**
+     * Compare this object with another object and return true if they are equal.
+     * See PostScript manual on what's equal and what's not.
+     * @param obj Object to compare this object with
+     * @return True if objects are equal, false otherwise
+     */
+    public boolean eq(PSObject obj) {
+        if (obj instanceof PSObjectName) {
+            PSObjectName objName = (PSObjectName)obj;
+            return (name.equals(objName.name));
+        } else if (obj instanceof PSObjectString) {
+            PSObjectString objStr = (PSObjectString)obj;
+            return (name.equals(objStr.value));
+        } else {
+            return false;
+        }
     }
     
     /** Return a hash code for this object. */
@@ -197,5 +204,13 @@ public class PSObjectName extends PSObject {
     public PSObject toLiteral() {
         isLiteral = true;
         return this;
+    }
+
+    /**
+     * Returns the type of this object
+     * @return Type of this object (see PostScript manual for possible values)
+     */
+    public String type() {
+        return "nametype";
     }
 }

@@ -107,6 +107,25 @@ public class PSObjectInt extends PSObject {
     }
     
     /**
+     * Compare this object with another object and return true if they are equal.
+     * See PostScript manual on what's equal and what's not.
+     * @param obj Object to compare this object with
+     * @return True if objects are equal, false otherwise
+     */
+    public boolean eq(PSObject obj) {
+        try {
+            if (obj instanceof PSObjectInt) {
+                return (value == obj.toInt());
+            } else if (obj instanceof PSObjectReal) {
+                return (toReal() == obj.toReal());
+            }
+        } catch (PSErrorTypeCheck e) {
+            // This can never happen because of the typecheck with instanceof
+        }
+        return false;
+    }
+
+    /**
      * Return this value rounded downwards
      * @return New object with same integer
      */
@@ -233,5 +252,13 @@ public class PSObjectInt extends PSObject {
      */
     public PSObjectInt clone() {
         return new PSObjectInt(value);
+    }
+
+    /**
+     * Returns the type of this object
+     * @return Type of this object (see PostScript manual for possible values)
+     */
+    public String type() {
+        return "integertype";
     }
 }

@@ -222,4 +222,12 @@ public class PSObjectDict extends PSObject {
         }
         return newDict;
     }
+
+    /**
+     * Returns the type of this object
+     * @return Type of this object (see PostScript manual for possible values)
+     */
+    public String type() {
+        return "dicttype";
+    }
 }

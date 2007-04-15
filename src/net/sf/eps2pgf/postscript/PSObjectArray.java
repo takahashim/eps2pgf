@@ -355,4 +355,13 @@ public class PSObjectArray extends PSObject {
     public int length() {
         return size();
     }
+    
+    /**
+     * Returns the type of this object
+     * @return Type of this object (see PostScript manual for possible values)
+     */
+    public String type() {
+        return "arraytype";
+    }
+
 }

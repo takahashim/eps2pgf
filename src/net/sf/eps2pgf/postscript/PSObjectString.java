@@ -185,6 +185,24 @@ public class PSObjectString extends PSObject {
     }
     
     /**
+     * Compare this object with another object and return true if they are equal.
+     * See PostScript manual on what's equal and what's not.
+     * @param obj Object to compare this object with
+     * @return True if objects are equal, false otherwise
+     */
+    public boolean eq(PSObject obj) {
+        if (obj instanceof PSObjectName) {
+            PSObjectName objName = (PSObjectName)obj;
+            return (value.equals(objName.name));
+        } else if (obj instanceof PSObjectString) {
+            PSObjectString objStr = (PSObjectString)obj;
+            return (value.equals(objStr.value));
+        } else {
+            return false;
+        }
+    }
+    
+    /**
      * Overwrites this string with a new value.
      * @param newStr New value for this object
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck The new string is longer than the current string
@@ -214,5 +232,13 @@ public class PSObjectString extends PSObject {
      */
     public PSObjectString clone() {
         return new PSObjectString(value);
+    }
+
+    /**
+     * Returns the type of this object
+     * @return Type of this object (see PostScript manual for possible values)
+     */
+    public String type() {
+        return "stringtype";
     }
 }

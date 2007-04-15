@@ -320,6 +320,16 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * Compare this object with another object and return true if they are equal.
+     * See PostScript manual on what's equal and what's not.
+     * @param obj Object to compare this object with
+     * @return True if objects are equal, false otherwise
+     */
+    public boolean eq(PSObject obj) {
+        return (this == obj);
+    }
+    
+    /**
      * Implements PostScript operator getinterval. Returns a new object
      * with an interval from this object.
      * @param index Index of the first element of the subarray
@@ -372,5 +382,13 @@ public class PSObject implements Cloneable {
         } else {
             return this;
         }
+    }
+    
+    /**
+     * Returns the type of this object
+     * @return Type of this object (see PostScript manual for possible values)
+     */
+    public String type() {
+        return "generictype";
     }
 }

@@ -503,15 +503,7 @@ public class Interpreter {
     public void op_eq() throws PSErrorTypeCheck, PSErrorStackUnderflow {
         PSObject any2 = opStack.pop();
         PSObject any1 = opStack.pop();
-        boolean bool;
-        if ( (any1 instanceof PSObjectInt) || (any1 instanceof PSObjectReal) ) {
-            bool = (any1.toReal() == any2.toReal());
-        } else if ( (any1 instanceof PSObjectString) || (any1 instanceof PSObjectName) ) {
-            bool = any1.toDictKey().equals(any2.toDictKey());
-        } else {
-            bool = (any1 == any2);
-        }
-        opStack.push(new PSObjectBool(bool));
+        opStack.push(new PSObjectBool(any1.eq(any2)));
     }
     
     /**
@@ -820,12 +812,7 @@ public class Interpreter {
     
     /** Postscript op: matrix */
     public void op_matrix() throws PSError {
-        double[] identityMatrix = {1, 0, 0, 1, 0, 0};
-        op_sqBrackLeft();
-        for(int i = 0 ; i < identityMatrix.length ; i++) {
-            opStack.push(new PSObjectReal(identityMatrix[i]));
-        }
-        op_sqBrackRight();
+        opStack.push(new PSObjectMatrix(1, 0, 0, 1, 0 , 0));
     }
     
     /**
@@ -1402,12 +1389,11 @@ public class Interpreter {
     }
     
     /**
-     * PostScript op: xcheck
+     * PostScript op: type
      */
-    public void op_xcheck() throws PSErrorStackUnderflow {
+    public void op_type() throws PSErrorStackUnderflow {
         PSObject any = opStack.pop();
-        PSObjectBool check = new PSObjectBool(any.isExecutable());
-        opStack.push(check);
+        opStack.push(new PSObjectName(any.type(), false));
     }
     
     /** PostScript op: where */
@@ -1422,4 +1408,13 @@ public class Interpreter {
         }
     }
    
+    /**
+     * PostScript op: xcheck
+     */
+    public void op_xcheck() throws PSErrorStackUnderflow {
+        PSObject any = opStack.pop();
+        PSObjectBool check = new PSObjectBool(any.isExecutable());
+        opStack.push(check);
+    }
+    
 }

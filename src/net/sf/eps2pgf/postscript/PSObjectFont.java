@@ -496,4 +496,12 @@ public class PSObjectFont extends PSObject implements Cloneable {
     public String isis() {
         return "-font " + getFontName() + " (FID " + getFID() + ")-";
     }
+
+    /**
+     * Returns the type of this object
+     * @return Type of this object (see PostScript manual for possible values)
+     */
+    public String type() {
+        return "dicttype";
+    }
 }
