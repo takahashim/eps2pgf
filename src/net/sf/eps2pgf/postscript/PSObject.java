@@ -152,6 +152,15 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * PostScript operator putinterval
+     * @param index Start index of subsequence
+     * @param obj Subsequence
+     */
+    public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck, PSErrorRangeCheck {
+        throw new PSErrorTypeCheck();
+    }
+
+    /**
      * Return this value rounded to the nearest integer
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
      * @return Value of this object rounded to the nearest integer
