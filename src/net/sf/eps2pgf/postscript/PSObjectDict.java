@@ -69,6 +69,16 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
+     * PostScript operator put. Replace a single value in this object.
+     * Same as setKey() method
+     * @param index Index or key for new value
+     * @param value New value
+     */
+    public void put(PSObject index, PSObject value) throws PSErrorTypeCheck {
+        setKey(index, value);
+    }
+
+    /**
      * Sets a key in the dictionary
      * @param key Key of the new dictionary entry.
      * @param value Value of the new dictionary entry.
@@ -132,15 +142,26 @@ public class PSObjectDict extends PSObject {
      * Return value associated with key. Same as lookup, except that a
      * PSErrorRangeCheck is thrown when the item doesn't exist.
      * @param key Key for which the associated value will be returned
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Requested key is not defined in this dictionary
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
      * @return Value associated with key
      */
-    public PSObject get(String key) throws PSErrorRangeCheck {
+    public PSObject get(String key) throws PSErrorUndefined {
         PSObject value = lookup(key);
         if (value == null) {
-            throw new PSErrorRangeCheck();
+            throw new PSErrorUndefined();
         }
         return value;
+    }
+    
+    /**
+     * PostScript operator: get
+     * Return value associated with key.
+     * @param key Key for which the associated value will be returned
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
+     * @return Value associated with key
+     */
+    public PSObject get(PSObject key) throws PSErrorUndefined, PSErrorTypeCheck {
+        return get(key.toDictKey());
     }
     
     /**

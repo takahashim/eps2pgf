@@ -615,15 +615,11 @@ public class Interpreter {
     }
     
     /** PostScript op: get */
-    public void op_get() throws PSError {
+    public void op_get() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorUndefined, PSErrorRangeCheck {
         PSObject indexKey = opStack.pop();
         PSObject obj = opStack.pop();
-        if ((obj instanceof PSObjectDict) || (obj instanceof PSObjectFont)) {
-            PSObjectDict dict = obj.toDict();
-            opStack.push(dict.lookup(indexKey.toDictKey()));
-        } else {
-            throw new PSErrorUnimplemented("operator: get not FULLY implemented.");
-        }
+        opStack.push(obj.get(indexKey));
     }
     
     /** PostScript op: getinterval */
@@ -897,12 +893,7 @@ public class Interpreter {
         PSObject any = opStack.pop();
         PSObject indexKey = opStack.pop();
         PSObject obj = opStack.pop();
-        if (obj instanceof PSObjectDict) {
-            PSObjectDict dict = (PSObjectDict)obj;
-            dict.setKey(indexKey, any);
-        } else {
-            throw new PSErrorUnimplemented("operator put not FULLY implemented.");
-        }
+        obj.put(indexKey, any);
     }
     
     /** PostScript op: readhexstring */
@@ -1205,7 +1196,7 @@ public class Interpreter {
      * PostScript op: shfill
      */
     public void op_shfill() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
-            PSErrorUnimplemented, PSErrorRangeCheck, IOException {
+            PSErrorUnimplemented, PSErrorRangeCheck, PSErrorUndefined, IOException {
         PSObjectDict dict = opStack.pop().toDict();
         exp.shfill(dict, gstate.current);
     }

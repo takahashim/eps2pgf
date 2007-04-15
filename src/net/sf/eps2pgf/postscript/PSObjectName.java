@@ -147,7 +147,7 @@ public class PSObjectName extends PSObject {
             return (name.equals(objName.name));
         } else if (obj instanceof PSObjectString) {
             PSObjectString objStr = (PSObjectString)obj;
-            return (name.equals(objStr.value));
+            return (name.equals(objStr.toString()));
         } else {
             return false;
         }

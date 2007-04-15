@@ -114,6 +114,15 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * PostScript operator: get
+     * Gets a single element from this object.
+     */
+    public PSObject get(PSObject index) throws PSErrorTypeCheck,
+            PSErrorRangeCheck, PSErrorUndefined {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Multiply this object with another object
      * @param obj Multiplication of this object and passed object
      * @return Multiplication object
@@ -129,6 +138,16 @@ public class PSObject implements Cloneable {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
      */
     public PSObject neg() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * PostScript operator put. Replace a single value in this object.
+     * @param index Index or key for new value
+     * @param value New value
+     */
+    public void put(PSObject index, PSObject value) throws PSErrorRangeCheck,
+            PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     

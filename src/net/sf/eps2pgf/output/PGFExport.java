@@ -171,7 +171,7 @@ public class PGFExport implements Exporter {
      * Shading fill (shfill PostScript operator)
      */
     public void shfill(PSObjectDict dict, GraphicsState gstate) throws PSErrorTypeCheck, 
-            PSErrorUnimplemented, PSErrorRangeCheck, IOException {
+            PSErrorUnimplemented, PSErrorRangeCheck, PSErrorUndefined, IOException {
         Shading shading = Shading.newShading(dict);
         if (shading instanceof RadialShading) {
             radialShading((RadialShading)shading, gstate);

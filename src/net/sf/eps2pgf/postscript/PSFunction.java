@@ -21,9 +21,7 @@
 
 package net.sf.eps2pgf.postscript;
 
-import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
-import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.postscript.errors.*;
 
 /**
  * Represents a PostScript function dictionary
@@ -49,7 +47,7 @@ public class PSFunction {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck A dictionary field has an invalid type
      * @return New PostScript function
      */
-    public static PSFunction newFunction(PSObjectDict dict) throws 
+    public static PSFunction newFunction(PSObjectDict dict) throws PSErrorUndefined,
             PSErrorRangeCheck, PSErrorUnimplemented, PSErrorTypeCheck {
         PSObject typeObj = dict.lookup("FunctionType");
         if (typeObj == null) {
@@ -78,7 +76,7 @@ public class PSFunction {
      * Load entries common to all PostScript functions
      * @param dict PostScript dictionary describing the function
      */
-    void loadCommonEntries(PSObjectDict dict) throws PSErrorRangeCheck, 
+    void loadCommonEntries(PSObjectDict dict) throws PSErrorUndefined, 
             PSErrorTypeCheck {
         // Load domain field
         domain = dict.get("Domain").toArray().toDoubleArray();
@@ -90,7 +88,7 @@ public class PSFunction {
             obj = dict.get("Range");
             range = obj.toArray().toDoubleArray();
             n = (int)Math.floor(range.length/2);
-        } catch (PSErrorRangeCheck e) {
+        } catch (PSErrorUndefined e) {
             range = new double[0];
             n = -1;
         }

@@ -55,7 +55,7 @@ public class Shading {
      * @return New shading object
      */
     public static Shading newShading(PSObjectDict dict) throws PSErrorRangeCheck, 
-            PSErrorTypeCheck, PSErrorUnimplemented {
+            PSErrorTypeCheck, PSErrorUndefined, PSErrorUnimplemented {
         PSObject shadingTypeObj = dict.lookup("ShadingType");
         if (shadingTypeObj == null) {
             throw new PSErrorRangeCheck();
@@ -77,7 +77,7 @@ public class Shading {
      * Load the entries common to all types of shading dictionaries
      */
     void loadCommonEntries(PSObjectDict dict) throws PSErrorRangeCheck, 
-            PSErrorUnimplemented, PSErrorTypeCheck {
+            PSErrorUnimplemented, PSErrorTypeCheck, PSErrorUndefined {
         PSObject colSpaceObj = dict.get("ColorSpace");
         if (colSpaceObj instanceof PSObjectName) {
             ColorSpace = ((PSObjectName)colSpaceObj).name;
