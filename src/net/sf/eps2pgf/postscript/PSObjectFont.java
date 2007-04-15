@@ -194,7 +194,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
         PSObjectString preCode = dict.lookup("LatexPreCode").toPSString();
         PSObjectString postCode = dict.lookup("LatexPostCode").toPSString();
 
-        str.append(preCode.value);
+        str.append(preCode.toString());
         for (int i = 0 ; i < charNames.size() ; i++) {
             PSObjectName charName;
             try {
@@ -204,16 +204,27 @@ public class PSObjectFont extends PSObject implements Cloneable {
                     throw new PSErrorUnimplemented("CharString for "
                             + charNames.get(i).isis() + " is unknown.");
                 }
-                str.append(code.toPSString().value);
+                str.append(code.toPSString().toString());
             } catch (PSErrorRangeCheck e) {
                 // This can never happen inside this for loop
             }
         }
-        str.append(postCode.value);
+        str.append(postCode.toString());
 
         return str.toString();
     }
     
+    /**
+     * PostScript operator: get
+     * Return value associated with key.
+     * @param key Key for which the associated value will be returned
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
+     * @return Value associated with key
+     */
+    public PSObject get(PSObject key) throws PSErrorUndefined, PSErrorTypeCheck {
+        return dict.get(key);
+    }
+
     /**
      * Get the bounding box of a text (defined by a series of charStrings
      * @param charNames Character names of the text for which the bounding box must be
@@ -339,6 +350,15 @@ public class PSObjectFont extends PSObject implements Cloneable {
      */
     public PSObjectMatrix getFontMatrix() throws PSErrorTypeCheck, PSErrorRangeCheck {
         return dict.lookup("FontMatrix").toMatrix();
+    }
+    
+    /**
+     * PostScript operator put. Replace a single value in this object.
+     * @param index Index or key for new value
+     * @param value New value
+     */
+    public void put(PSObject index, PSObject value) throws PSErrorTypeCheck {
+        dict.put(index, value);
     }
     
     /**

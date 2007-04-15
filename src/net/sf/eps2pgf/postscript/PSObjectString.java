@@ -30,14 +30,9 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Wagenaars
  */
 public class PSObjectString extends PSObject {
-    String value;
-    
-    /**
-     * Creates a new empty PostScript string
-     */
-    public PSObjectString() {
-        value = "";
-    }
+    private StringBuffer value;
+    private int offset;
+    private int count;
     
     /**
      * Create a new PostScript string with n \u0000 characters
@@ -52,7 +47,9 @@ public class PSObjectString extends PSObject {
             str.append("\u0000");
         }
         
-        value = str.toString();
+        value = new StringBuffer(str.toString());
+        offset = 0;
+        count = value.length();
     }
     
     /**
@@ -64,10 +61,12 @@ public class PSObjectString extends PSObject {
     public PSObjectString(String str) {
         int len = str.length();
         if ( (len > 0) && (str.charAt(0) == '(') && (str.charAt(len-1) == ')') ) {
-            value = parse(str.substring(1, len-1));
+            value = new StringBuffer(parse(str.substring(1, len-1)));
         } else {
-            value = new String(str);
+            value = new StringBuffer(str);
         }
+        offset = 0;
+        count = value.length();
     }
     
     /** Parse a postscript string. */
@@ -143,22 +142,37 @@ public class PSObjectString extends PSObject {
      * @return Length of this object
      */
     public int length() {
-        return value.length();
-    }
-
-    /**
-     * Convert this object to a string object, if possible
-     * @return PostScript string object representation of this object
-     */
-    public PSObjectString toPSString() {
-        return this;
+        return count;
     }
 
     /** Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      */
     public String isis() {
-        return "(" + value + ")";
+        return "(" + toString() + ")";
+    }
+    
+    /**
+     * Gets the (integer) value of a character in this string.
+     * @param index Index of character (first character has index 0)
+     * @return Integer value of requested character
+     */
+    public int get(int index) throws PSErrorRangeCheck {
+        if ( (index < 0) || (index >= count) ) {
+            throw new PSErrorRangeCheck();
+        }
+        
+        return value.charAt(index + offset);
+    }
+    
+    /**
+     * Gets the (integer) value of a character in this string.
+     * @param index Index of character (first character has index 0)
+     * @return Integer value of requested character
+     */
+    public PSObject get(PSObject index) throws PSErrorTypeCheck, PSErrorRangeCheck {
+        int chr = get(index.toInt());
+        return new PSObjectInt(chr);
     }
 
     /**
@@ -167,7 +181,7 @@ public class PSObjectString extends PSObject {
      * @return Text representation
      */
     public String cvs() {
-        return value;
+        return toString();
     }    
 
     /**
@@ -177,8 +191,8 @@ public class PSObjectString extends PSObject {
      */
     public PSObjectArray decode(PSObjectArray encoding) throws PSErrorRangeCheck {
         PSObjectArray arr = new PSObjectArray();
-        for (int i = 0 ; i < value.length() ; i++) {
-            int chr = value.charAt(i);
+        for (int i = 0 ; i < count ; i++) {
+            int chr = get(i);
             arr.addAt(i, encoding.get(chr));
         }
         return arr;
@@ -193,10 +207,10 @@ public class PSObjectString extends PSObject {
     public boolean eq(PSObject obj) {
         if (obj instanceof PSObjectName) {
             PSObjectName objName = (PSObjectName)obj;
-            return (value.equals(objName.name));
+            return (toString().equals(objName.name));
         } else if (obj instanceof PSObjectString) {
             PSObjectString objStr = (PSObjectString)obj;
-            return (value.equals(objStr.value));
+            return (toString().equals(objStr.toString()));
         } else {
             return false;
         }
@@ -208,10 +222,48 @@ public class PSObjectString extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck The new string is longer than the current string
      */
     public void overwrite(String newStr) throws PSErrorRangeCheck {
-        if (newStr.length() > value.length()) {
+        putinterval(newStr, 0);
+        count = newStr.length();
+    }
+    
+    /**
+     * PostScript operator put. Replace a single character in this string.
+     * @param index Index or key for new value
+     * @param newValue New value
+     */
+    public void put(PSObject index, PSObject newValue) throws PSErrorRangeCheck,
+            PSErrorTypeCheck {
+        int idx = index.toInt();
+        if ( (idx < 0) || (idx >= count) ) {
             throw new PSErrorRangeCheck();
         }
-        value = newStr;
+        
+        int chrInt = newValue.toNonNegInt();
+        if (chrInt > 255) {
+            throw new PSErrorRangeCheck();
+        }
+        char chr = (char)chrInt;
+        
+        value.setCharAt(idx, chr);
+    }
+    
+    /**
+     * PostScript operator putinterval
+     * @param newStr String to put in this string
+     */
+    public void putinterval(String newStr, int index) throws PSErrorRangeCheck {
+        if (newStr.length() > (count-index)) {
+            throw new PSErrorRangeCheck();
+        }
+        value.replace(offset+index, newStr.length(), newStr);
+    }
+
+    /**
+     * Convert this object to a string object, if possible
+     * @return PostScript string object representation of this object
+     */
+    public PSObjectString toPSString() {
+        return this;
     }
 
     /**
@@ -219,19 +271,19 @@ public class PSObjectString extends PSObject {
      * @return Human readable string.
      */
     public String toString() {
-        return "String: " + value;
+        return value.substring(offset, count);
     }
 
     /** Convert this object to dictionary key, if possible. */
     public String toDictKey() {
-        return value;
+        return toString();
     }
     
     /**
      * Creates an exact deep copy of this object.
      */
     public PSObjectString clone() {
-        return new PSObjectString(value);
+        return new PSObjectString(toString());
     }
 
     /**
