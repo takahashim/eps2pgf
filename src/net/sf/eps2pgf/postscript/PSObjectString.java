@@ -69,6 +69,26 @@ public class PSObjectString extends PSObject {
         count = value.length();
     }
     
+    /**
+     * Create new instance of PSObjectString. The new instance is a subset
+     * of an existing stringbuffer.
+     * @param strBuf The new instance is a subset of this stringbuffer.
+     *               Normally, this is the stringbuffer of another PSObjectString.
+     * @param index Index in strBuf of first character
+     * @param length Number of characters in new string
+     */
+    public PSObjectString(StringBuffer strBuf, int index, int length) throws PSErrorRangeCheck {
+        if ((index < 0) || (length < 0)) {
+            throw new PSErrorRangeCheck();
+        }
+        if ((index+length) > strBuf.length()) {
+            throw new PSErrorRangeCheck();
+        }
+        value = strBuf;
+        offset = index;
+        count = length;
+    }
+    
     /** Parse a postscript string. */
     public String parse(String str) {
         StringBuilder newStr = new StringBuilder();
@@ -174,6 +194,19 @@ public class PSObjectString extends PSObject {
         int chr = get(index.toInt());
         return new PSObjectInt(chr);
     }
+    
+    /**
+     * Implements PostScript operator getinterval. Returns a new object
+     * with an interval from this object.
+     * @param index Index of the first character of substring
+     * @param count Number of characters in the substring
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Invalid index or number of elements
+     * @return Object representing a subarray of this object. The data is shared
+     * between both objects.
+     */
+    public PSObject getinterval(int index, int count) throws PSErrorRangeCheck {
+        return new PSObjectString(value, index, count);
+    }
 
     /**
      * Produce a text representation of this object (see PostScript
@@ -271,7 +304,7 @@ public class PSObjectString extends PSObject {
      * @return Human readable string.
      */
     public String toString() {
-        return value.substring(offset, count);
+        return value.substring(offset, offset+count);
     }
 
     /** Convert this object to dictionary key, if possible. */
