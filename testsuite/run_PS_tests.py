@@ -26,8 +26,10 @@ import subprocess
 
 # Command run the PostScript interpreter. %outputFile% and %inputFile% are
 # automatically replaced by the real paths.
-#programCmd = "\"C:\\Program Files\\gs\\gs8.56\\bin\\gswin32c.exe\" -sDEVICE=pdfwrite -sOutputFile=\"%outputFile%\" -dBATCH -q \"%inputFile%\""
-programCmd = "java -jar ..\\dist\\eps2pgf.jar \"%inputFile%\" --output \"%outputFile%\""
+if len(sys.argv) > 1 and sys.argv[1] == 'gs':
+    programCmd = "\"C:\\Program Files\\gs\\gs8.56\\bin\\gswin32c.exe\" -sDEVICE=pdfwrite -sOutputFile=\"%outputFile%\" -dBATCH -q \"%inputFile%\""
+else:
+    programCmd = "java -jar ..\\dist\\eps2pgf.jar \"%inputFile%\" --output \"%outputFile%\""
 
 def main():
     scriptDir = findScriptDir()
