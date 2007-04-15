@@ -1,3 +1,12 @@
+bool 1 - eq 1: 1 1 eq 1.0 1 eq 1 1.0 eq
+bool 2 - eq 2: (abc) (abc) eq (abc) /abc eq /abc (abc) eq
+bool 3 - eq 3: false false eq mark [ eq null null eq
+bool 4 - eq 4: [1 2 3] dup eq [1 2 3] [1 2 3] eq false eq
+type 1 - type 1: [1 2 3] type /arraytype eq {1 2 add} type /arraytype eq matrix type /arraytype eq
+type 2 - type 2: true type /booleantype eq  null type /nulltype eq  mark type /marktype eq
+type 3 - type 3: 123 type /integertype eq  1.1 type /realtype eq  (abc) type /stringtype eq
+type 4 - type 4: 10 dict type /dicttype eq  /add load type /operatortype eq
+type 5 - type 5: /burp type /nametype eq  1 type type /nametype eq
 stack  1 - pop: true true false pop
 stack  2 - exch: 1 2 exch 1 eq exch 2 eq
 stack  3 - dup: (abcde) dup count 2 eq

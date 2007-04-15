@@ -27,10 +27,28 @@ package net.sf.eps2pgf.postscript;
  */
 public class PSObjectNull extends PSObject {
     
+    /**
+     * Compare this object with another object and return true if they are equal.
+     * See PostScript manual on what's equal and what's not.
+     * @param obj Object to compare this object with
+     * @return True if objects are equal, false otherwise
+     */
+    public boolean eq(PSObject obj) {
+        return (obj instanceof PSObjectNull);
+    }
+    
     /** Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      */
     public String isis() {
         return "null";
+    }
+
+    /**
+     * Returns the type of this object
+     * @return Type of this object (see PostScript manual for possible values)
+     */
+    public String type() {
+        return "nulltype";
     }
 }

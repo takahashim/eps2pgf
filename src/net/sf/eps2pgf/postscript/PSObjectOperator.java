@@ -99,4 +99,12 @@ public class PSObjectOperator extends PSObject {
     public PSObject toLiteral() {
         return new PSObjectName(name, true);
     }
+
+    /**
+     * Returns the type of this object
+     * @return Type of this object (see PostScript manual for possible values)
+     */
+    public String type() {
+        return "operatortype";
+    }
 }

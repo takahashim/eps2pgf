@@ -46,6 +46,21 @@ public class PSObjectBool extends PSObject {
         }
     }    
 
+    /**
+     * Compare this object with another object and return true if they are equal.
+     * See PostScript manual on what's equal and what's not.
+     * @param obj Object to compare this object with
+     * @return True if objects are equal, false otherwise
+     */
+    public boolean eq(PSObject obj) {
+        if (obj instanceof PSObjectBool) {
+            PSObjectBool objBool = (PSObjectBool)obj;
+            return (value == objBool.value);
+        } else {
+            return false;
+        }
+    }
+    
     /** Convert this object to a boolean, if possible. */
     public boolean toBool() {
         return value;
@@ -60,5 +75,13 @@ public class PSObjectBool extends PSObject {
         } else {
             return "false";
         }
+    }
+
+    /**
+     * Returns the type of this object
+     * @return Type of this object (see PostScript manual for possible values)
+     */
+    public String type() {
+        return "booleantype";
     }
 }
