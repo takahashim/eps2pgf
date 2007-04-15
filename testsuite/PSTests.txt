@@ -30,18 +30,19 @@ string  4 - get 2: (abcdef) 2 2 getinterval 1 get 100 eq
 string  5 - put: (abcdef) dup 2 48 put (ab0def) eq  
 string  6 - getinterval: (abcdef) 3 2 getinterval (de) eq (abcdef) 3 3 getinterval (def) eq
 string  7 - putinterval: (abcdef) dup 2 (1234) putinterval (ab1234) eq
-string  8 - copy: (1234567890) dup (xxxxx) exch copy pop (xxxxx67890) eq
-string  9 - forall: 0 (abcdef) {add} forall 597 eq
-string 10 - anchorsearch 1: (abbc)(ab) anchorsearch 3 1 roll (ab) eq 3 1 roll (bc) eq
-string 11 - anchorsearch 2: (abbc)(bb) anchorsearch false eq 2 1 roll (abbc) eq
-string 12 - anchorsearch 3: (abbc)(bc) anchorsearch false eq 2 1 roll (abbc) eq
-string 13 - anchorsearch 4: (abbc)(B) anchorsearch false eq 2 1 roll (abbc) eq
-string 14 - search 1: (abbc)(ab) search 4 1 roll () eq 4 1 roll (ab) eq 4 1 roll (bc) eq
-string 15 - search 2: (abbc)(bb) search 4 1 roll (a) eq 4 1 roll (bb) eq 4 1 roll (c) eq
-string 16 - search 3: (abbc)(bc) search 4 1 roll (ab) eq 4 1 roll (bc) eq 4 1 roll () eq
-string 17 - search 4: (abbc)(B) search false eq 2 1 roll (abbc) eq
-string 18 - token 1: (15(St1){1 2 add}) token 3 1 roll 15 eq 3 1 roll ((St1){1 2 add}) eq
-string 19 - token 2: ((St1){1 2 add}) token 3 1 roll (St1) eq 3 1 roll ({1 2 add}) eq
-string 20 - token 3: ({1 2 add}) token 3 1 roll dup type /arraytype eq 4 1 roll xcheck 4 1 roll () eq
-string 21 - token 4: () token false eq count 1 eq
-string 22 - misc 1: (abcdefghijklmn) dup 1.2 exch 3 5 getinterval cvs (1.2) eq 2 1 roll (abc1.2ghijklmn) eq
+string  8 - copy 1: (1234567890) dup (xxxxx) exch copy (xxxxx) eq 2 1 roll (xxxxx67890) eq
+string  9 - copy 2: (abc) (def) 2 copy 1 (x) putinterval (abc) eq 3 1 roll (dxf) eq 3 1 roll (abc) eq
+string 10 - forall: 0 (abcdef) {add} forall 597 eq
+string 11 - anchorsearch 1: (abbc)(ab) anchorsearch 3 1 roll (ab) eq 3 1 roll (bc) eq
+string 12 - anchorsearch 2: (abbc)(bb) anchorsearch false eq 2 1 roll (abbc) eq
+string 13 - anchorsearch 3: (abbc)(bc) anchorsearch false eq 2 1 roll (abbc) eq
+string 14 - anchorsearch 4: (abbc)(B) anchorsearch false eq 2 1 roll (abbc) eq
+string 15 - search 1: (abbc)(ab) search 4 1 roll () eq 4 1 roll (ab) eq 4 1 roll (bc) eq
+string 16 - search 2: (abbc)(bb) search 4 1 roll (a) eq 4 1 roll (bb) eq 4 1 roll (c) eq
+string 17 - search 3: (abbc)(bc) search 4 1 roll (ab) eq 4 1 roll (bc) eq 4 1 roll () eq
+string 18 - search 4: (abbc)(B) search false eq 2 1 roll (abbc) eq
+string 19 - token 1: (15(St1){1 2 add}) token 3 1 roll 15 eq 3 1 roll ((St1){1 2 add}) eq
+string 20 - token 2: ((St1){1 2 add}) token 3 1 roll (St1) eq 3 1 roll ({1 2 add}) eq
+string 21 - token 3: ({1 2 add}) token 3 1 roll dup type /arraytype eq 4 1 roll xcheck 4 1 roll () eq
+string 22 - token 4: () token false eq count 1 eq
+string 23 - misc 1: (abcdefghijklmn) dup 1.2 exch 3 5 getinterval cvs (1.2) eq 2 1 roll (abc1.2ghijklmn) eq

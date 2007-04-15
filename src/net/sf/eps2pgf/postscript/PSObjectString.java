@@ -207,6 +207,17 @@ public class PSObjectString extends PSObject {
     public PSObject getinterval(int index, int count) throws PSErrorRangeCheck {
         return new PSObjectString(value, index, count);
     }
+    
+    /**
+     * PostScript operator copy. Copies values from obj1 to this object.
+     * @param obj1 Copy values from obj1
+     * @return Returns subsequence of this object
+     */
+    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
+        String obj1Str = obj1.toPSString().toString();
+        putinterval(0, obj1Str);
+        return getinterval(0, obj1Str.length());
+    }
 
     /**
      * Produce a text representation of this object (see PostScript

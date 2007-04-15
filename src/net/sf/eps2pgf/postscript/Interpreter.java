@@ -297,7 +297,7 @@ public class Interpreter {
     /** PostScript op: copy */
     public void op_copy() throws PSError {
         PSObject obj = opStack.pop();
-        if ( (obj instanceof PSObjectInt) || (obj instanceof PSObjectReal) ) {
+        if (obj instanceof PSObjectInt) {
             // Get n, the number of copies to make
             int n = obj.toNonNegInt();
             int stackSize = opStack.size();
@@ -305,17 +305,10 @@ public class Interpreter {
             for (int i = stackSize-n ; i < stackSize ; i++) {
                 opStack.push(opStack.get(i));
             }
-        } else if (obj instanceof PSObjectArray) {
-            PSObjectArray array2 = (PSObjectArray)obj;
-            obj = opStack.pop();
-            if (!(obj instanceof PSObjectArray)) {
-                throw new PSErrorTypeCheck();
-            }
-            PSObjectArray array1 = (PSObjectArray)obj;
-            array2.copyFrom(array1);
-            opStack.push(array2);
         } else {
-            throw new PSErrorTypeCheck();
+            PSObject obj1 = opStack.pop();
+            PSObject subseq = obj.copy(obj1);
+            opStack.push(subseq);
         }
     }
     

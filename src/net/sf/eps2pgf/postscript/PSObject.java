@@ -96,6 +96,15 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * PostScript operator copy. Copies values from obj1 to this object.
+     * @param obj1 Copy values from obj1
+     * @return Returns subsequence of this object
+     */
+    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Produce a text representation of this object (see PostScript
      * operator 'cvs' for more info)
      * @return Text representation
