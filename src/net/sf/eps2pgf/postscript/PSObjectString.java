@@ -335,6 +335,37 @@ public class PSObjectString extends PSObject {
         String str = obj.toPSString().toString();
         putinterval(index, str);
     }
+    
+    /**
+     * PostScript operator: search
+     * @param seek Look for this string in this PSObjectString.
+     * @return List with PSObjects. See the PostScript manual for more info.
+     *         If found, list with {post, match, pre true}.
+     *         If not found, list with {string, false}.
+     */
+    public List<PSObject> search(String seek) {
+        String string = toString();
+        int n = string.length();
+        int m = seek.length();
+        List<PSObject> result = new LinkedList<PSObject>();
+        
+        int k = string.indexOf(seek);
+        if (k == -1) {
+            // seek not found
+            result.add(this);
+            result.add(new PSObjectBool(false));
+        } else {
+            try {
+                result.add(getinterval(k+m, n-k-m));
+                result.add(getinterval(k, m));
+                result.add(getinterval(0, k));
+            } catch (PSErrorRangeCheck e) {
+                // This can never happen
+            }
+            result.add(new PSObjectBool(true));
+        }
+        return result;
+    }
 
     /**
      * Convert this object to a string object, if possible

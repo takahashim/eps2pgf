@@ -1097,6 +1097,16 @@ public class Interpreter {
             // This can never happen. A correct matrix is created above
         }
     }
+    
+    /** PostScript op: search */
+    public void op_search() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        String seek = opStack.pop().toPSString().toString();
+        PSObjectString string = opStack.pop().toPSString();
+        List<PSObject> result = string.search(seek);
+        while (!result.isEmpty()) {
+            opStack.push(result.remove(0));
+        }
+    }
    
     /** PostScript op: setcmykcolor */
     public void op_setcmykcolor() throws PSError {
