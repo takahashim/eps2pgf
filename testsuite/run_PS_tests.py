@@ -28,8 +28,15 @@ import subprocess
 # automatically replaced by the real paths.
 if len(sys.argv) > 1 and sys.argv[1] == 'gs':
     programCmd = "\"C:\\Program Files\\gs\\gs8.56\\bin\\gswin32c.exe\" -sDEVICE=pdfwrite -sOutputFile=\"%outputFile%\" -dBATCH -q \"%inputFile%\""
+    nextArg = 2
 else:
     programCmd = "java -jar ..\\dist\\eps2pgf.jar \"%inputFile%\" --output \"%outputFile%\""
+    nextArg = 1
+    
+if len(sys.argv) > nextArg:
+    nameFilter = sys.argv[nextArg]
+else:
+    nameFilter = '.*'
 
 def main():
     scriptDir = findScriptDir()
@@ -56,6 +63,9 @@ def main():
         linenr = test[0]
         name = test[1]
         code = test[2]
+        
+        if not re.match(nameFilter, name):
+            continue
         
         print '%(linenr)4d %(name)-30s' % {'linenr':linenr, 'name':name},
         
