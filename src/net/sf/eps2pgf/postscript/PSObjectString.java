@@ -92,6 +92,35 @@ public class PSObjectString extends PSObject {
     }
     
     /**
+     * PostScript operator: anchorsearch
+     * @param seek Checks whether this string starts with seek.
+     * @return List with PSObjects. See the PostScript manual for more info.
+     *         If found, list with {post, match, true}.
+     *         If not found, list with {string, false}.
+     */
+    public List<PSObject> anchorsearch(String seek) {
+        String string = toString();
+        int n = string.length();
+        int m = seek.length();
+        List<PSObject> result = new LinkedList<PSObject>();
+        
+        if (!string.startsWith(seek)) {
+            // seek not found
+            result.add(this);
+            result.add(new PSObjectBool(false));
+        } else {
+            try {
+                result.add(getinterval(m, n-m));
+                result.add(getinterval(0, m));
+            } catch (PSErrorRangeCheck e) {
+                // This can never happen
+            }
+            result.add(new PSObjectBool(true));
+        }
+        return result;
+    }
+
+    /**
      * Produce a text representation of this object (see PostScript
      * operator 'cvs' for more info)
      * @return Text representation
@@ -340,7 +369,7 @@ public class PSObjectString extends PSObject {
      * PostScript operator: search
      * @param seek Look for this string in this PSObjectString.
      * @return List with PSObjects. See the PostScript manual for more info.
-     *         If found, list with {post, match, pre true}.
+     *         If found, list with {post, match, pre, true}.
      *         If not found, list with {string, false}.
      */
     public List<PSObject> search(String seek) {
