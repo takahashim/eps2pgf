@@ -131,6 +131,16 @@ public class Interpreter {
         opStack.push(num1.add(num2));
     }
     
+    /** PostScript op: anchorsearch */
+    public void op_anchorsearch() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        String seek = opStack.pop().toPSString().toString();
+        PSObjectString string = opStack.pop().toPSString();
+        List<PSObject> result = string.anchorsearch(seek);
+        while (!result.isEmpty()) {
+            opStack.push(result.remove(0));
+        }
+    }
+    
     /**
      * PostScript op: arc
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented This operator is not (yet) implemented
