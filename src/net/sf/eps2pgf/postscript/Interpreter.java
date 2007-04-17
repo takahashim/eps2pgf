@@ -591,19 +591,13 @@ public class Interpreter {
     public void op_forall() throws Exception {
         PSObjectProc proc = opStack.pop().toProc();
         PSObject obj = opStack.pop();
-        if ((obj instanceof PSObjectDict) || (obj instanceof PSObjectFont)) {
-            PSObjectDict dict = obj.toDict();
-            Set<PSObject> keys = dict.keySet();
-            Iterator<PSObject> iter = keys.iterator();
-            while (iter.hasNext()) {
-                PSObject key = iter.next();
-                PSObject value = dict.lookup(key);
-                opStack.push(key);
-                opStack.push(value);
-                proc.execute(this);
+        List<PSObject> items = obj.getItemList();
+        int N = items.remove(0).toNonNegInt();
+        while (!items.isEmpty()) {
+            for (int i = 0 ; i < N ; i++) {
+                 opStack.push(items.remove(0));
             }
-        } else {
-            throw new PSErrorUnimplemented("operator: forall not FULLY implemented");
+            proc.execute(this);
         }
     }
     

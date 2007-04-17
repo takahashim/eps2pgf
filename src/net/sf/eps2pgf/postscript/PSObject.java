@@ -21,6 +21,8 @@
 
 package net.sf.eps2pgf.postscript;
 
+import java.util.List;
+
 import org.fontbox.afm.*;
 
 import net.sf.eps2pgf.postscript.errors.*;
@@ -128,6 +130,18 @@ public class PSObject implements Cloneable {
      */
     public PSObject get(PSObject index) throws PSErrorTypeCheck,
             PSErrorRangeCheck, PSErrorUndefined {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Returns a list with all items in object.
+     * @return List with all items in this object. The first object (with
+     *         index 0) is always a PSObjectInt with the number of object
+     *         in a single item. For most object types this is 1, but for
+     *         dictionaries this is 2. All consecutive items (index 1 and
+     *         up) are the object's items.
+     */
+    public List<PSObject> getItemList() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     

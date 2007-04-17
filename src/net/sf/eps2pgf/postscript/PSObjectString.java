@@ -21,6 +21,8 @@
 
 package net.sf.eps2pgf.postscript;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.*;
 
 import net.sf.eps2pgf.postscript.errors.*;
@@ -89,6 +91,15 @@ public class PSObjectString extends PSObject {
         count = length;
     }
     
+    /**
+     * Produce a text representation of this object (see PostScript
+     * operator 'cvs' for more info)
+     * @return Text representation
+     */
+    public String cvs() {
+        return toString();
+    }    
+
     /** Parse a postscript string. */
     public String parse(String str) {
         StringBuilder newStr = new StringBuilder();
@@ -209,6 +220,27 @@ public class PSObjectString extends PSObject {
     }
     
     /**
+     * Returns a list with all items in object.
+     * @return List with all items in this object. The first object (with
+     *         index 0) is always a PSObjectInt with the number of object
+     *         in a single item. For most object types this is 1, but for
+     *         dictionaries this is 2. All consecutive items (index 1 and
+     *         up) are the object's items.
+     */
+    public List<PSObject> getItemList() throws PSErrorTypeCheck {
+        List<PSObject> items = new LinkedList<PSObject>();
+        items.add(new PSObjectInt(1));
+        try {
+            for (int i = 0 ; i < count ; i++) {
+                items.add(new PSObjectInt(get(i)));
+            }
+        } catch (PSErrorRangeCheck e) {
+            // This can never happen due to the for-loop.
+        }
+        return items;
+    }
+    
+    /**
      * PostScript operator copy. Copies values from obj1 to this object.
      * @param obj1 Copy values from obj1
      * @return Returns subsequence of this object
@@ -218,15 +250,6 @@ public class PSObjectString extends PSObject {
         putinterval(0, obj1Str);
         return getinterval(0, obj1Str.length());
     }
-
-    /**
-     * Produce a text representation of this object (see PostScript
-     * operator 'cvs' for more info)
-     * @return Text representation
-     */
-    public String cvs() {
-        return toString();
-    }    
 
     /**
      * Convert this string to an array with character names
