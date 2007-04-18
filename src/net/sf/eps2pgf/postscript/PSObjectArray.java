@@ -160,6 +160,15 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * PostScript operator: get
+     * Gets a single element from this object.
+     */
+    public PSObject get(PSObject index) throws PSErrorTypeCheck,
+            PSErrorRangeCheck, PSErrorUndefined {
+        return get(index.toNonNegInt());
+    }
+    
+    /**
      * Remove an element from this array.
      * @param index Index of the element to remove.
      * @return Removed element.
