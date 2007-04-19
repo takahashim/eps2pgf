@@ -134,6 +134,20 @@ public class PSObject implements Cloneable {
     }
     
     /**
+     * Implements PostScript operator getinterval. Returns a new object
+     * with an interval from this object.
+     * @param index Index of the first element of the subarray
+     * @param count Number of elements in the subarray
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Invalid index or number of elements
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to get a subinterval of this object
+     * @return Object representing a subarray of this object. The data is shared
+     * between both objects.
+     */
+    public PSObject getinterval(int index, int count) throws PSErrorRangeCheck, PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Returns a list with all items in object.
      * @return List with all items in this object. The first object (with
      *         index 0) is always a PSObjectInt with the number of object
@@ -142,6 +156,15 @@ public class PSObject implements Cloneable {
      *         up) are the object's items.
      */
     public List<PSObject> getItemList() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Implements PostScript operate: length
+     * @return Length of this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to get the length of this object type
+     */
+    public int length() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
@@ -381,20 +404,6 @@ public class PSObject implements Cloneable {
     }
     
     /**
-     * Implements PostScript operator getinterval. Returns a new object
-     * with an interval from this object.
-     * @param index Index of the first element of the subarray
-     * @param count Number of elements in the subarray
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Invalid index or number of elements
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to get a subinterval of this object
-     * @return Object representing a subarray of this object. The data is shared
-     * between both objects.
-     */
-    public PSObject getinterval(int index, int count) throws PSErrorRangeCheck, PSErrorTypeCheck {
-        throw new PSErrorTypeCheck();
-    }
-    
-    /**
      * Implements bind operator for this object. For most object this wil
      * be the same object, without any change.
      * @param interp Interpreter in which this object will be executed.
@@ -403,15 +412,6 @@ public class PSObject implements Cloneable {
      */
     public PSObject bind(Interpreter interp) throws PSErrorTypeCheck {
         return this;
-    }
-    
-    /**
-     * Implements PostScript operate: length
-     * @return Length of this object
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to get the length of this object type
-     */
-    public int length() throws PSErrorTypeCheck {
-        throw new PSErrorTypeCheck();
     }
     
     /**

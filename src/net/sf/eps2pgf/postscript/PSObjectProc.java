@@ -32,7 +32,7 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class PSObjectProc extends PSObject {
-    private List<PSObject> procObjects;
+    private PSObjectArray procObjects;
     
     /**
      * Creates a new instance of PSObjectProc
@@ -44,7 +44,7 @@ public class PSObjectProc extends PSObject {
         
         StringReader strReader = new StringReader(str);
         
-        procObjects = Parser.convert(strReader);
+        procObjects = new PSObjectArray(Parser.convert(strReader));
     }
     
     /**
@@ -66,11 +66,14 @@ public class PSObjectProc extends PSObject {
      */
     public String isis() {
         StringBuilder str = new StringBuilder();
-        Iterator<PSObject> it = procObjects.iterator();
         str.append("{");
-        while (it.hasNext()) {
-            PSObject ob = it.next();
+        try {
+            for (int i = 0 ; i < procObjects.length() ; i++) {
+                PSObject ob = procObjects.get(i);
                 str.append(" " + ob.isis());
+            }
+        } catch (PSErrorRangeCheck e) {
+            // This can never happen due to the for-loop
         }
         str.append(" }");
         return str.toString();
@@ -78,19 +81,65 @@ public class PSObjectProc extends PSObject {
     
     /** Replace executable name objects with their values */
     public PSObject bind(Interpreter interp) throws PSErrorTypeCheck {
-        LinkedList<PSObject> newList = new LinkedList<PSObject>();
-        
-        while(procObjects.size() > 0) {
-            PSObject obj = procObjects.remove(0);
-            newList.add(obj.bind(interp));
+        try {
+            for (int i = 0 ; i < procObjects.length() ; i++) {
+                PSObject obj = procObjects.get(i);
+                procObjects.put(i, obj.bind(interp));
+            }
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen due to the for-loop
         }
-        procObjects = newList;
         return this;
     }
     
     /** Executes this object in the supplied interpreter */
     public void execute(Interpreter interp) throws Exception {
-        interp.processObjects(procObjects);
+        List<PSObject> list = procObjects.getItemList();
+        list.remove(0);  // remove first item (= number of object per item)
+        interp.processObjects(list);
+    }
+    
+    /**
+     * PostScript operator: get
+     * Gets a single element from this object.
+     */
+    public PSObject get(PSObject index) throws PSErrorTypeCheck,
+            PSErrorRangeCheck, PSErrorUndefined {
+        return procObjects.get(index);
+    }
+    
+    /**
+     * Implements PostScript operator getinterval. Returns a new object
+     * with an interval from this object.
+     * @param index Index of the first element of the subarray
+     * @param count Number of elements in the subarray
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Invalid index or number of elements
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to get a subinterval of this object
+     * @return Object representing a subarray of this object. The data is shared
+     * between both objects.
+     */
+    public PSObject getinterval(int index, int count) throws PSErrorRangeCheck, PSErrorTypeCheck {
+        return procObjects.getinterval(index, count);
+    }
+    
+    /**
+     * Returns a list with all items in object.
+     * @return List with all items in this object. The first object (with
+     *         index 0) is always a PSObjectInt with the number of object
+     *         in a single item. For most object types this is 1, but for
+     *         dictionaries this is 2. All consecutive items (index 1 and
+     *         up) are the object's items.
+     */
+    public List<PSObject> getItemList() throws PSErrorTypeCheck {
+        return procObjects.getItemList();
+    }
+    
+    /**
+     * Implements PostScript operate: length
+     * @return Length of this object
+     */
+    public int length() {
+        return procObjects.length();
     }
     
     /**
@@ -101,6 +150,16 @@ public class PSObjectProc extends PSObject {
      */
     public void process(Interpreter interp) throws Exception {
         interp.opStack.push(this);
+    }
+    
+    /**
+     * PostScript operator put. Replace a single value in this object.
+     * @param index Index or key for new value
+     * @param value New value
+     */
+    public void put(PSObject index, PSObject value) throws PSErrorRangeCheck,
+            PSErrorTypeCheck {
+        procObjects.put(index, value);
     }
     
     /** Convert this object to a procedure object, if possible. */
@@ -121,7 +180,7 @@ public class PSObjectProc extends PSObject {
      * @return This object converted to a literal object
      */
     public PSObject toLiteral() {
-        return new PSObjectArray(procObjects);
+        return procObjects;
     }
 
     /**
