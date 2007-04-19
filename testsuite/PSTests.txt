@@ -7,6 +7,9 @@ type 2 - type 2: true type /booleantype eq  null type /nulltype eq  mark type /m
 type 3 - type 3: 123 type /integertype eq  1.1 type /realtype eq  (abc) type /stringtype eq
 type 4 - type 4: 10 dict type /dicttype eq  /add load type /operatortype eq
 type 5 - type 5: /burp type /nametype eq  1 type type /nametype eq
+type 6 - cvlit: {1 2 add} dup cvlit exch bind exch 2 get type /operatortype eq
+type 7 - cvx 1: [1 2 3] dup cvx exec count 4 eq 5 -1 roll exec count 5 eq
+type 8 - cvx 2: [1 2 3] dup cvx 2 /x put 2 get /x eq
 stack  1 - pop: true true false pop
 stack  2 - exch: 1 2 exch 1 eq exch 2 eq
 stack  3 - dup: (abcde) dup count 2 eq
@@ -23,43 +26,47 @@ stack 13 - mark: mark 1 2 3] type /arraytype eq
 stack 14 - cleartomark: 1 2 [ 3 4 5 cleartomark 2 eq 2 1 roll 1 eq
 stack 15 - counttomark 1: 1 mark 2 3 counttomark 2 eq 5 1 roll 3 eq 5 1 roll 2 eq 5 1 roll mark eq 5 1 roll 1 eq
 stack 16 - counttomark 2: 1 mark counttomark 0 eq 3 1 roll mark eq 3 1 roll 1 eq
-array 1 - array: 3 array dup type /arraytype eq exch dup 0 get null eq exch dup 1 get null eq exch dup 2 get null eq
-array 2 - length 1: [1 2 3] length 3 eq [] length 0 eq
-array 3 - length 2: {1 2 3} length 3 eq {} length 0 eq
-array 4 - get 1: [31 41 59] 0 get 31 eq  [0 (string 1) [] {add 2 div}] 2 get dup type /arraytype eq exch length 0 eq
-array 5 - get 2: {add 41 59} 0 get /add eq
-array 6 - put 1: /ar [5 17 3 8] def ar 2 (abcd) put ar 2 get (abcd) eq ar length 4
-array 7 - put 2: {a b /c} dup 1 (hoi) put dup length 3 eq exch 1 get (hoi) eq
-array 8 - getinterval 1: [9 8 7 6 5] 1 3 getinterval dup 0 get 8 eq exch dup 1 get 7 eq exch dup 2 get 6 eq exch length 3 eq
-array 9 - getinterval 2: {9 8 7 6 5} 1 3 getinterval dup 0 get 8 eq exch dup 1 get 7 eq exch dup 2 get 6 eq exch length 3 eq
-array 10 - putinterval 1: /ar [5 8 2 7 3] def ar 1 [(a)(b)(c)] putinterval ar 1 get (a) eq ar length 5 eq
-array 11 - putinterval 2: {5 8 2 7 3} dup 1 {(a)(b)(c)} putinterval dup 1 get (a) eq exch length 5 eq
-array 12 - astore: (a)(bcd)(ef) 3 array astore dup length 3 eq exch 2 get (ef) eq
-array 13 - aload: [23 (ab) -1] aload type /arraytype eq 4 1 roll -1 eq 4 1 roll (ab) eq 4 1 roll 23 eq
-array 14 - copy 1: [/a /b /c /d /e /f] dup [1 2 3] exch copy length 3 eq exch dup 0 get 1 eq exch 4 get /e eq
-array 15 - copy 2: {/a /b /c /d /e /f} dup {1 2 3} exch copy length 3 eq exch dup 0 get 1 eq exch 4 get /e eq
-array 16 - forall 1: 0 [13 29 3 -8 21] {add} forall 58 eq
-array 17 - forall 2: {/a 78} {} forall 78 eq exch /a eq
+array  1 - array: 3 array dup type /arraytype eq exch dup 0 get null eq exch dup 1 get null eq exch dup 2 get null eq
+array  2 - length 1: [1 2 3] length 3 eq [] length 0 eq
+array  3 - length 2: {1 2 3} length 3 eq {} length 0 eq
+array  4 - get 1: [31 41 59] 0 get 31 eq  [0 (string 1) [] {add 2 div}] 2 get dup type /arraytype eq exch length 0 eq
+array  5 - get 2: {add 41 59} 0 get /add eq
+array  6 - put 1: /ar [5 17 3 8] def ar 2 (abcd) put ar 2 get (abcd) eq ar length 4
+array  7 - put 2: {a b /c} dup 1 (hoi) put dup length 3 eq exch 1 get (hoi) eq
+array  8 - getinterval 1: [9 8 7 6 5] 1 3 getinterval dup 0 get 8 eq exch dup 1 get 7 eq exch dup 2 get 6 eq exch length 3 eq
+array  9 - getinterval 2: {9 8 7 6 5} 1 3 getinterval dup 0 get 8 eq exch dup 1 get 7 eq exch dup 2 get 6 eq exch length 3 eq
+array 10 - getinterval 3: [1 2 3 4 5 6] 1 4 getinterval 1 2 getinterval dup 0 get 3 eq exch 1 get 4 eq
+array 11 - putinterval 1: /ar [5 8 2 7 3] def ar 1 [(a)(b)(c)] putinterval ar 1 get (a) eq ar length 5 eq
+array 12 - putinterval 2: {5 8 2 7 3} dup 1 {(a)(b)(c)} putinterval dup 1 get (a) eq exch length 5 eq
+array 13 - putinterval 3: [1 2 3 4 5 6] dup 3 3 getinterval 1 [98 99] putinterval 5 get 99 eq
+array 14 - astore: (a)(bcd)(ef) 3 array astore dup length 3 eq exch 2 get (ef) eq
+array 15 - aload: [23 (ab) -1] aload type /arraytype eq 4 1 roll -1 eq 4 1 roll (ab) eq 4 1 roll 23 eq
+array 16 - copy 1: [/a /b /c /d /e /f] dup [1 2 3] exch copy length 3 eq exch dup 0 get 1 eq exch 4 get /e eq
+array 17 - copy 2: {/a /b /c /d /e /f} dup {1 2 3} exch copy length 3 eq exch dup 0 get 1 eq exch 4 get /e eq
+array 18 - forall 1: 0 [13 29 3 -8 21] {add} forall 58 eq
+array 19 - forall 2: {/a 78} {} forall 78 eq exch /a eq
 string  1 - string: 5 string (\000\000\000\000\000) eq
 string  2 - length: (0123456789) length 10 eq 
 string  3 - get 1: (abcdef) 4 get 101 eq
 string  4 - get 2: (abcdef) 2 2 getinterval 1 get 100 eq
 string  5 - put: (abcdef) dup 2 48 put (ab0def) eq  
-string  6 - getinterval: (abcdef) 3 2 getinterval (de) eq (abcdef) 3 3 getinterval (def) eq
-string  7 - putinterval: (abcdef) dup 2 (1234) putinterval (ab1234) eq
-string  8 - copy 1: (1234567890) dup (xxxxx) exch copy (xxxxx) eq 2 1 roll (xxxxx67890) eq
-string  9 - copy 2: (abc) (def) 2 copy 1 (x) putinterval (abc) eq 3 1 roll (dxf) eq 3 1 roll (abc) eq
-string 10 - forall: 0 (abcdef) {add} forall 597 eq (ty) {} forall 121 eq 2 1 roll 116 eq
-string 11 - anchorsearch 1: (abbc)(ab) anchorsearch 3 1 roll (ab) eq 3 1 roll (bc) eq
-string 12 - anchorsearch 2: (abbc)(bb) anchorsearch false eq 2 1 roll (abbc) eq
-string 13 - anchorsearch 3: (abbc)(bc) anchorsearch false eq 2 1 roll (abbc) eq
-string 14 - anchorsearch 4: (abbc)(B) anchorsearch false eq 2 1 roll (abbc) eq
-string 15 - search 1: (abbc)(ab) search 4 1 roll () eq 4 1 roll (ab) eq 4 1 roll (bc) eq
-string 16 - search 2: (abbc)(bb) search 4 1 roll (a) eq 4 1 roll (bb) eq 4 1 roll (c) eq
-string 17 - search 3: (abbc)(bc) search 4 1 roll (ab) eq 4 1 roll (bc) eq 4 1 roll () eq
-string 18 - search 4: (abbc)(B) search false eq 2 1 roll (abbc) eq
-string 19 - token 1: (15(St1){1 2 add}) token 3 1 roll 15 eq 3 1 roll ((St1){1 2 add}) eq
-string 20 - token 2: ((St1){1 2 add}) token 3 1 roll (St1) eq 3 1 roll ({1 2 add}) eq
-string 21 - token 3: ({1 2 add}) token 3 1 roll dup type /arraytype eq 4 1 roll xcheck 4 1 roll () eq
-string 22 - token 4: () token false eq count 1 eq
-string 23 - misc 1: (abcdefghijklmn) dup 1.2 exch 3 5 getinterval cvs (1.2) eq 2 1 roll (abc1.2ghijklmn) eq
+string  6 - getinterval 1: (abcdef) 3 2 getinterval (de) eq (abcdef) 3 3 getinterval (def) eq
+string  7 - getinterval 2: (abcdef) 2 4 getinterval 1 2 getinterval (de) eq
+string  8 - putinterval 1: (abcdef) dup 2 (1234) putinterval (ab1234) eq
+string  9 - putinterval 2: (abcdef) dup 2 3 getinterval 1 (xx) putinterval (abcxxf) eq
+string 10 - copy 1: (1234567890) dup (xxxxx) exch copy (xxxxx) eq 2 1 roll (xxxxx67890) eq
+string 11 - copy 2: (abc) (def) 2 copy 1 (x) putinterval (abc) eq 3 1 roll (dxf) eq 3 1 roll (abc) eq
+string 12 - forall: 0 (abcdef) {add} forall 597 eq (ty) {} forall 121 eq 2 1 roll 116 eq
+string 13 - anchorsearch 1: (abbc)(ab) anchorsearch 3 1 roll (ab) eq 3 1 roll (bc) eq
+string 14 - anchorsearch 2: (abbc)(bb) anchorsearch false eq 2 1 roll (abbc) eq
+string 15 - anchorsearch 3: (abbc)(bc) anchorsearch false eq 2 1 roll (abbc) eq
+string 16 - anchorsearch 4: (abbc)(B) anchorsearch false eq 2 1 roll (abbc) eq
+string 17 - search 1: (abbc)(ab) search 4 1 roll () eq 4 1 roll (ab) eq 4 1 roll (bc) eq
+string 18 - search 2: (abbc)(bb) search 4 1 roll (a) eq 4 1 roll (bb) eq 4 1 roll (c) eq
+string 19 - search 3: (abbc)(bc) search 4 1 roll (ab) eq 4 1 roll (bc) eq 4 1 roll () eq
+string 20 - search 4: (abbc)(B) search false eq 2 1 roll (abbc) eq
+string 21 - token 1: (15(St1){1 2 add}) token 3 1 roll 15 eq 3 1 roll ((St1){1 2 add}) eq
+string 22 - token 2: ((St1){1 2 add}) token 3 1 roll (St1) eq 3 1 roll ({1 2 add}) eq
+string 23 - token 3: ({1 2 add}) token 3 1 roll dup type /arraytype eq 4 1 roll xcheck 4 1 roll () eq
+string 24 - token 4: () token false eq count 1 eq
+string 25 - misc 1: (abcdefghijklmn) dup 1.2 exch 3 5 getinterval cvs (1.2) eq 2 1 roll (abc1.2ghijklmn) eq
