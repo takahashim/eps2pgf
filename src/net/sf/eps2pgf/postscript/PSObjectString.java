@@ -79,15 +79,15 @@ public class PSObjectString extends PSObject {
      * @param index Index in strBuf of first character
      * @param length Number of characters in new string
      */
-    public PSObjectString(StringBuffer strBuf, int index, int length) throws PSErrorRangeCheck {
+    public PSObjectString(PSObjectString str, int index, int length) throws PSErrorRangeCheck {
         if ((index < 0) || (length < 0)) {
             throw new PSErrorRangeCheck();
         }
-        if ((index+length) > strBuf.length()) {
+        if ((index+length) > str.length()) {
             throw new PSErrorRangeCheck();
         }
-        value = strBuf;
-        offset = index;
+        value = str.value;
+        offset = index + str.offset;
         count = length;
     }
     
@@ -245,7 +245,7 @@ public class PSObjectString extends PSObject {
      * between both objects.
      */
     public PSObject getinterval(int index, int count) throws PSErrorRangeCheck {
-        return new PSObjectString(value, index, count);
+        return new PSObjectString(this, index, count);
     }
     
     /**
