@@ -165,7 +165,28 @@ public class PSObjectArray extends PSObject {
      */
     public PSObject get(PSObject index) throws PSErrorTypeCheck,
             PSErrorRangeCheck, PSErrorUndefined {
-        return get(index.toNonNegInt());
+        return get(index.toInt());
+    }
+    
+    /**
+     * Returns a list with all items in object.
+     * @return List with all items in this object. The first object (with
+     *         index 0) is always a PSObjectInt with the number of object
+     *         in a single item. For most object types this is 1, but for
+     *         dictionaries this is 2. All consecutive items (index 1 and
+     *         up) are the object's items.
+     */
+    public List<PSObject> getItemList() {
+        List<PSObject> items = new LinkedList<PSObject>();
+        items.add(new PSObjectInt(1));
+        try {
+            for (int i = 0 ; i < size() ; i++) {
+                items.add(get(i));
+            }
+        } catch (PSErrorRangeCheck e) {
+            // This can never happen due to the for-loop
+        }
+        return items;
     }
     
     /**
@@ -363,6 +384,28 @@ public class PSObjectArray extends PSObject {
      */
     public int length() {
         return size();
+    }
+    
+    /**
+     * PostScript operator put. Replace a single value in this object.
+     * @param index Index or key for new value
+     * @param value New value
+     */
+    public void put(int index, PSObject value) throws PSErrorRangeCheck {
+        if ( (index < 0) || (index >= size()) ) {
+            throw new PSErrorRangeCheck();
+        }
+        array.set(index+offset, value);
+    }
+    
+    /**
+     * PostScript operator put. Replace a single value in this object.
+     * @param index Index or key for new value
+     * @param value New value
+     */
+    public void put(PSObject index, PSObject value) throws PSErrorRangeCheck,
+            PSErrorTypeCheck {
+        put(index.toInt(), value);
     }
     
     /**
