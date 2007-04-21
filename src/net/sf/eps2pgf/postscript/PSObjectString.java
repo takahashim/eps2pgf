@@ -349,7 +349,7 @@ public class PSObjectString extends PSObject {
      * @param newStr String to put in this string
      */
     public void putinterval(int index, String newStr) throws PSErrorRangeCheck {
-        if (newStr.length() > (count-index)) {
+        if ((index < 0) || (newStr.length() > (count-index))) {
             throw new PSErrorRangeCheck();
         }
         value.replace(offset+index, offset+index+newStr.length(), newStr);
