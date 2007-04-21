@@ -409,6 +409,21 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * PostScript operator putinterval
+     * @param index Start index of subsequence
+     * @param obj Subsequence
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not 'putinterval' anything in this object type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Index or (index+length) out of bounds
+     */
+    public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck, PSErrorRangeCheck {
+        PSObjectArray array3 = obj.toArray();
+        int N = array3.length();
+        for (int i = 0 ; i < N ; i++) {
+            set(index + i, array3.get(i));
+        }
+    }
+
+    /**
      * Returns the type of this object
      * @return Type of this object (see PostScript manual for possible values)
      */

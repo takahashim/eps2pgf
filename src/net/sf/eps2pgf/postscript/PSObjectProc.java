@@ -162,6 +162,25 @@ public class PSObjectProc extends PSObject {
         procObjects.put(index, value);
     }
     
+    /**
+     * PostScript operator putinterval
+     * @param index Start index of subsequence
+     * @param obj Subsequence
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not 'putinterval' anything in this object type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Index or (index+length) out of bounds
+     */
+    public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck, PSErrorRangeCheck {
+        procObjects.putinterval(index, obj);
+    }
+    
+    /**
+     * Convert this object to an array.
+     * @return This array
+     */
+    public PSObjectArray toArray() {
+        return procObjects;
+    }
+    
     /** Convert this object to a procedure object, if possible. */
     public PSObjectProc toProc() {
         return this;
