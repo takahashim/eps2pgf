@@ -31,7 +31,7 @@ import net.sf.eps2pgf.postscript.errors.*;
  *
  * @author Paul Wagenaars
  */
-public class PSObject implements Cloneable {
+public class PSObject implements Cloneable, Iterable {
 
     /**
      * Returns the absolute value of this object, if possible
@@ -207,6 +207,14 @@ public class PSObject implements Cloneable {
         return false;
     }
 
+    /**
+     * Returns an iterator over this PostScript object.
+     * @return An iterator over this object.
+     */
+    public PSObjectIterator iterator() {
+        return new PSObjectIterator(this);
+    }
+    
     /**
      * Implements PostScript operate: length
      * @return Length of this object
