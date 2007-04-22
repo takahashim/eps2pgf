@@ -40,11 +40,12 @@ array 11 - putinterval 1: /ar [5 8 2 7 3] def ar 1 [(a)(b)(c)] putinterval ar 1 
 array 12 - putinterval 2: {5 8 2 7 3} dup 1 {(a)(b)(c)} putinterval dup 1 get (a) eq exch length 5 eq
 array 13 - putinterval 3: [1 2 3 4 5 6] dup 3 3 getinterval 1 [98 99] putinterval 5 get 99 eq
 array 14 - astore: (a)(bcd)(ef) 3 array astore dup length 3 eq exch 2 get (ef) eq
-array 15 - aload: [23 (ab) -1] aload type /arraytype eq 4 1 roll -1 eq 4 1 roll (ab) eq 4 1 roll 23 eq
-array 16 - copy 1: [/a /b /c /d /e /f] dup [1 2 3] exch copy length 3 eq exch dup 0 get 1 eq exch 4 get /e eq
-array 17 - copy 2: {/a /b /c /d /e /f} dup {1 2 3} exch copy length 3 eq exch dup 0 get 1 eq exch 4 get /e eq
-array 18 - forall 1: 0 [13 29 3 -8 21] {add} forall 58 eq
-array 19 - forall 2: {/a 78} {} forall 78 eq exch /a eq
+array 15 - aload 1: [23 (ab) -1] aload type /arraytype eq 4 1 roll -1 eq 4 1 roll (ab) eq 4 1 roll 23 eq
+array 16 - aload 2: {23 (ab) -1} aload type /arraytype eq 4 1 roll -1 eq 4 1 roll (ab) eq 4 1 roll 23 eq
+array 17 - copy 1: [/a /b /c /d /e /f] dup [1 2 3] exch copy length 3 eq exch dup 0 get 1 eq exch 4 get /e eq
+array 18 - copy 2: {/a /b /c /d /e /f} dup {1 2 3} exch copy length 3 eq exch dup 0 get 1 eq exch 4 get /e eq
+array 19 - forall 1: 0 [13 29 3 -8 21] {add} forall 58 eq
+array 20 - forall 2: {/a 78} {} forall 78 eq exch /a eq
 string  1 - string: 5 string (\000\000\000\000\000) eq
 string  2 - length: (0123456789) length 10 eq 
 string  3 - get 1: (abcdef) 4 get 101 eq
