@@ -259,13 +259,14 @@ public class PSObjectString extends PSObject {
     public List<PSObject> getItemList() throws PSErrorTypeCheck {
         List<PSObject> items = new LinkedList<PSObject>();
         items.add(new PSObjectInt(1));
-        try {
-            for (int i = 0 ; i < count ; i++) {
-                items.add(new PSObjectInt(get(i)));
-            }
-        } catch (PSErrorRangeCheck e) {
-            // This can never happen due to the for-loop.
+        
+        for(PSObject chr : this) {
+            items.add(chr);
         }
+        //for (int i = 0 ; i < count ; i++) {
+        //    items.add(new PSObjectInt(get(i)));
+        //}
+
         return items;
     }
     

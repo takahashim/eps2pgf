@@ -67,13 +67,8 @@ public class PSObjectProc extends PSObject {
     public String isis() {
         StringBuilder str = new StringBuilder();
         str.append("{");
-        try {
-            for (int i = 0 ; i < procObjects.length() ; i++) {
-                PSObject ob = procObjects.get(i);
-                str.append(" " + ob.isis());
-            }
-        } catch (PSErrorRangeCheck e) {
-            // This can never happen due to the for-loop
+        for (PSObject ob : procObjects) {
+            str.append(" " + ob.isis());
         }
         str.append(" }");
         return str.toString();
