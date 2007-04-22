@@ -145,6 +145,32 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * PostScript operator 'cvx'. Makes this object executable
+     */
+    public PSObject cvx() {
+        try {
+            return new PSObjectProc(this);
+        } catch (PSErrorTypeCheck e) {
+            return this;
+        }
+    }
+
+    /**
+     * Compare this object with another object and return true if they are equal.
+     * See PostScript manual on what's equal and what's not.
+     * @param obj Object to compare this object with
+     * @return True if objects are equal, false otherwise
+     */
+    public boolean eq(PSObject obj) {
+        try {
+            PSObjectArray objArr = obj.toArray();
+            return (this == objArr);
+        } catch (PSErrorTypeCheck e) {
+            return false;
+        }
+    }
+    
+    /**
      * Replace the element with offset with value.
      * @param index Index of the element to replace.
      * @param value New value of the element.

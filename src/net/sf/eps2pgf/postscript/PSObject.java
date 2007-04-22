@@ -32,6 +32,7 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class PSObject implements Cloneable, Iterable<PSObject> {
+    Boolean isLiteral = true;
 
     /**
      * Returns the absolute value of this object, if possible
@@ -113,6 +114,18 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
+     * PostScript operator 'cvx'. Makes this object executable
+     */
+    public PSObject cvx() {
+        isLiteral = false;
+        return this;
+    }
+    
+    /**
+     * Make this object executable
+     */
+    
+    /**
      * Compare this object with another object and return true if they are equal.
      * See PostScript manual on what's equal and what's not.
      * @param obj Object to compare this object with
@@ -179,14 +192,6 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      */
     public List<PSObject> getItemList() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
-    }
-    
-    /**
-     * Checks whether this object is executable
-     * @return Returns true if this object is executable
-     */
-    public boolean isExecutable() {
-        return false;
     }
     
     /**
@@ -364,7 +369,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @return This object converted to a literal object
      */
     public PSObject toLiteral() throws PSErrorUnimplemented {
-        if (isExecutable()) {
+        if (xcheck()) {
             throw new PSErrorUnimplemented("Making this object literal");
         } else {
             return this;
@@ -462,4 +467,13 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     public String type() {
         return "generictype";
     }
+
+    /**
+     * PostScript operator 'xcheck'. Checks whether this object is executable
+     * @return Returns true if this object is executable
+     */
+    public boolean xcheck() {
+        return !isLiteral;
+    }
+    
 }

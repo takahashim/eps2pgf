@@ -30,7 +30,6 @@ import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
  */
 public class PSObjectName extends PSObject {
     String name;
-    Boolean isLiteral;
     
     /**
      * Creates a new instance of PSObjectName
@@ -189,14 +188,6 @@ public class PSObjectName extends PSObject {
         return name.length();
     }
 
-    /**
-     * Checks whether this object is executable
-     * @return Returns true if this object is executable
-     */
-    public boolean isExecutable() {
-        return !isLiteral;
-    }
-    
     /**
      * Convert this object to a literal object
      * @return This object converted to a literal object

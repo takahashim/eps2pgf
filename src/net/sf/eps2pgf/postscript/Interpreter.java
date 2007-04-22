@@ -416,15 +416,19 @@ public class Interpreter {
         opStack.push(any.toLiteral());
     }
     
-    /**
-     * PostScript op: cvs
-     */
+    /** PostScript op: cvs */
     public void op_cvs() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorRangeCheck {
         PSObjectString string = opStack.pop().toPSString();
         PSObject any = opStack.pop();
         string.overwrite(any.cvs());
         opStack.push(string);
+    }
+    
+    /** PostScript op: cvx */
+    public void op_cvx() throws PSErrorStackUnderflow {
+        PSObject any = opStack.pop();
+        opStack.push(any.cvx());
     }
     
     /**
@@ -1429,7 +1433,7 @@ public class Interpreter {
      */
     public void op_xcheck() throws PSErrorStackUnderflow {
         PSObject any = opStack.pop();
-        PSObjectBool check = new PSObjectBool(any.isExecutable());
+        PSObjectBool check = new PSObjectBool(any.xcheck());
         opStack.push(check);
     }
     
