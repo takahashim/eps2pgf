@@ -38,7 +38,8 @@ public class PSObjectOperator extends PSObject {
      */
     public PSObjectOperator(String nm, Method op) {
         name = nm;
-        opMethod = op;        
+        opMethod = op;
+        isLiteral = false;
     }
     
     /** Return PostScript text representation of this object. See the
@@ -84,14 +85,6 @@ public class PSObjectOperator extends PSObject {
         execute(interp);
     }
 
-    /**
-     * Checks whether this object is executable
-     * @return Returns true if this object is executable
-     */
-    public boolean isExecutable() {
-        return true;
-    }
-    
     /**
      * Convert this object to a name literal object
      * @return This object converted to a literal object

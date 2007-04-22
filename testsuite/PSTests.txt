@@ -9,20 +9,21 @@ type  4 - type 4: 10 dict type /dicttype eq  /add load type /operatortype eq
 type  5 - type 5: /burp type /nametype eq  1 type type /nametype eq
 type  6 - cvlit: {1 2 add} dup cvlit exch bind exch 2 get type /operatortype eq
 type  7 - cvx 1: [1 2 3] dup cvx exec count 4 eq 5 -1 roll exec count 5 eq
-type  8 - cvx 2: [1 2 3] dup cvx 2 /x put 2 get /x eq
-type  9 - xcheck: /koe xcheck false eq  [1 2 3] xcheck false eq  {1 2 3} xcheck true eq
-type 10 - executeonly: (123) executeonly rcheck false eq
-type 11 - noaccess: {/abc noaccess rcheck} stopped true eq
-type 12 - readonly: [1 2 3] readonly dup rcheck true eq exch wcheck false eq
-type 13 - rcheck: [1 2 3] rcheck true eq
-type 14 - wcheck: (koe) wcheck true eq
-type 15 - cvi: (3.3E1) cvi 33 eq  2 cvi 2 eq  -47.8 cvi -47 eq  520.9 cvi 520 eq
-type 16 - cvn 1: (abc) cvn type /nametype eq  (abc) cvn xcheck false eq   (abc) cvn /abc eq
-type 17 - cvn 2: (abc) cvx cvn type /nametype eq  (abc) cvx cvn xcheck true eq   (abc) cvx cvn /abc eq
-type 18 - cvr: 1.1 cvr 1.1 eq  78 cvr 78.0 eq  (78.9) cvr 78.9 eq  (1e3) cvr 1000.0 eq
-type 19 - cvrs 1: /temp 12 string def  123 10 temp cvrs (123) eq  -123 10 temp cvrs (-123) eq  123.4 10 temp cvrs (123.4) eq
-type 20 - cvrs 2: /temp 12 string def  123 16 temp cvrs (7B) eq -123 16 temp cvrs (FFFFFF85) eq  123.4 16 temp cvrs (7B) eq
-type 21 - cvs: /str 20 string def  579 str cvs (579) eq  mark str cvs (--nostringval--) eq  /foo str cvs (foo) eq
+type  8 - cvx 2: [1 2 3] dup cvx 2 /x put 2 get /x eq  [1 2 3] dup cvx eq
+type  9 - xcheck 1: /koe xcheck false eq  [1 2 3] xcheck false eq  {1 2 3} xcheck true eq
+type 10 - xcheck 2: /add cvx load xcheck true eq  /koe cvx xcheck true eq
+type 11 - executeonly: (123) executeonly rcheck false eq
+type 12 - noaccess: {/abc noaccess rcheck} stopped true eq
+type 13 - readonly: [1 2 3] readonly dup rcheck true eq exch wcheck false eq
+type 14 - rcheck: [1 2 3] rcheck true eq
+type 15 - wcheck: (koe) wcheck true eq
+type 16 - cvi: (3.3E1) cvi 33 eq  2 cvi 2 eq  -47.8 cvi -47 eq  520.9 cvi 520 eq
+type 17 - cvn 1: (abc) cvn type /nametype eq  (abc) cvn xcheck false eq   (abc) cvn /abc eq
+type 18 - cvn 2: (abc) cvx cvn type /nametype eq  (abc) cvx cvn xcheck true eq   (abc) cvx cvn /abc eq
+type 19 - cvr: 1.1 cvr 1.1 eq  78 cvr 78.0 eq  (78.9) cvr 78.9 eq  (1e3) cvr 1000.0 eq
+type 20 - cvrs 1: /temp 12 string def  123 10 temp cvrs (123) eq  -123 10 temp cvrs (-123) eq  123.4 10 temp cvrs (123.4) eq
+type 21 - cvrs 2: /temp 12 string def  123 16 temp cvrs (7B) eq -123 16 temp cvrs (FFFFFF85) eq  123.4 16 temp cvrs (7B) eq
+type 22 - cvs: /str 20 string def  579 str cvs (579) eq  mark str cvs (--nostringval--) eq  /foo str cvs (foo) eq
 stack  1 - pop: true true false pop
 stack  2 - exch: 1 2 exch 1 eq exch 2 eq
 stack  3 - dup: (abcde) dup count 2 eq

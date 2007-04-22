@@ -45,6 +45,8 @@ public class PSObjectProc extends PSObject {
         StringReader strReader = new StringReader(str);
         
         procObjects = new PSObjectArray(Parser.convert(strReader));
+        
+        isLiteral = false;
     }
     
     /**
@@ -54,6 +56,8 @@ public class PSObjectProc extends PSObject {
      */
     public PSObjectProc(PSObject array) throws PSErrorTypeCheck {
         procObjects = array.toArray();
+        
+        isLiteral = false;
     }
     
     /**
@@ -104,6 +108,21 @@ public class PSObjectProc extends PSObject {
     public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
         PSObject subarray = procObjects.copy(obj1);
         return new PSObjectProc(subarray);
+    }
+    
+    /**
+     * Compare this object with another object and return true if they are equal.
+     * See PostScript manual on what's equal and what's not.
+     * @param obj Object to compare this object with
+     * @return True if objects are equal, false otherwise
+     */
+    public boolean eq(PSObject obj) {
+        try {
+            PSObjectArray objArr = obj.toArray();
+            return (procObjects == objArr);
+        } catch (PSErrorTypeCheck e) {
+            return false;
+        }
     }
     
     /** Executes this object in the supplied interpreter */
@@ -201,14 +220,6 @@ public class PSObjectProc extends PSObject {
         return this;
     }
 
-    /**
-     * Checks whether this object is executable
-     * @return Returns true if this object is executable
-     */
-    public boolean isExecutable() {
-        return true;
-    }
-    
     /**
      * Convert this object to a literal object
      * @return This object converted to a literal object
