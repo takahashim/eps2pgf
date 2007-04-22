@@ -134,6 +134,17 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * PostScript operator copy. Copies values from obj1 to this object.
+     * @param obj1 Copy values from obj1
+     * @return Returns subsequence of this object
+     */
+    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
+        PSObjectArray array = obj1.toArray();
+        putinterval(0, array);
+        return getinterval(0, array.length());
+    }
+    
+    /**
      * Replace the element with offset with value.
      * @param index Index of the element to replace.
      * @param value New value of the element.

@@ -48,6 +48,15 @@ public class PSObjectProc extends PSObject {
     }
     
     /**
+     * Create a new instance of PSObjectProc with the supplied array as elements.
+     * @param array Array with elements for the new procedure
+     * @throws PSErrorTypeCheck Supplied argument is not an array.
+     */
+    public PSObjectProc(PSObject array) throws PSErrorTypeCheck {
+        procObjects = array.toArray();
+    }
+    
+    /**
      * Check whether a string is a procedure
      * @param str String to check.
      * @return Returns true when the string is a procedure. Returns false otherwise.
@@ -87,6 +96,16 @@ public class PSObjectProc extends PSObject {
         return this;
     }
     
+    /**
+     * PostScript operator copy. Copies values from obj1 to this object.
+     * @param obj1 Copy values from obj1
+     * @return Returns subsequence of this object
+     */
+    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
+        PSObject subarray = procObjects.copy(obj1);
+        return new PSObjectProc(subarray);
+    }
+    
     /** Executes this object in the supplied interpreter */
     public void execute(Interpreter interp) throws Exception {
         List<PSObject> list = procObjects.getItemList();
@@ -114,7 +133,8 @@ public class PSObjectProc extends PSObject {
      * between both objects.
      */
     public PSObject getinterval(int index, int count) throws PSErrorRangeCheck, PSErrorTypeCheck {
-        return procObjects.getinterval(index, count);
+        PSObject subseq = procObjects.getinterval(index, count);
+        return new PSObjectProc(subseq);
     }
     
     /**
