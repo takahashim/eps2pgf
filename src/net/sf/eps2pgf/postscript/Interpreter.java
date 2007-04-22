@@ -131,6 +131,15 @@ public class Interpreter {
         opStack.push(num1.add(num2));
     }
     
+    /** PostScript op: aload */
+    public void op_aload() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject array = opStack.pop();
+        for (PSObject obj : array.toArray()) {
+            opStack.push(obj);
+        }
+        opStack.push(array);
+    }
+    
     /** PostScript op: anchorsearch */
     public void op_anchorsearch() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         String seek = opStack.pop().toPSString().toString();
