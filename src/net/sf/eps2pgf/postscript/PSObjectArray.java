@@ -179,12 +179,8 @@ public class PSObjectArray extends PSObject {
     public List<PSObject> getItemList() {
         List<PSObject> items = new LinkedList<PSObject>();
         items.add(new PSObjectInt(1));
-        try {
-            for (int i = 0 ; i < size() ; i++) {
-                items.add(get(i));
-            }
-        } catch (PSErrorRangeCheck e) {
-            // This can never happen due to the for-loop
+        for (PSObject obj : this) {
+            items.add(obj);
         }
         return items;
     }
@@ -212,15 +208,8 @@ public class PSObjectArray extends PSObject {
     public String isis() {
         StringBuilder str = new StringBuilder();
         str.append("[ ");
-        try {
-            for (int i = 0 ; i < size() ; i++) {
-                str.append(get(i).isis() + " ");
-                if ( ((i+offset)%15) == 14 ) {
-                    str.append("\n");
-                }
-            }
-        } catch (PSErrorRangeCheck e) {
-            // This can never happen.
+        for (PSObject obj : this) {
+            str.append(obj.isis() + " ");
         }
         str.append("]");
         return str.toString();

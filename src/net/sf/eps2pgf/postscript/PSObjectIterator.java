@@ -31,7 +31,7 @@ import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
  *
  * @author Paul Wagenaars
  */
-public class PSObjectIterator implements Iterator {
+public class PSObjectIterator implements Iterator<PSObject> {
     private PSObject obj;
     private int nextIndex;
     
