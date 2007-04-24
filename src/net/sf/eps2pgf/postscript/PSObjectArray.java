@@ -171,6 +171,16 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * PostScript operator 'executeonly'. Set access attribute to executeonly.
+     */
+    public void executeonly() throws PSErrorInvalidAccess {
+        if (access == ACCESS_NONE) {
+            throw new PSErrorInvalidAccess();
+        }
+        access = ACCESS_EXECUTEONLY;
+    }
+    
+    /**
      * Replace the element with offset with value.
      * @param index Index of the element to replace.
      * @param value New value of the element.

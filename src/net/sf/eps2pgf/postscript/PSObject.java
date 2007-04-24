@@ -32,7 +32,13 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class PSObject implements Cloneable, Iterable<PSObject> {
+    static final int ACCESS_UNLIMITED = 0;
+    static final int ACCESS_READONLY = 1;
+    static final int ACCESS_EXECUTEONLY = 2;
+    static final int ACCESS_NONE = 3;
+    
     Boolean isLiteral = true;
+    int access = ACCESS_UNLIMITED;
 
     /**
      * Returns the absolute value of this object, if possible
@@ -142,6 +148,13 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      */
     public void execute(Interpreter interp) throws Exception {
         interp.opStack.push(this);
+    }
+    
+    /**
+     * PostScript operator 'executeonly'. Set access attribute to executeonly.
+     */
+    public void executeonly() throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        throw new PSErrorTypeCheck();
     }
     
     /**
@@ -368,12 +381,9 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Converting this object type to literal is not yet supported
      * @return This object converted to a literal object
      */
-    public PSObject toLiteral() throws PSErrorUnimplemented {
-        if (xcheck()) {
-            throw new PSErrorUnimplemented("Making this object literal");
-        } else {
-            return this;
-        }
+    public PSObject cvlit() throws PSErrorUnimplemented {
+        isLiteral = true;
+        return this;
     }
     
     /**

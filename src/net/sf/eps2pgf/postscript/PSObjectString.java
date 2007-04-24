@@ -213,6 +213,16 @@ public class PSObjectString extends PSObject {
     }
     
     /**
+     * PostScript operator 'executeonly'. Set access attribute to executeonly.
+     */
+    public void executeonly() throws PSErrorInvalidAccess {
+        if (access == ACCESS_NONE) {
+            throw new PSErrorInvalidAccess();
+        }
+        access = ACCESS_EXECUTEONLY;
+    }
+
+    /**
      * Gets the (integer) value of a character in this string.
      * @param index Index of character (first character has index 0)
      * @return Integer value of requested character

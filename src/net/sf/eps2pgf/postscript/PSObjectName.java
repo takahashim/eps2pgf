@@ -189,15 +189,6 @@ public class PSObjectName extends PSObject {
     }
 
     /**
-     * Convert this object to a literal object
-     * @return This object converted to a literal object
-     */
-    public PSObject toLiteral() {
-        isLiteral = true;
-        return this;
-    }
-
-    /**
      * Returns the type of this object
      * @return Type of this object (see PostScript manual for possible values)
      */

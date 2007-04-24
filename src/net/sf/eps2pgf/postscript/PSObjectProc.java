@@ -133,6 +133,16 @@ public class PSObjectProc extends PSObject {
     }
     
     /**
+     * PostScript operator 'executeonly'. Set access attribute to executeonly.
+     */
+    public void executeonly() throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        if (access == ACCESS_NONE) {
+            throw new PSErrorInvalidAccess();
+        }
+        access = ACCESS_EXECUTEONLY;
+    }
+    
+    /**
      * PostScript operator: get
      * Gets a single element from this object.
      */
@@ -224,7 +234,7 @@ public class PSObjectProc extends PSObject {
      * Convert this object to a literal object
      * @return This object converted to a literal object
      */
-    public PSObject toLiteral() {
+    public PSObject cvlit() {
         return procObjects;
     }
 
