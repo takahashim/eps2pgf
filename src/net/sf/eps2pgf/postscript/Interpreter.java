@@ -923,6 +923,13 @@ public class Interpreter {
         seq.putinterval(index, subseq);
     }
     
+    /** PostScript op: rcheck */
+    public void op_rcheck() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject obj = opStack.pop();
+        boolean chk = obj.rcheck();
+        opStack.push(new PSObjectBool(chk));
+    }
+    
     /** PostScript op: readhexstring */
     public void op_readhexstring() throws PSError {
         throw new PSErrorUnimplemented("operator: readhexstring");

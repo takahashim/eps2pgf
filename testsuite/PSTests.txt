@@ -13,7 +13,7 @@ type  8 - cvx 2: [1 2 3] dup cvx 2 /x put 2 get /x eq  [1 2 3] dup cvx eq
 type  9 - xcheck 1: /koe xcheck false eq  [1 2 3] xcheck false eq  {1 2 3} xcheck true eq
 type 10 - xcheck 2: /add cvx load xcheck true eq  /koe cvx xcheck true eq
 type 11 - executeonly: (123) executeonly rcheck false eq
-type 12 - noaccess: {/abc noaccess rcheck} stopped true eq
+type 12 - noaccess: [1 2] noaccess {/abc noaccess rcheck} stopped true eq
 type 13 - readonly: [1 2 3] readonly dup rcheck true eq exch wcheck false eq
 type 14 - rcheck: [1 2 3] rcheck true eq
 type 15 - wcheck: (koe) wcheck true eq
