@@ -413,7 +413,7 @@ public class Interpreter {
      */
     public void op_cvlit() throws PSErrorStackUnderflow, PSErrorUnimplemented {
         PSObject any = opStack.pop();
-        opStack.push(any.toLiteral());
+        opStack.push(any.cvlit());
     }
     
     /** PostScript op: cvs */
@@ -538,6 +538,14 @@ public class Interpreter {
     public void op_exec() throws PSErrorStackUnderflow, Exception {
         PSObject any = opStack.pop();
         any.execute(this);
+    }
+    
+    /** PostScript op: executeonly */
+    public void op_executeonly() throws PSErrorStackUnderflow,
+            PSErrorTypeCheck, PSErrorInvalidAccess {
+        PSObject obj = opStack.pop();
+        obj.executeonly();
+        opStack.push(obj);
     }
     
     /**

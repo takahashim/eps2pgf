@@ -86,14 +86,6 @@ public class PSObjectOperator extends PSObject {
     }
 
     /**
-     * Convert this object to a name literal object
-     * @return This object converted to a literal object
-     */
-    public PSObject toLiteral() {
-        return new PSObjectName(name, true);
-    }
-
-    /**
      * Returns the type of this object
      * @return Type of this object (see PostScript manual for possible values)
      */
