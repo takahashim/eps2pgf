@@ -460,6 +460,18 @@ public class PSObjectArray extends PSObject {
     }
 
     /**
+     * PostScript operator 'rcheck'. Checks whether the access attribute is
+     * 'unlimited' or 'readonly'.
+     */
+    public boolean rcheck() {
+        if ( (access == ACCESS_UNLIMITED) || (access == ACCESS_READONLY) ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Returns the type of this object
      * @return Type of this object (see PostScript manual for possible values)
      */

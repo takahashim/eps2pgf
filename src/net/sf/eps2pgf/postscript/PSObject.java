@@ -293,6 +293,14 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck, PSErrorRangeCheck {
         throw new PSErrorTypeCheck();
     }
+    
+    /**
+     * PostScript operator 'rcheck'. Checks whether the access attribute is
+     * 'unlimited' or 'readonly'.
+     */
+    public boolean rcheck() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
 
     /**
      * Return this value rounded to the nearest integer
