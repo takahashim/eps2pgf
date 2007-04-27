@@ -119,6 +119,15 @@ public class PSObjectString extends PSObject {
         }
         return result;
     }
+    
+    /**
+     * PostScript operator 'cvi'. Convert this object to an integer
+     */
+    public int cvi() throws PSErrorTypeCheck {
+        PSObjectReal ro = new PSObjectReal(value.toString());
+        System.out.println(" - " +ro.isis());
+        return ro.cvi();
+    }
 
     /**
      * Produce a text representation of this object (see PostScript

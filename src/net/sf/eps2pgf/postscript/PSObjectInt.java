@@ -96,6 +96,13 @@ public class PSObjectInt extends PSObject {
     public PSObjectInt ceiling() {
         return new PSObjectInt(value);
     }
+    
+    /**
+     * PostScript operator 'cvi'. Convert this object to an integer
+     */
+    public int cvi() {
+        return value;
+    }
 
     /**
      * Produce a text representation of this object (see PostScript
