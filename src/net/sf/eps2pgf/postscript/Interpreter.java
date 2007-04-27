@@ -387,6 +387,15 @@ public class Interpreter {
         opStack.push(new PSObjectReal(any.cvr()));
     }
     
+    /** PostScript op: cvrs */
+    public void op_cvrs() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorRangeCheck {
+        PSObjectString string = opStack.pop().toPSString();
+        int radix = opStack.pop().toInt();
+        PSObject num = opStack.pop();
+        opStack.push(new PSObjectString(num.cvrs(radix)));
+    }
+    
     /** PostScript op: cvs */
     public void op_cvs() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorRangeCheck {

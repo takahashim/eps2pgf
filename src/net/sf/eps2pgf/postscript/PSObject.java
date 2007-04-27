@@ -109,6 +109,13 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     public void copyValuesFrom(PSObject obj) throws PSErrorRangeCheck, PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
+    
+    /**
+     * PostScript operator 'cvrs'
+     */
+    public String cvrs(int radix) throws PSErrorTypeCheck, PSErrorRangeCheck {
+        throw new PSErrorTypeCheck();
+    }
 
     /**
      * Produce a text representation of this object (see PostScript

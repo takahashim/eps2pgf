@@ -111,6 +111,21 @@ public class PSObjectReal extends PSObject {
     }
     
     /**
+     * PostScript operator 'cvrs'
+     */
+    public String cvrs(int radix) throws PSErrorTypeCheck, PSErrorRangeCheck {
+        if (radix < 2) {
+            throw new PSErrorRangeCheck();
+        }
+        if (radix == 10) {
+            return Double.toString(value);
+        } else {
+            PSObjectInt valueInt = new PSObjectInt(cvi());
+            return valueInt.cvrs(radix);
+        }
+    }
+
+    /**
      * Produce a text representation of this object (see PostScript
      * operator 'cvs' for more info)
      * @return Text representation
