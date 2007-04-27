@@ -468,4 +468,12 @@ public class PSObjectString extends PSObject {
     public String type() {
         return "stringtype";
     }
+
+    /**
+     * PostScript operator 'wcheck'. Checks whether the access attribute is
+     * 'unlimited'.
+     */
+    public boolean wcheck() {
+        return (access == ACCESS_UNLIMITED);
+    }
 }

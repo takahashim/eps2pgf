@@ -1403,6 +1403,13 @@ public class Interpreter {
         opStack.push(new PSObjectName(any.type(), false));
     }
     
+    /** PostScript op: wcheck */
+    public void op_wcheck() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject obj = opStack.pop();
+        boolean chk = obj.wcheck();
+        opStack.push(new PSObjectBool(chk));
+    }
+    
     /** PostScript op: where */
     public void op_where() throws PSError {
         PSObject key = opStack.pop();
