@@ -375,6 +375,12 @@ public class Interpreter {
         opStack.push(any.cvlit());
     }
     
+    /** PostScript op: cvn */
+    public void op_cvn() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObjectString str = opStack.pop().toPSString();
+        opStack.push(str.cvn());
+    }
+    
     /** PostScript op: cvs */
     public void op_cvs() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorRangeCheck {
