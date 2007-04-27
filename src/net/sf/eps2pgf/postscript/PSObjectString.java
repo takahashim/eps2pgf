@@ -128,6 +128,13 @@ public class PSObjectString extends PSObject {
         System.out.println(" - " +ro.isis());
         return ro.cvi();
     }
+    
+    /**
+     * PostScript operator 'cvn'. Convert this object to a name object.
+     */
+    public PSObjectName cvn() {
+        return new PSObjectName(value.toString(), isLiteral);
+    }
 
     /**
      * Produce a text representation of this object (see PostScript
