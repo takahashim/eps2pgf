@@ -104,6 +104,13 @@ public class PSObjectReal extends PSObject {
     }
     
     /**
+     * PostScript operator 'cvr'. Convert this object to a real
+     */
+    public double cvr() throws PSErrorTypeCheck {
+        return value;
+    }
+    
+    /**
      * Produce a text representation of this object (see PostScript
      * operator 'cvs' for more info)
      * @return Text representation
@@ -121,7 +128,7 @@ public class PSObjectReal extends PSObject {
     public boolean eq(PSObject obj) {
         try {
             if ((obj instanceof PSObjectReal) || (obj instanceof PSObjectInt)) {
-                return (value == obj.toInt());
+                return (value == obj.toReal());
             }
         } catch (PSErrorTypeCheck e) {
             // This can never happen because of the typecheck with instanceof

@@ -381,6 +381,12 @@ public class Interpreter {
         opStack.push(str.cvn());
     }
     
+    /** PostScript op: cvr */
+    public void op_cvr() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject any = opStack.pop();
+        opStack.push(new PSObjectReal(any.cvr()));
+    }
+    
     /** PostScript op: cvs */
     public void op_cvs() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorRangeCheck {

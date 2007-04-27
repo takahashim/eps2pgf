@@ -125,7 +125,6 @@ public class PSObjectString extends PSObject {
      */
     public int cvi() throws PSErrorTypeCheck {
         PSObjectReal ro = new PSObjectReal(value.toString());
-        System.out.println(" - " +ro.isis());
         return ro.cvi();
     }
     
@@ -136,6 +135,14 @@ public class PSObjectString extends PSObject {
         return new PSObjectName(value.toString(), isLiteral);
     }
 
+    /**
+     * PostScript operator 'cvr'. Convert this object to a real
+     */
+    public double cvr() throws PSErrorTypeCheck {
+        PSObjectReal ro = new PSObjectReal(value.toString());
+        return ro.toReal();
+    }
+    
     /**
      * Produce a text representation of this object (see PostScript
      * operator 'cvs' for more info)

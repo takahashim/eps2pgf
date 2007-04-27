@@ -105,6 +105,13 @@ public class PSObjectInt extends PSObject {
     }
 
     /**
+     * PostScript operator 'cvr'. Convert this object to a real
+     */
+    public double cvr() throws PSErrorTypeCheck {
+        return toReal();
+    }
+    
+    /**
      * Produce a text representation of this object (see PostScript
      * operator 'cvs' for more info)
      * @return Text representation
