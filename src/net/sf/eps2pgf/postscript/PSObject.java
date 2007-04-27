@@ -262,6 +262,13 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
+     * PostScript operator 'noaccess'. Set access attribute to 'none'.
+     */
+    public void noaccess() throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Process this object in the supplied interpreter. This is the way
      * objects from the operand stack are processed.
      * @param interp Interpreter in which this object is processed.

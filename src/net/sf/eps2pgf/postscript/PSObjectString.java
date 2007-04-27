@@ -205,6 +205,13 @@ public class PSObjectString extends PSObject {
         return count;
     }
 
+    /**
+     * PostScript operator: 'noaccess'
+     */
+    public void noaccess() {
+        access = ACCESS_NONE;
+    }
+    
     /** Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      */

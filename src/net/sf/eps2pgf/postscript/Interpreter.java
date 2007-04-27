@@ -112,19 +112,13 @@ public class Interpreter {
         }        
     }
     
-    /**
-     * PostScript op: abs
-     */
+    /** PostScript op: abs */
     public void op_abs() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.pop();
         opStack.push(obj.abs());
     }
     
-    /**
-     * PostScript op: add
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Not enough object on stack
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One or both objects on stack are not numeric
-     */
+    /** PostScript op: add */
     public void op_add() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject num2 = opStack.pop();
         PSObject num1 = opStack.pop();
@@ -150,28 +144,17 @@ public class Interpreter {
         }
     }
     
-    /**
-     * PostScript op: arc
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented This operator is not (yet) implemented
-     */
+    /** PostScript op: arc */
     public void op_arc() throws PSErrorUnimplemented {
         throw new PSErrorUnimplemented("operator: arc");
     }
     
-    /**
-     * PostScript op: arcn
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented This operator is not (yet) implemented
-     */
+    /** PostScript op: arcn */
     public void op_arcn() throws PSErrorUnimplemented {
         throw new PSErrorUnimplemented("operator: arcn");
     }
     
-    /**
-     * PostScript op: array
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Not enough objects on stack
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Topmost object is not a number
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Topmost object is negative
-     */
+    /** PostScript op: array */
     public void op_array() throws PSErrorStackUnderflow, PSErrorTypeCheck, PSErrorRangeCheck {
         int n = opStack.pop().toNonNegInt();
         op_sqBrackLeft();
@@ -186,9 +169,7 @@ public class Interpreter {
         }
     }
     
-    /**
-     * PostScript op: ashow
-     */
+    /** PostScript op: ashow */
     public void op_ashow() throws PSErrorTypeCheck, PSErrorStackUnderflow,
             PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, 
             PSErrorNoCurrentPoint, IOException {
@@ -201,11 +182,7 @@ public class Interpreter {
     }
     
     
-    /**
-     * PostScript op: astore
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Operand stack underflow
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Operand of wrong type
-     */
+    /** PostScript op: astore */
     public void op_astore() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObjectArray array = opStack.pop().toArray();
         int n = array.size();
@@ -219,9 +196,7 @@ public class Interpreter {
         opStack.push(array);
     }
     
-    /**
-     * PostScript op: atan
-     */
+    /** PostScript op: atan */
     public void op_atan() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         double den = opStack.pop().toReal();
         double num = opStack.pop().toReal();
@@ -232,21 +207,13 @@ public class Interpreter {
         opStack.push(new PSObjectReal(result));
     }
     
-    /**
-     * PostScript op: begin
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Operand stack underflow
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Operand is not a dictionary
-     */
+    /** PostScript op: begin */
     public void op_begin() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObjectDict dict = opStack.pop().toDict();
         dictStack.pushDict(dict);
     }
     
-    /**
-     * PostScript op: bind
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Operand stack underflow
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Operand is not object type that can be binded
-     */
+    /** PostScript op: bind */
     public void op_bind() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.peek();
         if (obj instanceof PSObjectProc) {
@@ -260,9 +227,7 @@ public class Interpreter {
         }
     }
     
-    /**
-     * PostScript op: ceiling
-     */
+    /** PostScript op: ceiling */
     public void op_ceiling() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.pop();
         opStack.push(obj.ceiling());
@@ -273,11 +238,7 @@ public class Interpreter {
         opStack.clear();
     }
     
-    /**
-     * PostScript op: cleartomark
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnmatchedMark Unable to find mark object on stack
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow Operand stack underflow
-     */
+    /** PostScript op: cleartomark */
     public void op_cleartomark() throws PSErrorUnmatchedMark, PSErrorStackUnderflow {
         int n = opStack.size();
         for (int i = 0 ; i < n ; i++) {
@@ -869,6 +830,11 @@ public class Interpreter {
         gstate.current.path = new Path();
         gstate.current.position[0] = Double.NaN;
         gstate.current.position[1] = Double.NaN;
+    }
+    
+    /** PostScript op: noaccess */
+    public void op_noaccess() throws PSErrorStackUnderflow {
+        
     }
     
     /** PostScript op: not */
