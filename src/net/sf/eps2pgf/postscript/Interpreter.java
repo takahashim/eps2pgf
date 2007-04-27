@@ -329,9 +329,7 @@ public class Interpreter {
         throw new PSErrorUnimplemented("operator: currentfile");
     }
     
-    /**
-     * PostScript op: currentflat
-     */
+    /** PostScript op: currentflat */
     public void op_currentflat() {
         // pgf does not support changing the flatness
         opStack.push(new PSObjectReal(0.2));
@@ -346,9 +344,7 @@ public class Interpreter {
         opStack.push(obj);
     }
     
-    /**
-     * PostScript op: currentpoint
-     */
+    /** PostScript op: currentpoint */
     public void op_currentpoint() throws PSErrorNoCurrentPoint {
         double[] currentDevice = gstate.current.getCurrentPosInDeviceSpace();
         double[] currentUser = gstate.current.CTM.inverseApply(currentDevice);
@@ -356,9 +352,7 @@ public class Interpreter {
         opStack.push(new PSObjectReal(currentUser[1]));
     }
     
-    /**
-     * PostScript op: curveto
-     */
+    /** PostScript op: curveto */
     public void op_curveto() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         double y3 = opStack.pop().toReal();
         double x3 = opStack.pop().toReal();
@@ -369,9 +363,13 @@ public class Interpreter {
         gstate.current.curveto(x1,y1, x2,y2, x3,y3);
     }
     
-    /**
-     * PostScript op: cvlit
-     */
+    /** PostScrip op: cvi */
+    public void op_cvi() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject obj = opStack.pop();
+        opStack.push(new PSObjectInt(obj.cvi()));
+    }
+    
+    /** PostScript op: cvlit */
     public void op_cvlit() throws PSErrorStackUnderflow, PSErrorUnimplemented {
         PSObject any = opStack.pop();
         opStack.push(any.cvlit());

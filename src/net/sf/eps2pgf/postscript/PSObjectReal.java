@@ -92,6 +92,18 @@ public class PSObjectReal extends PSObject {
     }
     
     /**
+     * PostScript operator 'cvi'. Convert this object to an integer
+     */
+    public int cvi() {
+        try {
+            return (int)truncate().toReal();
+        } catch (PSErrorTypeCheck e) {
+            // this can never happen, because this object is a real
+            return 0;
+        }
+    }
+    
+    /**
      * Produce a text representation of this object (see PostScript
      * operator 'cvs' for more info)
      * @return Text representation

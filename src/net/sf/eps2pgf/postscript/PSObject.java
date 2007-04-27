@@ -408,6 +408,13 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
+     * PostScript operator 'cvi'. Convert this object to an integer
+     */
+    public int cvi() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Convert this object to a literal object
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Converting this object type to literal is not yet supported
      * @return This object converted to a literal object
