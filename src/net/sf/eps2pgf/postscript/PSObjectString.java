@@ -288,6 +288,13 @@ public class PSObjectString extends PSObject {
     }
     
     /**
+     * PostScript operator: 'readonly'
+     */
+    public void readonly() {
+        access = ACCESS_READONLY;
+    }
+    
+    /**
      * PostScript operator copy. Copies values from obj1 to this object.
      * @param obj1 Copy values from obj1
      * @return Returns subsequence of this object

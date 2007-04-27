@@ -121,6 +121,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     
     /**
      * PostScript operator 'cvx'. Makes this object executable
+     * @return Exectable version of this object
      */
     public PSObject cvx() {
         isLiteral = false;
@@ -152,6 +153,8 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     
     /**
      * PostScript operator 'executeonly'. Set access attribute to executeonly.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not set access attribute of this object type to 'executeonly'
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess 'access' attribute of this object does not allow changes
      */
     public void executeonly() throws PSErrorTypeCheck, PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
@@ -263,6 +266,8 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     
     /**
      * PostScript operator 'noaccess'. Set access attribute to 'none'.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not change 'access' attribute of this object type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess 'access' attribute of this object does not allow changes
      */
     public void noaccess() throws PSErrorTypeCheck, PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
@@ -304,11 +309,22 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     /**
      * PostScript operator 'rcheck'. Checks whether the access attribute is
      * 'unlimited' or 'readonly'.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not check 'access' attribute of this object type
+     * @return Returns true when this object is readable; returns false otherwise
      */
     public boolean rcheck() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
 
+    /**
+     * PostScript operator 'readonly'. Set access attribute to 'readonly'.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not change the 'access' attribute of this object type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess 'access' attribute of this object does not allow changes
+     */
+    public void readonly() throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        throw new PSErrorTypeCheck();
+    }
+    
     /**
      * Return this value rounded to the nearest integer
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric

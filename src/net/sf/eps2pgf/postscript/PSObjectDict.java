@@ -241,6 +241,17 @@ public class PSObjectDict extends PSObject {
     }
 
     /**
+     * PostScript operator: 'readonly'
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess Access attribute does no allow changes to this object
+     */
+    public void readonly() throws PSErrorInvalidAccess {
+        if (access != ACCESS_UNLIMITED) {
+            throw new PSErrorInvalidAccess();
+        }
+        access = ACCESS_READONLY;
+    }
+    
+    /**
      * Convert this object to a dictionary, if possible.
      * @return This dictionary.
      */
