@@ -218,6 +218,13 @@ public class PSObjectProc extends PSObject {
     }
     
     /**
+     * PostScript operator: 'noaccess'
+     */
+    public void noaccess() {
+        access = ACCESS_NONE;
+    }
+    
+    /**
      * PostScript operator 'rcheck'. Checks whether the access attribute is
      * 'unlimited' or 'readonly'.
      */

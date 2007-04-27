@@ -216,8 +216,21 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
+     * PostScript operator: 'noaccess'
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess Access attribute does no allow changes to this object
+     */
+    public void noaccess() throws PSErrorInvalidAccess {
+        if (access != ACCESS_UNLIMITED) {
+            throw new PSErrorInvalidAccess();
+        }
+        access = ACCESS_NONE;
+    }
+    
+    /**
      * PostScript operator 'rcheck'. Checks whether the access attribute is
      * 'unlimited' or 'readonly'.
+     * @return Returns 'true' when 'access' attribute is set to 'unlimited' or
+     * 'readonly'. Returns false otherwise.
      */
     public boolean rcheck() {
         if ( (access == ACCESS_UNLIMITED) || (access == ACCESS_READONLY) ) {

@@ -320,6 +320,13 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * PostScript operator: 'noaccess'
+     */
+    public void noaccess() {
+        access = ACCESS_NONE;
+    }
+    
+    /**
      * Convert this object to an array.
      * @return This array
      */
