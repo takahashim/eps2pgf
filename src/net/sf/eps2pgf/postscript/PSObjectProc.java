@@ -237,6 +237,13 @@ public class PSObjectProc extends PSObject {
     }
 
     /**
+     * PostScript operator: 'readonly'
+     */
+    public void readonly() {
+        access = ACCESS_READONLY;
+    }
+    
+    /**
      * Convert this object to an array.
      * @return This array
      */

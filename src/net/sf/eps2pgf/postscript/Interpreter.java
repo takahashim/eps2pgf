@@ -833,8 +833,11 @@ public class Interpreter {
     }
     
     /** PostScript op: noaccess */
-    public void op_noaccess() throws PSErrorStackUnderflow {
-        
+    public void op_noaccess() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
+        PSObject obj = opStack.pop();
+        obj.noaccess();
+        opStack.push(obj);
     }
     
     /** PostScript op: not */
@@ -904,8 +907,11 @@ public class Interpreter {
     /**
      * PostScript op: readonly
      */
-    public void op_readonly() {
-        log.info("readonly operator encountered. This feature is not implemented. This may lead to incorrect results.");
+    public void op_readonly() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
+        PSObject obj = opStack.pop();
+        obj.readonly();
+        opStack.push(obj);
     }
     
     /** PostScript op: rectclip */
