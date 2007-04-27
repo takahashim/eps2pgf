@@ -112,6 +112,21 @@ public class PSObjectInt extends PSObject {
     }
     
     /**
+     * PostScript operator 'cvrs'
+     */
+    public String cvrs(int radix) throws PSErrorTypeCheck, PSErrorRangeCheck {
+        if (radix < 2) {
+            throw new PSErrorRangeCheck();
+        }
+        if ( (value >= 0) || (radix == 10) ) {
+            return Integer.toString(value, radix).toUpperCase();
+        } else {
+            double negVal = Math.pow(2, 32) + value;
+            return Long.toString((long)negVal, radix).toUpperCase();
+        }
+    }
+
+    /**
      * Produce a text representation of this object (see PostScript
      * operator 'cvs' for more info)
      * @return Text representation

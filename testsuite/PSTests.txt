@@ -1,4 +1,4 @@
-bool 1 - eq 1: 1 1 eq 1.0 1 eq 1 1.0 eq
+bool 1 - eq 1: 1 1 eq 1.0 1 eq 1 1.0 eq  1.0 1.0 eq
 bool 2 - eq 2: (abc) (abc) eq (abc) /abc eq /abc (abc) eq
 bool 3 - eq 3: false false eq mark [ eq null null eq
 bool 4 - eq 4: [1 2 3] dup eq [1 2 3] [1 2 3] eq false eq
@@ -23,7 +23,7 @@ type 18 - cvn 2: (abc) cvx cvn type /nametype eq  (abc) cvx cvn xcheck true eq  
 type 19 - cvr: 1.1 cvr 1.1 eq  78 cvr 78.0 eq  (78.9) cvr 78.9 eq  (1e3) cvr 1000.0 eq
 type 20 - cvrs 1: /temp 12 string def  123 10 temp cvrs (123) eq  -123 10 temp cvrs (-123) eq  123.4 10 temp cvrs (123.4) eq
 type 21 - cvrs 2: /temp 12 string def  123 16 temp cvrs (7B) eq -123 16 temp cvrs (FFFFFF85) eq  123.4 16 temp cvrs (7B) eq
-type 22 - cvs: /str 20 string def  579 str cvs (579) eq  mark str cvs (--nostringval--) eq  /foo str cvs (foo) eq
+type 22 - cvs: 579 20 string cvs (579) eq  mark 20 string cvs (--nostringval--) eq  /foo 20 string cvs (foo) eq
 stack  1 - pop: true true false pop
 stack  2 - exch: 1 2 exch 1 eq exch 2 eq
 stack  3 - dup: (abcde) dup count 2 eq
@@ -87,3 +87,4 @@ string 22 - token 2: ((St1){1 2 add}) token 3 1 roll (St1) eq 3 1 roll ({1 2 add
 string 23 - token 3: ({1 2 add}) token 3 1 roll dup type /arraytype eq 4 1 roll xcheck 4 1 roll () eq
 string 24 - token 4: () token false eq count 1 eq
 string 25 - misc 1: (abcdefghijklmn) dup 1.2 exch 3 5 getinterval cvs (1.2) eq 2 1 roll (abc1.2ghijklmn) eq
+dict  1 - def 1: /str (abcdefghi) def (123) str cvs  str (123defghi) eq
