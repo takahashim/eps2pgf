@@ -271,4 +271,12 @@ public class PSObjectProc extends PSObject {
     public String type() {
         return "arraytype";
     }
+
+    /**
+     * PostScript operator 'wcheck'. Checks whether the access attribute is
+     * 'unlimited'.
+     */
+    public boolean wcheck() {
+        return (access == ACCESS_UNLIMITED);
+    }
 }

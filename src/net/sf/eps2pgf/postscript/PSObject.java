@@ -510,6 +510,16 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
 
     /**
+     * PostScript operator 'wcheck'. Checks whether the access attribute is
+     * 'unlimited'.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not check 'access' attribute of this object type
+     * @return Returns true when this object is writeable; returns false otherwise
+     */
+    public boolean wcheck() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+
+    /**
      * PostScript operator 'xcheck'. Checks whether this object is executable
      * @return Returns true if this object is executable
      */
