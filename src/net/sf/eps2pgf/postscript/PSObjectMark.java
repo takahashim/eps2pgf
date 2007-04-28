@@ -28,6 +28,28 @@ package net.sf.eps2pgf.postscript;
 public class PSObjectMark extends PSObject {
     
     /**
+     * Create new mark object
+     */
+    public PSObjectMark() {
+        
+    }
+    
+    /**
+     * Create new mark object
+     */
+    public PSObjectMark(PSObjectMark obj) {
+        copyCommonAttributes(obj);
+    }
+    
+    /**
+     * PostScript operator 'dup'. Create a copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObjectMark dup() {
+        return new PSObjectMark(this);
+    }
+    
+    /**
      * Compare this object with another object and return true if they are equal.
      * See PostScript manual on what's equal and what's not.
      * @param obj Object to compare this object with

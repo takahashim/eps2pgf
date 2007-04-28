@@ -46,6 +46,14 @@ public class PSObjectInt extends PSObject {
         value = Integer.parseInt(str);
     }
     
+    /**
+     * Create a new instance of PSObjectInt
+     */
+    public PSObjectInt(PSObjectInt obj) {
+        value = obj.value;
+        copyCommonAttributes(obj);
+    }
+    
     /** Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      */
@@ -133,6 +141,14 @@ public class PSObjectInt extends PSObject {
      */
     public String cvs() {
         return String.valueOf(value);
+    }
+    
+    /**
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObjectInt dup() {
+        return new PSObjectInt(this);
     }
     
     /**
@@ -273,13 +289,6 @@ public class PSObjectInt extends PSObject {
      * @return New object with same integer
      */
     public PSObjectInt truncate() {
-        return new PSObjectInt(value);
-    }
-
-    /**
-     * Creates an exact copy of this object.
-     */
-    public PSObjectInt clone() {
         return new PSObjectInt(value);
     }
 

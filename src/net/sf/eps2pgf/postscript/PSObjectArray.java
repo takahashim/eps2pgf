@@ -56,7 +56,7 @@ public class PSObjectArray extends PSObject {
         
         // Use the entire array
         offset = 0;
-        count = Integer.MAX_VALUE;        
+        count = dblArray.length;
     }
     
     /**
@@ -71,7 +71,7 @@ public class PSObjectArray extends PSObject {
         
         // Use the entire array
         offset = 0;
-        count = Integer.MAX_VALUE;
+        count = objs.length;
     }
     
     /**
@@ -81,7 +81,7 @@ public class PSObjectArray extends PSObject {
     public PSObjectArray(List<PSObject> objs) {
         array = objs;
         offset = 0;
-        count = Integer.MAX_VALUE;
+        count = objs.size();
     }
     
     /**
@@ -95,16 +95,19 @@ public class PSObjectArray extends PSObject {
      */
     public PSObjectArray(PSObjectArray obj, int index, int newCount) throws PSErrorRangeCheck {
         int n = obj.size();
-        if (index >= n) {
-            throw new PSErrorRangeCheck();
-        }
-        if ( (index + count - 1) >= n ) {
-            throw new PSErrorRangeCheck();
+        if ( (newCount != 0) || (index != 0) ) {
+            if (index >= n) {
+                throw new PSErrorRangeCheck();
+            }
+            if ( (index + count - 1) >= n ) {
+                throw new PSErrorRangeCheck();
+            }
         }
 
         array = obj.array;
         offset = obj.offset+index;
         count = newCount;
+        copyCommonAttributes(obj);
     }
     
     /**
@@ -156,6 +159,20 @@ public class PSObjectArray extends PSObject {
     }
 
     /**
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObjectArray dup() {
+        try {
+            return new PSObjectArray(this, 0, length());
+        } catch (PSErrorRangeCheck e) {
+            System.out.println("caught");
+            // this can never happen
+            return null;
+        }
+    }
+    
+    /**
      * Compare this object with another object and return true if they are equal.
      * See PostScript manual on what's equal and what's not.
      * @param obj Object to compare this object with
@@ -164,7 +181,10 @@ public class PSObjectArray extends PSObject {
     public boolean eq(PSObject obj) {
         try {
             PSObjectArray objArr = obj.toArray();
-            return (this == objArr);
+            if ( (count != objArr.count) || (offset != objArr.offset) ) {
+                return false;
+            }
+            return (array == objArr.array);
         } catch (PSErrorTypeCheck e) {
             return false;
         }
@@ -280,34 +300,6 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
-     * Copies the values from an array into this array.
-     * @param toBeCopied Object from which the values must be copied
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to copy values.
-     */
-    public void copyFrom(PSObjectArray toBeCopied) throws PSErrorRangeCheck, PSErrorUnimplemented {
-        int n = toBeCopied.size();
-        int m = size();
-        if (m < n) {
-            throw new PSErrorRangeCheck();
-        }
-        
-        // Copy all objects from toBeCopied
-        for (int i = 0 ; i < n ; i++) {
-            PSObject obj = toBeCopied.get(i);
-            try {
-                set(i, obj.clone());
-            } catch (CloneNotSupportedException e) {
-                throw new PSErrorUnimplemented("Cloning " + obj.getClass() + " objects.");
-            }
-        }
-        
-        // If this object has more objects than toBeCopied
-        for (int i = (m-1) ; i >= n ; i--) {
-            remove(i);
-        }
-    }
-    
-    /**
      * Implements PostScript operator getinterval. Returns a new object
      * with an interval from this object.
      * @param index Index of the first element of the subarray
@@ -416,14 +408,12 @@ public class PSObjectArray extends PSObject {
      * @throws java.lang.CloneNotSupportedException Unable to clone this object or one of its sub-objects
      * @return Deep copy of this array
      */
-    public PSObjectArray clone() throws CloneNotSupportedException {
+    public PSObjectArray clone() {
         PSObject[] objs = new PSObject[size()];
-        try {
-            for (int i = 0 ; i < objs.length ; i++) {
-                objs[i] = get(i).clone();
-            }
-        } catch (PSError e) {
-            throw new CloneNotSupportedException();
+        int i = 0;
+        for (PSObject obj : this) {
+            objs[i] = obj.clone();
+            i++;
         }
         return new PSObjectArray(objs);
     }

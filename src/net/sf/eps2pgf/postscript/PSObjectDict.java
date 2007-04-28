@@ -49,6 +49,15 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
+     * Create a new dictionary object
+     */
+    public PSObjectDict(PSObjectDict obj) {
+        map = obj.map;
+        capacity = obj.capacity;
+        copyCommonAttributes(obj);
+    }
+    
+    /**
      * Convert this object to string
      * @return Human-readable string representation of this object.
      */
@@ -184,6 +193,14 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObjectDict dup() {
+        return new PSObjectDict(this);
+    }
+    
+    /**
      * Get the number of elements
      * @return The number of entries in this dictionary.
      */
@@ -271,7 +288,7 @@ public class PSObjectDict extends PSObject {
      * @throws java.lang.CloneNotSupportedException Clone not supported.
      * @return Deep copy of this object.
      */
-    public PSObjectDict clone() throws CloneNotSupportedException {
+    public PSObjectDict clone() {
         PSObjectDict newDict = new PSObjectDict();
         newDict.capacity = capacity;
         for(String key : map.keySet()) {

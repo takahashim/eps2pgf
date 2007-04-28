@@ -28,6 +28,28 @@ package net.sf.eps2pgf.postscript;
 public class PSObjectNull extends PSObject {
     
     /**
+     * Create a new null object
+     */
+    public PSObjectNull() {
+        
+    }
+    
+    /**
+     * Create a new null object
+     */
+    public PSObjectNull(PSObjectNull obj) {
+        copyCommonAttributes(obj);
+    }
+    
+    /**
+     * PostScript operator 'dup'. Create a copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObject dup() {
+        return new PSObjectNull(this);
+    }
+    
+    /**
      * Compare this object with another object and return true if they are equal.
      * See PostScript manual on what's equal and what's not.
      * @param obj Object to compare this object with

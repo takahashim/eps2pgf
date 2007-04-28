@@ -497,7 +497,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @return Created copy
      * @throws java.lang.CloneNotSupportedException Unable to clone this font
      */
-    public PSObjectFont clone() throws CloneNotSupportedException {
+    public PSObjectFont clone() {
         PSObjectDict newDict = dict.clone();
         PSObjectFont newFont = null;
         try {

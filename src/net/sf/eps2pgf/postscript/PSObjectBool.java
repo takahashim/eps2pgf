@@ -34,6 +34,14 @@ public class PSObjectBool extends PSObject {
     }
     
     /**
+     * Creates a new boolean object
+     */
+    public PSObjectBool(PSObjectBool obj) {
+        value = obj.value;
+        copyCommonAttributes(obj);
+    }
+    
+    /**
      * Produce a text representation of this object (see PostScript
      * operator 'cvs' for more info)
      * @return Text representation
@@ -46,6 +54,14 @@ public class PSObjectBool extends PSObject {
         }
     }    
 
+    /**
+     * PostScript operator 'dup'. Create a shallow copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObjectBool dup() {
+        return new PSObjectBool(this);
+    }
+    
     /**
      * Compare this object with another object and return true if they are equal.
      * See PostScript manual on what's equal and what's not.

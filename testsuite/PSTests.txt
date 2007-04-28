@@ -2,6 +2,7 @@ bool 1 - eq 1: 1 1 eq 1.0 1 eq 1 1.0 eq  1.0 1.0 eq
 bool 2 - eq 2: (abc) (abc) eq (abc) /abc eq /abc (abc) eq
 bool 3 - eq 3: false false eq mark [ eq null null eq
 bool 4 - eq 4: [1 2 3] dup eq [1 2 3] [1 2 3] eq false eq
+bool 5 - eq 5: [1 2 3 4 5 6] dup 2 3 getinterval eq false eq
 type  1 - type 1: [1 2 3] type /arraytype eq {1 2 add} type /arraytype eq matrix type /arraytype eq
 type  2 - type 2: true type /booleantype eq  null type /nulltype eq  mark type /marktype eq
 type  3 - type 3: 123 type /integertype eq  1.1 type /realtype eq  (abc) type /stringtype eq
@@ -26,20 +27,21 @@ type 21 - cvrs 2: /temp 12 string def  123 16 temp cvrs (7B) eq -123 16 temp cvr
 type 22 - cvs: 579 20 string cvs (579) eq  mark 20 string cvs (--nostringval--) eq  /foo 20 string cvs (foo) eq
 stack  1 - pop: true true false pop
 stack  2 - exch: 1 2 exch 1 eq exch 2 eq
-stack  3 - dup: (abcde) dup count 2 eq
-stack  4 - copy 1: (a)(b)(c) 2 copy (c) eq 5 1 roll (b) eq 5 1 roll (c) eq 5 1 roll (b) eq 5 1 roll (a) eq
-stack  5 - copy 2: (a)(b)(c) 0 copy (c) eq 3 1 roll (b) eq 3 1 roll (a) eq
-stack  6 - index 1: (a)(b) (c) (d) 0 index (d) eq 5 1 roll (d) eq 5 1 roll (c) eq 5 1 roll (b) eq 5 1 roll (a)
-stack  7 - index 2: (a)(b) (c) (d) 3 index (a) eq 5 1 roll (d) eq 5 1 roll (c) eq 5 1 roll (b) eq 5 1 roll (a)
-stack  8 - roll 1: (a)(b)(c) 3 -1 roll (a) eq 3 1 roll (c) eq 3 1 roll (b) eq
-stack  9 - roll 2: (a)(b)(c) 3 1 roll (b) eq 3 1 roll (a) eq 3 1 roll (c) eq
-stack 10 - roll 2: (a)(b)(c) 3 0 roll (c) eq 3 1 roll (b) eq 3 1 roll (a) eq
-stack 11 - clear: 1 2 3 4 5 clear count 0 eq
-stack 12 - count: 1 (b) 3 (d) 5 (f) count 6 eq
-stack 13 - mark: mark 1 2 3] type /arraytype eq
-stack 14 - cleartomark: 1 2 [ 3 4 5 cleartomark 2 eq 2 1 roll 1 eq
-stack 15 - counttomark 1: 1 mark 2 3 counttomark 2 eq 5 1 roll 3 eq 5 1 roll 2 eq 5 1 roll mark eq 5 1 roll 1 eq
-stack 16 - counttomark 2: 1 mark counttomark 0 eq 3 1 roll mark eq 3 1 roll 1 eq
+stack  3 - dup 1: (abcde) dup count 2 eq  /foo dup cvx xcheck true eq  exch xcheck false eq
+stack  4 - dup 2: (abc) dup cvx xcheck true eq  exch xcheck false eq  1.0 dup cvx xcheck true eq  exch xcheck false eq
+stack  5 - copy 1: (a)(b)(c) 2 copy (c) eq 5 1 roll (b) eq 5 1 roll (c) eq 5 1 roll (b) eq 5 1 roll (a) eq
+stack  6 - copy 2: (a)(b)(c) 0 copy (c) eq 3 1 roll (b) eq 3 1 roll (a) eq
+stack  7 - index 1: (a)(b) (c) (d) 0 index (d) eq 5 1 roll (d) eq 5 1 roll (c) eq 5 1 roll (b) eq 5 1 roll (a)
+stack  8 - index 2: (a)(b) (c) (d) 3 index (a) eq 5 1 roll (d) eq 5 1 roll (c) eq 5 1 roll (b) eq 5 1 roll (a)
+stack  9 - roll 1: (a)(b)(c) 3 -1 roll (a) eq 3 1 roll (c) eq 3 1 roll (b) eq
+stack 10 - roll 2: (a)(b)(c) 3 1 roll (b) eq 3 1 roll (a) eq 3 1 roll (c) eq
+stack 11 - roll 2: (a)(b)(c) 3 0 roll (c) eq 3 1 roll (b) eq 3 1 roll (a) eq
+stack 12 - clear: 1 2 3 4 5 clear count 0 eq
+stack 13 - count: 1 (b) 3 (d) 5 (f) count 6 eq
+stack 14 - mark: mark 1 2 3] type /arraytype eq
+stack 15 - cleartomark: 1 2 [ 3 4 5 cleartomark 2 eq 2 1 roll 1 eq
+stack 16 - counttomark 1: 1 mark 2 3 counttomark 2 eq 5 1 roll 3 eq 5 1 roll 2 eq 5 1 roll mark eq 5 1 roll 1 eq
+stack 17 - counttomark 2: 1 mark counttomark 0 eq 3 1 roll mark eq 3 1 roll 1 eq
 array  1 - array: 3 array dup type /arraytype eq exch dup 0 get null eq exch dup 1 get null eq exch dup 2 get null eq
 array  2 - length 1: [1 2 3] length 3 eq [] length 0 eq
 array  3 - length 2: {1 2 3} length 3 eq {} length 0 eq
@@ -88,3 +90,4 @@ string 23 - token 3: ({1 2 add}) token 3 1 roll dup type /arraytype eq 4 1 roll 
 string 24 - token 4: () token false eq count 1 eq
 string 25 - misc 1: (abcdefghijklmn) dup 1.2 exch 3 5 getinterval cvs (1.2) eq 2 1 roll (abc1.2ghijklmn) eq
 dict  1 - def 1: /str (abcdefghi) def (123) str cvs  str (123defghi) eq
+dict  2 - def 2: /str1 (1 2 add) def str1 (1 2 add) eq  /str2 (1 2 add) cvx def str2 3 eq
