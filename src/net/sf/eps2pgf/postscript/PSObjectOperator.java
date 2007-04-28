@@ -42,6 +42,15 @@ public class PSObjectOperator extends PSObject {
         isLiteral = false;
     }
     
+    /**
+     * Create new operator object
+     */
+    public PSObjectOperator(PSObjectOperator obj) {
+        name = obj.name;
+        opMethod = obj.opMethod;
+        copyCommonAttributes(obj);
+    }
+    
     /** Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      */
@@ -59,18 +68,30 @@ public class PSObjectOperator extends PSObject {
     }
     
     /**
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObjectOperator dup() {
+        return new PSObjectOperator(this);
+    }
+    
+    /**
      * Executes this object in the supplied interpreter
      * @param interp Interpreter in which this object is executed.
      * @throws java.lang.Exception An error occured during the execution of this object.
      */
     public void execute(Interpreter interp) throws Exception {
-        try {
-            opMethod.invoke(interp);
-        } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof PSError) {
-                throw (PSError)e.getCause();
-            } else {
-                throw e;
+        if (isLiteral) {
+            interp.opStack.push(this);
+        } else {
+            try {
+                opMethod.invoke(interp);
+            } catch (InvocationTargetException e) {
+                if (e.getCause() instanceof PSError) {
+                    throw (PSError)e.getCause();
+                } else {
+                    throw e;
+                }
             }
         }
     }

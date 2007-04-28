@@ -474,7 +474,7 @@ public class Interpreter {
     
     /** PostScript op: dup */
     public void op_dup() throws PSErrorStackUnderflow {
-        opStack.push(opStack.peek());
+        opStack.push(opStack.peek().dup());
     }
     
     /** PostScript op: end */

@@ -44,6 +44,14 @@ public class PSObjectReal extends PSObject {
     }
     
     /**
+     * Creates a new real object.
+     */
+    public PSObjectReal(PSObjectReal obj) {
+        value = obj.value;
+        copyCommonAttributes(obj);
+    }
+    
+    /**
      * Check whether a string is a real
      * @param str String to check.
      * @return Returns true when str is a valid real. Returns false otherwise.
@@ -135,6 +143,14 @@ public class PSObjectReal extends PSObject {
     }
 
     /**
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObjectReal dup() {
+        return new PSObjectReal(this);
+    }
+    
+    /**
      * Compare this object with another object and return true if they are equal.
      * See PostScript manual on what's equal and what's not.
      * @param obj Object to compare this object with
@@ -220,11 +236,6 @@ public class PSObjectReal extends PSObject {
         } else {
             return ceiling();
         }
-    }
-
-    /** Creates and returns a copy of this object. */
-    public PSObjectReal clone() {
-        return new PSObjectReal(value);
     }
 
     /**

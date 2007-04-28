@@ -58,8 +58,16 @@ public class PSObjectName extends PSObject {
     
     /** Creates a new instance of PSObjectName. */
     public PSObjectName(PSObjectName obj) {
-        name = new String(obj.name);
-        isLiteral = obj.isLiteral;
+        name = obj.name;
+        copyCommonAttributes(obj);
+    }
+    
+    /**
+     * PostScript operator 'dup'. Create a copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObjectName dup() {
+        return new PSObjectName(this);
     }
     
     /**

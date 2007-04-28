@@ -80,12 +80,11 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
-     * Creates a copy of this object.
-     * @throws java.lang.CloneNotSupportedException This object does not suppert cloneing.
+     * Creates a (deep) copy of this object.
      * @return Deep copy of this object
      */
-    public PSObject clone() throws CloneNotSupportedException {
-        throw new CloneNotSupportedException();
+    public PSObject clone() {
+        return dup();
     }
     
     /**
@@ -97,6 +96,15 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      */
     public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Copies common object attributes (literal/executable and access) from
+     * another object to this object.
+     */
+    void copyCommonAttributes(PSObject obj) {
+        access = obj.access;
+        isLiteral = obj.isLiteral;
     }
     
     /**
@@ -136,8 +144,12 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
-     * Make this object executable
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
+     * of composite object is not copied, but shared.
      */
+    public PSObject dup() {
+        return null;
+    }
     
     /**
      * Compare this object with another object and return true if they are equal.

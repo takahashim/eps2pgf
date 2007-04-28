@@ -89,6 +89,7 @@ public class PSObjectString extends PSObject {
         value = str.value;
         offset = index + str.offset;
         count = length;
+        copyCommonAttributes(str);
     }
     
     /**
@@ -340,6 +341,19 @@ public class PSObjectString extends PSObject {
             arr.addAt(i, encoding.get(chr));
         }
         return arr;
+    }
+    
+    /**
+     * PostScript operator 'dup'. Create a copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObjectString dup() {
+        try {
+            return new PSObjectString(this, 0, length());
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen
+            return null;
+        }
     }
     
     /**

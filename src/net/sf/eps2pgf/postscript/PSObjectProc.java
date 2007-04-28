@@ -61,6 +61,14 @@ public class PSObjectProc extends PSObject {
     }
     
     /**
+     * Create new procedure (executable array) object
+     */
+    public PSObjectProc(PSObjectProc obj) {
+        procObjects = obj.procObjects;
+        copyCommonAttributes(obj);
+    }
+    
+    /**
      * Check whether a string is a procedure
      * @param str String to check.
      * @return Returns true when the string is a procedure. Returns false otherwise.
@@ -108,6 +116,14 @@ public class PSObjectProc extends PSObject {
     public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
         PSObject subarray = procObjects.copy(obj1);
         return new PSObjectProc(subarray);
+    }
+    
+    /**
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObjectProc dup() {
+        return new PSObjectProc(this);
     }
     
     /**
