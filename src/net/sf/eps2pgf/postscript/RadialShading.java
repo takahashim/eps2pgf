@@ -78,7 +78,8 @@ public class RadialShading extends Shading {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented A required feature is not implemented
      */
     public RadialShading(PSObjectDict dict) throws PSErrorTypeCheck, 
-            PSErrorUndefined, PSErrorRangeCheck, PSErrorUnimplemented {
+            PSErrorUndefined, PSErrorRangeCheck, PSErrorUnimplemented,
+            PSErrorInvalidAccess {
         // First, load the entries common to all shading types
         loadCommonEntries(dict);
         

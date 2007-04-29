@@ -55,7 +55,7 @@ public class Shading {
      * @return New shading object
      */
     public static Shading newShading(PSObjectDict dict) throws PSErrorRangeCheck, 
-            PSErrorTypeCheck, PSErrorUndefined, PSErrorUnimplemented {
+            PSErrorTypeCheck, PSErrorUndefined, PSErrorUnimplemented, PSErrorInvalidAccess {
         PSObject shadingTypeObj = dict.lookup("ShadingType");
         if (shadingTypeObj == null) {
             throw new PSErrorRangeCheck();

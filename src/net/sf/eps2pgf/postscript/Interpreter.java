@@ -184,7 +184,8 @@ public class Interpreter {
     
     
     /** PostScript op: astore */
-    public void op_astore() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    public void op_astore() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         PSObjectArray array = opStack.pop().toArray();
         int n = array.size();
         try {
@@ -699,7 +700,7 @@ public class Interpreter {
      * PostScript op: itransform
      */
     public void op_itransform() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
-            PSErrorRangeCheck {
+            PSErrorRangeCheck, PSErrorInvalidAccess {
         PSObject obj = opStack.pop();
         PSObjectMatrix matrix = null;
         try {
@@ -785,7 +786,7 @@ public class Interpreter {
     
     /** PostScript op: makefont */
     public void op_makefont() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
-            PSErrorRangeCheck, CloneNotSupportedException {
+            PSErrorRangeCheck, PSErrorInvalidAccess {
         PSObjectMatrix matrix = opStack.pop().toMatrix();
         PSObjectDict font = opStack.pop().toDict();
         font = font.clone();
@@ -1107,7 +1108,8 @@ public class Interpreter {
     /**
      * PostScript operator: scalefont
      */
-    public void op_scalefont() throws PSErrorStackUnderflow, PSErrorTypeCheck, CloneNotSupportedException {
+    public void op_scalefont() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         double scale = opStack.pop().toReal();
         
         // "font scale scalefont" is equivalent to 
@@ -1369,7 +1371,8 @@ public class Interpreter {
     /**
      * PostScript op: transform
      */
-    public void op_transform() throws PSErrorStackUnderflow, PSErrorTypeCheck, PSErrorRangeCheck {
+    public void op_transform() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorRangeCheck, PSErrorInvalidAccess {
         PSObject obj = opStack.pop();
         PSObjectMatrix matrix = null;
         try {

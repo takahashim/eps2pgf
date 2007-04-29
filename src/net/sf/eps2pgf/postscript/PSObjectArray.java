@@ -111,40 +111,98 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
-     * Returns the number of elements in this array.
-     * @return Number of items in this array.
+     * Insert an element at the specified position in this array.
+     * @param index Index at which the new element will be inserted.
+     * @param value Value of the new element
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
      */
-    public int size() {
-        return Math.min(count, array.size()-offset);
+    public void addAt(int index, PSObject value) throws PSErrorInvalidAccess {
+        checkAccess(false, false, true);
+        array.add(index+offset, value);
     }
     
     /**
      * Add an element to the end to this array.
      * @param value Value of the new element
      */
-    public void addToEnd(PSObject value) {
+    public void addToEnd(PSObject value) throws PSErrorInvalidAccess {
+        checkAccess(false, false, true);
         array.add(value);
     }
     
     /**
-     * Insert an element at the specified position in this array.
-     * @param index Index at which the new element will be inserted.
-     * @param value Value of the new element
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
+     * Replace executable name objects with their values
+     * @param interp Interpreter to which the operators must be bound.
+     * @return This array.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Something went wrong.
      */
-    public void addAt(int index, PSObject value) {
-        array.add(index+offset, value);
+    public PSObjectArray bind(Interpreter interp) throws PSErrorTypeCheck {
+        try {
+            for (int i = 0 ; i < size() ; i++) {
+                try {
+                    PSObject obj = get(i);
+                    set(i, obj.bind(interp));
+                    if (obj instanceof PSObjectProc) {
+                        obj.readonly();
+                    }
+                } catch (PSErrorInvalidAccess e) {
+                    // no access, don't change anything
+                }
+            }
+        } catch (PSErrorRangeCheck e) {
+            // This can never happen
+        }
+        return this;
     }
     
+    /**
+     * Creates a deep copy of this array.
+     * @throws java.lang.CloneNotSupportedException Unable to clone this object or one of its sub-objects
+     * @return Deep copy of this array
+     */
+    public PSObjectArray clone() {
+        PSObject[] objs = new PSObject[size()];
+        int i = 0;
+        for (PSObject obj : this) {
+            objs[i] = obj.clone();
+            i++;
+        }
+        return new PSObjectArray(objs);
+    }
+
     /**
      * PostScript operator copy. Copies values from obj1 to this object.
      * @param obj1 Copy values from obj1
      * @return Returns subsequence of this object
      */
-    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
+    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         PSObjectArray array = obj1.toArray();
         putinterval(0, array);
         return getinterval(0, array.length());
+    }
+    
+    /**
+     * Copies values from another obj to this object.
+     * @param obj Object from which the values must be copied
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to copy values from object.
+     */
+    public void copyValuesFrom(PSObject obj) throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        PSObjectArray array = obj.toArray();
+        
+        try {
+            // First remove all current elements from the array
+            for (int i = size()-1 ; i >= 0 ; i--) {
+                remove(i);
+            }
+        
+            // Copies the values
+            for (int i = 0 ; i < array.size() ; i++) {
+                addAt(i, array.get(i));
+            }
+        } catch (PSErrorRangeCheck e) {
+            // This can never happen
+        }
     }
     
     /**
@@ -164,9 +222,8 @@ public class PSObjectArray extends PSObject {
      */
     public PSObjectArray dup() {
         try {
-            return new PSObjectArray(this, 0, length());
+            return new PSObjectArray(this, 0, size());
         } catch (PSErrorRangeCheck e) {
-            System.out.println("caught");
             // this can never happen
             return null;
         }
@@ -178,7 +235,9 @@ public class PSObjectArray extends PSObject {
      * @param obj Object to compare this object with
      * @return True if objects are equal, false otherwise
      */
-    public boolean eq(PSObject obj) {
+    public boolean eq(PSObject obj) throws PSErrorInvalidAccess {
+        checkAccess(false, true, true);
+        obj.checkAccess(false, true, true);
         try {
             PSObjectArray objArr = obj.toArray();
             if ( (count != objArr.count) || (offset != objArr.offset) ) {
@@ -194,23 +253,8 @@ public class PSObjectArray extends PSObject {
      * PostScript operator 'executeonly'. Set access attribute to executeonly.
      */
     public void executeonly() throws PSErrorInvalidAccess {
-        if (access == ACCESS_NONE) {
-            throw new PSErrorInvalidAccess();
-        }
+        checkAccess(true, false, false);
         access = ACCESS_EXECUTEONLY;
-    }
-    
-    /**
-     * Replace the element with offset with value.
-     * @param index Index of the element to replace.
-     * @param value New value of the element.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
-     */
-    public void set(int index, PSObject value) throws PSErrorRangeCheck {
-        if ( (index < 0) || (index >= size()) ) {
-            throw new PSErrorRangeCheck();
-        }
-        array.set(index+offset, value);
     }
     
     /**
@@ -219,7 +263,8 @@ public class PSObjectArray extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
      * @return Value of the specifiec element.
      */
-    public PSObject get(int index) throws PSErrorRangeCheck {
+    public PSObject get(int index) throws PSErrorRangeCheck, PSErrorInvalidAccess {
+        checkAccess(false, true, false);
         if ( (index < 0) || (index >= size()) ) {
             throw new PSErrorRangeCheck();
         }
@@ -231,7 +276,7 @@ public class PSObjectArray extends PSObject {
      * Gets a single element from this object.
      */
     public PSObject get(PSObject index) throws PSErrorTypeCheck,
-            PSErrorRangeCheck, PSErrorUndefined {
+            PSErrorRangeCheck, PSErrorUndefined, PSErrorInvalidAccess {
         return get(index.toInt());
     }
     
@@ -243,7 +288,8 @@ public class PSObjectArray extends PSObject {
      *         dictionaries this is 2. All consecutive items (index 1 and
      *         up) are the object's items.
      */
-    public List<PSObject> getItemList() {
+    public List<PSObject> getItemList() throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
         List<PSObject> items = new LinkedList<PSObject>();
         items.add(new PSObjectInt(1));
         for (PSObject obj : this) {
@@ -253,18 +299,18 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
-     * Remove an element from this array.
-     * @param index Index of the element to remove.
-     * @return Removed element.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
+     * Implements PostScript operator getinterval. Returns a new object
+     * with an interval from this object.
+     * @param index Index of the first element of the subarray
+     * @param count Number of items in the subarray
+     * @return Subarray
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of bounds.
      */
-    public PSObject remove(int index) throws PSErrorRangeCheck {
-        if ( (index < 0) || (index >= size()) ) {
-            throw new PSErrorRangeCheck();
-        }
-        return array.remove(index+offset);
+    public PSObjectArray getinterval(int index, int count) throws PSErrorRangeCheck,
+            PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        return new PSObjectArray(this, index, count);
     }
-    
     
     /**
      * Return PostScript text representation of this object. See the
@@ -283,32 +329,12 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
-     * Replace executable name objects with their values
-     * @param interp Interpreter to which the operators must be bound.
-     * @return This array.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Something went wrong.
+     * Implements PostScript operate: length
+     * @return Length of this object
      */
-    public PSObjectArray bind(Interpreter interp) throws PSErrorTypeCheck {
-        try {
-            for (int i = 0 ; i < size() ; i++) {
-                set(i, get(i).bind(interp));
-            }
-        } catch (PSErrorRangeCheck e) {
-            // This can never happen
-        }
-        return this;
-    }
-    
-    /**
-     * Implements PostScript operator getinterval. Returns a new object
-     * with an interval from this object.
-     * @param index Index of the first element of the subarray
-     * @param count Number of items in the subarray
-     * @return Subarray
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of bounds.
-     */
-    public PSObjectArray getinterval(int index, int count) throws PSErrorRangeCheck {
-        return new PSObjectArray(this, index, count);
+    public int length() throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        return size();
     }
     
     /**
@@ -319,10 +345,102 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * PostScript operator put. Replace a single value in this object.
+     * @param index Index or key for new value
+     * @param value New value
+     */
+    public void put(PSObject index, PSObject value) throws PSErrorRangeCheck,
+            PSErrorTypeCheck, PSErrorInvalidAccess {
+        put(index.toInt(), value);
+    }
+    
+    /**
+     * PostScript operator put. Replace a single value in this object.
+     * @param index Index or key for new value
+     * @param value New value
+     */
+    public void put(int index, PSObject value) throws PSErrorRangeCheck,
+            PSErrorInvalidAccess {
+        checkAccess(false, false, true);
+        checkAccess(false, true, false);
+        if ( (index < 0) || (index >= size()) ) {
+            throw new PSErrorRangeCheck();
+        }
+        array.set(index+offset, value);
+    }
+    
+    /**
+     * PostScript operator putinterval
+     * @param index Start index of subsequence
+     * @param obj Subsequence
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not 'putinterval' anything in this object type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Index or (index+length) out of bounds
+     */
+    public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck,
+            PSErrorRangeCheck, PSErrorInvalidAccess {
+        PSObjectArray array3 = obj.toArray();
+        int N = array3.length();
+        for (int i = 0 ; i < N ; i++) {
+            set(index + i, array3.get(i));
+        }
+    }
+
+    /**
+     * PostScript operator 'rcheck'. Checks whether the access attribute is
+     * 'unlimited' or 'readonly'.
+     */
+    public boolean rcheck() {
+        if ( (access == ACCESS_UNLIMITED) || (access == ACCESS_READONLY) ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * PostScript operator: 'readonly'
      */
-    public void readonly() {
+    public void readonly() throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
         access = ACCESS_READONLY;
+    }
+    
+    /**
+     * Remove an element from this array.
+     * @param index Index of the element to remove.
+     * @return Removed element.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
+     */
+    public PSObject remove(int index) throws PSErrorRangeCheck, PSErrorInvalidAccess {
+        checkAccess(false, false, true);
+        if ( (index < 0) || (index >= size()) ) {
+            throw new PSErrorRangeCheck();
+        }
+        return array.remove(index+offset);
+    }
+    
+    /**
+     * Replace the element with offset with value.
+     * @param index Index of the element to replace.
+     * @param value New value of the element.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
+     */
+    public void set(int index, PSObject value) throws PSErrorRangeCheck,
+            PSErrorInvalidAccess {
+        checkAccess(false, false, true);
+        value.checkAccess(false, true, false);
+        if ( (index < 0) || (index >= size()) ) {
+            throw new PSErrorRangeCheck();
+        }
+        array.set(index+offset, value);
+    }
+    
+    /**
+     * Returns the number of elements in this array.
+     * @return Number of items in this array.
+     */
+    public int size() {
+        return Math.min(count, array.size()-offset);
     }
     
     /**
@@ -343,7 +461,7 @@ public class PSObjectArray extends PSObject {
      * @return Array with doubles
      */
     public double[] toDoubleArray(int k) throws PSErrorRangeCheck, 
-            PSErrorTypeCheck {
+            PSErrorTypeCheck, PSErrorInvalidAccess {
         if (k != size()) {
             throw new PSErrorRangeCheck();
         }
@@ -353,7 +471,8 @@ public class PSObjectArray extends PSObject {
     /**
      * Convert this PostScript array to a double[] array.
      */
-    public double[] toDoubleArray() throws PSErrorTypeCheck {
+    public double[] toDoubleArray() throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         double newArray[] = new double[size()];
         try {
             for (int i = 0 ; i < size() ; i++) {
@@ -371,7 +490,8 @@ public class PSObjectArray extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSError Array is not a valid matrix
      * @return Matrix representation of this array
      */
-    public PSObjectMatrix toMatrix() throws PSErrorRangeCheck, PSErrorTypeCheck {
+    public PSObjectMatrix toMatrix() throws PSErrorRangeCheck, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         if (this.size() != 6) {
             throw new PSErrorRangeCheck();
         }
@@ -380,101 +500,6 @@ public class PSObjectArray extends PSObject {
                 this.get(4).toReal(), this.get(5).toReal());
     }
     
-    /**
-     * Copies values from another obj to this object.
-     * @param obj Object from which the values must be copied
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to copy values from object.
-     */
-    public void copyValuesFrom(PSObject obj) throws PSErrorTypeCheck {
-        PSObjectArray array = obj.toArray();
-        
-        try {
-            // First remove all current elements from the array
-            for (int i = size()-1 ; i >= 0 ; i--) {
-                remove(i);
-            }
-        
-            // Copies the values
-            for (int i = 0 ; i < array.size() ; i++) {
-                addAt(i, array.get(i));
-            }
-        } catch (PSErrorRangeCheck e) {
-            // This can never happen
-        }
-    }
-    
-    /**
-     * Creates a deep copy of this array.
-     * @throws java.lang.CloneNotSupportedException Unable to clone this object or one of its sub-objects
-     * @return Deep copy of this array
-     */
-    public PSObjectArray clone() {
-        PSObject[] objs = new PSObject[size()];
-        int i = 0;
-        for (PSObject obj : this) {
-            objs[i] = obj.clone();
-            i++;
-        }
-        return new PSObjectArray(objs);
-    }
-
-    /**
-     * Implements PostScript operate: length
-     * @return Length of this object
-     */
-    public int length() {
-        return size();
-    }
-    
-    /**
-     * PostScript operator put. Replace a single value in this object.
-     * @param index Index or key for new value
-     * @param value New value
-     */
-    public void put(int index, PSObject value) throws PSErrorRangeCheck {
-        if ( (index < 0) || (index >= size()) ) {
-            throw new PSErrorRangeCheck();
-        }
-        array.set(index+offset, value);
-    }
-    
-    /**
-     * PostScript operator put. Replace a single value in this object.
-     * @param index Index or key for new value
-     * @param value New value
-     */
-    public void put(PSObject index, PSObject value) throws PSErrorRangeCheck,
-            PSErrorTypeCheck {
-        put(index.toInt(), value);
-    }
-    
-    /**
-     * PostScript operator putinterval
-     * @param index Start index of subsequence
-     * @param obj Subsequence
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not 'putinterval' anything in this object type
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Index or (index+length) out of bounds
-     */
-    public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck, PSErrorRangeCheck {
-        PSObjectArray array3 = obj.toArray();
-        int N = array3.length();
-        for (int i = 0 ; i < N ; i++) {
-            set(index + i, array3.get(i));
-        }
-    }
-
-    /**
-     * PostScript operator 'rcheck'. Checks whether the access attribute is
-     * 'unlimited' or 'readonly'.
-     */
-    public boolean rcheck() {
-        if ( (access == ACCESS_UNLIMITED) || (access == ACCESS_READONLY) ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     /**
      * Returns the type of this object
      * @return Type of this object (see PostScript manual for possible values)

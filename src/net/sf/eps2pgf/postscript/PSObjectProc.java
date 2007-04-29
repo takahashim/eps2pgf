@@ -98,9 +98,16 @@ public class PSObjectProc extends PSObject {
     /** Replace executable name objects with their values */
     public PSObject bind(Interpreter interp) throws PSErrorTypeCheck {
         try {
-            for (int i = 0 ; i < procObjects.length() ; i++) {
-                PSObject obj = procObjects.get(i);
-                procObjects.put(i, obj.bind(interp));
+            for (int i = 0 ; i < procObjects.size() ; i++) {
+                try {
+                    PSObject obj = procObjects.get(i);
+                    procObjects.set(i, obj.bind(interp));
+                    if (obj instanceof PSObjectProc) {
+                        obj.readonly();
+                    }
+                } catch (PSErrorInvalidAccess e) {
+                    // no access, don't change anything
+                }
             }
         } catch (PSErrorRangeCheck e) {
             // this can never happen due to the for-loop

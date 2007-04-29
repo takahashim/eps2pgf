@@ -235,7 +235,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @return Bounding box
      */
     public BoundingBox getBBox(PSObjectArray charNames)
-            throws PSErrorTypeCheck, PSErrorUndefined {
+            throws PSErrorTypeCheck, PSErrorUndefined, PSErrorInvalidAccess {
         charNames = replaceLigatures(charNames);
         
         BoundingBox bbox = new BoundingBox();
@@ -349,7 +349,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This font does not contain a valid font matrix
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Invalid number of elements in FontMatrix array
      */
-    public PSObjectMatrix getFontMatrix() throws PSErrorTypeCheck, PSErrorRangeCheck {
+    public PSObjectMatrix getFontMatrix() throws PSErrorTypeCheck,
+            PSErrorRangeCheck, PSErrorInvalidAccess {
         return dict.lookup("FontMatrix").toMatrix();
     }
     
@@ -399,7 +400,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Font metric field in this font is invalid of undefined
      * @return Width of the string in pt (= 1/72 inch)
      */
-    public double getWidth(PSObjectArray charNames) throws PSErrorTypeCheck, PSErrorUndefined {
+    public double getWidth(PSObjectArray charNames) throws PSErrorTypeCheck,
+            PSErrorUndefined, PSErrorInvalidAccess {
         charNames = replaceLigatures(charNames);
         double width = 0;
         for (int i = 0 ; i < charNames.size() ; i++) {
@@ -429,7 +431,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @return New array with character names
      */
     public PSObjectArray replaceLigatures(PSObjectArray charNames) 
-            throws PSErrorTypeCheck, PSErrorUndefined {
+            throws PSErrorTypeCheck, PSErrorUndefined, PSErrorInvalidAccess {
         PSObjectArray arr = new PSObjectArray();
         for (int i = 0 ; i < charNames.size() ; i++) {
             try {
