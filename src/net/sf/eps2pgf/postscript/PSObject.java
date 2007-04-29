@@ -143,7 +143,8 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck The supplied object can not be converted to the same type as this
      * object.
      */
-    public void copyValuesFrom(PSObject obj) throws PSErrorRangeCheck, PSErrorTypeCheck {
+    public void copyValuesFrom(PSObject obj) throws PSErrorRangeCheck,
+            PSErrorTypeCheck, PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     
@@ -489,7 +490,8 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a matrix
      * @return Matrix representation of this object
      */
-    public PSObjectMatrix toMatrix() throws PSErrorRangeCheck, PSErrorTypeCheck {
+    public PSObjectMatrix toMatrix() throws PSErrorRangeCheck, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     

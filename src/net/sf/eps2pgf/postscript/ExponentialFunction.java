@@ -40,7 +40,7 @@ public class ExponentialFunction extends PSFunction {
     
     /** Creates a new instance of ExponentialFunction */
     public ExponentialFunction(PSObjectDict dict) throws PSErrorRangeCheck, 
-            PSErrorTypeCheck, PSErrorUndefined {
+            PSErrorTypeCheck, PSErrorUndefined, PSErrorInvalidAccess {
         // First, load all entries common to all functions
         loadCommonEntries(dict);
         

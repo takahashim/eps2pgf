@@ -76,7 +76,8 @@ public interface Exporter {
     /**
      * Implements PostScript operator setdash
      */
-    public void setDash(PSObjectArray array, double offset) throws IOException, PSErrorTypeCheck;
+    public void setDash(PSObjectArray array, double offset) throws IOException,
+            PSErrorTypeCheck, PSErrorInvalidAccess;
     
     /**
      * Implements PostScript operator setlinecap

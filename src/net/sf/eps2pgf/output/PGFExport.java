@@ -251,7 +251,8 @@ public class PGFExport implements Exporter {
      * @throws java.io.IOException Unable to write output
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One or more element in the array is not a number
      */
-    public void setDash(PSObjectArray array, double offset) throws IOException, PSErrorTypeCheck {
+    public void setDash(PSObjectArray array, double offset) throws IOException,
+            PSErrorTypeCheck, PSErrorInvalidAccess {
         out.write("\\pgfsetdash{");
         
         try {

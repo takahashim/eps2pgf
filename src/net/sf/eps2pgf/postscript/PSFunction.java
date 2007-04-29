@@ -48,7 +48,7 @@ public class PSFunction {
      * @return New PostScript function
      */
     public static PSFunction newFunction(PSObjectDict dict) throws PSErrorUndefined,
-            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorTypeCheck {
+            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorTypeCheck, PSErrorInvalidAccess {
         PSObject typeObj = dict.lookup("FunctionType");
         if (typeObj == null) {
             throw new PSErrorRangeCheck();
@@ -77,7 +77,7 @@ public class PSFunction {
      * @param dict PostScript dictionary describing the function
      */
     void loadCommonEntries(PSObjectDict dict) throws PSErrorUndefined, 
-            PSErrorTypeCheck {
+            PSErrorTypeCheck, PSErrorInvalidAccess {
         // Load domain field
         domain = dict.get("Domain").toArray().toDoubleArray();
         m = (int)Math.floor(domain.length/2);
