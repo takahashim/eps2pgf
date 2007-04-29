@@ -75,7 +75,7 @@ public class Fonts {
      * Search a font and return it's corresponding font dictionary.
      */
     public PSObjectFont findFont(PSObject fontNameObj) throws PSErrorTypeCheck, 
-            PSErrorInvalidFont, ProgramError {
+            PSErrorInvalidFont, PSErrorInvalidAccess, ProgramError {
         String fontName = fontNameObj.toDictKey();
         return findFont(fontName);
     }
@@ -131,7 +131,7 @@ public class Fonts {
      * @throws PSErrorTypeCheck Unable to use the key as dictionary key
      */
     public PSObjectFont defineFont(PSObject key, PSObjectFont font) 
-            throws PSErrorTypeCheck, PSErrorUnimplemented {
+            throws PSErrorTypeCheck, PSErrorUnimplemented, PSErrorInvalidAccess {
         if (font.getFID() >= 0) {
             throw new PSErrorUnimplemented("Associating a font with more than one key.");
         } else {

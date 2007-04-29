@@ -24,8 +24,7 @@ package net.sf.eps2pgf.postscript;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import net.sf.eps2pgf.postscript.errors.PSError;
-import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.postscript.errors.*;
 
 /**
  *
@@ -50,6 +49,8 @@ public class PSObjectIterator implements Iterator<PSObject> {
         try {
             return (nextIndex < obj.length());
         } catch (PSErrorTypeCheck e) {
+            return false;
+        } catch (PSErrorInvalidAccess e) {
             return false;
         }
     }

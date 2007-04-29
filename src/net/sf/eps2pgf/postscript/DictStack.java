@@ -126,7 +126,8 @@ public class DictStack {
     }
     
     /** Search the dictionary that defines a specific key. */
-    public PSObjectDict where(PSObject key) throws PSErrorTypeCheck {
+    public PSObjectDict where(PSObject key) throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         return where(key.toDictKey());
     }
     
@@ -153,7 +154,8 @@ public class DictStack {
     }
     
     /** Define key->value in current dictionary. */
-    public void def(PSObject key, PSObject value) throws PSErrorTypeCheck {
+    public void def(PSObject key, PSObject value) throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         def(key.toDictKey(), value);
     }
     
