@@ -32,9 +32,16 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class PSObject implements Cloneable, Iterable<PSObject> {
+    /** Unlimited access */
     static final int ACCESS_UNLIMITED = 0;
+    
+    /** Only reading and executing is allowed */
     static final int ACCESS_READONLY = 1;
+    
+    /** Only executing is allowed */
     static final int ACCESS_EXECUTEONLY = 2;
+    
+    /** Nothing is allowed */
     static final int ACCESS_NONE = 3;
     
     Boolean isLiteral = true;
@@ -80,6 +87,27 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
+     * Check the access attribute of this object. Throws an exception when
+     * not allowed.
+     */
+    public void checkAccess(boolean execute, boolean read, boolean write) 
+            throws PSErrorInvalidAccess {
+        if (access == ACCESS_READONLY) {
+            if (write) {
+                throw new PSErrorInvalidAccess();
+            }
+        } else if (access == ACCESS_EXECUTEONLY) {
+            if (write || read) {
+                throw new PSErrorInvalidAccess();
+            }
+        } else if (access == ACCESS_NONE) {
+            if (write || read || execute) {
+                throw new PSErrorInvalidAccess();
+            }
+        }
+    }
+    
+    /**
      * Creates a (deep) copy of this object.
      * @return Deep copy of this object
      */
@@ -94,7 +122,8 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Subarray/substring longer that original array/string
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Invalid or incompatible object type(s) for copy operator
      */
-    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
+    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck,
+            PSErrorTypeCheck, PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     
@@ -130,7 +159,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * operator 'cvs' for more info)
      * @return Text representation
      */
-    public String cvs() {
+    public String cvs() throws PSErrorInvalidAccess {
         return "--nostringval--";
     }
     
@@ -157,7 +186,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @param obj Object to compare this object with
      * @return True if objects are equal, false otherwise
      */
-    public boolean eq(PSObject obj) {
+    public boolean eq(PSObject obj) throws PSErrorInvalidAccess {
         return (this == obj);
     }
     
@@ -198,7 +227,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @return Requested object
      */
     public PSObject get(PSObject index) throws PSErrorTypeCheck,
-            PSErrorRangeCheck, PSErrorUndefined {
+            PSErrorRangeCheck, PSErrorUndefined, PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     
@@ -212,7 +241,8 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @return Object representing a subarray of this object. The data is shared
      * between both objects.
      */
-    public PSObject getinterval(int index, int count) throws PSErrorRangeCheck, PSErrorTypeCheck {
+    public PSObject getinterval(int index, int count) throws PSErrorRangeCheck,
+            PSErrorTypeCheck, PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     
@@ -225,7 +255,8 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      *         up) are the object's items.
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This object does not have a list of items
      */
-    public List<PSObject> getItemList() throws PSErrorTypeCheck {
+    public List<PSObject> getItemList() throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     
@@ -260,7 +291,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @return Length of this object
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to get the length of this object type
      */
-    public int length() throws PSErrorTypeCheck {
+    public int length() throws PSErrorTypeCheck, PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     
@@ -310,7 +341,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not 'put' anything in this object type
      */
     public void put(PSObject index, PSObject value) throws PSErrorRangeCheck,
-            PSErrorTypeCheck {
+            PSErrorTypeCheck, PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     
@@ -321,7 +352,8 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not 'putinterval' anything in this object type
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Index or (index+length) out of bounds
      */
-    public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck, PSErrorRangeCheck {
+    public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck,
+            PSErrorRangeCheck,PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     
@@ -395,7 +427,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a dict key
      * @return Dictionary key that represents this object
      */
-    public String toDictKey() throws PSErrorTypeCheck {
+    public String toDictKey() throws PSErrorTypeCheck, PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     
@@ -429,7 +461,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     /**
      * PostScript operator 'cvi'. Convert this object to an integer
      */
-    public int cvi() throws PSErrorTypeCheck {
+    public int cvi() throws PSErrorTypeCheck, PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     
@@ -446,7 +478,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     /**
      * PostScript operator 'cvr'. Convert this object to a real
      */
-    public double cvr() throws PSErrorTypeCheck {
+    public double cvr() throws PSErrorTypeCheck, PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     

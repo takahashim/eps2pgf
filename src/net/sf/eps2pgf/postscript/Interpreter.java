@@ -135,7 +135,8 @@ public class Interpreter {
     }
     
     /** PostScript op: anchorsearch */
-    public void op_anchorsearch() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    public void op_anchorsearch() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         String seek = opStack.pop().toPSString().toString();
         PSObjectString string = opStack.pop().toPSString();
         List<PSObject> result = string.anchorsearch(seek);
@@ -172,7 +173,7 @@ public class Interpreter {
     /** PostScript op: ashow */
     public void op_ashow() throws PSErrorTypeCheck, PSErrorStackUnderflow,
             PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, 
-            PSErrorNoCurrentPoint, IOException {
+            PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {
         log.fine("ashow operator encoutered. ashow is not implemented, instead the normal show is used.");
         PSObjectString string = opStack.pop().toPSString();
         double ay = opStack.pop().toReal();
@@ -364,7 +365,8 @@ public class Interpreter {
     }
     
     /** PostScrip op: cvi */
-    public void op_cvi() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    public void op_cvi() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         PSObject obj = opStack.pop();
         opStack.push(new PSObjectInt(obj.cvi()));
     }
@@ -376,13 +378,15 @@ public class Interpreter {
     }
     
     /** PostScript op: cvn */
-    public void op_cvn() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    public void op_cvn() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         PSObjectString str = opStack.pop().toPSString();
         opStack.push(str.cvn());
     }
     
     /** PostScript op: cvr */
-    public void op_cvr() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    public void op_cvr() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         PSObject any = opStack.pop();
         opStack.push(new PSObjectReal(any.cvr()));
     }
@@ -398,7 +402,7 @@ public class Interpreter {
     
     /** PostScript op: cvs */
     public void op_cvs() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorRangeCheck {
+            PSErrorRangeCheck, PSErrorInvalidAccess {
         PSObjectString string = opStack.pop().toPSString();
         PSObject any = opStack.pop();
         string.overwrite(any.cvs());
@@ -496,7 +500,7 @@ public class Interpreter {
     }
     
     /** PostScript op: eq */
-    public void op_eq() throws PSErrorTypeCheck, PSErrorStackUnderflow {
+    public void op_eq() throws PSErrorTypeCheck, PSErrorStackUnderflow, PSErrorInvalidAccess {
         PSObject any2 = opStack.pop();
         PSObject any1 = opStack.pop();
         opStack.push(new PSObjectBool(any1.eq(any2)));
@@ -614,7 +618,7 @@ public class Interpreter {
     
     /** PostScript op: get */
     public void op_get() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorUndefined, PSErrorRangeCheck {
+            PSErrorUndefined, PSErrorRangeCheck, PSErrorInvalidAccess {
         PSObject indexKey = opStack.pop();
         PSObject obj = opStack.pop();
         opStack.push(obj.get(indexKey));
@@ -737,7 +741,8 @@ public class Interpreter {
     }
     
     /** PostScript op: length */
-    public void op_length() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    public void op_length() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         PSObject obj = opStack.pop();
         opStack.push(new PSObjectInt(obj.length()));
     }
@@ -904,7 +909,7 @@ public class Interpreter {
     
     /** PostScript op: putinterval */
     public void op_putinterval() throws PSErrorRangeCheck,
-            PSErrorStackUnderflow, PSErrorTypeCheck {
+            PSErrorStackUnderflow, PSErrorTypeCheck, PSErrorInvalidAccess {
         PSObject subseq = opStack.pop();
         int index = opStack.pop().toNonNegInt();
         PSObject seq = opStack.pop();
@@ -1128,7 +1133,8 @@ public class Interpreter {
     }
     
     /** PostScript op: search */
-    public void op_search() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    public void op_search() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         String seek = opStack.pop().toPSString().toString();
         PSObjectString string = opStack.pop().toPSString();
         List<PSObject> result = string.search(seek);
@@ -1239,7 +1245,7 @@ public class Interpreter {
     /** PostScript op: show */
     public void op_show() throws PSErrorTypeCheck, PSErrorStackUnderflow,
             PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, 
-            PSErrorNoCurrentPoint, IOException {
+            PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {
         
         PSObjectString string = opStack.pop().toPSString();
         double[] dpos = textHandler.showText(exp, string);
@@ -1313,7 +1319,7 @@ public class Interpreter {
      */
     public void op_stringwidth() throws PSErrorTypeCheck, PSErrorStackUnderflow,
             PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, 
-            PSErrorNoCurrentPoint, IOException {
+            PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {
         
         PSObjectString string = opStack.pop().toPSString();
         double[] dpos = textHandler.showText(exp, string, true);

@@ -188,7 +188,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented "String" contains an unknown charString
      */
     public String charNames2charStrings(PSObjectArray charNames) throws 
-            PSErrorTypeCheck, PSErrorUnimplemented {
+            PSErrorTypeCheck, PSErrorUnimplemented, PSErrorInvalidAccess {
         StringBuilder str = new StringBuilder();
         PSObjectDict charStrings = dict.lookup("CharStrings").toDict();
         PSObjectString preCode = dict.lookup("LatexPreCode").toPSString();
@@ -221,7 +221,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
      * @return Value associated with key
      */
-    public PSObject get(PSObject key) throws PSErrorUndefined, PSErrorTypeCheck {
+    public PSObject get(PSObject key) throws PSErrorUndefined, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         return dict.get(key);
     }
 
@@ -357,7 +358,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @param index Index or key for new value
      * @param value New value
      */
-    public void put(PSObject index, PSObject value) throws PSErrorTypeCheck {
+    public void put(PSObject index, PSObject value) throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         dict.put(index, value);
     }
     

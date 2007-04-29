@@ -47,7 +47,7 @@ public class TextHandler {
      */
     public double[] showText(Exporter exp, PSObjectString string) 
             throws PSErrorTypeCheck, PSErrorRangeCheck, PSErrorUndefined, 
-            PSErrorUnimplemented, PSErrorNoCurrentPoint, IOException {
+            PSErrorUnimplemented, PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {
         return showText(exp, string, false);
     }
     
@@ -59,7 +59,7 @@ public class TextHandler {
      */
     public double[] showText(Exporter exp, PSObjectString string, boolean noOutput) 
             throws PSErrorTypeCheck, PSErrorRangeCheck, PSErrorUndefined, 
-            PSErrorUnimplemented, PSErrorNoCurrentPoint, IOException {        
+            PSErrorUnimplemented, PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {        
         PSObjectFont currentFont = gstate.current.font;
         
         PSObjectArray charNames = string.decode(currentFont.getEncoding());

@@ -83,7 +83,7 @@ public class PSObjectString extends PSObject {
         if ((index < 0) || (length < 0)) {
             throw new PSErrorRangeCheck();
         }
-        if ((index+length) > str.length()) {
+        if ((index+length) > str.count) {
             throw new PSErrorRangeCheck();
         }
         value = str.value;
@@ -99,7 +99,8 @@ public class PSObjectString extends PSObject {
      *         If found, list with {post, match, true}.
      *         If not found, list with {string, false}.
      */
-    public List<PSObject> anchorsearch(String seek) {
+    public List<PSObject> anchorsearch(String seek) throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
         String string = toString();
         int n = string.length();
         int m = seek.length();
@@ -122,9 +123,31 @@ public class PSObjectString extends PSObject {
     }
     
     /**
+     * Creates an exact deep copy of this object.
+     */
+    public PSObjectString clone() {
+        return new PSObjectString(toString());
+    }
+
+    /**
+     * PostScript operator copy. Copies values from obj1 to this object.
+     * @param obj1 Copy values from obj1
+     * @return Returns subsequence of this object
+     */
+    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
+        checkAccess(false, false, true);
+        obj1.checkAccess(false, true, false);
+        String obj1Str = obj1.toPSString().toString();
+        putinterval(0, obj1Str);
+        return getinterval(0, obj1Str.length());
+    }
+
+    /**
      * PostScript operator 'cvi'. Convert this object to an integer
      */
-    public int cvi() throws PSErrorTypeCheck {
+    public int cvi() throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        checkAccess(false, true, false);
         PSObjectReal ro = new PSObjectReal(value.toString());
         return ro.cvi();
     }
@@ -132,14 +155,16 @@ public class PSObjectString extends PSObject {
     /**
      * PostScript operator 'cvn'. Convert this object to a name object.
      */
-    public PSObjectName cvn() {
+    public PSObjectName cvn() throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
         return new PSObjectName(value.toString(), isLiteral);
     }
 
     /**
      * PostScript operator 'cvr'. Convert this object to a real
      */
-    public double cvr() throws PSErrorTypeCheck {
+    public double cvr() throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        checkAccess(false, true, false);
         PSObjectReal ro = new PSObjectReal(value.toString());
         return ro.toReal();
     }
@@ -149,10 +174,181 @@ public class PSObjectString extends PSObject {
      * operator 'cvs' for more info)
      * @return Text representation
      */
-    public String cvs() {
+    public String cvs() throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
         return toString();
-    }    
+    }
 
+    /**
+     * Convert this string to an array with character names
+     * @param encoding Encoding to use to decode this string
+     * @return Array with character names
+     */
+    public PSObjectArray decode(PSObjectArray encoding) throws PSErrorRangeCheck,
+            PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        PSObjectArray arr = new PSObjectArray();
+        for (int i = 0 ; i < count ; i++) {
+            int chr = get(i);
+            arr.addAt(i, encoding.get(chr));
+        }
+        return arr;
+    }
+    
+    /**
+     * PostScript operator 'dup'. Create a copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObjectString dup() {
+        try {
+            return new PSObjectString(this, 0, count);
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen
+            return null;
+        }
+    }
+    
+    /**
+     * Compare this object with another object and return true if they are equal.
+     * See PostScript manual on what's equal and what's not.
+     * @param obj Object to compare this object with
+     * @return True if objects are equal, false otherwise
+     */
+    public boolean eq(PSObject obj) throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        obj.checkAccess(false, true, false);
+        if (obj instanceof PSObjectName) {
+            PSObjectName objName = (PSObjectName)obj;
+            return (toString().equals(objName.name));
+        } else if (obj instanceof PSObjectString) {
+            PSObjectString objStr = (PSObjectString)obj;
+            return (toString().equals(objStr.toString()));
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * PostScript operator 'executeonly'. Set access attribute to executeonly.
+     */
+    public void executeonly() throws PSErrorInvalidAccess {
+        checkAccess(true, false, false);
+        access = ACCESS_EXECUTEONLY;
+    }
+
+    /**
+     * Gets the (integer) value of a character in this string.
+     * @param index Index of character (first character has index 0)
+     * @return Integer value of requested character
+     */
+    public int get(int index) throws PSErrorRangeCheck, PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        if ( (index < 0) || (index >= count) ) {
+            throw new PSErrorRangeCheck();
+        }
+        
+        return value.charAt(index + offset);
+    }
+    
+    /**
+     * Gets the (integer) value of a character in this string.
+     * @param index Index of character (first character has index 0)
+     * @return Integer value of requested character
+     */
+    public PSObject get(PSObject index) throws PSErrorTypeCheck, PSErrorRangeCheck,
+            PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        int chr = get(index.toInt());
+        return new PSObjectInt(chr);
+    }
+    
+    /**
+     * Implements PostScript operator getinterval. Returns a new object
+     * with an interval from this object.
+     * @param index Index of the first character of substring
+     * @param count Number of characters in the substring
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Invalid index or number of elements
+     * @return Object representing a subarray of this object. The data is shared
+     * between both objects.
+     */
+    public PSObject getinterval(int index, int count) throws PSErrorRangeCheck,
+            PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        return new PSObjectString(this, index, count);
+    }
+    
+    /**
+     * Returns a list with all items in object.
+     * @return List with all items in this object. The first object (with
+     *         index 0) is always a PSObjectInt with the number of object
+     *         in a single item. For most object types this is 1, but for
+     *         dictionaries this is 2. All consecutive items (index 1 and
+     *         up) are the object's items.
+     */
+    public List<PSObject> getItemList() throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        List<PSObject> items = new LinkedList<PSObject>();
+        items.add(new PSObjectInt(1));
+        
+        for(PSObject chr : this) {
+            items.add(chr);
+        }
+        //for (int i = 0 ; i < count ; i++) {
+        //    items.add(new PSObjectInt(get(i)));
+        //}
+
+        return items;
+    }
+    
+    /** Return PostScript text representation of this object. See the
+     * PostScript manual under the == operator
+     */
+    public String isis() {
+        return "(" + toString() + ")";
+    }
+    
+    /**
+     * Check whether a string is a PostScript string
+     * @param str String to check.
+     * @return Returns true when str is a valid PostScript string. Returns false otherwise.
+     */
+    public static boolean isType(String str) {
+        int len = str.length();
+        if ( (str.charAt(0) == '(') && (str.charAt(len-1) == ')') ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Implements PostScript operate: length
+     * @return Length of this object
+     */
+    public int length() throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        return count;
+    }
+
+    /**
+     * PostScript operator: 'noaccess'
+     */
+    public void noaccess() {
+        access = ACCESS_NONE;
+    }
+    
+    /**
+     * Overwrites this string with a new value.
+     * @param newStr New value for this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck The new string is longer than the current string
+     */
+    public void overwrite(String newStr) throws PSErrorRangeCheck, PSErrorInvalidAccess {
+        checkAccess(false, false, true);
+        putinterval(0, newStr);
+        count = newStr.length();
+    }
+    
     /** Parse a postscript string. */
     public String parse(String str) {
         StringBuilder newStr = new StringBuilder();
@@ -208,189 +404,14 @@ public class PSObjectString extends PSObject {
     }
     
     /**
-     * Check whether a string is a PostScript string
-     * @param str String to check.
-     * @return Returns true when str is a valid PostScript string. Returns false otherwise.
-     */
-    public static boolean isType(String str) {
-        int len = str.length();
-        if ( (str.charAt(0) == '(') && (str.charAt(len-1) == ')') ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    
-    /**
-     * Implements PostScript operate: length
-     * @return Length of this object
-     */
-    public int length() {
-        return count;
-    }
-
-    /**
-     * PostScript operator: 'noaccess'
-     */
-    public void noaccess() {
-        access = ACCESS_NONE;
-    }
-    
-    /** Return PostScript text representation of this object. See the
-     * PostScript manual under the == operator
-     */
-    public String isis() {
-        return "(" + toString() + ")";
-    }
-    
-    /**
-     * PostScript operator 'executeonly'. Set access attribute to executeonly.
-     */
-    public void executeonly() throws PSErrorInvalidAccess {
-        if (access == ACCESS_NONE) {
-            throw new PSErrorInvalidAccess();
-        }
-        access = ACCESS_EXECUTEONLY;
-    }
-
-    /**
-     * Gets the (integer) value of a character in this string.
-     * @param index Index of character (first character has index 0)
-     * @return Integer value of requested character
-     */
-    public int get(int index) throws PSErrorRangeCheck {
-        if ( (index < 0) || (index >= count) ) {
-            throw new PSErrorRangeCheck();
-        }
-        
-        return value.charAt(index + offset);
-    }
-    
-    /**
-     * Gets the (integer) value of a character in this string.
-     * @param index Index of character (first character has index 0)
-     * @return Integer value of requested character
-     */
-    public PSObject get(PSObject index) throws PSErrorTypeCheck, PSErrorRangeCheck {
-        int chr = get(index.toInt());
-        return new PSObjectInt(chr);
-    }
-    
-    /**
-     * Implements PostScript operator getinterval. Returns a new object
-     * with an interval from this object.
-     * @param index Index of the first character of substring
-     * @param count Number of characters in the substring
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Invalid index or number of elements
-     * @return Object representing a subarray of this object. The data is shared
-     * between both objects.
-     */
-    public PSObject getinterval(int index, int count) throws PSErrorRangeCheck {
-        return new PSObjectString(this, index, count);
-    }
-    
-    /**
-     * Returns a list with all items in object.
-     * @return List with all items in this object. The first object (with
-     *         index 0) is always a PSObjectInt with the number of object
-     *         in a single item. For most object types this is 1, but for
-     *         dictionaries this is 2. All consecutive items (index 1 and
-     *         up) are the object's items.
-     */
-    public List<PSObject> getItemList() throws PSErrorTypeCheck {
-        List<PSObject> items = new LinkedList<PSObject>();
-        items.add(new PSObjectInt(1));
-        
-        for(PSObject chr : this) {
-            items.add(chr);
-        }
-        //for (int i = 0 ; i < count ; i++) {
-        //    items.add(new PSObjectInt(get(i)));
-        //}
-
-        return items;
-    }
-    
-    /**
-     * PostScript operator: 'readonly'
-     */
-    public void readonly() {
-        access = ACCESS_READONLY;
-    }
-    
-    /**
-     * PostScript operator copy. Copies values from obj1 to this object.
-     * @param obj1 Copy values from obj1
-     * @return Returns subsequence of this object
-     */
-    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
-        String obj1Str = obj1.toPSString().toString();
-        putinterval(0, obj1Str);
-        return getinterval(0, obj1Str.length());
-    }
-
-    /**
-     * Convert this string to an array with character names
-     * @param encoding Encoding to use to decode this string
-     * @return Array with character names
-     */
-    public PSObjectArray decode(PSObjectArray encoding) throws PSErrorRangeCheck {
-        PSObjectArray arr = new PSObjectArray();
-        for (int i = 0 ; i < count ; i++) {
-            int chr = get(i);
-            arr.addAt(i, encoding.get(chr));
-        }
-        return arr;
-    }
-    
-    /**
-     * PostScript operator 'dup'. Create a copy of this object. The values
-     * of composite object is not copied, but shared.
-     */
-    public PSObjectString dup() {
-        try {
-            return new PSObjectString(this, 0, length());
-        } catch (PSErrorRangeCheck e) {
-            // this can never happen
-            return null;
-        }
-    }
-    
-    /**
-     * Compare this object with another object and return true if they are equal.
-     * See PostScript manual on what's equal and what's not.
-     * @param obj Object to compare this object with
-     * @return True if objects are equal, false otherwise
-     */
-    public boolean eq(PSObject obj) {
-        if (obj instanceof PSObjectName) {
-            PSObjectName objName = (PSObjectName)obj;
-            return (toString().equals(objName.name));
-        } else if (obj instanceof PSObjectString) {
-            PSObjectString objStr = (PSObjectString)obj;
-            return (toString().equals(objStr.toString()));
-        } else {
-            return false;
-        }
-    }
-    
-    /**
-     * Overwrites this string with a new value.
-     * @param newStr New value for this object
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck The new string is longer than the current string
-     */
-    public void overwrite(String newStr) throws PSErrorRangeCheck {
-        putinterval(0, newStr);
-        count = newStr.length();
-    }
-    
-    /**
      * PostScript operator put. Replace a single character in this string.
      * @param index Index or key for new value
      * @param newValue New value
      */
     public void put(PSObject index, PSObject newValue) throws PSErrorRangeCheck,
-            PSErrorTypeCheck {
+            PSErrorTypeCheck, PSErrorInvalidAccess {
+        checkAccess(false, false, true);
+        
         int idx = index.toInt();
         if ( (idx < 0) || (idx >= count) ) {
             throw new PSErrorRangeCheck();
@@ -410,7 +431,9 @@ public class PSObjectString extends PSObject {
      * @param index Start index of subsequence
      * @param newStr String to put in this string
      */
-    public void putinterval(int index, String newStr) throws PSErrorRangeCheck {
+    public void putinterval(int index, String newStr) throws PSErrorRangeCheck,
+            PSErrorInvalidAccess {
+        checkAccess(false, false, true);
         if ((index < 0) || (newStr.length() > (count-index))) {
             throw new PSErrorRangeCheck();
         }
@@ -422,7 +445,9 @@ public class PSObjectString extends PSObject {
      * @param index Start index of subsequence
      * @param obj Subsequence
      */
-    public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck, PSErrorRangeCheck {
+    public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck, PSErrorRangeCheck,
+            PSErrorInvalidAccess {
+        obj.checkAccess(false, true, false);
         String str = obj.toPSString().toString();
         putinterval(index, str);
     }
@@ -440,13 +465,22 @@ public class PSObjectString extends PSObject {
     }
 
     /**
+     * PostScript operator: 'readonly'
+     */
+    public void readonly() throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        access = ACCESS_READONLY;
+    }
+    
+    /**
      * PostScript operator: search
      * @param seek Look for this string in this PSObjectString.
      * @return List with PSObjects. See the PostScript manual for more info.
      *         If found, list with {post, match, pre, true}.
      *         If not found, list with {string, false}.
      */
-    public List<PSObject> search(String seek) {
+    public List<PSObject> search(String seek) throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
         String string = toString();
         int n = string.length();
         int m = seek.length();
@@ -478,24 +512,18 @@ public class PSObjectString extends PSObject {
         return this;
     }
 
+    /** Convert this object to dictionary key, if possible. */
+    public String toDictKey() throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        return toString();
+    }
+    
     /**
      * Converts this object to a human readable string.
      * @return Human readable string.
      */
     public String toString() {
         return value.substring(offset, offset+count);
-    }
-
-    /** Convert this object to dictionary key, if possible. */
-    public String toDictKey() {
-        return toString();
-    }
-    
-    /**
-     * Creates an exact deep copy of this object.
-     */
-    public PSObjectString clone() {
-        return new PSObjectString(toString());
     }
 
     /**

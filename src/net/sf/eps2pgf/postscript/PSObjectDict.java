@@ -49,15 +49,6 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
-     * Create a new dictionary object
-     */
-    public PSObjectDict(PSObjectDict obj) {
-        map = obj.map;
-        capacity = obj.capacity;
-        copyCommonAttributes(obj);
-    }
-    
-    /**
      * Convert this object to string
      * @return Human-readable string representation of this object.
      */
@@ -83,7 +74,8 @@ public class PSObjectDict extends PSObject {
      * @param index Index or key for new value
      * @param value New value
      */
-    public void put(PSObject index, PSObject value) throws PSErrorTypeCheck {
+    public void put(PSObject index, PSObject value) throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         setKey(index, value);
     }
 
@@ -102,7 +94,8 @@ public class PSObjectDict extends PSObject {
      * @param value Value of the new dictionary entry.
      * @throws net.sf.eps2pgf.postscript.errors.PSError There was an error creating the new dictionary entry.
      */
-    public void setKey(PSObject key, PSObject value) throws PSErrorTypeCheck {
+    public void setKey(PSObject key, PSObject value) throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         setKey(key.toDictKey(), value);
     }
     
@@ -124,7 +117,8 @@ public class PSObjectDict extends PSObject {
      * @param value Value of the new dictionary entry.
      * @throws net.sf.eps2pgf.postscript.errors.PSError There was an error creating the new entry.
      */
-    public void setKey(PSObject key, String value) throws PSErrorTypeCheck {
+    public void setKey(PSObject key, String value) throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         setKey(key.toDictKey(), value);
     }
     
@@ -143,7 +137,8 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSError When key is not a valid dictionary key.
      * @return Value associated with key.
      */
-    public PSObject lookup(PSObject key) throws PSErrorTypeCheck {
+    public PSObject lookup(PSObject key) throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         return this.lookup(key.toDictKey());
     }
     
@@ -169,7 +164,8 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
      * @return Value associated with key
      */
-    public PSObject get(PSObject key) throws PSErrorUndefined, PSErrorTypeCheck {
+    public PSObject get(PSObject key) throws PSErrorUndefined,
+            PSErrorTypeCheck, PSErrorInvalidAccess {
         return get(key.toDictKey());
     }
     
@@ -188,7 +184,7 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to check the supplied key.
      * @param key Search for an entry with this key.
      */
-    public boolean containsKey(PSObject key) throws PSErrorTypeCheck {
+    public boolean containsKey(PSObject key) throws PSErrorTypeCheck, PSErrorInvalidAccess {
         return map.containsKey(key.toDictKey());
     }
     
@@ -197,7 +193,7 @@ public class PSObjectDict extends PSObject {
      * of composite object is not copied, but shared.
      */
     public PSObjectDict dup() {
-        return new PSObjectDict(this);
+        return this;
     }
     
     /**
