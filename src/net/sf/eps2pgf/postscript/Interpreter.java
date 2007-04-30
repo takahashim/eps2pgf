@@ -145,6 +145,13 @@ public class Interpreter {
         }
     }
     
+    /** PostScript op: and */
+    public void op_and() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject obj2 = opStack.pop();
+        PSObject obj1 = opStack.pop();
+        opStack.push(obj1.and(obj2));
+    }
+    
     /** PostScript op: arc */
     public void op_arc() throws PSErrorUnimplemented {
         throw new PSErrorUnimplemented("operator: arc");
@@ -867,12 +874,7 @@ public class Interpreter {
     /** PostScript op: not */
     public void op_not() throws PSError {
         PSObject obj = opStack.pop();
-        if (obj instanceof PSObjectBool) {
-            PSObjectBool bool = (PSObjectBool)obj;
-            opStack.push(new PSObjectBool( !bool.toBool() ));
-        } else {
-            throw new PSErrorUnimplemented("not operator not FULLY implemented.");
-        }
+        opStack.push(obj.not());
     }
     
     /** PostScript op: null */
@@ -880,6 +882,13 @@ public class Interpreter {
         opStack.push(new PSObjectNull());
     }
 
+    /** PostScript op: or */
+    public void op_or() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject obj2 = opStack.pop();
+        PSObject obj1 = opStack.pop();
+        opStack.push(obj1.or(obj2));
+    }
+    
     /** PostScript op: picstr */
     public void op_picstr() throws PSError {
         throw new PSErrorUnimplemented("operator: picstr");
@@ -1457,6 +1466,13 @@ public class Interpreter {
         PSObject any = opStack.pop();
         PSObjectBool check = new PSObjectBool(any.xcheck());
         opStack.push(check);
+    }
+    
+    /** PostScript op: xor */
+    public void op_xor() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject obj2 = opStack.pop();
+        PSObject obj1 = opStack.pop();
+        opStack.push(obj1.xor(obj2));
     }
     
 }

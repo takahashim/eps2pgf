@@ -67,6 +67,17 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
+     * PostScript operator 'and'
+     * @param obj2 Object to 'and' with this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One or both object does not have the correct type for the xor
+     * operation
+     * @return Logical 'and' of both values
+     */
+    public PSObject and(PSObject obj2) throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Implements bind operator for this object. For most object this wil
      * be the same object, without any change.
      * @param interp Interpreter in which this object will be executed.
@@ -332,6 +343,20 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess 'access' attribute of this object does not allow changes
      */
     public void noaccess() throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * PostScript operator: 'not'
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to determine logical negation of this object
+     * @return Logical negation of this object
+     */
+    public PSObject not() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /** PostScript operator 'or' */
+    public PSObject or(PSObject obj2) throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
@@ -603,6 +628,17 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      */
     public boolean xcheck() {
         return !isLiteral;
+    }
+    
+    /**
+     * PostScript operator 'xor'
+     * @param obj2 Object to 'xor' with this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One or both objects does not have the correct type for the xor
+     * operation
+     * @return Exclusive or of both values
+     */
+    public PSObject xor(PSObject obj2) throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
     }
     
 }
