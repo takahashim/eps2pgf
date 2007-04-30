@@ -82,7 +82,7 @@ public class PSObjectOperator extends PSObject {
      */
     public void execute(Interpreter interp) throws Exception {
         if (isLiteral) {
-            interp.opStack.push(this);
+            interp.opStack.push(dup());
         } else {
             try {
                 opMethod.invoke(interp);

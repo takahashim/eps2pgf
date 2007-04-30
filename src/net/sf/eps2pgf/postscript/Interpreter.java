@@ -217,16 +217,7 @@ public class Interpreter {
     
     /** PostScript op: bind */
     public void op_bind() throws PSErrorStackUnderflow, PSErrorTypeCheck {
-        PSObject obj = opStack.peek();
-        if (obj instanceof PSObjectProc) {
-            PSObjectProc proc = (PSObjectProc)obj;
-            proc.bind(this);            
-        } else if (obj instanceof PSObjectArray) {
-            PSObjectArray array = (PSObjectArray)obj;
-            array.bind(this);
-        } else {
-            throw new PSErrorTypeCheck();
-        }
+        PSObjectArray obj = opStack.peek().toArray().bind(this);
     }
     
     /** PostScript op: ceiling */
@@ -430,7 +421,7 @@ public class Interpreter {
     public void op_dblGreaterBrackets() throws PSErrorStackUnderflow, 
             PSErrorUnmatchedMark, PSErrorTypeCheck, PSErrorRangeCheck, 
             PSErrorDictStackUnderflow, IOException, Exception {
-        PSObjectProc defProc = new PSObjectProc("{def}");
+        PSObjectArray defProc = new PSObjectArray("{def}");
         
         op_counttomark(); opStack.push(new PSObjectInt(2)); op_idiv();
         op_dup(); op_dict();
@@ -573,7 +564,7 @@ public class Interpreter {
      */
     public void op_for() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             Exception {
-        PSObjectProc proc = opStack.pop().toProc();
+        PSObjectArray proc = opStack.pop().toProc();
         double limit = opStack.pop().toReal();
         double inc = opStack.pop().toReal();
         double initial = opStack.pop().toReal();
@@ -605,7 +596,7 @@ public class Interpreter {
     
     /** PostScript op: forall */
     public void op_forall() throws Exception {
-        PSObjectProc proc = opStack.pop().toProc();
+        PSObjectArray proc = opStack.pop().toProc();
         PSObject obj = opStack.pop();
         List<PSObject> items = obj.getItemList();
         int N = items.remove(0).toNonNegInt();
@@ -657,7 +648,7 @@ public class Interpreter {
     
     /** PostScript op: if */
     public void op_if() throws Exception {
-        PSObjectProc proc = opStack.pop().toProc();
+        PSObjectArray proc = opStack.pop().toProc();
         boolean bool = opStack.pop().toBool();
         if (bool) {
             proc.execute(this);
@@ -666,8 +657,8 @@ public class Interpreter {
     
     /** PostScript op: ifelse */
     public void op_ifelse() throws Exception {
-        PSObjectProc proc2 = opStack.pop().toProc();
-        PSObjectProc proc1 = opStack.pop().toProc();
+        PSObjectArray proc2 = opStack.pop().toProc();
+        PSObjectArray proc1 = opStack.pop().toProc();
         boolean bool = opStack.pop().toBool();
         
         if (bool) {
@@ -989,7 +980,7 @@ public class Interpreter {
     /** PostScript op: repeat */
     public void op_repeat() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
             PSErrorRangeCheck, Exception {
-        PSObjectProc proc = opStack.pop().toProc();
+        PSObjectArray proc = opStack.pop().toProc();
         int n = opStack.pop().toNonNegInt();
         
         for (int i = 0 ; i < n ; i++) {
@@ -1239,7 +1230,8 @@ public class Interpreter {
      * PostScript op: shfill
      */
     public void op_shfill() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
-            PSErrorUnimplemented, PSErrorRangeCheck, PSErrorUndefined, IOException {
+            PSErrorUnimplemented, PSErrorRangeCheck, PSErrorUndefined, IOException,
+            PSErrorInvalidAccess {
         PSObjectDict dict = opStack.pop().toDict();
         exp.shfill(dict, gstate.current);
     }

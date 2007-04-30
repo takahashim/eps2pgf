@@ -37,8 +37,8 @@ public class Parser {
      * @return Queue with PostScript object.
      * @throws java.io.IOException Unable to read from in.
      */
-    public static LinkedList<PSObject> convert(Reader in) throws IOException {
-        LinkedList<PSObject> seq = new LinkedList<PSObject>();
+    public static List<PSObject> convert(Reader in) throws IOException {
+        List<PSObject> seq = new ArrayList<PSObject>();
         StringBuilder strSoFar = new StringBuilder();
         boolean inComment = false;
         boolean inString = false;
@@ -158,8 +158,8 @@ public class Parser {
             return new PSObjectInt(str);
         } else if (PSObjectReal.isType(str)) {
             return new PSObjectReal(str);
-        } else if (PSObjectProc.isType(str)) {
-            return new PSObjectProc(str);
+        } else if (PSObjectArray.isType(str)) {
+            return new PSObjectArray(str);
         } else if (PSObjectString.isType(str)) {
             return new PSObjectString(str);
         } else {

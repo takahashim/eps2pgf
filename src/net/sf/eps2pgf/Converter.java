@@ -52,7 +52,7 @@ public class Converter {
      */
     public void convert() throws Exception {
         // Parse input file
-        LinkedList<PSObject> inputObjects;
+        List<PSObject> inputObjects;
         Reader in = new BufferedReader(new FileReader(inFile));
         inputObjects = Parser.convert(in);
         in.close();
