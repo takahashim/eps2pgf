@@ -197,7 +197,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @throws java.lang.Exception An error occured during the execution of this object.
      */
     public void execute(Interpreter interp) throws Exception {
-        interp.opStack.push(this);
+        interp.opStack.push(dup());
     }
     
     /**
@@ -537,7 +537,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a procedure.
      * @return Procedure representation of this object
      */
-    public PSObjectProc toProc() throws PSErrorTypeCheck {
+    public PSObjectArray toProc() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     

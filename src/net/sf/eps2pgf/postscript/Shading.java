@@ -77,7 +77,8 @@ public class Shading {
      * Load the entries common to all types of shading dictionaries
      */
     void loadCommonEntries(PSObjectDict dict) throws PSErrorRangeCheck, 
-            PSErrorUnimplemented, PSErrorTypeCheck, PSErrorUndefined {
+            PSErrorUnimplemented, PSErrorTypeCheck, PSErrorUndefined,
+            PSErrorInvalidAccess {
         PSObject colSpaceObj = dict.get("ColorSpace");
         if (colSpaceObj instanceof PSObjectName) {
             ColorSpace = ((PSObjectName)colSpaceObj).name;

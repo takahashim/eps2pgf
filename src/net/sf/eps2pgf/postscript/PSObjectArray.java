@@ -21,6 +21,7 @@
 
 package net.sf.eps2pgf.postscript;
 
+import java.io.*;
 import java.util.*;
 
 import net.sf.eps2pgf.postscript.errors.*;
@@ -75,13 +76,25 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
-     * Create a new instance of PSObjectArray
-     * @param objs List with objects that make up the new array
+     * Creates a new executable array object
+     * @param str String representing a valid procedure (executable array)
+     * @throws java.io.IOException Unable to read the string
      */
-    public PSObjectArray(List<PSObject> objs) {
-        array = objs;
+    public PSObjectArray(String str) throws IOException {
+        // quick check whether it is a literal or executable array
+        if (str.charAt(0) == '{') {
+            isLiteral = false;
+        } else if (str.charAt(0) == '[') {
+            isLiteral = true;
+        }
+        
+        str = str.substring(1,str.length()-1);
+        
+        StringReader strReader = new StringReader(str);
+        
+        array = Parser.convert(strReader);
+        count = array.size();
         offset = 0;
-        count = objs.size();
     }
     
     /**
@@ -142,8 +155,10 @@ public class PSObjectArray extends PSObject {
                 try {
                     PSObject obj = get(i);
                     set(i, obj.bind(interp));
-                    if (obj instanceof PSObjectProc) {
-                        obj.readonly();
+                    if (obj instanceof PSObjectArray) {
+                        if ( !((PSObjectArray)obj).isLiteral ) {
+                            obj.readonly();
+                        }
                     }
                 } catch (PSErrorInvalidAccess e) {
                     // no access, don't change anything
@@ -206,14 +221,20 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * Convert this object to a literal object
+     * @return This object converted to a literal object
+     */
+    public PSObject cvlit() {
+        isLiteral = true;
+        return this;
+    }
+
+    /**
      * PostScript operator 'cvx'. Makes this object executable
      */
     public PSObject cvx() {
-        try {
-            return new PSObjectProc(this);
-        } catch (PSErrorTypeCheck e) {
-            return this;
-        }
+        isLiteral = false;
+        return this;
     }
 
     /**
@@ -246,6 +267,17 @@ public class PSObjectArray extends PSObject {
             return (array == objArr.array);
         } catch (PSErrorTypeCheck e) {
             return false;
+        }
+    }
+    
+    /** Executes this object in the supplied interpreter */
+    public void execute(Interpreter interp) throws Exception {
+        if (isLiteral) {
+            interp.opStack.push(dup());
+        } else {
+            List<PSObject> list = getItemList();
+            list.remove(0);  // remove first item (= number of object per item)
+            interp.processObjects(list);
         }
     }
     
@@ -313,6 +345,22 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * Check whether a string is a procedure
+     * @param str String to check.
+     * @return Returns true when the string is a procedure. Returns false otherwise.
+     */
+    public static boolean isType(String str) {
+        int len = str.length();
+        if ( (str.charAt(0) == '{') && (str.charAt(len-1) == '}') ) {
+            return true;
+        } else if ( (str.charAt(0) == '[') && (str.charAt(len-1) == ']') ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      * @return String representation of this object.
@@ -320,11 +368,19 @@ public class PSObjectArray extends PSObject {
      */
     public String isis() {
         StringBuilder str = new StringBuilder();
-        str.append("[ ");
+        if (isLiteral) {
+            str.append("[ ");
+        } else {
+            str.append("{ ");
+        }
         for (PSObject obj : this) {
             str.append(obj.isis() + " ");
         }
-        str.append("]");
+        if (isLiteral) {
+            str.append("]");
+        } else {
+            str.append("}");
+        }
         return str.toString();
     }
     
@@ -498,6 +554,16 @@ public class PSObjectArray extends PSObject {
         return new PSObjectMatrix(this.get(0).toReal(), this.get(1).toReal(),
                 this.get(2).toReal(), this.get(3).toReal(),
                 this.get(4).toReal(), this.get(5).toReal());
+    }
+    
+    /**
+     * Convert this object to an executable array (procedure), if possible.
+     */
+    public PSObjectArray toProc() throws PSErrorTypeCheck {
+        if (isLiteral) {
+            throw new PSErrorTypeCheck();
+        }
+        return this;
     }
     
     /**

@@ -98,7 +98,7 @@ public class PSObjectName extends PSObject {
     public void execute(Interpreter interp) throws Exception {
         if (isLiteral) {
             // Literal name, just push it on the stack
-            interp.opStack.push(this);
+            interp.opStack.push(dup());
         } else {
             // Executable name, look it up in the dict stack and execute
             // the associated object.
