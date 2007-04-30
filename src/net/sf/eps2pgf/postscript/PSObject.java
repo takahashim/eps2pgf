@@ -279,7 +279,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @return Returns true when this object is greater than obj2, return false
      * otherwise.
      */
-    public boolean gt(PSObject obj2) throws PSErrorTypeCheck {
+    public boolean gt(PSObject obj2) throws PSErrorTypeCheck, PSErrorInvalidAccess {
         throw new PSErrorTypeCheck();
     }
     
