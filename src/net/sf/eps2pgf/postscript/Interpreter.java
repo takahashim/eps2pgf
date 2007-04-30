@@ -627,6 +627,16 @@ public class Interpreter {
         }
     }
     
+    /** PostScript op: ge */
+    public void op_ge() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
+        PSObject obj2 = opStack.pop();
+        PSObject obj1 = opStack.pop();
+        boolean gt = obj1.gt(obj2);
+        boolean eq = obj1.eq(obj2);
+        opStack.push(new PSObjectBool(gt || eq));
+    }
+    
     /** PostScript op: get */
     public void op_get() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorUndefined, PSErrorRangeCheck, PSErrorInvalidAccess {
@@ -656,7 +666,8 @@ public class Interpreter {
     }
     
     /** PostScript op: gt */
-    public void op_gt() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    public void op_gt() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         PSObject obj2 = opStack.pop();
         PSObject obj1 = opStack.pop();
         boolean chk = obj1.gt(obj2);
@@ -759,6 +770,13 @@ public class Interpreter {
         opStack.push(value);
     }
     
+    /** PostScript op: le */
+    public void op_le() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
+        op_gt();
+        op_not();
+    }
+    
     /** PostScript op: length */
     public void op_length() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorInvalidAccess {
@@ -792,14 +810,10 @@ public class Interpreter {
     }
     
     /** PostScript op: lt */
-    public void op_lt() throws PSError {
-        double num2 = opStack.pop().toReal();
-        double num1 = opStack.pop().toReal();
-        if (num1 < num2) {
-            opStack.push(new PSObjectBool(true));
-        } else {
-            opStack.push(new PSObjectBool(false));
-        }
+    public void op_lt() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
+        op_ge();
+        op_not();
     }
     
     /** PostScript op: makefont */
@@ -884,7 +898,7 @@ public class Interpreter {
     }
     
     /** PostScript op: not */
-    public void op_not() throws PSError {
+    public void op_not() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.pop();
         opStack.push(obj.not());
     }
