@@ -98,6 +98,17 @@ public class PSObjectInt extends PSObject {
     }
 
     /**
+     * PostScript operator 'and'
+     * @param obj2 Object to 'and' with this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Obj2 is not an integer object
+     * @return Bitwise and between this object and obj2
+     */
+    public PSObjectInt and(PSObject obj2) throws PSErrorTypeCheck {
+        int obj2Int = obj2.toInt();
+        return new PSObjectInt(value & obj2Int);
+    }
+    
+    /**
      * Return this value rounded upwards
      * @return New object with same integer
      */
@@ -245,6 +256,25 @@ public class PSObjectInt extends PSObject {
     }
     
     /**
+     * PostScript operator: 'not'
+     * @return Logical negation of this object
+     */
+    public PSObjectInt not() {
+        return new PSObjectInt(~value);
+    }
+    
+    /**
+     * PostScript operator 'or'
+     * @param obj2 Object to 'or' with this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Obj2 is not an integer object
+     * @return Return bitwise or between this object and obj2
+     */
+    public PSObjectInt or(PSObject obj2) throws PSErrorTypeCheck {
+        int obj2Int = obj2.toInt();
+        return new PSObjectInt(value | obj2Int);
+    }
+    
+    /**
      * Return this value rounded to the nearest integer
      * @return New object with same integer
      */
@@ -310,4 +340,16 @@ public class PSObjectInt extends PSObject {
     public String type() {
         return "integertype";
     }
+
+    /**
+     * PostScript operator 'xor'
+     * @param obj2 Object to 'xor' with this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Obj2 is not an integer object
+     * @return Return bitwise xor between this object and obj2
+     */
+    public PSObjectInt xor(PSObject obj2) throws PSErrorTypeCheck {
+        int obj2Int = obj2.toInt();
+        return new PSObjectInt(value ^ obj2Int);
+    }
+    
 }

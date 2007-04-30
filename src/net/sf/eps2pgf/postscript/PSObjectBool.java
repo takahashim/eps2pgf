@@ -21,6 +21,8 @@
 
 package net.sf.eps2pgf.postscript;
 
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
+
 /** Represent PostScript object: boolean
  *
  * @author Paul Wagenaars
@@ -39,6 +41,16 @@ public class PSObjectBool extends PSObject {
     public PSObjectBool(PSObjectBool obj) {
         value = obj.value;
         copyCommonAttributes(obj);
+    }
+    
+    /**
+     * PostScript operator 'and'
+     * @param obj2 Object to 'and' with this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Obj2 is not a boolean object
+     * @return Return true when both objects are true, return false otherwise.
+     */
+    public PSObjectBool and(PSObject obj2) throws PSErrorTypeCheck {
+        return new PSObjectBool((value && obj2.toBool()));
     }
     
     /**
@@ -77,6 +89,24 @@ public class PSObjectBool extends PSObject {
         }
     }
     
+    /**
+     * PostScript operator: 'not'
+     * @return Logical negation of this object
+     */
+    public PSObjectBool not() {
+        return new PSObjectBool(!value);
+    }
+    
+    /**
+     * PostScript operator 'or'
+     * @param obj2 Object to 'or' with this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Obj2 is not a boolean object
+     * @return Return true when one or both objects are true, return false otherwise.
+     */
+    public PSObjectBool or(PSObject obj2) throws PSErrorTypeCheck {
+        return new PSObjectBool((value || obj2.toBool()));
+    }
+    
     /** Convert this object to a boolean, if possible. */
     public boolean toBool() {
         return value;
@@ -100,4 +130,17 @@ public class PSObjectBool extends PSObject {
     public String type() {
         return "booleantype";
     }
+
+    /**
+     * PostScript operator 'xor'
+     * @param obj2 Object to 'xor' with this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Obj2 is not a boolean object
+     * @return Return true when only one of the objects is true, return false otherwise.
+     */
+    public PSObjectBool xor(PSObject obj2) throws PSErrorTypeCheck {
+        boolean bool2 = obj2.toBool();
+        boolean tot = ((value && !bool2) || (!value && bool2));
+        return new PSObjectBool(tot);
+    }
+    
 }
