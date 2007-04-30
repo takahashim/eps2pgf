@@ -262,6 +262,17 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
+     * PostScript operator 'gt'
+     * @param obj2 Object to compare this object to
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to compare the type of this object and/or obj2
+     * @return Returns true when this object is greater than obj2, return false
+     * otherwise.
+     */
+    public boolean gt(PSObject obj2) throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      * @return Text representation of this object.

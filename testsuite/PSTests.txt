@@ -1,8 +1,18 @@
-bool 1 - eq 1: 1 1 eq 1.0 1 eq 1 1.0 eq  1.0 1.0 eq
-bool 2 - eq 2: (abc) (abc) eq (abc) /abc eq /abc (abc) eq
-bool 3 - eq 3: false false eq mark [ eq null null eq
-bool 4 - eq 4: [1 2 3] dup eq [1 2 3] [1 2 3] eq false eq
-bool 5 - eq 5: [1 2 3 4 5 6] dup 2 3 getinterval eq false eq
+bool  1 - eq 1: 1 1 eq 1.0 1 eq 1 1.0 eq  1.0 1.0 eq
+bool  2 - eq 2: (abc) (abc) eq (abc) /abc eq /abc (abc) eq
+bool  3 - eq 3: false false eq mark [ eq null null eq
+bool  4 - eq 4: [1 2 3] dup eq [1 2 3] [1 2 3] eq false eq
+bool  5 - eq 5: [1 2 3 4 5 6] dup 2 3 getinterval eq false eq
+bool  6 - ne:  1 1 ne false eq  (abc)(abc) ne false eq  [1 2 3] [1 2 3] ne
+bool  7 - ge: 4.2 4 ge  (abc)(de)ge false eq  (aba)(ab) ge  (aba)(aba) ge
+bool  8 - gt: 4.0 4 gt false eq  4.4 4 gt  (abc)(de)gt false eq  (aba)(aba)gt false eq (abc)(ab)gt
+bool  9 - le: 3.8 4 le  (abc)(de) le  (aba)(aba) le  (aba)(ab)le false eq
+bool 10 - lt: 4.0 4 lt false eq  (abc)(de)lt  (aba)(aba)lt false eq (aba)(ab)lt false eq
+bool 11 - and: true true and  true false and false eq  99 1 and 1 eq  52 7 and 4 eq
+bool 12 - not: true not false eq  false not  52 not -53 eq
+bool 13 - or: true true or  true false or  false false or false eq  17 5 or 21 eq
+bool 14 - xor: true true xor false eq  true false xor  false false xor false eq  7 3 xor 4 eq  12 3 xor 15 eq
+bool 15 - bitshift: 7 3 bitshift 56 eq  142 -3 bitshift 17 eq
 type  1 - type 1: [1 2 3] type /arraytype eq {1 2 add} type /arraytype eq matrix type /arraytype eq
 type  2 - type 2: true type /booleantype eq  null type /nulltype eq  mark type /marktype eq
 type  3 - type 3: 123 type /integertype eq  1.1 type /realtype eq  (abc) type /stringtype eq
