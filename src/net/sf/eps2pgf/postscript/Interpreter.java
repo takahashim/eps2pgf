@@ -227,6 +227,18 @@ public class Interpreter {
         PSObjectArray obj = opStack.peek().toArray().bind(this);
     }
     
+    /** PostScript op: bitshift */
+    public void op_bitshift() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        int shift = opStack.pop().toInt();
+        int int1 = opStack.pop().toInt();
+        if (shift >= 0) {
+            int1 <<= shift;
+        } else {
+            int1 >>>= -shift;
+        }
+        opStack.push(new PSObjectInt(int1));
+    }
+    
     /** PostScript op: ceiling */
     public void op_ceiling() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.pop();

@@ -12,7 +12,7 @@ bool 11 - and: true true and  true false and false eq  99 1 and 1 eq  52 7 and 4
 bool 12 - not: true not false eq  false not  52 not -53 eq
 bool 13 - or: true true or  true false or  false false or false eq  17 5 or 21 eq
 bool 14 - xor: true true xor false eq  true false xor  false false xor false eq  7 3 xor 4 eq  12 3 xor 15 eq
-bool 15 - bitshift: 7 3 bitshift 56 eq  142 -3 bitshift 17 eq
+bool 15 - bitshift: 23 5 bitshift 736 eq  23 -2 bitshift 5 eq  -8945 13 bitshift -73277440 eq  -8945 -8 bitshift 16777181 eq
 type  1 - type 1: [1 2 3] type /arraytype eq {1 2 add} type /arraytype eq matrix type /arraytype eq
 type  2 - type 2: true type /booleantype eq  null type /nulltype eq  mark type /marktype eq
 type  3 - type 3: 123 type /integertype eq  1.1 type /realtype eq  (abc) type /stringtype eq
