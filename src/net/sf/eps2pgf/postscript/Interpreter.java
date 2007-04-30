@@ -636,6 +636,14 @@ public class Interpreter {
         exp.startScope();
     }
     
+    /** PostScript op: gt */
+    public void op_gt() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+        PSObject obj2 = opStack.pop();
+        PSObject obj1 = opStack.pop();
+        boolean chk = obj1.gt(obj2);
+        opStack.push(new PSObjectBool(chk));
+    }
+    
     /**
      * PostScript op: idiv
      */

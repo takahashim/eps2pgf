@@ -179,6 +179,17 @@ public class PSObjectInt extends PSObject {
     }
     
     /**
+     * PostScript operator 'gt'
+     * @param obj2 Object to compare this object to
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to compare the type of this object and/or obj2
+     * @return Returns true when this object is greater than obj2, return false
+     * otherwise.
+     */
+    public boolean gt(PSObject obj2) throws PSErrorTypeCheck {
+        return (toReal() > obj2.toReal());
+    }
+    
+    /**
      * Check whether a string is a integer
      * @param str String to check.
      * @return Returns true when str is a valid integer. Returns false otherwise.
