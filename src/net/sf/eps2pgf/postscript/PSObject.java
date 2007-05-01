@@ -596,6 +596,17 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
+     * Reads characters from this object, interpreting them as PostScript
+     * code, until it has scanned and constructed an entire object.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to read a token from this object type
+     * @return List with one or more objects. See PostScript manual under the
+     * 'token' operator for more info.
+     */
+    public List<PSObject> token() throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Return this value towards zero
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
      * @return Value of this object towards zero

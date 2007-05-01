@@ -21,8 +21,8 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 import java.util.regex.*;
 
 import net.sf.eps2pgf.postscript.errors.*;
@@ -271,7 +271,7 @@ public class PSObjectString extends PSObject {
      * @return Object representing a subarray of this object. The data is shared
      * between both objects.
      */
-    public PSObject getinterval(int index, int count) throws PSErrorRangeCheck,
+    public PSObjectString getinterval(int index, int count) throws PSErrorRangeCheck,
             PSErrorInvalidAccess {
         checkAccess(false, true, false);
         return new PSObjectString(this, index, count);
@@ -540,7 +540,41 @@ public class PSObjectString extends PSObject {
     public String toString() {
         return value.substring(offset, offset+count);
     }
-
+    
+    /**
+     * Reads characters from this object, interpreting them as PostScript
+     * code, until it has scanned and constructed an entire object.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to read a token from this object type
+     * @return List with one or more objects. See PostScript manual under the
+     * 'token' operator for more info.
+     */
+    public List<PSObject> token() throws PSErrorInvalidAccess {
+        Reader rdr = new StringReader(value.toString());
+        PSObject any;
+        try {
+            any = Parser.convertSingle(rdr);
+        } catch (IOException e) {
+            any = null;
+        }
+        
+        List<PSObject> lst = new ArrayList<PSObject>();
+        if (any != null) {
+            int chrs = Parser.charsLastConvert;
+            PSObjectString post;
+            try {
+                post = getinterval(chrs, count-chrs);
+            } catch (PSErrorRangeCheck e) {
+                post = new PSObjectString("");
+            }
+            lst.add(post);
+            lst.add(any);
+            lst.add(new PSObjectBool(true));
+        } else {
+            lst.add(new PSObjectBool(false));
+        }
+        return lst;
+    }
+    
     /**
      * Returns the type of this object
      * @return Type of this object (see PostScript manual for possible values)
