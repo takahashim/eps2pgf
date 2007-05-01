@@ -92,7 +92,7 @@ public class PSObjectArray extends PSObject {
         
         StringReader strReader = new StringReader(str);
         
-        array = Parser.convert(strReader);
+        array = Parser.convertAll(strReader);
         count = array.size();
         offset = 0;
     }

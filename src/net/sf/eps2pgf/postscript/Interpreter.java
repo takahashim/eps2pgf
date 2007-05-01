@@ -1403,9 +1403,16 @@ public class Interpreter {
         opStack.push(num1.sub(num2));
     }
     
-    /**
-     * PostScript op: transform
-     */
+    /** PostScript op: token */
+    public void op_token() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
+        PSObject obj = opStack.pop();
+        for (PSObject item : obj.token()) {
+            opStack.push(item);
+        }
+    }
+    
+    /** PostScript op: transform */
     public void op_transform() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorRangeCheck, PSErrorInvalidAccess {
         PSObject obj = opStack.pop();

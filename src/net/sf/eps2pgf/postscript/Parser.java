@@ -30,24 +30,40 @@ import java.util.*;
  * @author Paul Wagenaars
  */
 public class Parser {
+    public static int charsLastConvert = -1;
     
     /**
-     * Convert a PostScript code to a queue of PostScript objects.
-     * @param in PostScript code.
-     * @return Queue with PostScript object.
-     * @throws java.io.IOException Unable to read from in.
+     * Convert PostScript code to list of objects.
+     * @param in Reader with PostScript code
+     * @return List with PostScript objects
+     * @throws java.io.IOException Unable to read from in
      */
-    public static List<PSObject> convert(Reader in) throws IOException {
+    public static List<PSObject> convertAll(Reader in) throws IOException {
         List<PSObject> seq = new ArrayList<PSObject>();
+        PSObject obj;
+        while ( (obj = convertSingle(in)) != null ) {
+            seq.add(obj);
+        }
+        return seq;
+    }
+    
+    /**
+     * Read PostScript code until a single object is encountered
+     */
+    public static PSObject convertSingle(Reader in) throws IOException {
         StringBuilder strSoFar = new StringBuilder();
         boolean inComment = false;
         boolean inString = false;
         boolean inProc = false;
         int procDepth = 0;
+        int stringDepth = 0;
         int readChar;
         char chr;
         
+        int charsThisConvert = 0;
         while ( (readChar = in.read()) != -1 ) {
+            charsThisConvert++;
+            
             chr = (char)readChar;
             boolean saveStrSoFarBefore = false;
             boolean appendCurrentChar = false;
@@ -80,18 +96,24 @@ public class Parser {
             }
 
             // Start of a new string
-            else if ( (chr == '(') && !inProc && !inString ) {
-                inString = true;
-                saveStrSoFarBefore = true;
+            else if ( (chr == '(') && !inProc ) {
+                stringDepth++;
                 appendCurrentChar = true;
+                if (stringDepth <= 1) {
+                    inString = true;
+                    saveStrSoFarBefore = true;
+                }
             }
             
             // End of a string
             else if (inString && (chr == ')') && 
                     (strSoFar.charAt(strSoFar.length()-1) != '\\')) {
-                inString = false;
-                saveStrSoFarAfter = true;
+                stringDepth--;
                 appendCurrentChar = true;
+                if (stringDepth == 0) {
+                    inString = false;
+                    saveStrSoFarAfter = true;
+                }
             }
             
             // Start of literal
@@ -126,29 +148,35 @@ public class Parser {
             }
             
             if ( saveStrSoFarBefore && (strSoFar.length() > 0) ) {
-                //System.out.println("Object: " + strSoFar.capacity() + " >" + strSoFar + "<");
-                seq.add(convertToPSObject(strSoFar.toString()));
-                strSoFar.delete(0, strSoFar.length());
+                if (!Character.isWhitespace(chr)) {
+                    in.reset();
+                    charsThisConvert--;
+                }
+                PSObject newObj = convertToPSObject(strSoFar.toString());
+                charsLastConvert = charsThisConvert;
+                return newObj;
             }
             if (appendCurrentChar) {
                 strSoFar.append(chr);
             }
             if ( saveStrSoFarAfter && (strSoFar.length() > 0) ) {
-                //System.out.println("Object: " + strSoFar.capacity() + " >" + strSoFar + "<");
-                seq.add(convertToPSObject(strSoFar.toString()));
-                strSoFar.delete(0, strSoFar.length());                
+                PSObject newObj = convertToPSObject(strSoFar.toString());
+                charsLastConvert = charsThisConvert;
+                return newObj;
             }
             
-
+            in.mark(1);
         } // end of loop through all characters
         
         if (strSoFar.length() > 0) {
-            //System.out.println("Object: " + strSoFar.capacity() + " >" + strSoFar + "<");
-            seq.add(convertToPSObject(strSoFar.toString()));
+                PSObject newObj = convertToPSObject(strSoFar.toString());
+                charsLastConvert = charsThisConvert;
+                return newObj;
         }
         
-        return seq;
-    }  // end of method convert
+        charsLastConvert = charsThisConvert;
+        return null;
+    }
     
     /** Convert a string to a PostScript object.
      * @param str String to convert.

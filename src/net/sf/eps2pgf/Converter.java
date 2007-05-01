@@ -54,7 +54,7 @@ public class Converter {
         // Parse input file
         List<PSObject> inputObjects;
         Reader in = new BufferedReader(new FileReader(inFile));
-        inputObjects = Parser.convert(in);
+        inputObjects = Parser.convertAll(in);
         in.close();
         
         // Execute parsed file
