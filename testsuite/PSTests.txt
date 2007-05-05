@@ -100,6 +100,33 @@ string 22 - token 2: ((St1){1 2 add}) token 3 1 roll (St1) eq 3 1 roll ({1 2 add
 string 23 - token 3: ({1 2 add}) token 3 1 roll dup type /arraytype eq 4 1 roll xcheck 4 1 roll () eq
 string 24 - token 4: () token false eq count 1 eq
 string 25 - misc 1: (abcdefghijklmn) dup 1.2 exch 3 5 getinterval cvs (1.2) eq 2 1 roll (abc1.2ghijklmn) eq
-dict  1 - def 1: /str (abcdefghi) def (123) str cvs  str (123defghi) eq
-dict  2 - def 2: /str1 (1 2 add) def str1 (1 2 add) eq  /str2 (1 2 add) cvx def str2 3 eq
-dict  3 - def 3: (abc) dup /foo exch def cvx pop foo xcheck false eq
+dict  1 - dict: 10 dict type /dicttype eq
+dict  2 - <<: << 1 2 3 counttomark 3 eq
+dict  3 - >>: mark /test {1 add} >> type /dicttype eq
+dict  4 - length: 10 dict length 0 eq  << /a 1/b 2 /c {2 add}>> length 3 eq
+dict  5 - maxlength: 11 dict maxlength 11 eq  << /a 1/b 2 /c {2 add}>> maxlength 3 eq
+dict  6 - begin/currentdict: 10 dict dup begin currentdict eq
+dict  7 - end: 10 dict begin currentdict end currentdict dup 3 1 roll ne exch userdict eq
+dict  8 - def 1: /str (abcdefghi) def (123) str cvs  str (123defghi) eq
+dict  9 - def 2: /str1 (1 2 add) def str1 (1 2 add) eq  /str2 (1 2 add) cvx def str2 3 eq
+dict 10 - def 3: (abc) dup /foo exch def cvx pop foo xcheck false eq
+dict 11 - load: << /a (abc) /b 123 >> begin  /a load (abc) eq  /b load 123 eq
+dict 12 - store: /a 123 store a 123 eq  /a (abc) store a (abc) eq
+dict 13 - get: <</a 1.0 /b 2 >> /b get 2 eq  /foo (abc) def currentdict /foo get (abc) eq
+dict 14 - put: 10 dict dup /foo (bar) put  begin foo (bar) eq
+dict 15 - undef: 10 dict dup /foo (bar) put  dup /foo undef begin {foo} stopped
+dict 16 - known: <</a 123 /b 456>> dup /a known exch /b known
+dict 17 - where: <</a 123 /b 456>> dup begin <</d (abc) /e (def)>> begin  /b where 3 1 roll eq
+dict 18 - copy 1: <</a 123>> <</b (abc) /c (def)>> dup 3 1 roll copy eq
+dict 18 - copy 2: <</a 123>> <</b (abc) /c (def)>> copy /a known
+dict 19 - forall 1: <</a 123 /b 456>> {} forall  456 eq  4 1 roll /b eq  4 1 roll 123 eq  4 1 roll /a eq
+dict 20 - forall 2: 0 <</a 1 /b 2 /c 3>> {exch pop add} forall 6 eq
+dict 21 - currentdict/userdict: currentdict userdict eq  10 dict begin currentdict userdict ne
+dict 22 - errordict: errordict
+dict 23 - $error: $error
+dict 24 - systemdict: systemdict type /dicttype eq  {systemdict /foo (bar) put} stopped
+dict 25 - globaldict: globaldict type /dicttype eq
+dict 26 - statusdict: statusdict type /dicttype eq
+dict 27 - countdictstack: countdictstack 3 eq  10 dict begin countdictstack 4 eq
+dict 28 - dictstack: 10 array dictstack dup 0 get systemdict eq exch length 3 eq
+dict 29 - cleardictstack: 10 dict begin countdictstack 4 eq cleardictstack countdictstack 3 eq
