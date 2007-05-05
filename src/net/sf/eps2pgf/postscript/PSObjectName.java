@@ -22,7 +22,7 @@
 package net.sf.eps2pgf.postscript;
 
 import java.lang.reflect.*;
-import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
+import net.sf.eps2pgf.postscript.errors.*;
 
 /** PostScript object: literal name
  *
@@ -179,7 +179,12 @@ public class PSObjectName extends PSObject {
         if (isLiteral) {
             return this;
         } else {
-            PSObject lookedUp = interp.dictStack.lookup(name);
+            PSObject lookedUp;
+            try {
+                lookedUp = interp.dictStack.lookup(name);
+            } catch (PSErrorInvalidAccess e) {
+                lookedUp = null;
+            }
             if ( (lookedUp != null) && (lookedUp instanceof PSObjectOperator) ) {
                 return lookedUp;
             }  else {

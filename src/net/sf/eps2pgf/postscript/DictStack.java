@@ -44,11 +44,16 @@ public class DictStack {
     
     /** Create a new dictionary stack */
     public DictStack(Interpreter interp) {
-        fillSystemDict(interp);
+        try {
+            fillSystemDict(interp);
+            systemdict.readonly();
+        } catch (PSErrorInvalidAccess e) {
+            // this can never happen since all newly created dictionaries are read-write
+        }
     }
     
     /** Fill the system dictionary */
-    private void fillSystemDict(Interpreter interp) {
+    private void fillSystemDict(Interpreter interp) throws PSErrorInvalidAccess {
         // Add operators
         Method[] mthds = interp.getClass().getMethods();
         HashMap<String, String> replaceNames = new HashMap<String, String>();
@@ -103,7 +108,7 @@ public class DictStack {
     }
     
     /** Search the dictionary that defines a specific key. */
-    public PSObjectDict where(String key) {
+    public PSObjectDict where(String key) throws PSErrorInvalidAccess {
         // First look in the non-permanent dictionaries
         for(int i = dictStack.size()-1 ; i >= 0 ; i--) {
             PSObjectDict dict = dictStack.get(i);
@@ -133,7 +138,7 @@ public class DictStack {
     
     
     /** Lookup a key in the dictionary stack */
-    public PSObject lookup(String key) {
+    public PSObject lookup(String key) throws PSErrorInvalidAccess {
         PSObjectDict dict = where(key);
         if (dict == null) {
             return null;
@@ -144,7 +149,8 @@ public class DictStack {
     
     
     /** Define key->value in current dictionary. */
-    public void def(String key, PSObject value) throws PSErrorTypeCheck {
+    public void def(String key, PSObject value) throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         try {
             PSObjectDict dict = dictStack.peek();
             dict.setKey(key, value);
@@ -181,19 +187,6 @@ public class DictStack {
         store(key.toDictKey(), value);
     }
     
-    
-    /** Print a one-line summary to stdout */
-    public void dumpSummary() {
-        System.out.print("----- Dictionary stack:");
-        for(int i = dictStack.size()-1 ; i >= 0 ; i--) {
-            PSObjectDict dict = dictStack.get(i);
-            System.out.print(" dict" + i + "(" + dict.length() + ")");
-        }
-        System.out.print(" userdict(" + userdict.length() + ")");
-        System.out.print(" systemdict(" + systemdict.length() + ")");
-        System.out.println("");
-    }
-    
     public void dumpFull() throws PSErrorRangeCheck {
         System.out.println("----- Dictionary stack");
         for(int i = dictStack.size()-1 ; i >= 0 ; i--) {
@@ -204,8 +197,11 @@ public class DictStack {
         System.out.println("  --- userdict");
         userdict.dumpFull("    - ");
         System.out.println("  --- systemdict");
-        System.out.println("    - " + systemdict.length() + " key->value pairs.");
-        //systemdict.dumpFull("    - ");
+        try {
+            System.out.println("    - " + systemdict.length() + " key->value pairs.");
+        } catch (PSErrorInvalidAccess e) {
+            System.out.println("    - ?? key->value pairs.");
+        }
         System.out.println("----- End of dictionary stack");
     }
 }
