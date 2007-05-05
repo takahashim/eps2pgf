@@ -45,9 +45,13 @@ public class PSObjectFont extends PSObject implements Cloneable {
      */
     public PSObjectFont() {
         dict = new PSObjectDict();
-        setFID();
-        dict.setKey("FontType", new PSObjectInt(1));
-        dict.setKey("FontMatrix", new PSObjectMatrix(1,0,0,1,0,0));
+        try {
+            setFID();
+            dict.setKey("FontType", new PSObjectInt(1));
+            dict.setKey("FontMatrix", new PSObjectMatrix(1,0,0,1,0,0));
+        } catch (PSErrorInvalidAccess e) {
+            // this can never happen, because a new dictionary always has write access
+        }
     }
     
     /**
@@ -73,29 +77,33 @@ public class PSObjectFont extends PSObject implements Cloneable {
         }
         
         // Setting the dictionary keys with font info
-        dict = new PSObjectDict();
-        dict.setKey("FontType", new PSObjectInt(1));
-        dict.setKey("FontMatrix", new PSObjectMatrix(1,0,0,1,0,0));
-        dict.setKey("FontName", new PSObjectName(fontName, true));
-        setFID();
-        String encoding = props.getProperty("encoding", "Standard");
-        if (encoding.equals("Standard")) {
-            dict.setKey("Encoding", new PSObjectArray(Encoding.getStandardVector()));
-        } else if (encoding.equals("ISOLatin1")) {
-            dict.setKey("Encoding", new PSObjectArray(Encoding.getISOLatin1Vector()));
-        } else if (encoding.equals("Symbol")) {
-            dict.setKey("Encoding", new PSObjectArray(Encoding.getSymbolVector()));
-        } else {
-            log.severe("Unknown encoding: " + encoding);
-            throw new PSErrorInvalidFont();
+        try {
+            dict = new PSObjectDict();
+            dict.setKey("FontType", new PSObjectInt(1));
+            dict.setKey("FontMatrix", new PSObjectMatrix(1,0,0,1,0,0));
+            dict.setKey("FontName", new PSObjectName(fontName, true));
+            setFID();
+            String encoding = props.getProperty("encoding", "Standard");
+            if (encoding.equals("Standard")) {
+                dict.setKey("Encoding", new PSObjectArray(Encoding.getStandardVector()));
+            } else if (encoding.equals("ISOLatin1")) {
+                dict.setKey("Encoding", new PSObjectArray(Encoding.getISOLatin1Vector()));
+            } else if (encoding.equals("Symbol")) {
+                dict.setKey("Encoding", new PSObjectArray(Encoding.getSymbolVector()));
+            } else {
+                log.severe("Unknown encoding: " + encoding);
+                throw new PSErrorInvalidFont();
+            }
+            dict.setKey("PaintType", new PSObjectInt(2));
+            dict.setKey("LatexPreCode", props.getProperty("latexprecode", ""));
+            dict.setKey("LatexPostCode", props.getProperty("latexpostcode", ""));
+            String charStrings = props.getProperty("charstrings", "StandardLatin");
+            dict.setKey("CharStrings", loadCharStrings(resourceDir, charStrings));
+            FontMetric fontMetrics = loadAfm(resourceDir, fontName);
+            dict.setKey("AFM", new PSObjectAfm(fontMetrics));
+        } catch (PSErrorInvalidAccess e) {
+            // because a new dictionary always has read-write access, this can never happen
         }
-        dict.setKey("PaintType", new PSObjectInt(2));
-        dict.setKey("LatexPreCode", props.getProperty("latexprecode", ""));
-        dict.setKey("LatexPostCode", props.getProperty("latexpostcode", ""));
-        String charStrings = props.getProperty("charstrings", "StandardLatin");
-        dict.setKey("CharStrings", loadCharStrings(resourceDir, charStrings));
-        FontMetric fontMetrics = loadAfm(resourceDir, fontName);
-        dict.setKey("AFM", new PSObjectAfm(fontMetrics));
         
 //      dict.setKey("FontBBox", new PSObjectArray(fontBbox));
     }
@@ -105,13 +113,10 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @param aDict Dictionary to use as font dictionary
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Dictionary is not a valid font
      */
-    public PSObjectFont(PSObjectDict aDict) throws PSErrorTypeCheck {
-        // Check some (not all) required font dictionary fields
-        if ((!aDict.containsKey("FontType")) || (!aDict.containsKey("FontMatrix"))) {
-            throw new PSErrorTypeCheck();
-        }
-        
+    public PSObjectFont(PSObjectDict aDict) {
         dict = aDict;
+        access = aDict.access;
+        isLiteral = aDict.isLiteral;
     }
     
     /**
@@ -165,15 +170,19 @@ public class PSObjectFont extends PSObject implements Cloneable {
         }
         
         // Now load charStrings from the props
-        PSObjectDict dict = new PSObjectDict();
-        Set<String> allCharNames = Encoding.getCharNames().keySet();
-        for (String charName : allCharNames) {
-            // Check whether this character name in defined in this
-            // charStrings list.
-            String propValue = props.getProperty(charName);
-            if (propValue != null) {
-                dict.setKey(charName, propValue);
+        try {
+            PSObjectDict dict = new PSObjectDict();
+            Set<String> allCharNames = Encoding.getCharNames().keySet();
+            for (String charName : allCharNames) {
+                // Check whether this character name in defined in this
+                // charStrings list.
+                String propValue = props.getProperty(charName);
+                if (propValue != null) {
+                    dict.setKey(charName, propValue);
+                }
             }
+        } catch (PSErrorInvalidAccess e) {
+            // this can never happen since a new dictionary always has read-write access
         }
 
         return dict;
@@ -281,7 +290,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
     /**
      * Retrieves the metrics for a single character
      */
-    CharMetric getCharMetric(String charName) throws PSErrorTypeCheck, PSErrorUndefined {
+    CharMetric getCharMetric(String charName) throws PSErrorTypeCheck,
+            PSErrorUndefined, PSErrorInvalidAccess {
         FontMetric fm = getFontMetric();
         List charMetrics = fm.getCharMetrics();
         for (Object obj : charMetrics) {
@@ -306,6 +316,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
         } catch (PSErrorTypeCheck e) {
             // No font name is defined
             return "";
+        } catch (PSErrorInvalidAccess e) {
+            return "";
         }
     }
     
@@ -321,6 +333,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
         } catch (NullPointerException e) {
             // No FID is defined
             return -1;
+        } catch (PSErrorInvalidAccess e) {
+            return -1;
         }
     }
     
@@ -328,7 +342,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * Set the font ID for this font to the next available ID
      * @return New font ID
      */
-    int setFID() {
+    int setFID() throws PSErrorInvalidAccess {
         int FID = nextFID++;
         dict.setKey("FID", new PSObjectInt(FID));
         return FID;
@@ -339,7 +353,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @return Encoding defined by this font
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Encoding vector is not defined by this font
      */
-    public PSObjectArray getEncoding() throws PSErrorTypeCheck {
+    public PSObjectArray getEncoding() throws PSErrorTypeCheck, PSErrorInvalidAccess {
         return dict.lookup("Encoding").toArray();
     }
     
@@ -369,7 +383,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This font is invalid. The AFM field is not set properly.
      * @return Font metrics
      */
-    public FontMetric getFontMetric() throws PSErrorTypeCheck {
+    public FontMetric getFontMetric() throws PSErrorTypeCheck, PSErrorInvalidAccess {
         return dict.lookup("AFM").toFontMetric();
     }
     
@@ -380,7 +394,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @param secondChar Second kerning character
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This font does not contain font metric data
      */
-    public double getKernX(String firstChar, String secondChar) throws PSErrorTypeCheck {
+    public double getKernX(String firstChar, String secondChar) throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         FontMetric fm = getFontMetric();
         List kernPairs = fm.getKernPairs();
         for (Object obj : kernPairs) {
@@ -476,7 +491,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * Get the number of elements
      * @return The number of dictionary entries in this font.
      */
-    public int length() {
+    public int length() throws PSErrorInvalidAccess {
         return dict.length();
     }
     
@@ -504,11 +519,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
     public PSObjectFont clone() {
         PSObjectDict newDict = dict.clone();
         PSObjectFont newFont = null;
-        try {
-            newFont = new PSObjectFont(newDict);
-        } catch (PSErrorTypeCheck e) {
-            // Assuming that "this object" is a valid font this should never happen.
-        }
+        newFont = new PSObjectFont(newDict);
         return newFont;
     }
     
