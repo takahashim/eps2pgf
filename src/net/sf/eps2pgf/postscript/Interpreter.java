@@ -847,9 +847,14 @@ public class Interpreter {
         opStack.push(new PSObjectMatrix(1, 0, 0, 1, 0 , 0));
     }
     
-    /**
-     * PostScript operator: mod
-     */
+    /** PostScript op: maxlength */
+    public void op_maxlength() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
+        PSObjectDict dict = opStack.pop().toDict();
+        opStack.push(new PSObjectInt(dict.maxlength()));
+    }
+    
+    /** PostScript operator: mod */
     public void op_mod() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         int int2 = opStack.pop().toInt();
         int int1 = opStack.pop().toInt();
