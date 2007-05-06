@@ -104,7 +104,7 @@ dict  1 - dict: 10 dict type /dicttype eq
 dict  2 - <<: << 1 2 3 counttomark 3 eq
 dict  3 - >>: mark /test {1 add} >> type /dicttype eq
 dict  4 - length: 10 dict length 0 eq  << /a 1/b 2 /c {2 add}>> length 3 eq
-dict  5 - maxlength: 11 dict maxlength 11 eq  << /a 1/b 2 /c {2 add}>> maxlength 3 eq
+dict  5 - maxlength: 11 dict maxlength 11 eq  << /a 1 /b 2 >> maxlength 2 eq
 dict  6 - begin/currentdict: 10 dict dup begin currentdict eq
 dict  7 - end: 10 dict begin currentdict end currentdict dup 3 1 roll ne exch userdict eq
 dict  8 - def 1: /str (abcdefghi) def (123) str cvs  str (123defghi) eq

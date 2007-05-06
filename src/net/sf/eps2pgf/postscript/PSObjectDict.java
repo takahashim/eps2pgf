@@ -50,7 +50,7 @@ public class PSObjectDict extends PSObject {
     
     /**
      * Creates a deep copy of this object.
-     * @throws java.lang.CloneNotSupportedException Clone not supported.
+     * 
      * @return Deep copy of this object.
      */
     public PSObjectDict clone() {
@@ -64,9 +64,10 @@ public class PSObjectDict extends PSObject {
 
     /**
      * Checks whether this dictionary has a specific key.
-     * @return True when the entry exists, false otherwise.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to check the supplied key.
      * @param key Search for an entry with this key.
+     * @return True when the entry exists, false otherwise.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Key has not a correct type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
      */
     public boolean containsKey(PSObject key) throws PSErrorTypeCheck, PSErrorInvalidAccess {
         checkAccess(false, true, false);
@@ -75,8 +76,9 @@ public class PSObjectDict extends PSObject {
     
     /**
      * Checks whether this dictionary has a specific key.
-     * @param key Key of the entry to check.
      * @return True when the entry exists, false otherwise.
+     * @param key Key of the entry to check.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
      */
     public boolean containsKey(String key) throws PSErrorInvalidAccess {
         checkAccess(false, true, false);
@@ -85,8 +87,8 @@ public class PSObjectDict extends PSObject {
     
     /**
      * Dumps the entire dictionary to stdout
+     * 
      * @param preStr String that will be prepended to each line written to output.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError There was an error reading from this dictionary.
      */
     public void dumpFull(String preStr) {
         Set<String> keys = map.keySet();
@@ -98,6 +100,7 @@ public class PSObjectDict extends PSObject {
     /**
      * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
      * of composite object is not copied, but shared.
+     * @return Duplicate of this object
      */
     public PSObjectDict dup() {
         return this;
@@ -106,9 +109,10 @@ public class PSObjectDict extends PSObject {
     /**
      * Return value associated with key. Same as lookup, except that a
      * PSErrorRangeCheck is thrown when the item doesn't exist.
-     * @param key Key for which the associated value will be returned
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
      * @return Value associated with key
+     * @param key Key for which the associated value will be returned
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
      */
     public PSObject get(String key) throws PSErrorUndefined, PSErrorInvalidAccess {
         checkAccess(false, true, false);
@@ -122,9 +126,11 @@ public class PSObjectDict extends PSObject {
     /**
      * PostScript operator: get
      * Return value associated with key.
-     * @param key Key for which the associated value will be returned
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
      * @return Value associated with key
+     * @param key Key for which the associated value will be returned
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied key has invalid type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
      */
     public PSObject get(PSObject key) throws PSErrorUndefined,
             PSErrorTypeCheck, PSErrorInvalidAccess {
@@ -158,6 +164,7 @@ public class PSObjectDict extends PSObject {
     /**
      * Get the number of elements
      * @return The number of entries in this dictionary.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
      */
     public int length() throws PSErrorInvalidAccess {
         checkAccess(false, true, false);
@@ -167,8 +174,9 @@ public class PSObjectDict extends PSObject {
     /**
      * Looks up a key in this dictionary
      * @param key Dictionary key to look up.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError When key is not a valid dictionary key.
      * @return Value associated with key.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied key is not the correct type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
      */
     public PSObject lookup(PSObject key) throws PSErrorTypeCheck,
             PSErrorInvalidAccess {
@@ -177,12 +185,23 @@ public class PSObjectDict extends PSObject {
     
     /**
      * Looks up a key in this dictionary
-     * @param key Key of the entry to look up.
      * @return Object associated with the key.
+     * @param key Key of the entry to look up.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
      */
     public PSObject lookup(String key) throws PSErrorInvalidAccess {
         checkAccess(false, true, false);
         return map.get(key);
+    }
+    
+    /**
+     * PostScript operator 'maxlength'
+     * @return maximum of the 'capacity' and the actual number of entries
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
+     */
+    public int maxlength() throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        return Math.max(capacity, length());
     }
     
     /**
@@ -198,6 +217,8 @@ public class PSObjectDict extends PSObject {
      * Same as setKey() method
      * @param index Index or key for new value
      * @param value New value
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied key does not have a valid type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No write access to this object
      */
     public void put(PSObject index, PSObject value) throws PSErrorTypeCheck,
             PSErrorInvalidAccess {
@@ -231,6 +252,7 @@ public class PSObjectDict extends PSObject {
      * Sets a key in the dictionary
      * @param key Key of the new dictionary entry.
      * @param value Value of the new dictionary entry.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No write access to this object
      */
     public void setKey(String key, PSObject value) throws PSErrorInvalidAccess {
         checkAccess(false, false, true);
@@ -241,7 +263,8 @@ public class PSObjectDict extends PSObject {
      * Sets a key in the dictionary
      * @param key Key of the new dictionary entry.
      * @param value Value of the new dictionary entry.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError There was an error creating the new dictionary entry.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Key has not a valid type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No write access to this object
      */
     public void setKey(PSObject key, PSObject value) throws PSErrorTypeCheck,
             PSErrorInvalidAccess {
@@ -250,9 +273,10 @@ public class PSObjectDict extends PSObject {
     
     /**
      * Set a key in the dictionary
+     * @return Created PSObjectString.
      * @param key Key of the new dictionary entry.
      * @param value Value of the new dictionary item. Will be converted to a PSObjectString.
-     * @return Created PSObjectString.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No write access to this object
      */
     public PSObjectString setKey(String key, String value) throws PSErrorInvalidAccess {
         checkAccess(false, true, false);
@@ -265,7 +289,8 @@ public class PSObjectDict extends PSObject {
      * Sets a key in the dictionary
      * @param key Key of the new dictionary entry.
      * @param value Value of the new dictionary entry.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError There was an error creating the new entry.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Key has an invalid type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No write access to this object
      */
     public void setKey(PSObject key, String value) throws PSErrorTypeCheck,
             PSErrorInvalidAccess {
@@ -282,8 +307,9 @@ public class PSObjectDict extends PSObject {
     
     /**
      * Convert this object to a font.
+     * @return Font dictionary object
      */
-    public PSObjectFont toFont() throws PSErrorTypeCheck {
+    public PSObjectFont toFont() {
         return new PSObjectFont(this);
     }
     
@@ -306,6 +332,8 @@ public class PSObjectDict extends PSObject {
     /**
      * PostScript operator 'wcheck'. Checks whether the access attribute is
      * 'unlimited'.
+     * @return Returns true when there is write access to this object, returns
+     * false otherwise
      */
     public boolean wcheck() {
         return (access == ACCESS_UNLIMITED);
