@@ -755,8 +755,7 @@ public class Interpreter {
     public void op_known() throws PSError {
         PSObject key = opStack.pop();
         PSObjectDict dict = opStack.pop().toDict();
-        boolean containsKey = dict.containsKey(key);
-        opStack.push(new PSObjectBool(containsKey));
+        opStack.push(new PSObjectBool(dict.known(key)));
     }
     
     /** PostScript op: load */
@@ -1462,20 +1461,24 @@ public class Interpreter {
         opStack.push(new PSObjectBool(true));
     }
     
-    /**
-     * PostScript op: truncate
-     */
+    /** PostScript op: truncate */
     public void op_truncate() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.pop();
         opStack.push(obj.truncate());
     }
     
-    /**
-     * PostScript op: type
-     */
+    /** PostScript op: type */
     public void op_type() throws PSErrorStackUnderflow {
         PSObject any = opStack.pop();
         opStack.push(new PSObjectName(any.type(), false));
+    }
+    
+    /** PostScript op: undef */
+    public void op_undef() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
+        PSObject key = opStack.pop();
+        PSObjectDict dict = opStack.pop().toDict();
+        dict.undef(key);
     }
     
     /** PostScript op: wcheck */
