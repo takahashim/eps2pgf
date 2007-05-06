@@ -1,3 +1,8 @@
+parser 1: [1 2] count 1 eq exch type /arraytype eq
+parser 2: <123d>type/stringtype eq  <~j34rt~>type /stringtype eq
+parser 3: <</a(foo)/b 3>> count 1 eq exch type /dicttype eq
+parser 4: (lka(oi){\)) dup length 9 eq exch type /stringtype eq
+parser 5: {{ {1 2 add} {/foo put}} (}) 1 2 add} count 1 eq exch type /arraytype eq
 bool  1 - eq 1: 1 1 eq 1.0 1 eq 1 1.0 eq  1.0 1.0 eq
 bool  2 - eq 2: (abc) (abc) eq (abc) /abc eq /abc (abc) eq
 bool  3 - eq 3: false false eq mark [ eq null null eq

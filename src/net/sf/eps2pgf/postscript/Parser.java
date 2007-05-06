@@ -55,99 +55,160 @@ public class Parser {
         boolean inComment = false;
         boolean inString = false;
         boolean inProc = false;
+        boolean inHexString = false;
+        boolean inB85String = false;
         int procDepth = 0;
         int stringDepth = 0;
         int readChar;
-        char chr;
+        char chr = '\000';
+        char prevChr;
+        String lastTwo;
         
         int charsThisConvert = 0;
         while ( (readChar = in.read()) != -1 ) {
             charsThisConvert++;
             
+            prevChr = chr;
             chr = (char)readChar;
-            boolean saveStrSoFarBefore = false;
-            boolean appendCurrentChar = false;
-            boolean saveStrSoFarAfter = false;
+            if (charsThisConvert > 1) {
+                lastTwo = Character.toString(prevChr) + Character.toString(chr);
+            } else {
+                lastTwo = Character.toString(chr);
+            }
+            boolean tokenBefore = false;
+            boolean appendCurrentChar = true;
+            boolean tokenAfter = false;
             
             // If we are in a comment, we only need to stop for a new line
             // or form feed.
             if (inComment) {
+                appendCurrentChar = false;
                 if ((chr == 10) || (chr == 12) || (chr == 13)) {
                     inComment = false;
                 }
             }
             
-            // If we encounter a % and are not in a string, we found a
-            // comment.
-            else if (!inString && (chr == '%')) {
+            // In a string
+            else if (inString) {
+                if ( (chr == ')') && !lastTwo.equals("\\)")) {
+                    stringDepth--;
+                    if (stringDepth == 0) {
+                        inString = false;
+                        if (!inProc) {
+                            tokenAfter = true;
+                        }
+                    }
+                } else if ( (chr == '(') && !lastTwo.equals("\\(")) {
+                    stringDepth++;
+                }
+            }
+            
+            // In a procedure
+            else if (inProc) {
+                // End of the procedure
+                if (chr == '}') {
+                    procDepth--;
+                    if (procDepth == 0) {
+                        tokenAfter = true;
+                        inProc = false;
+                    }
+                }
+                // A string in a procedure
+                else if (chr == '(') {
+                    stringDepth++;
+                    inString = true;
+                }
+                // a procedure in a procedure
+                else if (chr == '{') {
+                    procDepth++;
+                }
+            }
+
+            else if (inHexString) {
+                // End of the hex string
+                if (chr == '>') {
+                    inHexString = false;
+                    tokenAfter = true;
+                }
+            }
+            
+            else if (inB85String) {
+                // End of base-85 string
+                if (lastTwo.equals("~>")) {
+                    inB85String = false;
+                    tokenAfter = true;
+                }
+            }
+            
+            // start of comment
+            else if (chr == '%') {
+                appendCurrentChar = false;
                 inComment = true;
             }
             
-            // Objects are separated by whitespace
-            else if ( Character.isWhitespace(chr) && !inProc && !inString ) {
-                saveStrSoFarBefore = true;
+            // object ended by whitespace
+            else if ( Character.isWhitespace(chr) ) {
+                appendCurrentChar = false;
+                tokenBefore = true;
             }
             
-            // Or objects are separated by [ or ]
-            else if ( ((chr == '[') || (chr == ']')) && !inProc && !inString ) {
-                saveStrSoFarBefore = true;
-                appendCurrentChar = true;
-                saveStrSoFarAfter = true;
-            }
-
-            // Start of a new string
-            else if ( (chr == '(') && !inProc ) {
+            // start of string
+            else if (chr == '(') {
                 stringDepth++;
-                appendCurrentChar = true;
-                if (stringDepth <= 1) {
-                    inString = true;
-                    saveStrSoFarBefore = true;
-                }
+                inString = true;
+                tokenBefore = true;
             }
             
-            // End of a string
-            else if (inString && (chr == ')') && 
-                    (strSoFar.charAt(strSoFar.length()-1) != '\\')) {
-                stringDepth--;
-                appendCurrentChar = true;
-                if (stringDepth == 0) {
-                    inString = false;
-                    saveStrSoFarAfter = true;
-                }
+            // start or end of array
+            else if ((chr == '[') || (chr == ']')) {
+                tokenBefore = true;
+                tokenAfter = true;
             }
             
             // Start of literal
-            else if ( (chr == '/') && !inProc && !inString ) {
-                saveStrSoFarBefore = true;
-                appendCurrentChar = true;
+            else if (chr == '/') {
+                tokenBefore = true;
             }
             
-            // Start of procedure ..}
+            // Start of procedure .. {
             else if ( (chr == '{') && !inString ) {
-                if (procDepth == 0) {
-                    saveStrSoFarBefore = true;
-                    inProc = true;
-                }
+                tokenBefore = true;
+                inProc = true;
                 procDepth++;
-                appendCurrentChar = true;
             }
             
-            // End of procedure ..}
-            else if ( inProc && (chr == '}') ) {
-                procDepth = procDepth - 1;
-                appendCurrentChar = true;
-                if (procDepth == 0) {
-                    saveStrSoFarAfter = true;
-                    inProc = false;
+            // start of hex string, base-85 string or dictionary
+            else if (chr == '<') {
+                if (prevChr == '<') {
+                    tokenAfter = true;
+                } else {
+                    tokenBefore = true;
                 }
             }
             
-            // All other characters must be appended to strSofar
-            else {
-                appendCurrentChar = true;
+            // second char of base-85 string
+            else if ( (prevChr == '<') && (chr == '~') ) {
+                inB85String = true;
             }
             
-            if ( saveStrSoFarBefore && (strSoFar.length() > 0) ) {
+            // second char of hex string
+            else if (prevChr == '<') {
+                inHexString = true;
+            }
+            
+            // end of dictionary >>
+            else if (chr == '>') {
+                if (prevChr == '>') {
+                    tokenAfter = true;
+                } else {
+                    tokenBefore = true;
+                }
+            }
+            
+            //
+            // Create token, append current character
+            //
+            if ( tokenBefore && (strSoFar.length() > 0) ) {
                 if (!Character.isWhitespace(chr)) {
                     in.reset();
                     charsThisConvert--;
@@ -159,7 +220,7 @@ public class Parser {
             if (appendCurrentChar) {
                 strSoFar.append(chr);
             }
-            if ( saveStrSoFarAfter && (strSoFar.length() > 0) ) {
+            if ( tokenAfter && (strSoFar.length() > 0) ) {
                 PSObject newObj = convertToPSObject(strSoFar.toString());
                 charsLastConvert = charsThisConvert;
                 return newObj;
