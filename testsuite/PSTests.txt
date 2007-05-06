@@ -115,7 +115,7 @@ dict 12 - store: /a 123 store a 123 eq  /a (abc) store a (abc) eq
 dict 13 - get: <</a 1.0 /b 2 >> /b get 2 eq  /foo (abc) def currentdict /foo get (abc) eq
 dict 14 - put: 10 dict dup /foo (bar) put  begin foo (bar) eq
 dict 15 - undef: 10 dict dup /foo (bar) put  dup /foo undef begin {foo} stopped
-dict 16 - known: <</a 123 /b 456>> dup /a known exch /b known
+dict 16 - known: /mydict 5 dict def mydict /total 0 put mydict /total known  mydict /badname known false eq
 dict 17 - where: <</a 123 /b 456>> dup begin <</d (abc) /e (def)>> begin  /b where 3 1 roll eq
 dict 18 - copy 1: <</a 123>> <</b (abc) /c (def)>> dup 3 1 roll copy eq
 dict 18 - copy 2: <</a 123>> <</b (abc) /c (def)>> copy /a known

@@ -63,29 +63,6 @@ public class PSObjectDict extends PSObject {
     }
 
     /**
-     * Checks whether this dictionary has a specific key.
-     * @param key Search for an entry with this key.
-     * @return True when the entry exists, false otherwise.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Key has not a correct type
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
-     */
-    public boolean containsKey(PSObject key) throws PSErrorTypeCheck, PSErrorInvalidAccess {
-        checkAccess(false, true, false);
-        return map.containsKey(key.toDictKey());
-    }
-    
-    /**
-     * Checks whether this dictionary has a specific key.
-     * @return True when the entry exists, false otherwise.
-     * @param key Key of the entry to check.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
-     */
-    public boolean containsKey(String key) throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
-        return map.containsKey(key);
-    }
-    
-    /**
      * Dumps the entire dictionary to stdout
      * 
      * @param preStr String that will be prepended to each line written to output.
@@ -147,19 +124,17 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
-     * Returs all keys defined in this dictionary.
-     * @return Set with all defined keys.
+     * PostScript operator 'known'
+     * @param key Key of the entry to check
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Key has an invalid type
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
+     * @return Returns true when the key is known, returns false otherwise
      */
-/*    public Set<PSObject> keySet() {
-        Set<String> strKeys = map.keySet();
-        Iterator<String> strKeyIter = strKeys.iterator();
-        Set<PSObject> keys = new HashSet<PSObject>();
-        while (strKeyIter.hasNext()) {
-            String key = strKeyIter.next();
-            keys.add(new PSObjectName(key, true));
-        }
-        return keys;
-    }*/
+    public boolean known(PSObject key) throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        String keyStr = key.toDictKey();
+        return map.containsKey(keyStr);
+    }
     
     /**
      * Get the number of elements
@@ -327,6 +302,18 @@ public class PSObjectDict extends PSObject {
      */
     public String type() {
         return "dicttype";
+    }
+    
+    /**
+     * PostScript operator 'undef'
+     * @param key Key of the entry to remove
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Type of key is incorrect
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No write access to this object
+     */
+    public void undef(PSObject key) throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        checkAccess(false, false, true);
+        String keyStr = key.toDictKey();
+        map.remove(keyStr);
     }
 
     /**
