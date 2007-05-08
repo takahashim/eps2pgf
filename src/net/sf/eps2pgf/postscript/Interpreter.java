@@ -1489,7 +1489,8 @@ public class Interpreter {
     }
     
     /** PostScript op: where */
-    public void op_where() throws PSError {
+    public void op_where() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess {
         PSObject key = opStack.pop();
         PSObjectDict dict = dictStack.where(key);
         if (dict == null) {

@@ -38,6 +38,9 @@ public class DictStack {
     // User dictionary
     private PSObjectDict userdict = new PSObjectDict();
     
+    // Global dictionary
+    private PSObjectDict globaldict = new PSObjectDict();
+    
     // System dictionary
     private PSObjectDict systemdict = new PSObjectDict();
     
@@ -112,18 +115,23 @@ public class DictStack {
         // First look in the non-permanent dictionaries
         for(int i = dictStack.size()-1 ; i >= 0 ; i--) {
             PSObjectDict dict = dictStack.get(i);
-            if (dict.lookup(key) != null) {
+            if (dict.known(key)) {
                 return dict;
             }
         }
         
         // Then look in the permanent dictionary userdict
-        if (userdict.lookup(key) != null) {
+        if (userdict.known(key)) {
             return userdict;
         }
         
+        // Then look in up in the permanent dictionary globaldict
+        if (globaldict.known(key)) {
+            return globaldict;
+        }
+        
         // Finally, look in the permanent dictionary systemdict
-        if (systemdict.lookup(key) != null) {
+        if (systemdict.known(key)) {
             return systemdict;
         }
         

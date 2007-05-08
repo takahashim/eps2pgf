@@ -30,6 +30,9 @@ import java.util.*;
  * @author Paul Wagenaars
  */
 public class Parser {
+    /**
+     * Numbers of characters consumed in the last convertSingle call
+     */
     public static int charsLastConvert = -1;
     
     /**
@@ -49,6 +52,9 @@ public class Parser {
     
     /**
      * Read PostScript code until a single object is encountered
+     * @param in Read characters (PostScript code) from this reader
+     * @throws java.io.IOException Unable to read from input
+     * @return Object read from in reader or 'null' if there were no more objects
      */
     public static PSObject convertSingle(Reader in) throws IOException {
         StringBuilder strSoFar = new StringBuilder();
