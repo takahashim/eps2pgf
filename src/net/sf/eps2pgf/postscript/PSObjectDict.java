@@ -21,8 +21,9 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.util.*;
 import java.lang.*;
+import java.util.*;
+
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
@@ -60,6 +61,23 @@ public class PSObjectDict extends PSObject {
             newDict.map.put(new String(key), map.get(key).clone());
         }
         return newDict;
+    }
+
+    /**
+     * PostScript operator copy. Copies values from obj1 to this object.
+     * @param obj1 Copy values from obj1
+     * @return Returns subsequence of this object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Invalid or incompatible object type(s) for copy operator
+     */
+    public PSObject copy(PSObject obj1) throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        obj1.checkAccess(false, true, false);
+        
+        PSObjectDict dict1 = obj1.toDict();
+        for (Map.Entry<String, PSObject> entry : dict1.map.entrySet()) {
+            setKey(entry.getKey(), entry.getValue());
+        }
+        
+        return this;
     }
 
     /**
@@ -131,9 +149,18 @@ public class PSObjectDict extends PSObject {
      * @return Returns true when the key is known, returns false otherwise
      */
     public boolean known(PSObject key) throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        return known(key.toDictKey());
+    }
+    
+    /**
+     * PostScript operator 'known'
+     * @param key Key of the entry to check
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
+     * @return Returns true when the key is known, returns false otherwise
+     */
+    public boolean known(String key) throws PSErrorInvalidAccess {
         checkAccess(false, true, false);
-        String keyStr = key.toDictKey();
-        return map.containsKey(keyStr);
+        return map.containsKey(key);
     }
     
     /**
@@ -190,14 +217,14 @@ public class PSObjectDict extends PSObject {
     /**
      * PostScript operator put. Replace a single value in this object.
      * Same as setKey() method
-     * @param index Index or key for new value
+     * @param key Key or key for new value
      * @param value New value
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied key does not have a valid type
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No write access to this object
      */
-    public void put(PSObject index, PSObject value) throws PSErrorTypeCheck,
+    public void put(PSObject key, PSObject value) throws PSErrorTypeCheck,
             PSErrorInvalidAccess {
-        setKey(index, value);
+        setKey(key, value);
     }
 
     /**
