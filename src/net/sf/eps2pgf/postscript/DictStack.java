@@ -85,6 +85,19 @@ public class DictStack {
         
         // Add other entries
         systemdict.setKey("userdict", userdict);
+        
+        // Add $error dictionary
+        PSObjectDict dollarerror = new PSObjectDict();
+        dollarerror.setKey("newerror", new PSObjectBool(false));
+        dollarerror.setKey("errorname", new PSObjectNull());
+        dollarerror.setKey("command", new PSObjectNull());
+        dollarerror.setKey("errorinfo", new PSObjectNull());
+        dollarerror.setKey("ostack", new PSObjectNull());
+        dollarerror.setKey("estack", new PSObjectNull());
+        dollarerror.setKey("dstack", new PSObjectNull());
+        dollarerror.setKey("recordstacks", new PSObjectBool(true));
+        dollarerror.setKey("binary", new PSObjectBool(false));
+        systemdict.setKey("$error", dollarerror);
     }
 
     /** Push a dictionary onto the stack */
