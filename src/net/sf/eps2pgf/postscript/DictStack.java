@@ -83,8 +83,10 @@ public class DictStack {
             systemdict.setKey(name, op);
         }
         
-        // Add other entries
-        systemdict.setKey("userdict", userdict);
+        // add errordict dictionary
+        PSObjectDict errordict = new PSObjectDict();
+        // dummy dictionary, error handling is not yet implemented
+        systemdict.setKey("errordict", errordict);
         
         // Add $error dictionary
         PSObjectDict dollarerror = new PSObjectDict();
@@ -98,7 +100,12 @@ public class DictStack {
         dollarerror.setKey("recordstacks", new PSObjectBool(true));
         dollarerror.setKey("binary", new PSObjectBool(false));
         systemdict.setKey("$error", dollarerror);
-    }
+        
+        // add permanent dictionaries
+        systemdict.setKey("systemdict", systemdict);
+        systemdict.setKey("userdict", userdict);
+        systemdict.setKey("globaldict", globaldict);
+}
 
     /** Push a dictionary onto the stack */
     public void pushDict(PSObjectDict dict) {
