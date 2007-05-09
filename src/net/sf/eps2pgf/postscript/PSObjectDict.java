@@ -133,6 +133,26 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
+     * Returns a list with all items in object.
+     * @return List with all items in this object. The first object (with
+     *         index 0) is always a PSObjectInt with the number of object
+     *         in a single item. For most object types this is 1, but for
+     *         dictionaries this is 2. All consecutive items (index 1 and
+     *         up) are the object's items.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This object does not have a list of items
+     */
+    public List<PSObject> getItemList() throws PSErrorInvalidAccess {
+        checkAccess(false, true, false);
+        List<PSObject> lst = new ArrayList<PSObject>();
+        lst.add(new PSObjectInt(2));
+        for (Map.Entry<String, PSObject> entry : map.entrySet()) {
+            lst.add(new PSObjectName(entry.getKey(), true));
+            lst.add(entry.getValue());
+        }
+        return lst;
+    }
+    
+    /**
      * Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      * @return String representing this object.
