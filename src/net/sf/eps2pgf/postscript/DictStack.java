@@ -55,6 +55,14 @@ public class DictStack {
         }
     }
     
+    /**
+     * Implements PostScript operator 'countdictstack'
+     * @return Returns the number of dictionaries on the stack
+     */
+    int countdictstack() {
+        return 3 + dictStack.size();
+    }
+    
     /** Fill the system dictionary */
     private void fillSystemDict(Interpreter interp) throws PSErrorInvalidAccess {
         // Add operators

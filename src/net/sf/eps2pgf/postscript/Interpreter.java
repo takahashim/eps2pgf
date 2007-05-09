@@ -304,9 +304,7 @@ public class Interpreter {
         }
     }
     
-    /**
-     * PostScript op: cos
-     */
+    /** PostScript op: cos */
     public void op_cos() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         double angle = opStack.pop().toReal();
         opStack.push(new PSObjectReal(Math.cos(angle*Math.PI/180)));
@@ -317,6 +315,11 @@ public class Interpreter {
         int count = opStack.size();
         PSObjectInt n = new PSObjectInt(count);
         opStack.push(n);
+    }
+    
+    /** PostScript op: countdictstack */
+    public void op_countdictstack() {
+        opStack.push(new PSObjectInt(dictStack.countdictstack()));
     }
     
     /** PostScript op: counttomark */
