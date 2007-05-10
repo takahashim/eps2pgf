@@ -63,6 +63,67 @@ public class DictStack {
         return 3 + dictStack.size();
     }
     
+    /** Define key->value in current dictionary. */
+    public void def(PSObject key, PSObject value) throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
+        def(key.toDictKey(), value);
+    }
+    
+    /** Define key->value in current dictionary. */
+    public void def(String key, PSObject value) throws PSErrorTypeCheck,
+            PSErrorInvalidAccess {
+        try {
+            PSObjectDict dict = dictStack.peek();
+            dict.setKey(key, value);
+        } catch (PSErrorStackUnderflow e) {
+            userdict.setKey(key, value);
+        }
+    }
+    
+    /**
+     * PostScript operator <code>dictstack</code>
+     * Stores all elements of the dictionary stack into <code>array</code>
+     * and returns an object describing the initial <code>n</code>'-element
+     * subarray of 'array'.
+     * @param array Array to which the dictionaries will be stored
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck <CODE>array</CODE> is too short to store all dictionaries
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No write access to <code>array</code>
+     * @return Subarray of <code>array</code> with all dictionaries
+     */
+    public PSObjectArray dictstack(PSObjectArray array) throws PSErrorRangeCheck,
+            PSErrorInvalidAccess {
+        int n = countdictstack();
+        if (n > array.length()) {
+            throw new PSErrorRangeCheck();
+        }
+        array.put(0, systemdict);
+        array.put(1, globaldict);
+        array.put(2, userdict);
+        for (int i = 0 ; i < dictStack.size() ; i++) {
+            array.put(i+3, dictStack.get(i));
+        }
+        
+        return array.getinterval(0, n);
+    }
+    
+    public void dumpFull() throws PSErrorRangeCheck {
+        System.out.println("----- Dictionary stack");
+        for(int i = dictStack.size()-1 ; i >= 0 ; i--) {
+            PSObjectDict dict = dictStack.get(i);
+            System.out.println("  --- dict" + i);
+            dict.dumpFull("    - ");
+        }
+        System.out.println("  --- userdict");
+        userdict.dumpFull("    - ");
+        System.out.println("  --- systemdict");
+        try {
+            System.out.println("    - " + systemdict.length() + " key->value pairs.");
+        } catch (PSErrorInvalidAccess e) {
+            System.out.println("    - ?? key->value pairs.");
+        }
+        System.out.println("----- End of dictionary stack");
+    }
+
     /** Fill the system dictionary */
     private void fillSystemDict(Interpreter interp) throws PSErrorInvalidAccess {
         // Add operators
@@ -184,23 +245,6 @@ public class DictStack {
     }
     
     
-    /** Define key->value in current dictionary. */
-    public void def(String key, PSObject value) throws PSErrorTypeCheck,
-            PSErrorInvalidAccess {
-        try {
-            PSObjectDict dict = dictStack.peek();
-            dict.setKey(key, value);
-        } catch (PSErrorStackUnderflow e) {
-            userdict.setKey(key, value);
-        }
-    }
-    
-    /** Define key->value in current dictionary. */
-    public void def(PSObject key, PSObject value) throws PSErrorTypeCheck,
-            PSErrorInvalidAccess {
-        def(key.toDictKey(), value);
-    }
-    
     
     /** Implement PostScript operator: store */
     public void store(String key, PSObject value) throws PSErrorTypeCheck, PSErrorInvalidAccess {
@@ -223,21 +267,4 @@ public class DictStack {
         store(key.toDictKey(), value);
     }
     
-    public void dumpFull() throws PSErrorRangeCheck {
-        System.out.println("----- Dictionary stack");
-        for(int i = dictStack.size()-1 ; i >= 0 ; i--) {
-            PSObjectDict dict = dictStack.get(i);
-            System.out.println("  --- dict" + i);
-            dict.dumpFull("    - ");
-        }
-        System.out.println("  --- userdict");
-        userdict.dumpFull("    - ");
-        System.out.println("  --- systemdict");
-        try {
-            System.out.println("    - " + systemdict.length() + " key->value pairs.");
-        } catch (PSErrorInvalidAccess e) {
-            System.out.println("    - ?? key->value pairs.");
-        }
-        System.out.println("----- End of dictionary stack");
-    }
 }
