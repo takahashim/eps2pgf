@@ -174,6 +174,7 @@ public class DictStack {
         systemdict.setKey("systemdict", systemdict);
         systemdict.setKey("userdict", userdict);
         systemdict.setKey("globaldict", globaldict);
+        systemdict.setKey("statusdict", new PSObjectDict());
 }
 
     /** Push a dictionary onto the stack */
