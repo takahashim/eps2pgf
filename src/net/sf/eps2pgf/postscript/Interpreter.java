@@ -250,6 +250,11 @@ public class Interpreter {
         opStack.clear();
     }
     
+    /** PostScript op: cleardictstack */
+    public void op_cleardictstack() {
+        dictStack.cleardictstack();
+    }
+    
     /** PostScript op: cleartomark */
     public void op_cleartomark() throws PSErrorUnmatchedMark, PSErrorStackUnderflow {
         int n = opStack.size();
