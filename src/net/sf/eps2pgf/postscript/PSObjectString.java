@@ -39,6 +39,7 @@ public class PSObjectString extends PSObject {
     /**
      * Create a new PostScript string with n \u0000 characters
      * @param n Number of \u0000 characters in the new string
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck <code>n</code> is less than zero
      */
     public PSObjectString(int n) throws PSErrorRangeCheck {
         if (n < 0) {
@@ -225,6 +226,23 @@ public class PSObjectString extends PSObject {
             return (toString().equals(objStr.toString()));
         } else {
             return false;
+        }
+    }
+    
+    /**
+     * Executes this object in the supplied interpreter
+     * @param interp Interpreter in which this object is executed.
+     * @throws java.lang.Exception An error occured during the execution of this object.
+     */
+    public void execute(Interpreter interp) throws Exception {
+        if (isLiteral) {
+            interp.opStack.push(dup());
+        } else {
+            PSObject obj;
+            Reader strRdr = new StringReader(toString());
+            while ( (obj = Parser.convertSingle(strRdr)) != null) {
+                obj.process(interp);
+            }
         }
     }
     
