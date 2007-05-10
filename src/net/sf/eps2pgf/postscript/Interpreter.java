@@ -483,6 +483,13 @@ public class Interpreter {
         opStack.push(new PSObjectDict(capacity));
     }
     
+    /** PostScript op: dictstack */
+    public void op_dictstack() throws PSErrorStackUnderflow,
+            PSErrorTypeCheck, PSErrorRangeCheck, PSErrorInvalidAccess {
+        PSObjectArray array = opStack.pop().toArray();
+        opStack.push(dictStack.dictstack(array));
+    }
+    
     /** PostScript op: div */
     public void op_div() throws PSError {
         double num2 = opStack.pop().toReal();
