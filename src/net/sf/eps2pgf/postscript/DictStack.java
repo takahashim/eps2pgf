@@ -56,6 +56,20 @@ public class DictStack {
     }
     
     /**
+     * PostScript operator <code>cleardictstack</code>. Pops all dictionaries off
+     * the dictionary stack except the permanent entries.
+     */
+    public void cleardictstack() {
+        try {
+            while (true) {
+                dictStack.pop();
+            }
+        } catch (PSErrorStackUnderflow e) {
+            // we reached the end of the stacl, it's empty now.
+        }
+    }
+    
+    /**
      * Implements PostScript operator 'countdictstack'
      * @return Returns the number of dictionaries on the stack
      */
