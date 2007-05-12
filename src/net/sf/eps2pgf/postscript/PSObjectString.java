@@ -57,17 +57,34 @@ public class PSObjectString extends PSObject {
     
     /**
      * Creates a new instance of PSObjectString
-     * @param str This object is initialized with a copy of this string. If
-     *            the string is enclosed in round parenthesis ( ) it is
-     *            parsed as PostScript string.
+     * @param str This object is initialized with a copy of this string. The
+     *            string has to be a valid PostScript string enclosed in:
+     *            (..), <..> or <~..~>.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorIOError The supplied string is invalid
      */
     public PSObjectString(String str) {
-        int len = str.length();
-        if ( (len > 0) && (str.charAt(0) == '(') && (str.charAt(len-1) == ')') ) {
-            value = new StringBuffer(parse(str.substring(1, len-1)));
-        } else {
-            value = new StringBuffer(str);
+        value = new StringBuffer(str);
+        offset = 0;
+        count = value.length();
+    }
+    
+    /**
+     * Creates a new instance of PSObjectString
+     * @param str The value of the new PSObjectString will have this value
+     * @param dummy As the name suggests, it doesn't do anything.
+     */
+    public PSObjectString(String str, boolean isPostScript) throws PSErrorIOError {
+        if (isPostScript) {
+            int len = str.length();
+            if ( (len > 0) && (str.charAt(0) == '(') && (str.charAt(len-1) == ')') ) {
+                str = parse(str.substring(1, len-1));
+            } else if ( (len > 0) && str.substring(0,2).equals("<~") && str.substring(len-2).equals("~>") ) {
+                str = parseBase85(str.substring(2,len-2));
+            } else if ( (len > 0) && (str.charAt(0) == '<') && (str.charAt(len-1) == '>') ) {
+                str = parseHex(str.substring(1, len-1));
+            }
         }
+        value = new StringBuffer(str);
         offset = 0;
         count = value.length();
     }
@@ -348,7 +365,11 @@ public class PSObjectString extends PSObject {
      */
     public static boolean isType(String str) {
         int len = str.length();
-        if ( (str.charAt(0) == '(') && (str.charAt(len-1) == ')') ) {
+        if ( (len >= 2) && (str.charAt(0) == '(') && (str.charAt(len-1) == ')') ) {
+            return true;
+        } else if ( (len >= 4) && str.substring(0,2).equals("<~") && str.substring(len-2).equals("~>") ) {
+            return true;
+        } else if ( (len >= 2) && (str.charAt(0) == '<') && (str.charAt(len-1) == '>') ) {
             return true;
         } else {
             return false;
@@ -434,6 +455,39 @@ public class PSObjectString extends PSObject {
         }
         //System.out.println(str + " -> " + newStr);
         return newStr.toString();
+    }
+    
+    /**
+     * Decode an ASCII base-85 string
+     * @param str String to decode
+     * @return Decoded string
+     */
+    public String parseBase85(String str) {
+        return str;
+    }
+    
+    /**
+     * Decode a hex string
+     * @param str String to decode
+     * @return Decoded string
+     */
+    public String parseHex(String str) throws PSErrorIOError {
+        str = str.replaceAll("\\s+", "");
+        if ( (str.length() % 2) != 0 ) {
+            str += "0";
+        }
+        
+        int n = str.length()/2;
+        StringBuilder parsedStr = new StringBuilder(n);
+        for (int i = 0 ; i < n ; i++) {
+            String currChar = str.substring(2*i, 2*(i+1));
+            try {
+                parsedStr.append((char)Integer.parseInt(currChar, 16));
+            } catch (NumberFormatException e) {
+                throw new PSErrorIOError();
+            }
+        }
+        return parsedStr.toString();
     }
     
     /**
@@ -566,7 +620,7 @@ public class PSObjectString extends PSObject {
      * @return List with one or more objects. See PostScript manual under the
      * 'token' operator for more info.
      */
-    public List<PSObject> token() throws PSErrorInvalidAccess {
+    public List<PSObject> token() throws PSErrorInvalidAccess, PSErrorIOError {
         Reader rdr = new StringReader(value.toString());
         PSObject any;
         try {

@@ -1424,7 +1424,7 @@ public class Interpreter {
     
     /** PostScript op: token */
     public void op_token() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+            PSErrorInvalidAccess, PSErrorIOError {
         PSObject obj = opStack.pop();
         for (PSObject item : obj.token()) {
             opStack.push(item);
