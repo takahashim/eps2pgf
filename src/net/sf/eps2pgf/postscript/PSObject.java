@@ -602,7 +602,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @return List with one or more objects. See PostScript manual under the
      * 'token' operator for more info.
      */
-    public List<PSObject> token() throws PSErrorTypeCheck, PSErrorInvalidAccess {
+    public List<PSObject> token() throws PSErrorTypeCheck, PSErrorInvalidAccess, PSErrorIOError {
         throw new PSErrorTypeCheck();
     }
     

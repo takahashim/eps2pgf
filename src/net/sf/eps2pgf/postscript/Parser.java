@@ -24,6 +24,8 @@ package net.sf.eps2pgf.postscript;
 import java.io.*;
 import java.util.*;
 
+import net.sf.eps2pgf.postscript.errors.*;
+
 /**
  * Reads PostScript code and converts it to a queue of PostScript objects.
  *
@@ -41,7 +43,7 @@ public class Parser {
      * @return List with PostScript objects
      * @throws java.io.IOException Unable to read from in
      */
-    public static List<PSObject> convertAll(Reader in) throws IOException {
+    public static List<PSObject> convertAll(Reader in) throws IOException, PSErrorIOError {
         List<PSObject> seq = new ArrayList<PSObject>();
         PSObject obj;
         while ( (obj = convertSingle(in)) != null ) {
@@ -56,7 +58,7 @@ public class Parser {
      * @throws java.io.IOException Unable to read from input
      * @return Object read from in reader or 'null' if there were no more objects
      */
-    public static PSObject convertSingle(Reader in) throws IOException {
+    public static PSObject convertSingle(Reader in) throws IOException, PSErrorIOError {
         StringBuilder strSoFar = new StringBuilder();
         boolean inComment = false;
         boolean inString = false;
@@ -152,12 +154,6 @@ public class Parser {
                 inComment = true;
             }
             
-            // object ended by whitespace
-            else if ( Character.isWhitespace(chr) ) {
-                appendCurrentChar = false;
-                tokenBefore = true;
-            }
-            
             // start of string
             else if (chr == '(') {
                 stringDepth++;
@@ -211,6 +207,12 @@ public class Parser {
                 }
             }
             
+            // object ended by whitespace
+            else if ( Character.isWhitespace(chr) ) {
+                appendCurrentChar = false;
+                tokenBefore = true;
+            }
+            
             //
             // Create token, append current character
             //
@@ -248,7 +250,7 @@ public class Parser {
     /** Convert a string to a PostScript object.
      * @param str String to convert.
      */
-    static PSObject convertToPSObject(String str) throws IOException {
+    static PSObject convertToPSObject(String str) throws IOException, PSErrorIOError {
         if (PSObjectInt.isType(str)) {
             return new PSObjectInt(str);
         } else if (PSObjectReal.isType(str)) {
@@ -256,7 +258,7 @@ public class Parser {
         } else if (PSObjectArray.isType(str)) {
             return new PSObjectArray(str);
         } else if (PSObjectString.isType(str)) {
-            return new PSObjectString(str);
+            return new PSObjectString(str, true);
         } else {
             // At this we assume the object to be a name, either literal
             // or executable.
