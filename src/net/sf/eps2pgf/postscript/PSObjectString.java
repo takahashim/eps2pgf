@@ -462,8 +462,52 @@ public class PSObjectString extends PSObject {
      * @param str String to decode
      * @return Decoded string
      */
-    public String parseBase85(String str) {
-        return str;
+    public String parseBase85(String str) throws PSErrorIOError {
+        str = str.replaceAll("\\s+", "");
+        StringBuilder parsedStr = new StringBuilder();
+        
+        int nextChar = 0;
+        long[] c = new long[5];
+        int n = str.length();
+        for (int i = 0 ; i < n ; i++) {
+            char chr = str.charAt(i);
+            
+            if ( (chr == 'z') && (nextChar == 0) ) {
+                c[0] = '!';
+                c[1] = '!';
+                c[2] = '!';
+                c[3] = '!';
+                c[4] = '!';
+                nextChar = 5;
+            } else if ( (chr >= '!') && (chr <= 'u') ) {
+                c[nextChar++] = chr;
+            } else {
+                throw new PSErrorIOError();
+            }
+            
+            if ( (i == (n-1)) && (nextChar > 0) ) {
+                while (nextChar < 5) {
+                    c[nextChar++] = '!';
+                }
+            }
+            
+            if (nextChar >= 5) {
+                nextChar = 0;
+                long d = 0;
+                for (int j = 0 ; j < 5 ; j++) {
+                    d = 85L*d + c[j] - 33L;
+                }
+                if (d >= 256L*256L*256L*256L) {
+                    throw new PSErrorIOError();
+                }
+                parsedStr.append((char)((d >> 24) & 0x00FF));
+                parsedStr.append((char)((d >> 16) & 0x00FF));
+                parsedStr.append((char)((d >> 8) & 0x00FF));
+                parsedStr.append((char)(d & 0x00FF));
+            }
+        }
+        
+        return parsedStr.toString();
     }
     
     /**
