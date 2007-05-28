@@ -31,7 +31,7 @@ import java.util.logging.*;
 public class Main {
     static final String appName = "Eps2pgf";
     static final int versionMajor = 0;
-    static final int versionMinor = 2;
+    static final int versionMinor = 3;
     static final int versionRevision = 0;
     static Options opts = new Options();;
     
