@@ -1,5 +1,5 @@
 ============================================================================
-                              Eps2pgf v0.2.0
+                              Eps2pgf v0.3.0
 ============================================================================
 
 Website: http://sourceforge.net/projects/eps2pgf
@@ -54,6 +54,9 @@ this program; if not, write to the Free Software Foundation, Inc.,
 ----------------------------------------------------------------------------
 Changelog
 ----------------------------------------------------------------------------
+v0.3.0 (2007-05-28)
+  - Added: tons of PostScript commands
+
 v0.2.0 (2007-04-06)
   - Added: added several PostScript commands
   - Added: radial shadings 
