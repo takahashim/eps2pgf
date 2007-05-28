@@ -56,6 +56,7 @@ Changelog
 ----------------------------------------------------------------------------
 v0.3.0 (2007-05-28)
   - Added: tons of PostScript commands
+  - Added: automated test scripts
 
 v0.2.0 (2007-04-06)
   - Added: added several PostScript commands
