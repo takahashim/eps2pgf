@@ -124,7 +124,7 @@ dict 16 - known: /mydict 5 dict def mydict /total 0 put mydict /total known  myd
 dict 17 - where: <</a 123 /b 456>> dup begin <</d (abc) /e (def)>> begin  /b where 3 1 roll eq
 dict 18 - copy 1: <</a 123>> <</b (abc) /c (def)>> dup 3 1 roll copy eq
 dict 18 - copy 2: <</a 123>> <</b (abc) /c (def)>> copy /a known
-dict 19 - forall 1: <</a 123 /b 456>> {} forall  456 eq  4 1 roll /b eq  4 1 roll 123 eq  4 1 roll /a eq
+dict 19 - forall 1: <</a 123 /b 123>> {} forall  123 eq  4 1 roll dup /b eq exch /a eq or  4 1 roll 123 eq  4 1 roll dup /a eq exch /b eq or
 dict 20 - forall 2: 0 <</a 1 /b 2 /c 3>> {exch pop add} forall 6 eq
 dict 21 - currentdict/userdict: currentdict userdict eq  10 dict begin currentdict userdict ne
 dict 22 - errordict: errordict
