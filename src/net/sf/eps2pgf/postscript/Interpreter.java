@@ -603,6 +603,13 @@ public class Interpreter {
         double inc = opStack.pop().toReal();
         double initial = opStack.pop().toReal();
         
+        // Check whether limit, inc and initial are all three integers
+        boolean allIntegers = false;
+        if ( (limit == Math.round(limit)) && (inc == Math.round(inc)) && 
+                (initial == Math.round(initial)) ) {
+            allIntegers = true;
+        }
+        
         // Prevent (virtually) infinite loops
         if (inc == 0) {
             return;
@@ -621,7 +628,11 @@ public class Interpreter {
                 break;
             }
             
-            opStack.push(new PSObjectReal(control));
+            if (allIntegers) {
+                opStack.push(new PSObjectInt(control));
+            } else {
+                opStack.push(new PSObjectReal(control));
+            }
             proc.execute(this);
             
             control += inc;
