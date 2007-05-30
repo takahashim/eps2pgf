@@ -21,6 +21,8 @@
 
 package net.sf.eps2pgf.postscript;
 
+import java.util.List;
+
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
@@ -252,6 +254,19 @@ public class PSObjectMatrix extends PSObject {
         return Math.sqrt(Math.pow(matrix[1], 2) + Math.pow(matrix[3], 2));
     }
     
+    
+    /**
+     * Returns a list with all items in object.
+     * @return List with all items in this object. The first object (with
+     *         index 0) is always a PSObjectInt with the number of object
+     *         in a single item. For most object types this is 1, but for
+     *         dictionaries this is 2. All consecutive items (index 1 and
+     *         up) are the object's items.
+     */
+    public List<PSObject> getItemList() throws PSErrorInvalidAccess {
+        PSObjectArray array = toArray();
+        return array.getItemList();
+    }
     
     /**
      * Returns the mean scaling factor described by this matrix
