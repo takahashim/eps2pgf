@@ -40,6 +40,14 @@ public class PSObjectInt extends PSObject {
     
     /**
      * Creates a new instance of PSObjectInt
+     * @param r New integer value will be the integer nearest to this value (i.e. round(r))
+     */
+    public PSObjectInt(double r) {
+        value = (int)Math.round(r);
+    }
+    
+    /**
+     * Creates a new instance of PSObjectInt
      * @param str String representing an integer
      */
     public PSObjectInt(String str) {
