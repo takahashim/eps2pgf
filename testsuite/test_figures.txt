@@ -1,8 +1,9 @@
 autocad_columbia: 
 autocad_nozzle:
 creohn_Sheep_in_gray:
+dvips1:
+golfer:
 grow:
-illustrator_golfer:
 illustrator_vw:
 ipe-figure1:
 tiger:
