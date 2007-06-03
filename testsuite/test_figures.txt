@@ -3,6 +3,6 @@ autocad_nozzle:
 creohn_Sheep_in_gray:
 grow:
 illustrator_golfer:
-illustrator_tiger:
 illustrator_vw:
 ipe-figure1:
+tiger:

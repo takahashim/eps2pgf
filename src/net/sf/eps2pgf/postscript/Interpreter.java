@@ -59,6 +59,12 @@ public class Interpreter {
     // Text handler, handles text in the postscript code
     TextHandler textHandler = new TextHandler(gstate);
     
+    // Header information of the file being interpreted
+    DSCHeader header;
+    
+    // Default clipping path
+    Path defaultClippingPath;
+    
     Logger log = Logger.getLogger("global");
     
     /**
@@ -67,8 +73,9 @@ public class Interpreter {
      * @param out Destination for output code
      * @throws java.io.FileNotFoundException Unable to find font resources
      */
-    public Interpreter(List<PSObject> in, Writer out) throws FileNotFoundException {
+    public Interpreter(List<PSObject> in, Writer out, DSCHeader fileHeader) throws FileNotFoundException {
         docObjects = in;
+        header = fileHeader;
         
         // Initialize character encodings
         Encoding.initialize();
@@ -83,10 +90,7 @@ public class Interpreter {
      * @throws java.lang.Exception Something went wrong in the interpretation process
      */
     public void start() throws Exception {
-        exp.init();
-        
-        // Default line width in PostScript is 1pt, while in PGF it is 0.4pt
-        exp.setlinewidth(gstate.current.CTM.getMeanScaling());
+        initialize();
         
         try {
             processObjects(docObjects);
@@ -99,6 +103,46 @@ public class Interpreter {
             throw e;
         }
         exp.finish();
+    }
+    
+    /**
+     * Do some initialization tasks
+     **/
+    void initialize() throws IOException, PSErrorUnimplemented {
+        exp.init();
+        
+        // Default line width in PostScript is 1pt, while in PGF it is 0.4pt
+        exp.setlinewidth(gstate.current.CTM.getMeanScaling());
+        
+        // An eps-file defines a bounding box. Set this bounding box as the
+        // default clipping path.
+        double[] bbox = header.boundingBox;
+        double left, right, top, bottom;
+        if (bbox != null) {
+            left = bbox[0];
+            bottom = bbox[1];
+            right = bbox[2];
+            top = bbox[3];
+        } else {
+            // If no bounding box is default we use A4 paper. But the figure is
+            // not automatically clipped by this, so in most situation it won't
+            // have any effect on the result (only in situation where e.g.
+            // 'initclip' is used).
+            left = 0;
+            bottom = 0;
+            right = 595;
+            top = 842;
+        }
+        gstate.current.moveto(left, bottom);
+        gstate.current.lineto(right, bottom);
+        gstate.current.lineto(right, top);
+        gstate.current.lineto(left, top);
+        gstate.current.path.closepath();
+        defaultClippingPath = gstate.current.path;
+        op_newpath();
+        if (bbox != null) {
+            op_initclip();
+        }
     }
     
     /**
@@ -266,14 +310,15 @@ public class Interpreter {
         throw new PSErrorUnmatchedMark();
     }
     
-    /**
-     * PostScript op: clip
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Operator not fully implemented
-     * @throws java.io.IOException Unable to write output
-     */
+    /** PostScript op: clip */
     public void op_clip() throws PSErrorUnimplemented, IOException {
         gstate.current.clip();
         exp.clip(gstate.current.clippingPath);
+    }
+    
+    /** PostScript op: clippath */
+    public void op_clippath() {
+        gstate.current.path = gstate.current.clippingPath.clone();
     }
     
     /** PostScript op: closepath */
@@ -751,9 +796,13 @@ public class Interpreter {
         opStack.push(new PSObjectArray(encodingVector));
     }
     
-    /**
-     * PostScript op: itransform
-     */
+    /** PostScript op: initclip */
+    public void op_initclip() throws IOException, PSErrorUnimplemented {
+        gstate.current.clippingPath = defaultClippingPath.clone();
+        exp.clip(gstate.current.clippingPath);
+    }
+    
+    /** PostScript op: itransform */
     public void op_itransform() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
             PSErrorRangeCheck, PSErrorInvalidAccess {
         PSObject obj = opStack.pop();
@@ -913,8 +962,8 @@ public class Interpreter {
     }
 
     /** PostScript op: newpath */
-    public void op_newpath() throws PSError {
-        gstate.current.path = new Path();
+    public void op_newpath() {
+        gstate.current.path = new Path(gstate);
         gstate.current.position[0] = Double.NaN;
         gstate.current.position[1] = Double.NaN;
     }

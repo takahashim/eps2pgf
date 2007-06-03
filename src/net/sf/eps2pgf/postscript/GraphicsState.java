@@ -64,12 +64,18 @@ public class GraphicsState implements Cloneable {
     public PSObjectFont font;
     
     /**
+     * Link to the parent graphics state stack
+     */
+    GstateStack parentStack;
+    
+    /**
      * Creates a new default graphics state.
      */
-    public GraphicsState() {
-        path = new Path();
-        clippingPath = new Path();
+    public GraphicsState(GstateStack parentGraphicsStack) {
+        path = new Path(parentGraphicsStack);
+        clippingPath = new Path(parentGraphicsStack);
         font = new PSObjectFont();
+        parentStack = parentGraphicsStack;
     }
     
     
@@ -82,7 +88,7 @@ public class GraphicsState implements Cloneable {
         position[0] = x;
         position[1] = y;
         double[] transformed = CTM.apply(x, y);
-        path.moveto(transformed[0], transformed[1], x, y);
+        path.moveto(transformed[0], transformed[1]);
     }
     
     /**
@@ -128,7 +134,7 @@ public class GraphicsState implements Cloneable {
         position[0] = position[0] + dx;
         position[1] = position[1] + dy;
         double[] transformed = CTM.apply(position);
-        path.moveto(transformed[0], transformed[1], position[0], position[1]);
+        path.moveto(transformed[0], transformed[1]);
     }
     
     /**
@@ -162,9 +168,6 @@ public class GraphicsState implements Cloneable {
      * inside the current path.
      */
     public void clip() {
-        if (clippingPath.sections.size() > 0) {
-            log.info("Clip operator is not fully implemented. This might have an effect on the result.");
-        }
         clippingPath = path.clone();
     }
     
@@ -190,7 +193,7 @@ public class GraphicsState implements Cloneable {
      * @return Returns the deep copy.
      */
     public GraphicsState clone() throws CloneNotSupportedException {
-        GraphicsState newState = new GraphicsState();
+        GraphicsState newState = new GraphicsState(parentStack);
         newState.CTM = CTM.clone();
         newState.position = position.clone();
         newState.path = path.clone();

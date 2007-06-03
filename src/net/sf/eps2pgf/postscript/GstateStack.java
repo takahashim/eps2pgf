@@ -39,7 +39,7 @@ public class GstateStack {
      */
     public GstateStack() {
         stack = new ArrayStack<GraphicsState>();
-        current = new GraphicsState();
+        current = new GraphicsState(this);
     }
     
     /**
