@@ -138,3 +138,4 @@ dict 29 - cleardictstack: 10 dict begin countdictstack 4 eq cleardictstack count
 control 1 - for 1: 0 1 1 4 {add} for dup 10 eq exch type /integertype eq
 control 2 - for 2: 1 2 6 {} for 5 eq  3 1 roll 3 eq  3 1 roll type /integertype eq
 control 3 - for 3: 3 -.5 1 {} for 1.0 eq  5 1 roll 1.5 eq  5 1 roll 2.0 eq  5 1 roll 2.5 eq  5 1 roll 3.0 eq
+path 1 - clippath: clippath 1 setgray fill

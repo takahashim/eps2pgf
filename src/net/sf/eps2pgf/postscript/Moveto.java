@@ -40,15 +40,11 @@ public class Moveto extends PathSection implements Cloneable {
      * Create a new Moveto instance
      * @param x X-coordinate (in device coordinates, micrometer)
      * @param y Y-coordinate (in device coordinates, micrometer)
-     * @param docx user space X-coordinate before CTM (in pt)
-     * @param docy user space Y-coordinate before CTM (in pt)
      */
-    public Moveto(double x, double y, double docx, double docy) {
+    public Moveto(double x, double y) {
         params[0] = x;
         params[1] = y;
-        params[2] = docx;
-        params[3] = docy;
-        for (int i = 4 ; i < params.length ; i++) {
+        for (int i = 2 ; i < params.length ; i++) {
             params[i] = Double.NaN;
         }
     }
