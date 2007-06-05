@@ -30,13 +30,7 @@ import net.sf.eps2pgf.postscript.errors.*;
  * items.
  * @author Paul Wagenaars
  */
-public class PSObjectMatrix extends PSObject {
-    double[] matrix = new double[6];
-    
-    // Keep track of rotation (for easy reference, instead of deriving it
-    // from the matrix.
-    double rotation = 0;
-    
+public class PSObjectMatrix extends PSObjectArray {
     /**
      * Creates a new instance of PSObjectMatrix. See PostScript manual
      * under "4.3 Coordinate Systems and Transformation" for more info.
@@ -54,109 +48,52 @@ public class PSObjectMatrix extends PSObject {
      * Transformation" for more info.
      */
     public PSObjectMatrix(double a, double b, double c, double d, double tx, double ty) {
-        matrix[0] = a;
-        matrix[1] = b;
-        matrix[2] = c;
-        matrix[3] = d;
-        matrix[4] = tx;
-        matrix[5] = ty;
+        try {
+            addAt(0, new PSObjectReal(a));
+            addAt(1, new PSObjectReal(b));
+            addAt(2, new PSObjectReal(c));
+            addAt(3, new PSObjectReal(d));
+            addAt(4, new PSObjectReal(tx));
+            addAt(5, new PSObjectReal(ty));
+        } catch (PSErrorInvalidAccess e) {
+            // this can never happen with a brand new array/matrix
+        }
     }
     
     /**
      * Creates a new instance of PSObjectMatrix. The new matrix is an exact copy of
-     * refMatrix.
+     * 'refArray'.
      * 
-     * @param refMatrix PSObjectMatrix to copy.
+     * @param refArray Array to copy.
      */
-    public PSObjectMatrix(PSObjectMatrix refMatrix) {
-        for (int i = 0 ; i < matrix.length ; i++) {
-            matrix[i] = refMatrix.matrix[i];
+    public PSObjectMatrix(PSObjectArray refArray) throws PSErrorRangeCheck,
+            PSErrorTypeCheck {
+        checkMatrix(refArray);
+
+        array = refArray.array;
+        offset = refArray.offset;
+        count = refArray.count;
+        copyCommonAttributes(refArray);
+    }
+    
+    public static void checkMatrix(PSObjectArray arrayToCheck) throws PSErrorRangeCheck,
+            PSErrorTypeCheck {
+        if (arrayToCheck.size() != 6) {
+            throw new PSErrorRangeCheck();
+        }
+        for (int i = 0 ; i < 6 ; i++) {
+            arrayToCheck.array.get(i+arrayToCheck.offset).toReal();
         }
     }
     
     /**
-     * Copies values from another matrix to this matrix.
-     * @param obj Object from which the values must be copied.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to copy values.
+     * Apples this transformation matrix to a point
+     * @param coor Coordinate {x, y}
+     * @return Transformed coordinate
      */
-    public void copyValuesFrom(PSObject obj) throws PSErrorRangeCheck,
-            PSErrorTypeCheck, PSErrorInvalidAccess {
-        PSObjectMatrix fromMatrix = obj.toMatrix();
-        for (int i = 0 ; i < matrix.length ; i++) {
-            matrix[i] = fromMatrix.matrix[i];
-        }
-    }
-    
-    /**
-     * Creates a scaled copy of this matrix.
-     *                       [sx 0  0]
-     * Transformation matrix: [0  sy 0]
-     *                       [0  0  1]
-     * @param sx X-coodinate scaling factor.
-     * @param sy Y-coordinate scaling factor.
-     */
-    public void scale(double sx, double sy) {
-        // [a b c d xx yy]
-        matrix[0] = sx*matrix[0];
-        matrix[1] = sx*matrix[1];
-        matrix[2] = sy*matrix[2];
-        matrix[3] = sy*matrix[3];
-    }
-    
-    /**
-     * Translates the matrix
-     *                         [1  0  0]
-     * Transformation matrix = [0  1  0]
-     *                         [sx sy 1]
-     * @param tx X-coordinate translation
-     * @param ty Y-coordinate translation
-     */
-    public void translate(double tx, double ty) {
-        // [a b c d xx yy]
-        matrix[4] = tx*matrix[0] + ty*matrix[2] + matrix[4];
-        matrix[5] = tx*matrix[1] + ty*matrix[3] + matrix[5];
-    }
-    
-    /**
-     * Rotates the matrix (current transformation matrix)
-     *                         [cos(a)  sin(a) 0]
-     * Transformation matrix = [-sin(a) cos(a) 0]
-     *                         [  0      0     1]
-     * @param angle Angle in degrees for counterclockwise rotation.
-     */
-    public void rotate(double angle) {
-        // [a b c d xx yy]
-        double cosa = Math.cos(angle*Math.PI/180);
-        double sina = Math.sin(angle*Math.PI/180);
-        double a = cosa*matrix[0] + sina*matrix[2];
-        double b = cosa*matrix[1] + sina*matrix[3];
-        double c = -sina*matrix[0] + cosa*matrix[2];
-        double d = -sina*matrix[1] + cosa*matrix[3];
-        matrix[0] = a;
-        matrix[1] = b;
-        matrix[2] = c;
-        matrix[3] = d;
-    }
-    
-    /**
-     * Applies the transformation represented by conc to this matrix.
-     * newMatrix = conc * matrix
-     * @param conc Matrix describing the transformation.
-     */
-    public void concat(PSObjectMatrix conc) {
-        // [a b c d tx ty] [a b 0 ; c d 0 ; tx ty 1]
-        double a = conc.matrix[0]*matrix[0] + conc.matrix[1]*matrix[2];
-        double b = conc.matrix[0]*matrix[1] + conc.matrix[1]*matrix[3];
-        double c = conc.matrix[2]*matrix[0] + conc.matrix[3]*matrix[2];
-        double d = conc.matrix[2]*matrix[1] + conc.matrix[3]*matrix[3];
-        double tx = conc.matrix[4]*matrix[0] + conc.matrix[5]*matrix[2] + matrix[4];
-        double ty = conc.matrix[4]*matrix[1] + conc.matrix[5]*matrix[3] + matrix[5];
-        matrix[0] = a;
-        matrix[1] = b;
-        matrix[2] = c;
-        matrix[3] = d;
-        matrix[4] = tx;
-        matrix[5] = ty;
+    public double[] apply(double[] coor) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        return apply(coor[0], coor[1]);
     }
     
     /**
@@ -165,21 +102,117 @@ public class PSObjectMatrix extends PSObject {
      * @param y Y-coordinate
      * @return Transformed coordinate
      */
-    public double[] apply(double x, double y) {
+    public double[] apply(double x, double y) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
         // [a b c d tx ty]
         double[] converted = new double[2];
-        converted[0] = matrix[0]*x + matrix[2]*y + matrix[4];
-        converted[1] = matrix[1]*x + matrix[3]*y + matrix[5];
+        converted[0] = getReal(0)*x + getReal(2)*y + getReal(4);
+        converted[1] = getReal(1)*x + getReal(3)*y + getReal(5);
         return converted;
     }
     
+    
+    
     /**
-     * Apples this transformation matrix to a point
-     * @param coor Coordinate {x, y}
-     * @return Transformed coordinate
+     * Creates a deep copy of this array.
+     * @throws java.lang.CloneNotSupportedException Unable to clone this object or one of its sub-objects
+     * @return Deep copy of this array
      */
-    public double[] apply(double[] coor) {
-        return apply(coor[0], coor[1]);
+    public PSObjectMatrix clone() {
+        try {
+            double a = getReal(0);
+            double b = getReal(1);
+            double c = getReal(2);
+            double d = getReal(3);
+            double tx = getReal(4);
+            double ty = getReal(5);
+            return new PSObjectMatrix(a, b, c, d, tx, ty);
+        } catch (PSError e) {
+            // this should never happen
+            return new PSObjectMatrix(1, 0, 0, 1, 0, 0);
+        }
+    }
+
+    /**
+     * Applies the transformation represented by conc to this matrix.
+     * newMatrix = conc * matrix
+     * @param conc Matrix describing the transformation.
+     */
+    public void concat(PSObjectMatrix conc) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        // [a b c d tx ty] [a b 0 ; c d 0 ; tx ty 1]
+        double a = conc.getReal(0)*getReal(0) + conc.getReal(1)*getReal(2);
+        double b = conc.getReal(0)*getReal(1) + conc.getReal(1)*getReal(3);
+        double c = conc.getReal(2)*getReal(0) + conc.getReal(3)*getReal(2);
+        double d = conc.getReal(2)*getReal(1) + conc.getReal(3)*getReal(3);
+        double tx = conc.getReal(4)*getReal(0) + conc.getReal(5)*getReal(2) + getReal(4);
+        double ty = conc.getReal(4)*getReal(1) + conc.getReal(5)*getReal(3) + getReal(5);
+        setReal(0, a);
+        setReal(1, b);
+        setReal(2, c);
+        setReal(3, d);
+        setReal(4, tx);
+        setReal(5, ty);
+    }
+    
+    /**
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
+     * of composite object is not copied, but shared.
+     */
+    public PSObjectMatrix dup() {
+        try {
+            return new PSObjectMatrix(this);
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen
+            return null;
+        } catch (PSErrorTypeCheck e) {
+            // this can never happen
+            return null;
+        }
+    }
+    
+    /**
+     * Returns the mean scaling factor described by this matrix
+     * @return Mean scaling factor (= mean(sqrt(a^2+c^2) + sqrt(b^2+d^2)) )
+     */
+    public double getMeanScaling() throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        return 0.5 * (getXScaling() + getYScaling());
+    }
+    
+    /**
+     * Gets the object at the requested index and returns the real value of that
+     * object.
+     * @param index Index of the object to get
+     */
+    public double getReal(int index) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        return get(index).toReal();
+    }
+    
+    /**
+     * Determines the rotation for this transformation matrix
+     * @return Rotation in degrees
+     */
+    public double getRotation() throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        return Math.atan2(getReal(1), getReal(0)) / Math.PI * 180;
+    }
+    
+    /**
+     * Returns the x-scaling factor described by this matrix
+     */
+    public double getXScaling() throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        return Math.sqrt(Math.pow(getReal(0), 2) + Math.pow(getReal(2), 2));
+    }
+    
+    /**
+     * Returns the y-scaling factor described by this matrix
+     */
+    public double getYScaling() throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        return Math.sqrt(Math.pow(getReal(1), 2) + Math.pow(getReal(3), 2));
     }
     
     /**
@@ -188,13 +221,14 @@ public class PSObjectMatrix extends PSObject {
      * @param y Y-coordinate
      * @return Inverse transformed coordinate
      */
-    public double[] inverseApply(double x, double y) {
-        double a = matrix[0];
-        double b = matrix[1];
-        double c = matrix[2];
-        double d = matrix[3];
-        double tx = matrix[4];
-        double ty = matrix[5];
+    public double[] inverseApply(double x, double y) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        double a = getReal(0);
+        double b = getReal(1);
+        double c = getReal(2);
+        double d = getReal(3);
+        double tx = getReal(4);
+        double ty = getReal(5);
         
         double[] coor = new double[2];
         
@@ -208,7 +242,8 @@ public class PSObjectMatrix extends PSObject {
      * @param coor Coordinate
      * @return Inverse transformed coordinate
      */
-    public double[] inverseApply(double[] coor) {
+    public double[] inverseApply(double[] coor) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
         return inverseApply(coor[0], coor[1]);
     }
     
@@ -218,11 +253,12 @@ public class PSObjectMatrix extends PSObject {
      * @param y dy translation
      * @return Inverse transformed translation
      */
-    public double[] inverseApplyShift(double x, double y) {
-        double a = matrix[0];
-        double b = matrix[1];
-        double c = matrix[2];
-        double d = matrix[3];
+    public double[] inverseApplyShift(double x, double y) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        double a = getReal(0);
+        double b = getReal(1);
+        double c = getReal(2);
+        double d = getReal(3);
         
         double[] coor = new double[2];
         
@@ -236,64 +272,48 @@ public class PSObjectMatrix extends PSObject {
      * @param coor Translation vector {dx, dy}
      * @return Inverse transformed translation
      */
-    public double[] inverseApplyShift(double[] coor) {
+    public double[] inverseApplyShift(double[] coor) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
         return inverseApplyShift(coor[0], coor[1]);
     }
     
     /**
-     * Returns the x-scaling factor described by this matrix
+     * Rotates the matrix (current transformation matrix)
+     *                         [cos(a)  sin(a) 0]
+     * Transformation matrix = [-sin(a) cos(a) 0]
+     *                         [  0      0     1]
+     * @param angle Angle in degrees for counterclockwise rotation.
      */
-    public double getXScaling() {
-        return Math.sqrt(Math.pow(matrix[0], 2) + Math.pow(matrix[2], 2));
+    public void rotate(double angle) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        // [a b c d xx yy]
+        double cosa = Math.cos(angle*Math.PI/180);
+        double sina = Math.sin(angle*Math.PI/180);
+        double a = cosa*getReal(0) + sina*getReal(2);
+        double b = cosa*getReal(1) + sina*getReal(3);
+        double c = -sina*getReal(0) + cosa*getReal(2);
+        double d = -sina*getReal(1) + cosa*getReal(3);
+        setReal(0, a);
+        setReal(1, b);
+        setReal(2, c);
+        setReal(3, d);
     }
     
     /**
-     * Returns the y-scaling factor described by this matrix
+     * Creates a scaled copy of this matrix.
+     *                        [sx 0  0]
+     * Transformation matrix: [0  sy 0]
+     *                        [0  0  1]
+     * @param sx X-coodinate scaling factor.
+     * @param sy Y-coordinate scaling factor.
      */
-    public double getYScaling() {
-        return Math.sqrt(Math.pow(matrix[1], 2) + Math.pow(matrix[3], 2));
-    }
-    
-    
-    /**
-     * Returns a list with all items in object.
-     * @return List with all items in this object. The first object (with
-     *         index 0) is always a PSObjectInt with the number of object
-     *         in a single item. For most object types this is 1, but for
-     *         dictionaries this is 2. All consecutive items (index 1 and
-     *         up) are the object's items.
-     */
-    public List<PSObject> getItemList() throws PSErrorInvalidAccess {
-        PSObjectArray array = toArray();
-        return array.getItemList();
-    }
-    
-    /**
-     * Returns the mean scaling factor described by this matrix
-     * @return Mean scaling factor (= mean(sqrt(a^2+c^2) + sqrt(b^2+d^2)) )
-     */
-    public double getMeanScaling() {
-        return 0.5 * (getXScaling() + getYScaling());
-    }
-    
-    /**
-     * Determines the rotation for this transformation matrix
-     * @return Rotation in degrees
-     */
-    public double getRotation() {
-        return Math.atan2(matrix[1], matrix[0]) / Math.PI * 180;
-    }
-    
-    /**
-     * Convert this matrix to an array.
-     * @return Array copy of this matrix.
-     */
-    public PSObjectArray toArray() {
-        PSObject[] objs = new PSObject[matrix.length];
-        for (int i = 0 ; i < objs.length ; i++) {
-            objs[i] = new PSObjectReal(matrix[i]);
-        }
-        return new PSObjectArray(objs);
+    public void scale(double sx, double sy) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        // [a b c d xx yy]
+        setReal(0, sx*getReal(0));
+        setReal(1, sx*getReal(1));
+        setReal(2, sy*getReal(2));
+        setReal(3, sy*getReal(3));
     }
     
     /**
@@ -303,34 +323,27 @@ public class PSObjectMatrix extends PSObject {
     public PSObjectMatrix toMatrix() {
         return this;
     }
-
     /**
-     * Returns an exact copy of this matrix.
-     * @return Exact copy of this object.
+     * Replaces a value in this matrix
      */
-    public PSObjectMatrix clone() {
-       return new PSObjectMatrix(this);
+    public void setReal(int index, double value) throws PSErrorRangeCheck,
+            PSErrorInvalidAccess {
+        set(index, new PSObjectReal(value));
     }
     
     /**
-     * Creates a human-readable string representation of this object.
-     * @return String representation of this object.
+     * Translates the matrix
+     *                         [1  0  0]
+     * Transformation matrix = [0  1  0]
+     *                         [sx sy 1]
+     * @param tx X-coordinate translation
+     * @param ty Y-coordinate translation
      */
-    public String isis() {
-        StringBuilder str = new StringBuilder();
-        str.append("[");
-        for (int i = 0 ; i < matrix.length ; i++) {
-            str.append(" " + matrix[i]);
-        }
-        str.append(" ]");
-        return str.toString();
+    public void translate(double tx, double ty) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        // [a b c d xx yy]
+        setReal(4, tx*getReal(0) + ty*getReal(2) + getReal(4));
+        setReal(5, tx*getReal(1) + ty*getReal(3) + getReal(5));
     }
 
-    /**
-     * Returns the type of this object
-     * @return Type of this object (see PostScript manual for possible values)
-     */
-    public String type() {
-        return "arraytype";
-    }
 }
