@@ -31,9 +31,9 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class PSObjectArray extends PSObject {
-    private List<PSObject> array;
-    private int offset;
-    private int count;
+    List<PSObject> array;
+    int offset;
+    int count;
     
     /**
      * Create a new empty PostScript array
