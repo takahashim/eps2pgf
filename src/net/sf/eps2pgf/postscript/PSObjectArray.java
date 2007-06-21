@@ -197,29 +197,6 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
-     * Copies values from another obj to this object.
-     * @param obj Object from which the values must be copied
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to copy values from object.
-     */
-    public void copyValuesFrom(PSObject obj) throws PSErrorTypeCheck, PSErrorInvalidAccess {
-        PSObjectArray array = obj.toArray();
-        
-        try {
-            // First remove all current elements from the array
-            for (int i = size()-1 ; i >= 0 ; i--) {
-                remove(i);
-            }
-        
-            // Copies the values
-            for (int i = 0 ; i < array.size() ; i++) {
-                addAt(i, array.get(i));
-            }
-        } catch (PSErrorRangeCheck e) {
-            // This can never happen
-        }
-    }
-    
-    /**
      * Convert this object to a literal object
      * @return This object converted to a literal object
      */
@@ -341,6 +318,16 @@ public class PSObjectArray extends PSObject {
             PSErrorInvalidAccess {
         checkAccess(false, true, false);
         return new PSObjectArray(this, index, count);
+    }
+    
+    /**
+     * Gets the object at the requested index and returns the real value of that
+     * object.
+     * @param index Index of the object to get
+     */
+    public double getReal(int index) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        return get(index).toReal();
     }
     
     /**
@@ -491,6 +478,14 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * Replaces a value in this matrix
+     */
+    public void setReal(int index, double value) throws PSErrorRangeCheck,
+            PSErrorInvalidAccess {
+        set(index, new PSObjectReal(value));
+    }
+    
+    /**
      * Returns the number of elements in this array.
      * @return Number of items in this array.
      */
@@ -547,12 +542,7 @@ public class PSObjectArray extends PSObject {
      */
     public PSObjectMatrix toMatrix() throws PSErrorRangeCheck, PSErrorTypeCheck,
             PSErrorInvalidAccess {
-        if (this.size() != 6) {
-            throw new PSErrorRangeCheck();
-        }
-        return new PSObjectMatrix(this.get(0).toReal(), this.get(1).toReal(),
-                this.get(2).toReal(), this.get(3).toReal(),
-                this.get(4).toReal(), this.get(5).toReal());
+        return new PSObjectMatrix(this);
     }
     
     /**

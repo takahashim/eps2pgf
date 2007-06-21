@@ -107,7 +107,8 @@ public class Interpreter {
     /**
      * Do some initialization tasks
      **/
-    void initialize() throws IOException, PSErrorUnimplemented {
+    void initialize() throws IOException, PSErrorUnimplemented,
+            PSErrorInvalidAccess, PSErrorRangeCheck, PSErrorTypeCheck {
         exp.init();
         
         // Default line width in PostScript is 1pt, while in PGF it is 0.4pt
@@ -321,7 +322,8 @@ public class Interpreter {
     }
     
     /** PostScript op: closepath */
-    public void op_closepath() {
+    public void op_closepath() throws PSErrorInvalidAccess, PSErrorRangeCheck,
+            PSErrorTypeCheck {
         double[] startPos = gstate.current.path.closepath();
         if (startPos != null) {
             gstate.current.moveto(startPos[0], startPos[1]);
@@ -401,15 +403,14 @@ public class Interpreter {
     
     /** PostScript op: currentmatrix */
     public void op_currentmatrix() throws PSError {
-        PSObject obj = opStack.pop();
-        PSObjectMatrix matrix = obj.toMatrix();
-        matrix.copyValuesFrom(gstate.current.CTM);
-        obj.copyValuesFrom(matrix);
-        opStack.push(obj);
+        PSObjectMatrix matrix = opStack.pop().toMatrix();
+        matrix.copy(gstate.current.CTM);
+        opStack.push(matrix);
     }
     
     /** PostScript op: currentpoint */
-    public void op_currentpoint() throws PSErrorNoCurrentPoint {
+    public void op_currentpoint() throws PSErrorNoCurrentPoint, PSErrorTypeCheck,
+            PSErrorRangeCheck, PSErrorInvalidAccess {
         double[] currentDevice = gstate.current.getCurrentPosInDeviceSpace();
         double[] currentUser = gstate.current.CTM.inverseApply(currentDevice);
         opStack.push(new PSObjectReal(currentUser[0]));
@@ -417,7 +418,8 @@ public class Interpreter {
     }
     
     /** PostScript op: curveto */
-    public void op_curveto() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    public void op_curveto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess, PSErrorRangeCheck {
         double y3 = opStack.pop().toReal();
         double x3 = opStack.pop().toReal();
         double y2 = opStack.pop().toReal();
@@ -801,6 +803,11 @@ public class Interpreter {
         exp.clip(gstate.current.clippingPath);
     }
     
+    /** PostScript op: initmatrix */
+    public void op_initmatrix() {
+        gstate.current.initmatrix();
+    }
+    
     /** PostScript op: itransform */
     public void op_itransform() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
             PSErrorRangeCheck, PSErrorInvalidAccess {
@@ -917,7 +924,7 @@ public class Interpreter {
     
     /** Postscript op: matrix */
     public void op_matrix() throws PSError {
-        opStack.push(new PSObjectMatrix(1, 0, 0, 1, 0 , 0));
+        opStack.push(new PSObjectMatrix());
     }
     
     /** PostScript op: maxlength */
@@ -1126,7 +1133,7 @@ public class Interpreter {
     
     /** PostScript op: rmoveto */
     public void op_rlineto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorNoCurrentPoint {
+            PSErrorNoCurrentPoint, PSErrorRangeCheck, PSErrorInvalidAccess {
         double dy = opStack.pop().toReal();
         double dx = opStack.pop().toReal();
         gstate.current.rlineto(dx, dy);
@@ -1134,7 +1141,7 @@ public class Interpreter {
 
     /** PostScript op: rmoveto */
     public void op_rmoveto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorNoCurrentPoint {
+            PSErrorNoCurrentPoint, PSErrorInvalidAccess, PSErrorRangeCheck {
         double dy = opStack.pop().toReal();
         double dx = opStack.pop().toReal();
         gstate.current.rmoveto(dx, dy);

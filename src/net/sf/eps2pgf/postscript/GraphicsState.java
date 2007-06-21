@@ -21,7 +21,8 @@
 package net.sf.eps2pgf.postscript;
 
 import java.util.logging.*;
-import net.sf.eps2pgf.postscript.errors.PSErrorNoCurrentPoint;
+
+import net.sf.eps2pgf.postscript.errors.*;
 
 /**
  * Structure that holds the graphics state (graphic control parameter).
@@ -40,7 +41,8 @@ public class GraphicsState implements Cloneable {
      * in eps files to micrometers.
      * [a b c d tx ty] -> x' = a*x + b*y + tx ; y' = c*x + d*y * ty
      */
-    public PSObjectMatrix CTM = new PSObjectMatrix(25.4*1000/72.0, 0 ,0, 25.4*1000/72.0, 0, 0);
+    public PSObjectMatrix CTM = new PSObjectMatrix();
+    public static PSObjectMatrix defaultCTM = new PSObjectMatrix(25.4*1000/72.0, 0 ,0, 25.4*1000/72.0, 0, 0);
     
     /**
      * Current position in pt (before CTM is applied).
@@ -71,95 +73,11 @@ public class GraphicsState implements Cloneable {
      * Creates a new default graphics state.
      */
     public GraphicsState(GstateStack parentGraphicsStack) {
+        initmatrix();
         path = new Path(parentGraphicsStack);
         clippingPath = new Path(parentGraphicsStack);
         font = new PSObjectFont();
         parentStack = parentGraphicsStack;
-    }
-    
-    
-    /**
-     * Move the current position to a new location (PostScript moveto operator)
-     * @param x X-coordinate (before CTM is applied)
-     * @param y Y-coordinate (before CTM is applied)
-     */
-    public void moveto(double x, double y) {
-        position[0] = x;
-        position[1] = y;
-        double[] transformed = CTM.apply(x, y);
-        path.moveto(transformed[0], transformed[1]);
-    }
-    
-    /**
-     * Draw a line to a point.
-     * @param x X-coordinate (before CTM is applied)
-     * @param y Y-coordinate (before CTM is applied)
-     */
-    public void lineto(double x, double y) {
-        position[0] = x;
-        position[1] = y;
-        double[] transformed = CTM.apply(x, y);
-        path.lineto(transformed[0], transformed[1]);
-    }
-    
-    /**
-     * Add a curveto section to the current path
-     * @param x1 X-coordinate of first control point
-     * @param y1 Y-coordinate of first control point
-     * @param x2 X-coordinate of second control point
-     * @param y2 Y-coordinate of second control point
-     * @param x3 X-coordinate of end point
-     * @param y3 Y-coordinate of end point
-     */
-    public void curveto(double x1, double y1, double x2, double y2, 
-            double x3, double y3) {
-        position[0] = x3;
-        position[1] = y3;
-        double[] coor1 = CTM.apply(x1, y1);
-        double[] coor2 = CTM.apply(x2, y2);
-        double[] coor3 = CTM.apply(x3, y3);
-        path.curveto(coor1, coor2, coor3);
-    }
-    
-    /**
-     * Move to a relative point.
-     * @param dx delta X-coordinate (before CTM is applied)
-     * @param dy delta Y-coordinate (before CTM is applied)
-     */
-    public void rmoveto(double dx, double dy) throws PSErrorNoCurrentPoint {
-        if (position[0] == Double.NaN) {
-            throw new PSErrorNoCurrentPoint();
-        }
-        position[0] = position[0] + dx;
-        position[1] = position[1] + dy;
-        double[] transformed = CTM.apply(position);
-        path.moveto(transformed[0], transformed[1]);
-    }
-    
-    /**
-     * Draw a line to a relative point.
-     * @param dx delta X-coordinate (before CTM is applied)
-     * @param dy delta Y-coordinate (before CTM is applied)
-     */
-    public void rlineto(double dx, double dy) throws PSErrorNoCurrentPoint {
-        if (position[0] == Double.NaN) {
-            throw new PSErrorNoCurrentPoint();
-        }
-        position[0] = position[0] + dx;
-        position[1] = position[1] + dy;
-        double[] transformed = CTM.apply(position);
-        path.lineto(transformed[0], transformed[1]);
-    }
-    
-    /**
-     * Retrieves the current position in device space. 
-     * @return X- and Y-coordinate in device space (micrometers)
-     */
-    public double[] getCurrentPosInDeviceSpace() throws PSErrorNoCurrentPoint {
-        if (path.sections.size() == 0) {
-            throw new PSErrorNoCurrentPoint();
-        }
-        return path.sections.get(path.sections.size() - 1).deviceCoor();
     }
     
     /**
@@ -168,22 +86,6 @@ public class GraphicsState implements Cloneable {
      */
     public void clip() {
         clippingPath = path.clone();
-    }
-    
-    /**
-     * Updates the field current position by retrieving the last coordinate
-     * of the current path and transforming it back to user space
-     * coordinates. This is usually done after the CTM has been altered.
-     */
-    public void updatePosition() {
-        try {
-            double[] posd = getCurrentPosInDeviceSpace();
-            position = CTM.inverseApply(posd);
-        } catch (PSErrorNoCurrentPoint e) {
-            // Apparently there is no current point
-            position[0] = Double.NaN;
-            position[1] = Double.NaN;
-        }
     }
     
     /**
@@ -200,4 +102,127 @@ public class GraphicsState implements Cloneable {
         newState.font = font.clone();
         return newState;
     }
+
+    /**
+     * Add a curveto section to the current path
+     * @param x1 X-coordinate of first control point
+     * @param y1 Y-coordinate of first control point
+     * @param x2 X-coordinate of second control point
+     * @param y2 Y-coordinate of second control point
+     * @param x3 X-coordinate of end point
+     * @param y3 Y-coordinate of end point
+     */
+    public void curveto(double x1, double y1, double x2, double y2, 
+            double x3, double y3) throws PSErrorInvalidAccess, PSErrorRangeCheck,
+            PSErrorTypeCheck {
+        position[0] = x3;
+        position[1] = y3;
+        double[] coor1 = CTM.apply(x1, y1);
+        double[] coor2 = CTM.apply(x2, y2);
+        double[] coor3 = CTM.apply(x3, y3);
+        path.curveto(coor1, coor2, coor3);
+    }
+    
+    /**
+     * Retrieves the current position in device space. 
+     * @return X- and Y-coordinate in device space (micrometers)
+     */
+    public double[] getCurrentPosInDeviceSpace() throws PSErrorNoCurrentPoint {
+        if (path.sections.size() == 0) {
+            throw new PSErrorNoCurrentPoint();
+        }
+        return path.sections.get(path.sections.size() - 1).deviceCoor();
+    }
+    
+    /**
+     * Sets the current transformation matrix (CTM) to its default value
+     */
+    public void initmatrix() {
+        try {
+            CTM.copy(defaultCTM);
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen since both are matrices
+        } catch (PSErrorTypeCheck e) {
+            // this can never happen since both are matrices
+        } catch (PSErrorInvalidAccess e) {
+            // this can never happen because user can not change access
+            // properties of these matrices.
+        }
+    }
+    
+    /**
+     * Draw a line to a point.
+     * @param x X-coordinate (before CTM is applied)
+     * @param y Y-coordinate (before CTM is applied)
+     */
+    public void lineto(double x, double y) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        position[0] = x;
+        position[1] = y;
+        double[] transformed = CTM.apply(x, y);
+        path.lineto(transformed[0], transformed[1]);
+    }
+    
+    /**
+     * Move the current position to a new location (PostScript moveto operator)
+     * @param x X-coordinate (before CTM is applied)
+     * @param y Y-coordinate (before CTM is applied)
+     */
+    public void moveto(double x, double y) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        position[0] = x;
+        position[1] = y;
+        double[] transformed = CTM.apply(x, y);
+        path.moveto(transformed[0], transformed[1]);
+    }
+    
+    /**
+     * Draw a line to a relative point.
+     * @param dx delta X-coordinate (before CTM is applied)
+     * @param dy delta Y-coordinate (before CTM is applied)
+     */
+    public void rlineto(double dx, double dy) throws PSErrorNoCurrentPoint,
+            PSErrorInvalidAccess, PSErrorRangeCheck, PSErrorTypeCheck {
+        if (position[0] == Double.NaN) {
+            throw new PSErrorNoCurrentPoint();
+        }
+        position[0] = position[0] + dx;
+        position[1] = position[1] + dy;
+        double[] transformed = CTM.apply(position);
+        path.lineto(transformed[0], transformed[1]);
+    }
+    
+    /**
+     * Move to a relative point.
+     * @param dx delta X-coordinate (before CTM is applied)
+     * @param dy delta Y-coordinate (before CTM is applied)
+     */
+    public void rmoveto(double dx, double dy) throws PSErrorNoCurrentPoint,
+            PSErrorInvalidAccess, PSErrorRangeCheck, PSErrorTypeCheck {
+        if (position[0] == Double.NaN) {
+            throw new PSErrorNoCurrentPoint();
+        }
+        position[0] = position[0] + dx;
+        position[1] = position[1] + dy;
+        double[] transformed = CTM.apply(position);
+        path.moveto(transformed[0], transformed[1]);
+    }
+    
+    /**
+     * Updates the field current position by retrieving the last coordinate
+     * of the current path and transforming it back to user space
+     * coordinates. This is usually done after the CTM has been altered.
+     */
+    public void updatePosition() throws PSErrorInvalidAccess, PSErrorRangeCheck,
+            PSErrorTypeCheck {
+        try {
+            double[] posd = getCurrentPosInDeviceSpace();
+            position = CTM.inverseApply(posd);
+        } catch (PSErrorNoCurrentPoint e) {
+            // Apparently there is no current point
+            position[0] = Double.NaN;
+            position[1] = Double.NaN;
+        }
+    }
+    
 }

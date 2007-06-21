@@ -31,6 +31,14 @@ import net.sf.eps2pgf.postscript.errors.*;
  */
 public class PSObjectMatrix extends PSObjectArray {
     /**
+     * Creates a new instance of PSObjectMatrix. The new object is filled with
+     * an identity matrix.
+     */
+    public PSObjectMatrix() {
+        this(1, 0, 0, 1, 0, 0);
+    }
+    
+    /**
      * Creates a new instance of PSObjectMatrix. See PostScript manual
      * under "4.3 Coordinate Systems and Transformation" for more info.
      * @param a See PostScript manual  under "4.3 Coordinate Systems and
@@ -128,7 +136,7 @@ public class PSObjectMatrix extends PSObjectArray {
             return new PSObjectMatrix(a, b, c, d, tx, ty);
         } catch (PSError e) {
             // this should never happen
-            return new PSObjectMatrix(1, 0, 0, 1, 0, 0);
+            return new PSObjectMatrix();
         }
     }
 
@@ -177,16 +185,6 @@ public class PSObjectMatrix extends PSObjectArray {
     public double getMeanScaling() throws PSErrorInvalidAccess,
             PSErrorRangeCheck, PSErrorTypeCheck {
         return 0.5 * (getXScaling() + getYScaling());
-    }
-    
-    /**
-     * Gets the object at the requested index and returns the real value of that
-     * object.
-     * @param index Index of the object to get
-     */
-    public double getReal(int index) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
-        return get(index).toReal();
     }
     
     /**
@@ -322,14 +320,7 @@ public class PSObjectMatrix extends PSObjectArray {
     public PSObjectMatrix toMatrix() {
         return this;
     }
-    /**
-     * Replaces a value in this matrix
-     */
-    public void setReal(int index, double value) throws PSErrorRangeCheck,
-            PSErrorInvalidAccess {
-        set(index, new PSObjectReal(value));
-    }
-    
+
     /**
      * Translates the matrix
      *                         [1  0  0]

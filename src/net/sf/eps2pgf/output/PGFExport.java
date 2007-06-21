@@ -184,7 +184,7 @@ public class PGFExport implements Exporter {
      * Create a radial shading
      */
     void radialShading(RadialShading shading, GraphicsState gstate) throws IOException, 
-            PSErrorRangeCheck, PSErrorUnimplemented {
+            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorInvalidAccess, PSErrorTypeCheck {
         // Convert coordinates and radii from user space to coordinate space
         // PGF does not support the Extend parameters for shadings. So we
         // try to emulate the effect.
