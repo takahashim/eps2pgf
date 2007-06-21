@@ -47,7 +47,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
         try {
             setFID();
             dict.setKey("FontType", new PSObjectInt(1));
-            dict.setKey("FontMatrix", new PSObjectMatrix(1,0,0,1,0,0));
+            dict.setKey("FontMatrix", new PSObjectMatrix());
         } catch (PSErrorInvalidAccess e) {
             // this can never happen, because a new dictionary always has write access
         }
@@ -79,7 +79,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
         try {
             dict = new PSObjectDict();
             dict.setKey("FontType", new PSObjectInt(1));
-            dict.setKey("FontMatrix", new PSObjectMatrix(1,0,0,1,0,0));
+            dict.setKey("FontMatrix", new PSObjectMatrix());
             dict.setKey("FontName", new PSObjectName(fontName, true));
             setFID();
             String encoding = props.getProperty("encoding", "Standard");

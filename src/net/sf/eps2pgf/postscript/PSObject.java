@@ -147,18 +147,6 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
-     * Copies values from another object to this object, if possible.
-     * @param obj Object from which the values must the copied
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck The supplied object does not have the correct number of elements.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck The supplied object can not be converted to the same type as this
-     * object.
-     */
-    public void copyValuesFrom(PSObject obj) throws PSErrorRangeCheck,
-            PSErrorTypeCheck, PSErrorInvalidAccess {
-        throw new PSErrorTypeCheck();
-    }
-    
-    /**
      * PostScript operator 'cvrs'
      */
     public String cvrs(int radix) throws PSErrorTypeCheck, PSErrorRangeCheck {

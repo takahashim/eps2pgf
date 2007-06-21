@@ -20,8 +20,9 @@
 
 package net.sf.eps2pgf.postscript;
 
-import com.sun.org.apache.bcel.internal.verifier.statics.DOUBLE_Upper;
 import java.util.*;
+
+import net.sf.eps2pgf.postscript.errors.*;
 
 /** Represents a PostScript path
  *
@@ -43,7 +44,8 @@ public class Path implements Cloneable {
      * @return Returns the starting coordinate of this path. (in document
      * coordinates, before CTM, in pt)
      */
-    public double[] closepath() {
+    public double[] closepath() throws PSErrorInvalidAccess, PSErrorRangeCheck,
+            PSErrorTypeCheck {
         int len = sections.size();
         // If the path is empty closepath does nothing
         if (len == 0) {
