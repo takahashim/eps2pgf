@@ -117,9 +117,9 @@ public class GraphicsState implements Cloneable {
             PSErrorTypeCheck {
         position[0] = x3;
         position[1] = y3;
-        double[] coor1 = CTM.apply(x1, y1);
-        double[] coor2 = CTM.apply(x2, y2);
-        double[] coor3 = CTM.apply(x3, y3);
+        double[] coor1 = CTM.transform(x1, y1);
+        double[] coor2 = CTM.transform(x2, y2);
+        double[] coor3 = CTM.transform(x3, y3);
         path.curveto(coor1, coor2, coor3);
     }
     
@@ -159,7 +159,7 @@ public class GraphicsState implements Cloneable {
             PSErrorRangeCheck, PSErrorTypeCheck {
         position[0] = x;
         position[1] = y;
-        double[] transformed = CTM.apply(x, y);
+        double[] transformed = CTM.transform(x, y);
         path.lineto(transformed[0], transformed[1]);
     }
     
@@ -172,7 +172,7 @@ public class GraphicsState implements Cloneable {
             PSErrorRangeCheck, PSErrorTypeCheck {
         position[0] = x;
         position[1] = y;
-        double[] transformed = CTM.apply(x, y);
+        double[] transformed = CTM.transform(x, y);
         path.moveto(transformed[0], transformed[1]);
     }
     
@@ -188,7 +188,7 @@ public class GraphicsState implements Cloneable {
         }
         position[0] = position[0] + dx;
         position[1] = position[1] + dy;
-        double[] transformed = CTM.apply(position);
+        double[] transformed = CTM.transform(position);
         path.lineto(transformed[0], transformed[1]);
     }
     
@@ -204,7 +204,7 @@ public class GraphicsState implements Cloneable {
         }
         position[0] = position[0] + dx;
         position[1] = position[1] + dy;
-        double[] transformed = CTM.apply(position);
+        double[] transformed = CTM.transform(position);
         path.moveto(transformed[0], transformed[1]);
     }
     
@@ -217,7 +217,7 @@ public class GraphicsState implements Cloneable {
             PSErrorTypeCheck {
         try {
             double[] posd = getCurrentPosInDeviceSpace();
-            position = CTM.inverseApply(posd);
+            position = CTM.itransform(posd);
         } catch (PSErrorNoCurrentPoint e) {
             // Apparently there is no current point
             position[0] = Double.NaN;
