@@ -1537,11 +1537,12 @@ public class Interpreter {
     public void op_translate() throws PSError {
         PSObject obj = opStack.pop();
         double tx, ty;
-        if ( (obj instanceof PSObjectArray) || (obj instanceof PSObjectMatrix) ) {
+        if ( obj instanceof PSObjectArray ) {
             PSObjectMatrix matrix = obj.toMatrix();
             ty = opStack.pop().toReal();
             tx = opStack.pop().toReal();
-            throw new PSErrorUnimplemented("translate operator not yet fully implemented.");
+            matrix.translate(tx, ty);
+            opStack.push(matrix);
         } else {
             ty = obj.toReal();
             tx = opStack.pop().toReal();
