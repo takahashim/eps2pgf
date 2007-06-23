@@ -505,9 +505,7 @@ public class Interpreter {
         op_end();
     }
     
-    /**
-     * PostScript op: <<
-     */
+    /** PostScript op: << */
     public void op_dblLessBrackets() {
         op_mark();
     }
@@ -517,6 +515,14 @@ public class Interpreter {
         PSObject value = opStack.pop();
         PSObject key = opStack.pop();
         dictStack.def(key, value);
+    }
+    
+    /** PostScript op: defaultmatrix */
+    public void op_defaultmatrix() throws PSErrorStackUnderflow,
+            PSErrorRangeCheck, PSErrorTypeCheck, PSErrorInvalidAccess {
+        PSObjectMatrix matrix = opStack.pop().toMatrix();
+        matrix.copy(gstate.current.defaultCTM);
+        opStack.push(matrix);
     }
     
     /** PostScript op: definefont */
