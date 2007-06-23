@@ -746,9 +746,15 @@ public class Interpreter {
         opStack.push(new PSObjectBool(chk));
     }
     
-    /**
-     * PostScript op: idiv
-     */
+    /** PostScript op: identmatrix */
+    public void op_identmatrix() throws PSErrorStackUnderflow, PSErrorRangeCheck,
+            PSErrorTypeCheck, PSErrorInvalidAccess {
+        PSObjectMatrix matrix = opStack.pop().toMatrix();
+        matrix.copy(new PSObjectMatrix());
+        opStack.push(matrix);
+    }
+    
+    /** PostScript op: idiv */
     public void op_idiv() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         int int2 = opStack.pop().toInt();
         int int1 = opStack.pop().toInt();
