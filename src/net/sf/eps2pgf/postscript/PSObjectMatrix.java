@@ -83,6 +83,11 @@ public class PSObjectMatrix extends PSObjectArray {
         copyCommonAttributes(refArray);
     }
     
+    /**
+     * Check whether this could be a valid matrix
+     * @param arrayToCheck Array that is checked
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Array does not have six items
+     */
     public static void checkMatrix(PSObjectArray arrayToCheck) throws PSErrorRangeCheck {
         if (arrayToCheck.size() != 6) {
             throw new PSErrorRangeCheck();
@@ -113,8 +118,6 @@ public class PSObjectMatrix extends PSObjectArray {
         converted[1] = getReal(1)*x + getReal(3)*y + getReal(5);
         return converted;
     }
-    
-    
     
     /**
      * Creates a deep copy of this array.
@@ -156,6 +159,18 @@ public class PSObjectMatrix extends PSObjectArray {
         setReal(3, d);
         setReal(4, tx);
         setReal(5, ty);
+    }
+    
+    /**
+     * Applies this matrix to a *distance* vector
+     */
+    public double[] dtransform(double x, double y) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        // [a b c d tx ty]
+        double[] converted = new double[2];
+        converted[0] = getReal(0)*x + getReal(2)*y;
+        converted[1] = getReal(1)*x + getReal(3)*y;
+        return converted;
     }
     
     /**

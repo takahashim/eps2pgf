@@ -565,6 +565,29 @@ public class Interpreter {
         opStack.push(new PSObjectReal( num1 / num2 ));
     }
     
+    /** PostScript op: dtransform */
+    public void op_dtransform() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorRangeCheck, PSErrorInvalidAccess {
+        PSObject obj = opStack.pop();
+        PSObjectMatrix matrix = null;
+        try {
+            matrix = obj.toMatrix();
+        } catch (PSErrorTypeCheck e) {
+            
+        }
+        double dy;
+        if (matrix == null) {
+            matrix = gstate.current.CTM;
+            dy = obj.toReal();
+        } else {
+            dy = opStack.pop().toReal();
+        }
+        double dx = opStack.pop().toReal();
+        double transformed[] = matrix.dtransform(dx, dy);
+        opStack.push(new PSObjectReal(transformed[0]));
+        opStack.push(new PSObjectReal(transformed[1]));
+    }
+    
     /** PostScript op: dup */
     public void op_dup() throws PSErrorStackUnderflow {
         opStack.push(opStack.peek().dup());
