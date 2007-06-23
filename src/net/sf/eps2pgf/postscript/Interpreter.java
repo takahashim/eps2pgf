@@ -802,6 +802,29 @@ public class Interpreter {
         opStack.push(new PSObjectInt(quotient));
     }
     
+    /** PostScript op: idtransform */
+    public void op_idtransform() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorRangeCheck, PSErrorInvalidAccess {
+        PSObject obj = opStack.pop();
+        PSObjectMatrix matrix = null;
+        try {
+            matrix = obj.toMatrix();
+        } catch (PSErrorTypeCheck e) {
+            
+        }
+        double dy;
+        if (matrix == null) {
+            matrix = gstate.current.CTM;
+            dy = obj.toReal();
+        } else {
+            dy = opStack.pop().toReal();
+        }
+        double dx = opStack.pop().toReal();
+        double transformed[] = matrix.idtransform(dx, dy);
+        opStack.push(new PSObjectReal(transformed[0]));
+        opStack.push(new PSObjectReal(transformed[1]));
+    }
+    
     /** PostScript op: if */
     public void op_if() throws Exception {
         PSObjectArray proc = opStack.pop().toProc();
