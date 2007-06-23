@@ -88,9 +88,6 @@ public class PSObjectMatrix extends PSObjectArray {
         if (arrayToCheck.size() != 6) {
             throw new PSErrorRangeCheck();
         }
-        for (int i = 0 ; i < 6 ; i++) {
-            arrayToCheck.array.get(i+arrayToCheck.offset).toReal();
-        }
     }
     
     /**
