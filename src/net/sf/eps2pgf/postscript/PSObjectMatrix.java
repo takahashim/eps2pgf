@@ -83,8 +83,7 @@ public class PSObjectMatrix extends PSObjectArray {
         copyCommonAttributes(refArray);
     }
     
-    public static void checkMatrix(PSObjectArray arrayToCheck) throws PSErrorRangeCheck,
-            PSErrorTypeCheck {
+    public static void checkMatrix(PSObjectArray arrayToCheck) throws PSErrorRangeCheck {
         if (arrayToCheck.size() != 6) {
             throw new PSErrorRangeCheck();
         }
