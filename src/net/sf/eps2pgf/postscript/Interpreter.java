@@ -423,7 +423,7 @@ public class Interpreter {
     public void op_currentpoint() throws PSErrorNoCurrentPoint, PSErrorTypeCheck,
             PSErrorRangeCheck, PSErrorInvalidAccess {
         double[] currentDevice = gstate.current.getCurrentPosInDeviceSpace();
-        double[] currentUser = gstate.current.CTM.inverseApply(currentDevice);
+        double[] currentUser = gstate.current.CTM.itransform(currentDevice);
         opStack.push(new PSObjectReal(currentUser[0]));
         opStack.push(new PSObjectReal(currentUser[1]));
     }
@@ -873,7 +873,7 @@ public class Interpreter {
         }
         double x = opStack.pop().toReal();
         
-        double[] itransformed = matrix.inverseApply(x, y);
+        double[] itransformed = matrix.itransform(x, y);
         opStack.push(new PSObjectReal(itransformed[0]));
         opStack.push(new PSObjectReal(itransformed[1]));
     }
@@ -1564,7 +1564,7 @@ public class Interpreter {
             y = opStack.pop().toReal();
         }
         double x = opStack.pop().toReal();
-        double transformed[] = matrix.apply(x, y);
+        double transformed[] = matrix.transform(x, y);
         opStack.push(new PSObjectReal(transformed[0]));
         opStack.push(new PSObjectReal(transformed[1]));
     }

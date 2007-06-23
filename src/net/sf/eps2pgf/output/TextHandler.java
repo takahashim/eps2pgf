@@ -107,7 +107,7 @@ public class TextHandler {
 
         // Determine current point shift in user space coordinates
         double showShift[] = shiftPos(currentFont.getWidth(charNames), 0, scaling, angle);
-        showShift = gstate.current.CTM.inverseApplyShift(showShift);
+        showShift = gstate.current.CTM.idtransform(showShift);
         
         return showShift;
     }

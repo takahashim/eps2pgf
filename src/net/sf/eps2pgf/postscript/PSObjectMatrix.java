@@ -95,31 +95,6 @@ public class PSObjectMatrix extends PSObjectArray {
     }
     
     /**
-     * Apples this transformation matrix to a point
-     * @param coor Coordinate {x, y}
-     * @return Transformed coordinate
-     */
-    public double[] apply(double[] coor) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
-        return apply(coor[0], coor[1]);
-    }
-    
-    /**
-     * Applies this transformation matrix to a point
-     * @param x X-coordinate
-     * @param y Y-coordinate
-     * @return Transformed coordinate
-     */
-    public double[] apply(double x, double y) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
-        // [a b c d tx ty]
-        double[] converted = new double[2];
-        converted[0] = getReal(0)*x + getReal(2)*y + getReal(4);
-        converted[1] = getReal(1)*x + getReal(3)*y + getReal(5);
-        return converted;
-    }
-    
-    /**
      * Creates a deep copy of this array.
      * @throws java.lang.CloneNotSupportedException Unable to clone this object or one of its sub-objects
      * @return Deep copy of this array
@@ -229,7 +204,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * @param y Y-coordinate
      * @return Inverse transformed coordinate
      */
-    public double[] inverseApply(double x, double y) throws PSErrorInvalidAccess,
+    public double[] itransform(double x, double y) throws PSErrorInvalidAccess,
             PSErrorRangeCheck, PSErrorTypeCheck {
         double a = getReal(0);
         double b = getReal(1);
@@ -250,9 +225,9 @@ public class PSObjectMatrix extends PSObjectArray {
      * @param coor Coordinate
      * @return Inverse transformed coordinate
      */
-    public double[] inverseApply(double[] coor) throws PSErrorInvalidAccess,
+    public double[] itransform(double[] coor) throws PSErrorInvalidAccess,
             PSErrorRangeCheck, PSErrorTypeCheck {
-        return inverseApply(coor[0], coor[1]);
+        return itransform(coor[0], coor[1]);
     }
     
     /**
@@ -261,7 +236,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * @param y dy translation
      * @return Inverse transformed translation
      */
-    public double[] inverseApplyShift(double x, double y) throws PSErrorInvalidAccess,
+    public double[] idtransform(double x, double y) throws PSErrorInvalidAccess,
             PSErrorRangeCheck, PSErrorTypeCheck {
         double a = getReal(0);
         double b = getReal(1);
@@ -280,9 +255,9 @@ public class PSObjectMatrix extends PSObjectArray {
      * @param coor Translation vector {dx, dy}
      * @return Inverse transformed translation
      */
-    public double[] inverseApplyShift(double[] coor) throws PSErrorInvalidAccess,
+    public double[] idtransform(double[] coor) throws PSErrorInvalidAccess,
             PSErrorRangeCheck, PSErrorTypeCheck {
-        return inverseApplyShift(coor[0], coor[1]);
+        return idtransform(coor[0], coor[1]);
     }
     
     /**
@@ -332,6 +307,31 @@ public class PSObjectMatrix extends PSObjectArray {
         return this;
     }
 
+    /**
+     * Apples this transformation matrix to a point
+     * @param coor Coordinate {x, y}
+     * @return Transformed coordinate
+     */
+    public double[] transform(double[] coor) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        return transform(coor[0], coor[1]);
+    }
+    
+    /**
+     * Applies this transformation matrix to a point
+     * @param x X-coordinate
+     * @param y Y-coordinate
+     * @return Transformed coordinate
+     */
+    public double[] transform(double x, double y) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        // [a b c d tx ty]
+        double[] converted = new double[2];
+        converted[0] = getReal(0)*x + getReal(2)*y + getReal(4);
+        converted[1] = getReal(1)*x + getReal(3)*y + getReal(5);
+        return converted;
+    }
+    
     /**
      * Translates the matrix
      *                         [1  0  0]

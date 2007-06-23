@@ -192,14 +192,14 @@ public class PGFExport implements Exporter {
         double xScale = gstate.CTM.getXScaling() / scaling;
         double yScale = gstate.CTM.getYScaling() / scaling;
         double angle = gstate.CTM.getRotation();
-        double[] coor0 = gstate.CTM.apply(shading.getCoord(0.0));
-        double[] coor1 = gstate.CTM.apply(shading.getCoord(1.0));
+        double[] coor0 = gstate.CTM.transform(shading.getCoord(0.0));
+        double[] coor1 = gstate.CTM.transform(shading.getCoord(1.0));
 
         double max_s = 1.0;
         if (shading.extend1) {
             // Find the s value for which the radius is big (0.3 metres ~ a4 paper)
             max_s = shading.getSForDistance(0.3*1e6/scaling, 1, Double.POSITIVE_INFINITY);
-            coor1 = gstate.CTM.apply(shading.getCoord(max_s));
+            coor1 = gstate.CTM.transform(shading.getCoord(max_s));
         }
         
         startScope();

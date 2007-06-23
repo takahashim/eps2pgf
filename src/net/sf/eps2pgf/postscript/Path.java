@@ -61,7 +61,7 @@ public class Path implements Cloneable {
         for (int i = len-1 ; i >= 0 ; i--) {
             PathSection section = sections.get(i);
             if (section instanceof Moveto) {
-                position = gStateStack.current.CTM.inverseApply(section.params[0], 
+                position = gStateStack.current.CTM.itransform(section.params[0], 
                         section.params[1]);
                 break;
             }
