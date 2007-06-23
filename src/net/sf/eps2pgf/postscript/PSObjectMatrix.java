@@ -199,6 +199,62 @@ public class PSObjectMatrix extends PSObjectArray {
     }
     
     /**
+     * Applies inverse transformation to a translation (i.e. tx and ty are ignored)
+     * @param x dx translation
+     * @param y dy translation
+     * @return Inverse transformed translation
+     */
+    public double[] idtransform(double x, double y) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        double a = getReal(0);
+        double b = getReal(1);
+        double c = getReal(2);
+        double d = getReal(3);
+        
+        double[] coor = new double[2];
+        
+        coor[0] = (d*x-c*y)/(-c*b+a*d);
+        coor[1] = -(-a*y+b*x)/(-c*b+a*d);
+        return coor;
+    }
+    
+    /**
+     * Applies inverse transformation to a translation (i.e. tx and ty are ignored)
+     * @param coor Translation vector {dx, dy}
+     * @return Inverse transformed translation
+     */
+    public double[] idtransform(double[] coor) throws PSErrorInvalidAccess,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        return idtransform(coor[0], coor[1]);
+    }
+    
+    /**
+     * Calculate the inverse of this matrix. The result replaces the current
+     * values in this matrix.
+     */
+    public void invert() throws PSErrorInvalidAccess, PSErrorUndefinedResult,
+            PSErrorRangeCheck, PSErrorTypeCheck {
+        checkAccess(false, true, true);
+        double a = getReal(0);
+        double b = getReal(1);
+        double c = getReal(2);
+        double d = getReal(3);
+        double tx = getReal(4);
+        double ty = getReal(5);
+        
+        if ((a == 0) && (b == 0) && (c == 0) && (d == 0)) {
+            throw new PSErrorUndefinedResult();
+        }
+        
+        setReal(0, d/(a*d-c*b));
+        setReal(1, -b/(a*d-c*b));
+        setReal(2, -c/(a*d-c*b));
+        setReal(3, a/(a*d-c*b));
+        setReal(4, (c*ty-d*tx)/(a*d-c*b));
+        setReal(5, -(a*ty-b*tx)/(a*d-c*b));
+    }
+    
+    /**
      * Applies inverse transformation to a point
      * @param x X-coordinate
      * @param y Y-coordinate
@@ -228,36 +284,6 @@ public class PSObjectMatrix extends PSObjectArray {
     public double[] itransform(double[] coor) throws PSErrorInvalidAccess,
             PSErrorRangeCheck, PSErrorTypeCheck {
         return itransform(coor[0], coor[1]);
-    }
-    
-    /**
-     * Applies inverse transformation to a translation (i.e. tx and ty are ignored)
-     * @param x dx translation
-     * @param y dy translation
-     * @return Inverse transformed translation
-     */
-    public double[] idtransform(double x, double y) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
-        double a = getReal(0);
-        double b = getReal(1);
-        double c = getReal(2);
-        double d = getReal(3);
-        
-        double[] coor = new double[2];
-        
-        coor[0] = (d*x-c*y)/(-c*b+a*d);
-        coor[1] = -(-a*y+b*x)/(-c*b+a*d);
-        return coor;
-    }
-    
-    /**
-     * Applies inverse transformation to a translation (i.e. tx and ty are ignored)
-     * @param coor Translation vector {dx, dy}
-     * @return Inverse transformed translation
-     */
-    public double[] idtransform(double[] coor) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
-        return idtransform(coor[0], coor[1]);
     }
     
     /**

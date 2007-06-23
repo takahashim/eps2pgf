@@ -860,6 +860,16 @@ public class Interpreter {
         opStack.push(opStack.peek(n));
     }
     
+    /** PostScript op: invertmatrix */
+    public void op_invertmatrix() throws PSErrorStackUnderflow, PSErrorRangeCheck,
+            PSErrorInvalidAccess, PSErrorTypeCheck, PSErrorUndefinedResult {
+        PSObjectMatrix matrix2 = opStack.pop().toMatrix();
+        PSObjectMatrix matrix1 = opStack.pop().toMatrix();
+        matrix2.copy(matrix1);
+        matrix2.invert();
+        opStack.push(matrix2);
+    }
+    
     /** PostScript "op": ISOLatin1Encoding */
     public void op_ISOLatin1Encoding() {
         PSObjectName[] encodingVector = Encoding.getISOLatin1Vector();
