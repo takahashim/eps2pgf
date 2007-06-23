@@ -337,6 +337,17 @@ public class Interpreter {
         gstate.current.updatePosition();
     }
     
+    /** PostScript op: concantmatrix */
+    public void op_concatmatrix() throws PSErrorStackUnderflow, PSErrorRangeCheck,
+            PSErrorTypeCheck, PSErrorInvalidAccess {
+        PSObjectMatrix matrix3 = opStack.pop().toMatrix();
+        PSObjectMatrix matrix2 = opStack.pop().toMatrix();
+        PSObjectMatrix matrix1 = opStack.pop().toMatrix();
+        matrix3.copy(matrix2);
+        matrix3.concat(matrix1);
+        opStack.push(matrix3);
+    }
+    
     /** PostScript op: copy */
     public void op_copy() throws PSError {
         PSObject obj = opStack.pop();
