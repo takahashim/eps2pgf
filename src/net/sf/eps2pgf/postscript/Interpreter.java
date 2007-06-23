@@ -1351,7 +1351,8 @@ public class Interpreter {
    
     /** PostScript op: setmatrix */
     public void op_setmatrix() throws PSError {
-        throw new PSErrorUnimplemented("operator: setmatrix");
+        PSObjectMatrix matrix = opStack.pop().toMatrix();
+        gstate.current.CTM.copy(matrix);
     }
     
     /**
