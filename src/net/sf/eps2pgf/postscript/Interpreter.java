@@ -1223,11 +1223,12 @@ public class Interpreter {
     public void op_scale() throws PSError {
         PSObject obj = opStack.pop();
         double sx, sy;
-        if ( (obj instanceof PSObjectArray) || (obj instanceof PSObjectMatrix) ) {
+        if ( obj instanceof PSObjectArray ) {
             PSObjectMatrix matrix = obj.toMatrix();
             sy = opStack.pop().toReal();
             sx = opStack.pop().toReal();
-            throw new PSErrorUnimplemented("scale operator not yet fully implemented.");
+            matrix.scale(sx, sy);
+            opStack.push(matrix);
         } else {
             sy = obj.toReal();
             sx = opStack.pop().toReal();
