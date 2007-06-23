@@ -1194,10 +1194,11 @@ public class Interpreter {
     public void op_rotate() throws PSError {
         PSObject obj = opStack.pop();
         double angle;
-        if ( (obj instanceof PSObjectArray) || (obj instanceof PSObjectMatrix) ) {
+        if ( obj instanceof PSObjectArray ) {
             PSObjectMatrix matrix = obj.toMatrix();
             angle = opStack.pop().toReal();
-            throw new PSErrorUnimplemented("scale operator not yet fully implemented.");
+            matrix.rotate(angle);
+            opStack.push(matrix);
         } else {
             angle = obj.toReal();
             gstate.current.CTM.rotate(angle);
