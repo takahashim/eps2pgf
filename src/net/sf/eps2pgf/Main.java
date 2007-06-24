@@ -9,7 +9,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -90,10 +90,20 @@ public class Main {
      */
     public static void printVersionCopyright() {
         System.out.println(getNameVersion());
-        System.out.println("Copyright (C) 2007 Paul Wagenaars <pwagenaars@fastmail.fm>");
-        System.out.println(appName + " comes with ABSOLUTELY NO WARRANTY. This is free software, and you");
-        System.out.println("are welcome to redistribute it under certain conditions. See version 2 of");
-        System.out.println("the GNU General Public License for details.");
+        System.out.println("");
+        System.out.println("Copyright 2007 Paul Wagenaars <pwagenaars@fastmail.fm>");
+        System.out.println("");
+        System.out.println("Licensed under the Apache License, Version 2.0 (the \"License\");");
+        System.out.println("you may not use this file except in compliance with the License.");
+        System.out.println("You may obtain a copy of the License at");
+        System.out.println("");
+        System.out.println("    http://www.apache.org/licenses/LICENSE-2.0");
+        System.out.println("");
+        System.out.println("Unless required by applicable law or agreed to in writing, software");
+        System.out.println("distributed under the License is distributed on an \"AS IS\" BASIS,");
+        System.out.println("WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.");
+        System.out.println("See the License for the specific language governing permissions and");
+        System.out.println("limitations under the License.");
     }
 
     /**
