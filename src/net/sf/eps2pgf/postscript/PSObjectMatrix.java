@@ -242,16 +242,17 @@ public class PSObjectMatrix extends PSObjectArray {
         double tx = getReal(4);
         double ty = getReal(5);
         
-        if ((a == 0) && (b == 0) && (c == 0) && (d == 0)) {
+        double cmn = 1/(a*d-c*b);
+        if (Double.isInfinite(cmn) || Double.isNaN(cmn)) {
             throw new PSErrorUndefinedResult();
         }
         
-        setReal(0, d/(a*d-c*b));
-        setReal(1, -b/(a*d-c*b));
-        setReal(2, -c/(a*d-c*b));
-        setReal(3, a/(a*d-c*b));
-        setReal(4, (c*ty-d*tx)/(a*d-c*b));
-        setReal(5, -(a*ty-b*tx)/(a*d-c*b));
+        setReal(0, d*cmn);
+        setReal(1, -b*cmn);
+        setReal(2, -c*cmn);
+        setReal(3, a*cmn);
+        setReal(4, (c*ty-d*tx)*cmn);
+        setReal(5, -(a*ty-b*tx)*cmn);
     }
     
     /**
