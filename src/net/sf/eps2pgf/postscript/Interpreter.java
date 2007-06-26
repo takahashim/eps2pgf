@@ -1476,17 +1476,13 @@ public class Interpreter {
         // This operator has no meaning in eps2pgf
     }
     
-    /**
-     * PostScript op: sin
-     */
+    /** PostScript op: sin */
     public void op_sin() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         double angle = opStack.pop().toReal();
         opStack.push(new PSObjectReal(Math.sin(angle*Math.PI/180)));
     }
     
-    /**
-     * PostScript op: sqrt
-     */
+    /** PostScript op: sqrt */
     public void op_sqrt() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorRangeCheck {
         double x = opStack.pop().toNonNegReal();
@@ -1500,12 +1496,12 @@ public class Interpreter {
         opStack.push(new PSObjectArray(encodingVector));
     }
     
-    /**
-     * PostScript op: stopped
-     * @throws PSErrorStackUnderflow Operand stack is empty
-     * @throws PSErrorUnimplemented Executed code contains postscript code that is not yet implemented in eps2pgf
-     * @throws Another exception occured. If this happens it's a bug in eps2pgf
-     */
+    /** PostScript op: stop */
+    public void op_stop() throws PSErrorInvalidStop {
+        throw new PSErrorInvalidStop();
+    }
+    
+    /** PostScript op: stopped */
     public void op_stopped() throws PSErrorStackUnderflow, PSErrorUnimplemented, Exception {
         PSObject any = opStack.pop();
         try {
@@ -1524,18 +1520,14 @@ public class Interpreter {
         opStack.push(new PSObjectBool(false));
     }
     
-    /**
-     * PostScript op: string
-     */
+    /** PostScript op: string */
     public void op_string() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorRangeCheck {
         int n = opStack.pop().toNonNegInt();
         opStack.push(new PSObjectString(n));
     }
    
-    /**
-     * PostScript op: stringwidth
-     */
+    /** PostScript op: stringwidth */
     public void op_stringwidth() throws PSErrorTypeCheck, PSErrorStackUnderflow,
             PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, 
             PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {
