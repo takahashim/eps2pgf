@@ -149,9 +149,11 @@ control 10 - repeat 2: 1 2 3 4 3 {pop} repeat 1 eq
 control 11 - repeat 3: mark 0 {(will not happen)} repeat mark eq
 control 12 - loop 1: 1 {1 add dup 5 eq {exit} if} loop 5 eq
 control 13 - loop 2: 1 {1 add dup 5 eq {stop} if} loop 5 eq
-control 14 - exit: 0 2 999 {dup 6 eq {exit} if} for 6 eq  4 1 roll 4 eq  4 1 roll 2 eq  4 1 roll 0 eq
-control 15 - stop: {1 2 stop 3 4} stopped  3 1 roll 2 eq  3 1 roll 1 eq
-control 16 - stopped: {add} stopped  {1 2} stopped false eq
+control 14 - exit 1: 0 2 999 {dup 6 eq {exit} if} for 6 eq  4 1 roll 4 eq  4 1 roll 2 eq  4 1 roll 0 eq
+control 15 - exit 2: [1 2 3] {exit} forall  99 {exit} repeat
+control 16 - exit 3: {exit} loop
+control 17 - stop: stop {1 2 stop 3 4} stopped  3 1 roll 2 eq  3 1 roll 1 eq
+control 18 - stopped: {add} stopped  {1 2} stopped false eq
 
 path  1 - clippath: clippath 1 setgray fill
 

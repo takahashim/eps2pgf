@@ -644,9 +644,12 @@ public class Interpreter {
         opStack.push(obj);
     }
     
-    /**
-     * PostScript op: exp
-     */
+    /** PostScript op: exit */
+    public void op_exit() throws PSErrorInvalidExit {
+        throw new PSErrorInvalidExit();
+    }
+    
+    /** PostScript op: exp */
     public void op_exp() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         double exponent = opStack.pop().toReal();
         double base = opStack.pop().toReal();
@@ -707,21 +710,25 @@ public class Interpreter {
         
         // Execute the for loop
         double control = initial;
-        while (true) {
-            if ( (inc > 0) && (control > limit) ) {
-                break;
-            } else if ( (inc < 0) && (control < limit) ) {
-                break;
+        try {
+            while (true) {
+                if ( (inc > 0) && (control > limit) ) {
+                    break;
+                } else if ( (inc < 0) && (control < limit) ) {
+                    break;
+                }
+
+                if (allIntegers) {
+                    opStack.push(new PSObjectInt(control));
+                } else {
+                    opStack.push(new PSObjectReal(control));
+                }
+                proc.execute(this);
+
+                control += inc;
             }
-            
-            if (allIntegers) {
-                opStack.push(new PSObjectInt(control));
-            } else {
-                opStack.push(new PSObjectReal(control));
-            }
-            proc.execute(this);
-            
-            control += inc;
+        } catch (PSErrorInvalidExit e) {
+            // 'exit' operator called from within this loop
         }
     }
     
@@ -731,11 +738,15 @@ public class Interpreter {
         PSObject obj = opStack.pop();
         List<PSObject> items = obj.getItemList();
         int N = items.remove(0).toNonNegInt();
-        while (!items.isEmpty()) {
-            for (int i = 0 ; i < N ; i++) {
-                 opStack.push(items.remove(0));
+        try {
+            while (!items.isEmpty()) {
+                for (int i = 0 ; i < N ; i++) {
+                     opStack.push(items.remove(0));
+                }
+                proc.execute(this);
             }
-            proc.execute(this);
+        } catch (PSErrorInvalidExit e) {
+            // 'exit' operator called from within this loop
         }
     }
     
@@ -1190,8 +1201,12 @@ public class Interpreter {
         PSObjectArray proc = opStack.pop().toProc();
         int n = opStack.pop().toNonNegInt();
         
-        for (int i = 0 ; i < n ; i++) {
-            proc.execute(this);
+        try {
+            for (int i = 0 ; i < n ; i++) {
+                proc.execute(this);
+            }
+        } catch (PSErrorInvalidExit e) {
+            // 'exit' operator called from within this loop
         }
     }    
     
