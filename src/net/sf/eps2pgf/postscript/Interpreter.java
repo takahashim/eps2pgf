@@ -961,22 +961,33 @@ public class Interpreter {
         gstate.current.lineto(x, y);
     }
     
-    /**
-     * PostScript op: ln
-     */
+    /** PostScript op: ln */
     public void op_ln() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         double num = opStack.pop().toReal();
         double result = Math.log(num);
         opStack.push(new PSObjectReal(result));
     }
     
-    /**
-     * PostScript op: log
-     */
+    /** PostScript op: log */
     public void op_log() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         double num = opStack.pop().toReal();
         double result = Math.log10(num);
         opStack.push(new PSObjectReal(result));
+    }
+    
+    /** PostScript op: loop */
+    public void op_loop() throws PSErrorStackUnderflow, PSErrorTypeCheck, Exception {
+        PSObjectArray proc = opStack.pop().toProc();
+        
+        try {
+            while (true) {
+                proc.execute(this);
+            }
+        } catch (PSErrorInvalidExit e) {
+            // 'exit' operator called from within this loop
+        } catch (PSErrorInvalidStop e) {
+            // 'stop' operator called from within this loop
+        }
     }
     
     /** PostScript op: lt */
