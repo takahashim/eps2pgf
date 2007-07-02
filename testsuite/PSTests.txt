@@ -155,7 +155,18 @@ control 16 - exit 3: {exit} loop
 control 17 - stop: {1 2 stop 3 4} stopped  3 1 roll 2 eq  3 1 roll 1 eq
 control 18 - stopped: {add} stopped  {1 2} stopped false eq
 
-path  1 - clippath: clippath 1 setgray fill
+path  1 - newpath: newpath
+path  2 - currentpoint/moveto: 0 0 moveto currentpoint 0 eq exch 0 eq
+path  3 - rmoveto: 1 2 moveto 1 2 rmoveto currentpoint 4 eq exch 2 eq
+path  4 - lineto: 9 9 moveto 10 10 lineto
+path  5 - rlineto: 1 2 moveto 1 2 rlineto currentpoint 4 eq exch 2 eq
+path  6 - arc: 1 2 3 4 90 arc
+path  7 - arcn: 1 2 3 4 5 arcn
+path  8 - arct: 0 0 moveto 0 4 4 4 1 arct
+path  9 - arcto: 0 0 moveto 0 4 4 4 1 arcto 4.0 eq  4 1 roll 1.0 eq  4 1 roll 3.0 eq  4 1 roll 0.0 eq
+path 10 - curveto: 0 0 moveto 1 2 3 4 5 6 curveto
+path 11 - rcurveto: 1 1 moveto 1 2 3 4 5 6 rcurveto currentpoint 7.0 div dup 1 lt {1 exch div} if 1.001 le  exch 6.0 div dup 1 lt {1 exch div} if 1.001 le
+path 12 - clippath: clippath 1 setgray fill
 
 coor  1 - matrix 1: matrix {} forall  0 eq  6 1 roll 0 eq  6 1 roll 1 eq  6 1 roll 0 eq  6 1 roll 0 eq  6 1 roll 1 eq
 coor  2 - matrix 2: matrix dup eq
