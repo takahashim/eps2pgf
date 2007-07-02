@@ -177,6 +177,26 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
+     * Add a curveto section to the current path
+     * @param dx1 X-coordinate of first control point
+     * @param dy1 Y-coordinate of first control point
+     * @param dx2 X-coordinate of second control point
+     * @param dy2 Y-coordinate of second control point
+     * @param dx3 X-coordinate of end point
+     * @param dy3 Y-coordinate of end point
+     */
+    public void rcurveto(double dx1, double dy1, double dx2, double dy2, 
+            double dx3, double dy3) throws PSErrorInvalidAccess, PSErrorRangeCheck,
+            PSErrorTypeCheck {
+        double[] coor1 = CTM.transform(position[0] + dx1, position[1] + dy1);
+        double[] coor2 = CTM.transform(position[0] + dx2, position[1] + dy2);
+        double[] coor3 = CTM.transform(position[0] + dx3, position[1] + dy3);
+        position[0] = position[0] + dx3;
+        position[1] = position[1] + dy3;
+        path.curveto(coor1, coor2, coor3);
+    }
+    
+    /**
      * Draw a line to a relative point.
      * @param dx delta X-coordinate (before CTM is applied)
      * @param dy delta Y-coordinate (before CTM is applied)

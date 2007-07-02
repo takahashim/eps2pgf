@@ -1144,6 +1144,18 @@ public class Interpreter {
         opStack.push(new PSObjectBool(chk));
     }
     
+    /** PostScript op: rcurveto */
+    public void op_rcurveto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess, PSErrorRangeCheck {
+        double dy3 = opStack.pop().toReal();
+        double dx3 = opStack.pop().toReal();
+        double dy2 = opStack.pop().toReal();
+        double dx2 = opStack.pop().toReal();
+        double dy1 = opStack.pop().toReal();
+        double dx1 = opStack.pop().toReal();
+        gstate.current.rcurveto(dx1,dy1, dx2,dy2, dx3,dy3);
+    }
+    
     /** PostScript op: readhexstring */
     public void op_readhexstring() throws PSError {
         throw new PSErrorUnimplemented("operator: readhexstring");
