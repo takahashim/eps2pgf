@@ -1107,6 +1107,46 @@ public class Interpreter {
         opStack.push(obj1.or(obj2));
     }
     
+    /** PostScript op: pathforall */
+    public void op_pathforall() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess, PSErrorRangeCheck, Exception {
+        PSObjectArray close = opStack.pop().toProc();
+        PSObjectArray curve = opStack.pop().toProc();
+        PSObjectArray line = opStack.pop().toProc();
+        PSObjectArray move = opStack.pop().toProc();
+        
+        ArrayList<PathSection> path = gstate.current.path.sections;
+        PSObjectMatrix CTM = gstate.current.CTM;
+        
+        try {
+            for (int i = 0 ; i < path.size() ; i++) {
+                PathSection section = path.get(i);
+                int nrCoors = 0;
+                PSObjectArray proc = close;
+                if (section instanceof Moveto) {
+                    nrCoors = 1;
+                    proc = move;
+                } else if (section instanceof Lineto) {
+                    nrCoors = 1;
+                    proc = line;
+                } else if (section instanceof Curveto) {
+                    nrCoors = 3;
+                    proc = curve;
+                }
+                for (int j = 0 ; j < nrCoors ; j++) {
+                    double x = section.params[2*j];
+                    double y = section.params[2*j+1];
+                    double[] coor = CTM.itransform(x, y);
+                    opStack.push(new PSObjectReal(coor[0]));
+                    opStack.push(new PSObjectReal(coor[1]));
+                }
+                proc.execute(this);
+            }
+        } catch (PSErrorInvalidExit e) {
+            // 'exit' operator executed within this loop
+        }
+    }
+    
     /** PostScript op: picstr */
     public void op_picstr() throws PSError {
         throw new PSErrorUnimplemented("operator: picstr");
