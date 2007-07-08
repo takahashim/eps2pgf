@@ -197,8 +197,14 @@ public class Interpreter {
     }
     
     /** PostScript op: arc */
-    public void op_arc() throws PSErrorUnimplemented {
-        throw new PSErrorUnimplemented("operator: arc");
+    public void op_arc() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess, PSErrorRangeCheck {
+        double angle2 = opStack.pop().toReal();
+        double angle1 = opStack.pop().toReal();
+        double r = opStack.pop().toReal();
+        double y = opStack.pop().toReal();
+        double x = opStack.pop().toReal();
+        gstate.current.arc(x, y, r, angle1, angle2);
     }
     
     /** PostScript op: arcn */
