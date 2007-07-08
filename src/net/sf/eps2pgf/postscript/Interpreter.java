@@ -204,12 +204,18 @@ public class Interpreter {
         double r = opStack.pop().toReal();
         double y = opStack.pop().toReal();
         double x = opStack.pop().toReal();
-        gstate.current.arc(x, y, r, angle1, angle2);
+        gstate.current.arc(x, y, r, angle1, angle2, true);
     }
     
     /** PostScript op: arcn */
-    public void op_arcn() throws PSErrorUnimplemented {
-        throw new PSErrorUnimplemented("operator: arcn");
+    public void op_arcn() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorInvalidAccess, PSErrorRangeCheck {
+        double angle2 = opStack.pop().toReal();
+        double angle1 = opStack.pop().toReal();
+        double r = opStack.pop().toReal();
+        double y = opStack.pop().toReal();
+        double x = opStack.pop().toReal();
+        gstate.current.arc(x, y, r, angle1, angle2, false);
     }
     
     /** PostScript op: array */
