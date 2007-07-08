@@ -95,10 +95,15 @@ public class GraphicsState implements Cloneable {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck A value is out of range
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck An object has an incorrect type
      */
-    public void arc(double x, double y, double r, double angle1, double angle2)
+    public void arc(double x, double y, double r, double angle1, double angle2, boolean isPositive)
             throws PSErrorInvalidAccess, PSErrorRangeCheck, PSErrorTypeCheck {
-        while (angle2 < angle1) {
-            angle2 += 360;
+        double mult = 1;
+        if (!isPositive) {
+            mult = -1;
+        }
+        
+        while (mult*angle2 < mult*angle1) {
+            angle2 += mult*360;
         }
         
         // convert angles from degrees to radians
@@ -115,30 +120,29 @@ public class GraphicsState implements Cloneable {
         // take step from angle1 to multiples of 90 degrees
         double ang1;
         double ang2 = angle1;
-        double angleStep = Math.PI/2;
-        for (double ang = angle1 ; ang < angle2 ; ang += angleStep) {
+        double angleStep = mult*Math.PI/2;
+        for (double ang = angle1 ; mult*ang2 < mult*angle2 ; ang += angleStep) {
             ang1 = ang2;
-            if (angle2 <= (ang + angleStep)) {
+            ang2 = angleStep*Math.floor((ang + angleStep)/angleStep);
+            if (mult*angle2 < mult*ang2) {
                 ang2 = angle2;
-            } else {
-                ang2 = angleStep*Math.floor((ang + angleStep)/angleStep);
             }
 
             double mang = (ang1+ang2)/2;
             
-            double unitX0 = Math.cos((ang2-ang1)/2);
-            double unitY0 = Math.sin((ang2-ang1)/2);
+            double unitX0 = Math.cos(mult*(ang2-ang1)/2);
+            double unitY0 = Math.sin(mult*(ang2-ang1)/2);
             
             double xControl = (4-unitX0)/3;
             double yControl = (1-unitX0)*(3-unitX0)/(3*unitY0);
             double angControl = Math.atan2(yControl, xControl);
             double rControl = Math.sqrt(xControl*xControl + yControl*yControl);
             
-            double x1 = x + r*rControl*Math.cos(mang-angControl);
-            double y1 = y + r*rControl*Math.sin(mang-angControl);
+            double x1 = x + r*rControl*Math.cos(mang-mult*angControl);
+            double y1 = y + r*rControl*Math.sin(mang-mult*angControl);
             
-            double x2 = x + r*rControl*Math.cos(mang+angControl);
-            double y2 = y + r*rControl*Math.sin(mang+angControl);
+            double x2 = x + r*rControl*Math.cos(mang+mult*angControl);
+            double y2 = y + r*rControl*Math.sin(mang+mult*angControl);
             
             double x3 = x + r*Math.cos(ang2);
             double y3 = y + r*Math.sin(ang2);
@@ -146,6 +150,7 @@ public class GraphicsState implements Cloneable {
             curveto(x1, y1, x2, y2, x3, y3);
         }
     }
+    
     
     /**
      * Intersects the area inside the current clipping path with the area
