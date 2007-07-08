@@ -167,6 +167,8 @@ path  9 - arcto: 0 0 moveto 0 4 4 4 1 arcto 4.0 eq  4 1 roll 1.0 eq  4 1 roll 3.
 path 10 - curveto: 0 0 moveto 1 2 3 4 5 6 curveto
 path 11 - rcurveto: 1 1 moveto 1 2 3 4 5 6 rcurveto currentpoint 7.0 div dup 1 lt {1 exch div} if 1.001 le  exch 6.0 div dup 1 lt {1 exch div} if 1.001 le
 path 12 - clippath: clippath 1 setgray fill
+path 13 - pathforall 1: 1 2 moveto 3 4 lineto 1 2 3 4 5 6 curveto 2 2 scale {sub} {add add} {add sub add sub add add} {} pathforall 6.5 exch 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt
+path 14 - pathforall 2: 1 2 moveto 3 4 lineto {exit} {} {} {} pathforall 2 eq exch 1 eq
 
 coor  1 - matrix 1: matrix {} forall  0 eq  6 1 roll 0 eq  6 1 roll 1 eq  6 1 roll 0 eq  6 1 roll 0 eq  6 1 roll 1 eq
 coor  2 - matrix 2: matrix dup eq

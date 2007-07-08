@@ -20,8 +20,6 @@
 
 package net.sf.eps2pgf.postscript;
 
-import com.sun.org.apache.bcel.internal.verifier.statics.DOUBLE_Upper;
-
 /**
  *
  * @author Paul Wagenaars

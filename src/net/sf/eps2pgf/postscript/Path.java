@@ -29,13 +29,31 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class Path implements Cloneable {
+    /**
+     * List with sections of this path
+     */
     public ArrayList<PathSection> sections;
     GstateStack gStateStack;
     
-    /** Creates a new instance of Path */
+    /**
+     * Creates a new instance of Path
+     * @param graphicsStateStack Pointer to the graphics state to which this path is linked
+     */
     public Path(GstateStack graphicsStateStack) {
         sections = new ArrayList<PathSection>();
         gStateStack = graphicsStateStack;
+    }
+    
+    /**
+     * Create a clone of this object.
+     * @return Returns a clone of this object. 
+     */
+    public Path clone() {
+        Path clonedPath = new Path(gStateStack);
+        for (int i = 0 ; i < sections.size() ; i++) {
+            clonedPath.sections.add(sections.get(i).clone());
+        }
+        return clonedPath;
     }
     
     /**
@@ -43,6 +61,9 @@ public class Path implements Cloneable {
      * new subpath.
      * @return Returns the starting coordinate of this path. (in document
      * coordinates, before CTM, in pt)
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess Insufficient access rights
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Value out of range
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object of invalid type
      */
     public double[] closepath() throws PSErrorInvalidAccess, PSErrorRangeCheck,
             PSErrorTypeCheck {
@@ -74,19 +95,9 @@ public class Path implements Cloneable {
     }
     
     /**
-     * Create a clone of this object.
-     * @return Returns a clone of this object. 
-     */
-    public Path clone() {
-        Path clonedPath = new Path(gStateStack);
-        for (int i = 0 ; i < sections.size() ; i++) {
-            clonedPath.sections.add(sections.get(i).clone());
-        }
-        return clonedPath;
-    }
-    
-    /**
      * Adds a moveto to this path.
+     * @param x X-coordinate in device coordinates
+     * @param y Y-coordinate in device coordinates
      */
     public void moveto(double x, double y) {
         int len = sections.size();
@@ -101,6 +112,8 @@ public class Path implements Cloneable {
     
     /**
      * Adds a lineto to this path.
+     * @param x X-coordinate in device coordinates
+     * @param y Y-coordinate in device coordinates
      */
     public void lineto(double x, double y) {
         sections.add(new Lineto(x, y));
@@ -118,6 +131,7 @@ public class Path implements Cloneable {
     
     /**
      * Creates a human-readable string representation of this object.
+     * @return Human-readable string representation of this path
      */
     public String toString() {
         StringBuilder str = new StringBuilder();
