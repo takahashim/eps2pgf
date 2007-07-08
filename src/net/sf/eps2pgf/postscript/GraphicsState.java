@@ -42,6 +42,9 @@ public class GraphicsState implements Cloneable {
      * [a b c d tx ty] -> x' = a*x + b*y + tx ; y' = c*x + d*y * ty
      */
     public PSObjectMatrix CTM = new PSObjectMatrix();
+    /**
+     * Default CTM (CTM is initialized to this value)
+     */
     public static PSObjectMatrix defaultCTM = new PSObjectMatrix(25.4*1000/72.0, 0 ,0, 25.4*1000/72.0, 0, 0);
     
     /**
@@ -71,6 +74,7 @@ public class GraphicsState implements Cloneable {
     
     /**
      * Creates a new default graphics state.
+     * @param parentGraphicsStack Pointer the graphics stack of which this object is part of.
      */
     public GraphicsState(GstateStack parentGraphicsStack) {
         initmatrix();
@@ -78,6 +82,69 @@ public class GraphicsState implements Cloneable {
         clippingPath = new Path(parentGraphicsStack);
         font = new PSObjectFont();
         parentStack = parentGraphicsStack;
+    }
+    
+    /**
+     * Adds an arc to the end of the current path
+     * @param x X-coordinate of center of circle in user space coordinates
+     * @param y Y-coordinate of center of circle in user space coordinates
+     * @param r Radius of circle
+     * @param angle1 Angle in degrees of starting point
+     * @param angle2 Angle in degrees of end point
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No access to a required object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck A value is out of range
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck An object has an incorrect type
+     */
+    public void arc(double x, double y, double r, double angle1, double angle2)
+            throws PSErrorInvalidAccess, PSErrorRangeCheck, PSErrorTypeCheck {
+        while (angle2 < angle1) {
+            angle2 += 360;
+        }
+        
+        // convert angles from degrees to radians
+        angle1 = Math.toRadians(angle1);
+        angle2 = Math.toRadians(angle2);
+        
+        // move to start, if necessary
+        double x0 = x + r*Math.cos(angle1);
+        double y0 = y + r*Math.sin(angle1);
+        if ( (Math.abs(position[0]-x0) > 1e-6) || (Math.abs(position[1]-y0) > 1e-6) ) {
+            lineto(x0, y0);
+        }
+        
+        // take step from angle1 to multiples of 90 degrees
+        double ang1;
+        double ang2 = angle1;
+        double angleStep = Math.PI/2;
+        for (double ang = angle1 ; ang < angle2 ; ang += angleStep) {
+            ang1 = ang2;
+            if (angle2 <= (ang + angleStep)) {
+                ang2 = angle2;
+            } else {
+                ang2 = angleStep*Math.floor((ang + angleStep)/angleStep);
+            }
+
+            double mang = (ang1+ang2)/2;
+            
+            double unitX0 = Math.cos((ang2-ang1)/2);
+            double unitY0 = Math.sin((ang2-ang1)/2);
+            
+            double xControl = (4-unitX0)/3;
+            double yControl = (1-unitX0)*(3-unitX0)/(3*unitY0);
+            double angControl = Math.atan2(yControl, xControl);
+            double rControl = Math.sqrt(xControl*xControl + yControl*yControl);
+            
+            double x1 = x + r*rControl*Math.cos(mang-angControl);
+            double y1 = y + r*rControl*Math.sin(mang-angControl);
+            
+            double x2 = x + r*rControl*Math.cos(mang+angControl);
+            double y2 = y + r*rControl*Math.sin(mang+angControl);
+            
+            double x3 = x + r*Math.cos(ang2);
+            double y3 = y + r*Math.sin(ang2);
+            
+            curveto(x1, y1, x2, y2, x3, y3);
+        }
     }
     
     /**
