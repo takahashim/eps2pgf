@@ -212,10 +212,35 @@ public class Interpreter {
             PSErrorInvalidAccess, PSErrorRangeCheck {
         double angle2 = opStack.pop().toReal();
         double angle1 = opStack.pop().toReal();
-        double r = opStack.pop().toReal();
+        double r = opStack.pop().toNonNegReal();
         double y = opStack.pop().toReal();
         double x = opStack.pop().toReal();
         gstate.current.arc(x, y, r, angle1, angle2, false);
+    }
+    
+    /** PostScript op: acrt */
+    public void op_arct() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorRangeCheck, PSErrorInvalidAccess {
+        double r = opStack.pop().toNonNegReal();
+        double y2 = opStack.pop().toReal();
+        double x2 = opStack.pop().toReal();
+        double y1 = opStack.pop().toReal();
+        double x1 = opStack.pop().toReal();
+        gstate.current.arcto(x1, y1, x2, y2, r);
+    }
+    
+    /** PostScript op: acrto */
+    public void op_arcto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorRangeCheck, PSErrorInvalidAccess {
+        double r = opStack.pop().toNonNegReal();
+        double y2 = opStack.pop().toReal();
+        double x2 = opStack.pop().toReal();
+        double y1 = opStack.pop().toReal();
+        double x1 = opStack.pop().toReal();
+        double[] t1t2 = gstate.current.arcto(x1, y1, x2, y2, r);
+        for (int i = 0 ; i < t1t2.length ; i++) {
+            opStack.push(new PSObjectReal(t1t2[i]));
+        }
     }
     
     /** PostScript op: array */
