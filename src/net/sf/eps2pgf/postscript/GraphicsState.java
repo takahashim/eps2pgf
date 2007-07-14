@@ -151,6 +151,70 @@ public class GraphicsState implements Cloneable {
         }
     }
     
+    /**
+     * Implements the 'arcto' PostScript operator
+     */
+    public double[] arcto(double x1, double y1, double x2, double y2, double r) 
+            throws PSErrorInvalidAccess, PSErrorRangeCheck, PSErrorTypeCheck {
+        double x0 = position[0];
+        double y0 = position[1];
+        
+        // Calculate some angles
+        double phi1 = Math.atan2(y0-y1, x0-x1);
+        double phi2 = Math.atan2(y2-y1, x2-x1);
+        double alpha = phi2 - phi1;
+        if (alpha > Math.PI) {
+            alpha = alpha - 2*Math.PI;
+        } else if (alpha < -Math.PI) {
+            alpha = alpha + 2*Math.PI;
+        }
+        
+        // Check if angle is -180, 0 or 180 degrees
+        if ( (Math.abs(Math.abs(alpha) - Math.PI) < 1e-3) || (Math.abs(alpha) < 1e-3) ) {
+            lineto(x1, y1);
+            double[] ret = {x1, y1, x1, y1};
+            return ret;
+        }
+        
+        // Calculate lines parallel to the lines (x0,y0)-(x1,y1) and (x1,y1)-(x2,y2)
+        double posorneg;
+        if (alpha >= 0) {
+            posorneg = 1.0;
+        } else {
+            posorneg = -1.0;
+        }
+        double p1x0 = x0 + r*Math.cos(phi1 + posorneg*Math.PI/2);
+        double p1y0 = y0 + r*Math.sin(phi1 + posorneg*Math.PI/2);
+        double p1x1 = x1 + r*Math.cos(phi1 + posorneg*Math.PI/2);
+        double p1y1 = y1 + r*Math.sin(phi1 + posorneg*Math.PI/2);
+        
+        double p2x1 = x1 + r*Math.cos(phi2 - posorneg*Math.PI/2);
+        double p2y1 = y1 + r*Math.sin(phi2 - posorneg*Math.PI/2);
+        double p2x2 = x2 + r*Math.cos(phi2 - posorneg*Math.PI/2);
+        double p2y2 = y2 + r*Math.sin(phi2 - posorneg*Math.PI/2);
+        
+        // Calculate intersection, this is the center of the circle
+        // Weisstein, Eric W. "Line-Line Intersection." From MathWorld--A Wolfram Web
+        // Resource. http://mathworld.wolfram.com/Line-LineIntersection.html 
+        double num = det(det(p1x0,p1y0,p1x1,p1y1), p1x0-p1x1, det(p2x1,p2y1,p2x2,p2y2), p2x1-p2x2);
+        double den = det(p1x0-p1x1, p1y0-p1y1, p2x1-p2x2, p2y1-p2y2);
+        double x = num/den;
+        num = det(det(p1x0, p1y0, p1x1, p1y1), p1y0-p1y1, det(p2x1,p2y1,p2x2,p2y2), p2y1-p2y2);
+        double y = num/den;
+
+        double ang1 = Math.PI + phi1 + posorneg*Math.PI/2;
+        double ang2 = Math.PI + phi2 - posorneg*Math.PI/2;
+
+        double xt1 = x + r*Math.cos(ang1);
+        double yt1 = y + r*Math.sin(ang1);
+        double xt2 = x + r*Math.cos(ang2);
+        double yt2 = y + r*Math.sin(ang2);
+
+        arc(x, y, r, ang1, ang2, (ang2 > ang1));
+        
+        double[] ret = {xt1, yt1, xt2, yt2};
+        return ret;
+    }
     
     /**
      * Intersects the area inside the current clipping path with the area
@@ -194,6 +258,15 @@ public class GraphicsState implements Cloneable {
         double[] coor3 = CTM.transform(x3, y3);
         path.curveto(coor1, coor2, coor3);
     }
+    
+    /**
+     * Calculate determinant of the matrix: [a b]
+     *                                      [c d]
+     */
+    double det(double a, double b, double c, double d) {
+        return a*d - b*c;
+    }
+    
     
     /**
      * Retrieves the current position in device space. 
