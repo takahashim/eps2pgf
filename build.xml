@@ -70,6 +70,8 @@
         <delete file="${dist.jar.dir}/README.txt" />
         <copy file="${basedir}/otherfiles/README.txt" todir="${dist.jar.dir}" />
         <copy file="${basedir}/otherfiles/LICENSE.txt" todir="${dist.jar.dir}" />
+        <copy file="${basedir}/otherfiles/LICENSE_FontBox.txt" todir="${dist.jar.dir}/lib" />
+        <copy file="${basedir}/otherfiles/LICENSE_JSAP.txt" todir="${dist.jar.dir}/lib" />
         
         <mkdir dir="${dist.jar.dir}/resources" />
         <copy todir="${dist.jar.dir}/resources">
