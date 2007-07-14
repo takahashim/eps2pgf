@@ -1,5 +1,5 @@
 ============================================================================
-                              Eps2pgf v0.3.0
+                              Eps2pgf v0.4.0
 ============================================================================
 
 Website: http://sourceforge.net/projects/eps2pgf
@@ -55,6 +55,10 @@ limitations under the License.
 ----------------------------------------------------------------------------
 Changelog
 ----------------------------------------------------------------------------
+v0.4.0 (2007-07-??)
+  - Changed: Eps2pgf is now distributed under the Apache license
+  - Added: lots of PostScript commands
+
 v0.3.0 (2007-05-28)
   - Added: tons of PostScript commands
   - Added: automated test scripts
