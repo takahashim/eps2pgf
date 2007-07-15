@@ -22,8 +22,11 @@ import os
 import re
 import sys
 import subprocess
+import time
 
-programCmd = "java -jar ..\\dist\\eps2pgf.jar \"%inputFile%\" --output \"%outputFile%\""
+eps2pgfCmd = "java -jar ..\\dist\\eps2pgf.jar \"%epsFile%\" --output \"%pgfFile%\""
+latexCmd = "pdflatex --interaction=errorstopmode -output-directory=\"%outputDir%\" \"%texFile%\""
+
 nextArg = 1
     
 if len(sys.argv) > 1:
@@ -33,6 +36,7 @@ else:
 
 def main():
     scriptDir = findScriptDir()
+    testFigDir = os.path.join(scriptDir, 'test_figures')
     testFile = os.path.join(scriptDir, 'test_figures.txt')
     tests = loadTestFile(testFile)
     
@@ -50,25 +54,26 @@ def main():
         if not re.match(nameFilter, basename):
             continue
         
-        print '%(linenr)4d %(name)-30s' % {'linenr':linenr, 'name':basename},
+        print '%(linenr)4d %(name)-25s' % {'linenr':linenr, 'name':basename},
         
         # Determine input filename
-        if os.path.exists(os.path.join('test_figures', basename+'.eps')):
-            inputFile = os.path.join('test_figures', basename+'.eps')
-        elif os.path.exists(os.path.join('test_figures', basename+'.ps')):
-            inputFile = os.path.join('test_figures', basename+'.ps')
+        if os.path.exists(os.path.join(testFigDir, basename+'.eps')):
+            epsFile = os.path.join(testFigDir, basename+'.eps')
+        elif os.path.exists(os.path.join(testFigDir, basename+'.ps')):
+            epsFile = os.path.join(testFigDir, basename+'.ps')
         else:
             print "ERROR (file not found)"
             errorsPgf.append(basename)
             continue
         
-        # Determine output filename
-        outputFile = os.path.join(workDir, basename+'.pgf')
+        # Determine output filenames
+        pgfFile = os.path.join(workDir, basename+'.pgf')
+        texFile = os.path.join(workDir, basename+'.tex')
         
         # Prepare program command
-        global programCmd
-        thisCmd = programCmd.replace('%inputFile%', inputFile)
-        thisCmd = thisCmd.replace('%outputFile%', outputFile)
+        global eps2pgfCmd
+        thisCmd = eps2pgfCmd.replace('%epsFile%', epsFile)
+        thisCmd = thisCmd.replace('%pgfFile%', pgfFile)
         
         # Execute the interpreter
         procObj = subprocess.Popen(thisCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -77,10 +82,40 @@ def main():
         # Check standard error
         errorMsg = procObj.stderr.read()
         if len(errorMsg) > 0:
-            print "ERROR"
+            print "Eps2pgf: ERROR"
             errorsPgf.append(basename)
+            continue
         else:
-            print "ok"
+            print "Eps2pgf: ok",
+            
+        # Create LaTeX file
+        createTexFile(texFile, pgfFile)
+        
+        # Run LaTeX
+        global latexCmd
+        thisCmd = latexCmd.replace('%outputDir%', workDir)
+        thisCmd = thisCmd.replace('%texFile%', texFile)
+        procObj = subprocess.Popen(thisCmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        stdout = ''
+        latexError = False
+        while (procObj.poll() == None):
+            nextLine = procObj.stdout.readline()
+            if nextLine:
+                stdout += nextLine
+                if nextLine.startswith('!'):
+                    # There was an error
+                    latexError = True
+                    errorsTex.append(basename)
+                    for i in range(1,5):
+                        stdout += procObj.stdout.readline()
+                    procObj.stdin.write('X')
+                    break
+            time.sleep(0.1)
+            
+        if latexError:
+            print ', LaTeX: ERROR'
+        else:
+            print ', LaTeX: ok'
             
     print '-----'
     print '%(nr)d eps2pgf error(s)' % {'nr':len(errorsPgf)},
@@ -137,19 +172,27 @@ def cleanup(workDir):
     
     """
     if os.path.exists(workDir):
-        try:
-            files = os.listdir(workDir)
-            # First, remove all .pgf files
-            for filename in files:
-                fullfile = os.path.join(workDir, filename)
-                if os.path.isfile(fullfile) and filename.endswith('.pgf'):
-                    os.remove(fullfile)
-            
-            # Last, remove the directory itself
-            os.rmdir(workDir)
-        except WindowsError:
-            print "WARNING: Failed to remove workdir ("+workDir+")"
-            pass
+        files = os.listdir(workDir)
+        # First, remove all temporary files
+        for filename in files:
+            fullfile = os.path.join(workDir, filename)
+            if os.path.isfile(fullfile) and (filename.endswith('.pgf') or
+                                             filename.endswith('.aux') or
+                                             filename.endswith('.log') or
+                                             filename.endswith('.tex')):
+                os.remove(fullfile)
+   
     
+def createTexFile(texFile, pgfFile):
+    """Create a minimal LaTeX file that includes the PGF file.
+    
+    """
+    f = open(texFile, 'w')
+    f.write('\\documentclass{article}\n')
+    f.write('\\usepackage{pgf}\n')
+    f.write('\\pagestyle{empty}\n')
+    f.write('\\begin{document}\n')
+    f.write('\\input{' + pgfFile.replace('\\', '/') + '}\n')
+    f.write('\\end{document}\n')
 
 main()
