@@ -198,3 +198,21 @@ coor 23 - itransform 2: 56.78 23.96 [1.2 3.4 5.6 7.8 9.1 2.3] itransform 2 array
 coor 24 - idtransform 1: [1.2 3.4 5.6 7.8 9.1 2.3] setmatrix 56.78 23.96 idtransform 2 array astore [-31.891 16.973] /m2 exch def /m1 exch def 0 1 m1 length 1 sub {dup m1 exch get 1e-40 add exch m2 exch get 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt} for
 coor 25 - idtransform 2: 56.78 23.96 [1.2 3.4 5.6 7.8 9.1 2.3] idtransform 2 array astore [-31.891 16.973] /m2 exch def /m1 exch def 0 1 m1 length 1 sub {dup m1 exch get 1e-40 add exch m2 exch get 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt} for
 coor 26 - invertmatrix: [1.2 3.4 5.6 7.8 9.1 2.3] matrix invertmatrix [-0.8058 0.3512 0.5785 -0.1240 6.002 -2.911] /m2 exch def /m1 exch def 0 1 m1 length 1 sub {dup m1 exch get 1e-40 add exch m2 exch get 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt} for
+
+graphics  1 - currentcolorspace: currentcolorspace 0 get /DeviceGray eq
+graphics  2 - setcolorspace: /DeviceRGB setcolorspace currentcolorspace 0 get /DeviceRGB eq
+graphics  3 - currentcolor: currentcolor 0 eq count 1 eq
+graphics  4 - setcolor 1: 0.5 setcolor currentcolor 0.5 eq
+graphics  5 - setcolor 2: 0.5 setcolor /DeviceRGB setcolorspace currentcolor 0 eq 3 1 roll 0 eq 3 1 roll 0 eq
+graphics  6 - setgray 1: 0.4 setgray currentcolorspace 0 get /DeviceGray eq
+graphics  7 - setgray 2: 0.4 setgray currentcolor 0.4 eq count 1 eq
+graphics  8 - sethsbcolor 1: 0.123 0.456 0.789 sethsbcolor currentcolorspace 0 get /DeviceRGB eq
+graphics  9 - sethsbcolor 2: 0.123 0.456 0.789 sethsbcolor currentcolor 0.4292 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.6947 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.789 div dup 1 lt {1 exch div} if 1.001 le   
+graphics 10 - setrgbcolor 1: 0.123 0.456 0.789 setrgbcolor currentcolorspace 0 get /DeviceRGB eq
+graphics 11 - setrgbcolor 2: 0.123 0.456 0.789 setrgbcolor currentcolor 0.789 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.456 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.123 div dup 1 lt {1 exch div} if 1.001 le   
+graphics 12 - setcmykcolor 1: 0.12 0.34 0.56 0.78 setcmykcolor currentcolorspace 0 get /DeviceCMYK eq
+graphics 13 - setcmykcolor 2: 0.12 0.34 0.56 0.78 setcmykcolor currentcolor 0.78 div dup 1 lt {1 exch div} if 1.001 le  4 1 roll 0.56 div dup 1 lt {1 exch div} if 1.001 le  4 1 roll 0.34 div dup 1 lt {1 exch div} if 1.001 le  4 1 roll 0.12 div dup 1 lt {1 exch div} if 1.001 le   
+graphics 14 - currentgray: 0.25 1 0.5 setrgbcolor currentgray 0.72 div dup 1 lt {1 exch div} if 1.001 le
+graphics 15 - currenthsbcolor: 0.25 1 0.5 setrgbcolor currenthsbcolor  1.0 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.75 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.3889 div dup 1 lt {1 exch div} if 1.001 le
+graphics 16 - currentrgbcolor: 0.25 1 0.5 setrgbcolor currentrgbcolor  0.5 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 1.0 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.25 div dup 1 lt {1 exch div} if 1.001 le
+graphics 17 - currentcmykcolor: 0.25 1 0.5 setrgbcolor currentcmykcolor  0.0 sub abs 0.0001 le  4 1 roll 0.5 div dup 1 lt {1 exch div} if 1.001 le  4 1 roll 0.0 sub abs 0.0001 le  4 1 roll 0.75 div dup 1 lt {1 exch div} if 1.001 le
