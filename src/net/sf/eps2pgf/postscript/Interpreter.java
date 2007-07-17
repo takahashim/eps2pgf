@@ -433,6 +433,14 @@ public class Interpreter {
         throw new PSErrorUnmatchedMark();
     }
     
+    /** PostScript op: currentcolor */
+    public void op_currentcolor() {
+        double[] values = gstate.current.color;
+        for (int i = 0 ; i < values.length ; i++) {
+            opStack.push(new PSObjectReal(values[i]));
+        }
+    }
+    
     /** PostScript op: currentcolorspace */
     public void op_currentcolorspace() {
         opStack.push(gstate.current.colorSpace.clone());
