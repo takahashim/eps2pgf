@@ -433,6 +433,11 @@ public class Interpreter {
         throw new PSErrorUnmatchedMark();
     }
     
+    /** PostScript op: currentcolorspace */
+    public void op_currentcolorspace() {
+        opStack.push(gstate.current.colorSpace.clone());
+    }
+    
     /** PostScript op: currentdict */
     public void op_currentdict() {
         opStack.push(dictStack.peekDict());
