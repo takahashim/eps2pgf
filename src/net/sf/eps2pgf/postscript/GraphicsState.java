@@ -20,8 +20,10 @@
 
 package net.sf.eps2pgf.postscript;
 
+import java.io.IOException;
 import java.util.logging.*;
 
+import net.sf.eps2pgf.output.Exporter;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
@@ -63,6 +65,19 @@ public class GraphicsState implements Cloneable {
     public Path clippingPath;
     
     /**
+     * Current color space
+     */
+    public PSObjectArray colorSpace = new PSObjectArray();
+    
+    /**
+     * Current color (meaning of parameters depends on the colorSpace specified above)
+     */
+    public double[] color;
+    static double[] defaultGray = {0.0};
+    static double[] defaultRgb = {0.0, 0.0, 0.0};
+    static double[] defaultCmyk = {0.0, 0.0, 0.0, 1.0};
+    
+    /**
      * Current font
      */
     public PSObjectFont font;
@@ -81,6 +96,12 @@ public class GraphicsState implements Cloneable {
         path = new Path(parentGraphicsStack);
         clippingPath = new Path(parentGraphicsStack);
         font = new PSObjectFont();
+        try {
+            colorSpace.addToEnd(new PSObjectName("DeviceGray", true));
+        } catch (PSErrorInvalidAccess e) {
+            // this can never happen since the array was just created
+        }
+        color = defaultGray.clone();
         parentStack = parentGraphicsStack;
     }
     
@@ -236,6 +257,8 @@ public class GraphicsState implements Cloneable {
         newState.path = path.clone();
         newState.clippingPath = clippingPath.clone();
         newState.font = font.clone();
+        newState.color = color.clone();
+        newState.colorSpace = colorSpace.clone();
         return newState;
     }
 
@@ -371,6 +394,42 @@ public class GraphicsState implements Cloneable {
         position[1] = position[1] + dy;
         double[] transformed = CTM.transform(position);
         path.moveto(transformed[0], transformed[1]);
+    }
+    
+    /**
+     * Sets the current color space
+     * @param obj Object describing the color space. Should be a literal name or an
+     * array starting with a literal name.
+     * @param exp Changing the color space does not change the color. If an exporter
+     * is passed then the default color for the specified color space is set in the
+     * exporter.
+     */
+    public void setcolorspace(PSObject obj, Exporter exp) throws PSErrorRangeCheck,
+            PSErrorTypeCheck, PSErrorInvalidAccess, PSErrorUndefined, IOException {
+        String spaceName;
+        if (obj instanceof PSObjectName) {
+            spaceName = ((PSObjectName)obj).name;
+        } else if (obj instanceof PSObjectArray) {
+            spaceName = ((PSObjectArray)obj).get(0).toName().name;
+        } else {
+            throw new PSErrorTypeCheck();
+        }
+        
+        if (spaceName.equals("DeviceGray")) {
+            color = defaultGray.clone();
+        } else if (spaceName.equals("DeviceRGB")) {
+            color = defaultRgb.clone();
+        } else if (spaceName.equals("DeviceCMYK")) {
+            color = defaultCmyk.clone();
+        } else {
+            throw new PSErrorUndefined();
+        }
+        PSObjectArray newColSpace = new PSObjectArray();
+        newColSpace.addToEnd(new PSObjectName(spaceName, true));
+        colorSpace = newColSpace;
+        if (exp != null) {
+            exp.setColor(color);
+        }
     }
     
     /**

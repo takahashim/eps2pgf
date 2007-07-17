@@ -1459,6 +1459,13 @@ public class Interpreter {
             opStack.push(result.remove(0));
         }
     }
+    
+    /** PostScript op: setcolorspace */
+    public void op_setcolorspace() throws PSErrorStackUnderflow, PSErrorRangeCheck,
+            PSErrorTypeCheck, PSErrorInvalidAccess, PSErrorUndefined, IOException {
+        PSObject arrayOrName = opStack.pop();
+        gstate.current.setcolorspace(arrayOrName, exp);
+    }
    
     /** PostScript op: setcmykcolor */
     public void op_setcmykcolor() throws PSError {
@@ -1499,16 +1506,12 @@ public class Interpreter {
    
     /** PostScript op: setrgbcolor */
     public void op_setrgbcolor() throws PSError, IOException {
-        double blue = opStack.pop().toReal();
-        double green = opStack.pop().toReal();
-        double red = opStack.pop().toReal();
-        exp.setColor(red, green, blue);
+        throw new PSErrorUnimplemented("setrgbcolor");
     }
    
     /** PostScript op: setgray */
     public void op_setgray() throws PSError, IOException {
-        double level = opStack.pop().toReal();
-        exp.setColor(level);
+        throw new PSErrorUnimplemented("setgraycolor");
     }
    
     /** PostScript op: setlinecap */

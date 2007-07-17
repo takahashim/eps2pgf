@@ -349,34 +349,35 @@ public class PGFExport implements Exporter {
     }
 
     /**
-     * Sets the current color
-     * @param r Red value
-     * @param g Green value
-     * @param b Blue value
-     * @throws java.io.IOException Unable to write output
+     * Sets the current color in gray, RGB or CMYK
+     * @param colorLevels Depending on the length of the array. If it has one
+     * parameter it is a gray value, if it has three parameters it are RGB values
+     * and if it has four parameters it are CMYK values.
      */
-    public void setColor(double r, double g, double b) throws IOException {
-        r = Math.max(Math.min(r, 1.0), 0.0);
-        g = Math.max(Math.min(g, 1.0), 0.0);
-        b = Math.max(Math.min(b, 1.0), 0.0);
-        out.write("\\definecolor{eps2pgf_color}{rgb}{" + colorFormat.format(r) +
-                "," + colorFormat.format(g) + "," + colorFormat.format(b) + "}");
+    public void setColor(double[] colorLevels) throws IOException {
+        for (int i = 0 ; i < colorLevels.length ; i++) {
+            colorLevels[i] = Math.max(Math.min(colorLevels[i], 1.0), 0.0);
+        }
+        if (colorLevels.length >= 4) {
+            out.write("\\definecolor{eps2pgf_color}{cmyk}{"
+                    + colorFormat.format(colorLevels[0])
+                    + "," + colorFormat.format(colorLevels[1])
+                    + "," + colorFormat.format(colorLevels[2])
+                    + "," + colorFormat.format(colorLevels[3]) + "}");
+        } else if (colorLevels.length == 3) {
+            out.write("\\definecolor{eps2pgf_color}{rgb}{"
+                    + colorFormat.format(colorLevels[0])
+                    + "," + colorFormat.format(colorLevels[1])
+                    + "," + colorFormat.format(colorLevels[2]) + "}");
+        } else {
+            out.write("\\definecolor{eps2pgf_color}{gray}{"
+                    + colorFormat.format(colorLevels[0]) + "}");
+        }
+        
         out.write("\\pgfsetstrokecolor{eps2pgf_color}");
         out.write("\\pgfsetfillcolor{eps2pgf_color}\n");
     }
 
-    /**
-     * Sets the current color in gray
-     * @param level Grayscale level
-     * @throws java.io.IOException Unable to write output
-     */
-    public void setColor(double level) throws IOException {
-        level = Math.max(Math.min(level, 1.0), 0.0);
-        out.write("\\definecolor{eps2pgf_color}{gray}{" + colorFormat.format(level) + "}");
-        out.write("\\pgfsetstrokecolor{eps2pgf_color}");
-        out.write("\\pgfsetfillcolor{eps2pgf_color}\n");        
-    }
-    
     /**
      * Draws text
      * @param text Exact text to draw

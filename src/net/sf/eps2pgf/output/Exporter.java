@@ -96,14 +96,9 @@ public interface Exporter {
     public void setlinewidth(double lineWidth) throws IOException;
     
     /**
-     * Sets the current color in Red-Green-Blue (RGB)
+     * Sets the current color in gray, rgb or cmyk
      */
-    public void setColor(double r, double g, double b) throws IOException;
-
-    /**
-     * Sets the current color in gray
-     */
-    public void setColor(double level) throws IOException;
+    public void setColor(double[] colorLevels) throws IOException;
     
     /**
      * Sets the miter limit
