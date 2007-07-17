@@ -97,11 +97,12 @@ public class GraphicsState implements Cloneable {
         clippingPath = new Path(parentGraphicsStack);
         font = new PSObjectFont();
         try {
-            colorSpace.addToEnd(new PSObjectName("DeviceGray", true));
-        } catch (PSErrorInvalidAccess e) {
-            // this can never happen since the array was just created
+            setcolorspace(new PSObjectName("DeviceGray", true), null);
+        } catch (PSError e) {
+            // this can never happen
+        } catch (IOException e) {
+            // this can never happen
         }
-        color = defaultGray.clone();
         parentStack = parentGraphicsStack;
     }
     
