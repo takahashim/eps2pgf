@@ -398,6 +398,23 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
+     * Sets the color
+     * @param newColor Parameters of new color (defined in current color space)
+     * @param exp Exporter to which the new color will be written
+     */
+    public void setcolor(double[] newColor, Exporter exp) throws IOException {
+        int n = Math.min(color.length, newColor.length);
+        for (int i = 0 ; i < n ; i++) {
+            newColor[i] = Math.max(Math.min(newColor[i], 1.0), 0.0);
+        }
+
+        for (int i = 0 ; i < n ; i++) {
+            color[i] = newColor[i];
+        }
+        exp.setColor(color);
+    }
+    
+    /**
      * Sets the current color space
      * @param obj Object describing the color space. Should be a literal name or an
      * array starting with a literal name.

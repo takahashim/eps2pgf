@@ -1473,16 +1473,26 @@ public class Interpreter {
         }
     }
     
+    /** PostScript op: setcmykcolor */
+    public void op_setcmykcolor() throws PSError {
+        throw new PSErrorUnimplemented("operator: setcmykcolor");
+    }
+    
+    /** PostScript op: setcolor */
+    public void op_setcolor() throws PSErrorStackUnderflow, PSErrorTypeCheck, IOException {
+        int n = gstate.current.color.length;
+        double[] newColor = new double[n];
+        for (int i = 0 ; i < n ; i++) {
+            newColor[n-i-1] = opStack.pop().toReal();
+        }
+        gstate.current.setcolor(newColor, exp);
+    }
+   
     /** PostScript op: setcolorspace */
     public void op_setcolorspace() throws PSErrorStackUnderflow, PSErrorRangeCheck,
             PSErrorTypeCheck, PSErrorInvalidAccess, PSErrorUndefined, IOException {
         PSObject arrayOrName = opStack.pop();
         gstate.current.setcolorspace(arrayOrName, exp);
-    }
-   
-    /** PostScript op: setcmykcolor */
-    public void op_setcmykcolor() throws PSError {
-        throw new PSErrorUnimplemented("operator: setcmykcolor");
     }
    
     /** PostScript op: setdash */
