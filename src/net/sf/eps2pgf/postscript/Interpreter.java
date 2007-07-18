@@ -1534,7 +1534,9 @@ public class Interpreter {
    
     /** PostScript op: setgray */
     public void op_setgray() throws PSError, IOException {
-        throw new PSErrorUnimplemented("setgraycolor");
+        double[] num = { opStack.pop().toReal() };
+        gstate.current.setcolorspace(new PSObjectName("DeviceGray", true), null);
+        gstate.current.setcolor(num, exp);
     }
    
     /** PostScript op: setlinecap */
