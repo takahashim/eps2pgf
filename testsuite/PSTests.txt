@@ -213,7 +213,15 @@ graphics 11 - setrgbcolor 1: 0.123 0.456 0.789 setrgbcolor currentcolorspace 0 g
 graphics 12 - setrgbcolor 2: 0.123 0.456 0.789 setrgbcolor currentcolor 0.789 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.456 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.123 div dup 1 lt {1 exch div} if 1.001 le   
 graphics 13 - setcmykcolor 1: 0.12 0.34 0.56 0.78 setcmykcolor currentcolorspace 0 get /DeviceCMYK eq
 graphics 14 - setcmykcolor 2: 0.12 0.34 0.56 0.78 setcmykcolor currentcolor 0.78 div dup 1 lt {1 exch div} if 1.001 le  4 1 roll 0.56 div dup 1 lt {1 exch div} if 1.001 le  4 1 roll 0.34 div dup 1 lt {1 exch div} if 1.001 le  4 1 roll 0.12 div dup 1 lt {1 exch div} if 1.001 le   
-graphics 15 - currentgray: 0.25 1 0.5 setrgbcolor currentgray 0.72 div dup 1 lt {1 exch div} if 1.001 le
-graphics 16 - currenthsbcolor: 0.25 1 0.5 setrgbcolor currenthsbcolor  1.0 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.75 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.3889 div dup 1 lt {1 exch div} if 1.001 le
-graphics 17 - currentrgbcolor: 0.25 1 0.5 setrgbcolor currentrgbcolor  0.5 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 1.0 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.25 div dup 1 lt {1 exch div} if 1.001 le
-graphics 18 - currentcmykcolor: 0.25 1 0.5 setrgbcolor currentcmykcolor  0.0 sub abs 0.0001 le  4 1 roll 0.5 div dup 1 lt {1 exch div} if 1.001 le  4 1 roll 0.0 sub abs 0.0001 le  4 1 roll 0.75 div dup 1 lt {1 exch div} if 1.001 le
+graphics 15 - currentgray 1: 0.25 setgray currentgray 0.25 sub abs 0.0001 lt
+graphics 16 - currentgray 2: 0.25 1 0.5 setrgbcolor currentgray 0.72 sub abs 0.0001 lt
+graphics 17 - currentgray 3: 0.1 0.2 0.3 0.4 setcmykcolor currentgray 0.419 sub abs 0.0001 lt
+graphics 18 - currenthsbcolor 1: 0.25 setgray currenthsbcolor 0.25 sub abs 0.0001 lt  3 1 roll abs 0.0001 lt  3 1 roll abs 0.0001 lt
+graphics 19 - currenthsbcolor 2: 0.25 1 0.5 setrgbcolor currenthsbcolor  1.0 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.75 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.3889 div dup 1 lt {1 exch div} if 1.001 le
+graphics 20 - currenthsbcolor 3: 0.1 0.2 0.3 0.4 setcmykcolor currenthsbcolor 0.5 sub abs 0.0001 lt  3 1 roll 0.4 sub abs 0.0001 lt  3 1 roll 0.08333 sub abs 0.0001 lt
+graphics 21 - currentrgbcolor 1: 0.25 setgray currentrgbcolor  0.25 sub abs 0.0001 lt  3 1 roll 0.25 sub abs 0.0001 lt  3 1 roll 0.25 sub abs 0.0001 lt
+graphics 22 - currentrgbcolor 2: 0.25 1 0.5 setrgbcolor currentrgbcolor  0.5 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 1.0 div dup 1 lt {1 exch div} if 1.001 le  3 1 roll 0.25 div dup 1 lt {1 exch div} if 1.001 le
+graphics 23 - currentrgbcolor 3: 0.1 0.2 0.3 0.4 setcmykcolor currentrgbcolor 0.3 sub abs 0.0001 lt  3 1 roll 0.4 sub abs 0.0001 lt  3 1 roll 0.5 sub abs 0.0001 lt
+graphics 24 - currentcmykcolor 1: 0.25 setgray currentcmykcolor  0.75 sub abs 0.0001 lt  4 1 roll abs 0.0001 lt  4 1 roll abs 0.0001  4 1 roll abs 0.0001 lt
+graphics 25 - currentcmykcolor 2: 0.25 1 0.5 setrgbcolor currentcmykcolor  0.0 sub abs 0.0001 le  4 1 roll 0.5 div dup 1 lt {1 exch div} if 1.001 le  4 1 roll 0.0 sub abs 0.0001 le  4 1 roll 0.75 div dup 1 lt {1 exch div} if 1.001 le
+graphics 26 - currentcmykcolor 3: 0.1 0.2 0.3 0.4 setcmykcolor currentcmykcolor 0.4 sub abs 0.0001 lt  4 1 roll 0.3 sub abs 0.0001 lt  4 1 roll 0.2 sub abs 0.0001 lt  4 1 roll 0.1 sub abs 0.0001 lt
