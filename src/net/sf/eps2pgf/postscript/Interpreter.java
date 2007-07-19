@@ -1529,7 +1529,12 @@ public class Interpreter {
    
     /** PostScript op: setrgbcolor */
     public void op_setrgbcolor() throws PSError, IOException {
-        throw new PSErrorUnimplemented("setrgbcolor");
+        double blue = opStack.pop().toReal();
+        double green = opStack.pop().toReal();
+        double red = opStack.pop().toReal();
+        double[] rgbValues = {red, green, blue};
+        gstate.current.setcolorspace(new PSObjectName("DeviceRGB", true), null);
+        gstate.current.setcolor(rgbValues, exp);
     }
    
     /** PostScript op: setgray */
