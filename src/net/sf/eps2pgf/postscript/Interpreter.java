@@ -1474,8 +1474,14 @@ public class Interpreter {
     }
     
     /** PostScript op: setcmykcolor */
-    public void op_setcmykcolor() throws PSError {
-        throw new PSErrorUnimplemented("operator: setcmykcolor");
+    public void op_setcmykcolor() throws PSError, IOException {
+        double k = opStack.pop().toReal();
+        double y = opStack.pop().toReal();
+        double m = opStack.pop().toReal();
+        double c = opStack.pop().toReal();
+        double[] cmykValues = {c, m, y, k};
+        gstate.current.setcolorspace(new PSObjectName("DeviceCMYK", true), null);
+        gstate.current.setcolor(cmykValues, exp);
     }
     
     /** PostScript op: setcolor */
