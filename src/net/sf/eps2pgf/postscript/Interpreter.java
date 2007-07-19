@@ -462,6 +462,12 @@ public class Interpreter {
         opStack.push(new PSObjectReal(0.2));
     }
     
+    /** PostScript op: currentgray */
+    public void op_currentgray() throws PSError {
+        double gray = gstate.current.currentgray();
+        opStack.push(new PSObjectReal(gray));
+    }
+    
     /** PostScript op: currentmatrix */
     public void op_currentmatrix() throws PSError {
         PSObjectMatrix matrix = opStack.pop().toMatrix();

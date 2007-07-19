@@ -264,6 +264,13 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
+     * Convert a color in CMYK to grayscale
+     */
+    public static double convertCMYKtoGray(double c, double m, double y, double k) {
+        return (1.0 - Math.min(1.0, 0.3*c + 0.59*m + 0.11*y + k));
+    }
+    
+    /**
      * Convert a color specified in HSB to RGB
      * @param h Hue (ranging from 0 to 1)
      * @param s Saturation (ranging from 0 to 1)
@@ -301,6 +308,28 @@ public class GraphicsState implements Cloneable {
                 
         }
         return rgb;
+    }
+    
+    /**
+     * Convert a color in RGB to grayscale
+     */
+    public static double convertRGBtoGray(double r, double g, double b) {
+        return (0.3*r + 0.59*g + 0.11*b);
+    }
+    
+    /**
+     * Returns the current color in grayscale
+     */
+    public double currentgray() throws PSError {
+        String spaceName = colorSpace.get(0).toName().name;
+        if (spaceName.equals("DeviceGray")) {
+            return color[0];
+        } else if (spaceName.equals("DeviceRGB")) {
+            return convertRGBtoGray(color[0], color[1], color[2]);
+        } else if (spaceName.equals("DeviceCMYK")) {
+            return convertCMYKtoGray(color[0], color[1], color[2], color[3]);
+        }
+        return -1;
     }
 
     /**
