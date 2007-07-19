@@ -262,6 +262,46 @@ public class GraphicsState implements Cloneable {
         newState.colorSpace = colorSpace.clone();
         return newState;
     }
+    
+    /**
+     * Convert a color specified in HSB to RGB
+     * @param h Hue (ranging from 0 to 1)
+     * @param s Saturation (ranging from 0 to 1)
+     * @param b Brightness (ranging from 0 to 1)
+     */
+    public static double[] convertHSBtoRGB(double h, double s, double b) {
+        // See http://en.wikipedia.org/wiki/HSV_color_space
+        h = h % 1.0;
+        double Hi = Math.floor(h*6);
+        double f = h*6 - Hi;
+        double p = b * (1 - s);
+        double q = b * (1 - f*s);
+        double t = b * (1 - (1 - f)*s);
+        
+        double[] rgb = new double[3];
+        switch ((int)Hi) {
+            case 0:
+                rgb[0] = b;  rgb[1] = t;  rgb[2] = p;
+                break;
+            case 1:
+                rgb[0] = q;  rgb[1] = b;  rgb[2] = p;
+                break;
+            case 2:
+                rgb[0] = p;  rgb[1] = b;  rgb[2] = t;
+                break;
+            case 3:
+                rgb[0] = p;  rgb[1] = q;  rgb[2] = b;
+                break;
+            case 4:
+                rgb[0] = t;  rgb[1] = p;  rgb[2] = b;
+                break;
+            case 5:
+                rgb[0] = b;  rgb[1] = p;  rgb[2] = q;
+                break;
+                
+        }
+        return rgb;
+    }
 
     /**
      * Add a curveto section to the current path
