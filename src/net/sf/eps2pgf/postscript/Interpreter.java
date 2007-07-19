@@ -1538,6 +1538,16 @@ public class Interpreter {
         gstate.current.setcolorspace(new PSObjectName("DeviceGray", true), null);
         gstate.current.setcolor(num, exp);
     }
+    
+    /** PostScript op: sethsbcolor */
+    public void op_sethsbcolor() throws PSError, IOException {
+        double brightness = opStack.pop().toReal();
+        double saturaration = opStack.pop().toReal();
+        double hue = opStack.pop().toReal();
+        double[] rgbValues = GraphicsState.convertHSBtoRGB(hue, saturaration, brightness);
+        gstate.current.setcolorspace(new PSObjectName("DeviceRGB", true), null);
+        gstate.current.setcolor(rgbValues, exp);
+    }
    
     /** PostScript op: setlinecap */
     public void op_setlinecap() throws PSError, IOException {
