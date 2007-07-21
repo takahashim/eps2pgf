@@ -22,6 +22,7 @@ package net.sf.eps2pgf.postscript;
 
 import java.io.IOException;
 import java.util.logging.*;
+import net.sf.eps2pgf.ProgramError;
 
 import net.sf.eps2pgf.output.Exporter;
 import net.sf.eps2pgf.postscript.errors.*;
@@ -264,72 +265,37 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
-     * Convert a color in CMYK to grayscale
-     */
-    public static double convertCMYKtoGray(double c, double m, double y, double k) {
-        return (1.0 - Math.min(1.0, 0.3*c + 0.59*m + 0.11*y + k));
-    }
-    
-    /**
-     * Convert a color specified in HSB to RGB
-     * @param h Hue (ranging from 0 to 1)
-     * @param s Saturation (ranging from 0 to 1)
-     * @param b Brightness (ranging from 0 to 1)
-     */
-    public static double[] convertHSBtoRGB(double h, double s, double b) {
-        // See http://en.wikipedia.org/wiki/HSV_color_space
-        h = h % 1.0;
-        double Hi = Math.floor(h*6);
-        double f = h*6 - Hi;
-        double p = b * (1 - s);
-        double q = b * (1 - f*s);
-        double t = b * (1 - (1 - f)*s);
-        
-        double[] rgb = new double[3];
-        switch ((int)Hi) {
-            case 0:
-                rgb[0] = b;  rgb[1] = t;  rgb[2] = p;
-                break;
-            case 1:
-                rgb[0] = q;  rgb[1] = b;  rgb[2] = p;
-                break;
-            case 2:
-                rgb[0] = p;  rgb[1] = b;  rgb[2] = t;
-                break;
-            case 3:
-                rgb[0] = p;  rgb[1] = q;  rgb[2] = b;
-                break;
-            case 4:
-                rgb[0] = t;  rgb[1] = p;  rgb[2] = b;
-                break;
-            case 5:
-                rgb[0] = b;  rgb[1] = p;  rgb[2] = q;
-                break;
-                
-        }
-        return rgb;
-    }
-    
-    /**
-     * Convert a color in RGB to grayscale
-     */
-    public static double convertRGBtoGray(double r, double g, double b) {
-        return (0.3*r + 0.59*g + 0.11*b);
-    }
-    
-    /**
      * Returns the current color in grayscale
      */
-    public double currentgray() throws PSError {
+    public double currentgray() throws PSError, ProgramError {
         String spaceName = colorSpace.get(0).toName().name;
         if (spaceName.equals("DeviceGray")) {
             return color[0];
         } else if (spaceName.equals("DeviceRGB")) {
-            return convertRGBtoGray(color[0], color[1], color[2]);
+            return ColorConvert.RGBtoGray(color);
         } else if (spaceName.equals("DeviceCMYK")) {
-            return convertCMYKtoGray(color[0], color[1], color[2], color[3]);
+            return ColorConvert.CMYKtoGray(color);
+        } else {
+            throw new ProgramError("You've found a bug. Current colorspace is"
+                    + " invalid. That should not be possible.");
         }
-        return -1;
+    }
+    
+    /**
+     * Returns the current color in the hsb (also hsv) color space
+     */
+    public double[] currenthsbcolor() throws PSError, ProgramError {
+        String spaceName = colorSpace.get(0).toName().name;
+        if (spaceName.equals("DeviceGray")) {
+            return ColorConvert.grayToHSB(color[0]);
+        } else if (spaceName.equals("DeviceRGB")) {
+            return ColorConvert.RGBtoHSB(color);
+        } else if (spaceName.equals("DeviceCMYK")) {
+            return ColorConvert.CMYKtoHSB(color);
+        } else {
+            throw new ProgramError("You've found a bug. Current colorspace is"
+                    + " invalid. That should not be possible.");
+        }
     }
 
     /**

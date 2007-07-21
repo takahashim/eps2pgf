@@ -463,9 +463,17 @@ public class Interpreter {
     }
     
     /** PostScript op: currentgray */
-    public void op_currentgray() throws PSError {
+    public void op_currentgray() throws PSError, ProgramError {
         double gray = gstate.current.currentgray();
         opStack.push(new PSObjectReal(gray));
+    }
+    
+    /** PostScript op: currenthsbcolor */
+    public void op_currenthsbcolor() throws PSError, ProgramError {
+        double hsb[] = gstate.current.currenthsbcolor();
+        for (int i = 0 ; i < hsb.length ; i++) {
+            opStack.push(new PSObjectReal(hsb[i]));
+        }
     }
     
     /** PostScript op: currentmatrix */
@@ -1561,7 +1569,7 @@ public class Interpreter {
         double brightness = opStack.pop().toReal();
         double saturaration = opStack.pop().toReal();
         double hue = opStack.pop().toReal();
-        double[] rgbValues = GraphicsState.convertHSBtoRGB(hue, saturaration, brightness);
+        double[] rgbValues = ColorConvert.HSBtoRGB(hue, saturaration, brightness);
         gstate.current.setcolorspace(new PSObjectName("DeviceRGB", true), null);
         gstate.current.setcolor(rgbValues, exp);
     }
