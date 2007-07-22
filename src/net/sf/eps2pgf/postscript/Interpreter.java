@@ -433,6 +433,14 @@ public class Interpreter {
         throw new PSErrorUnmatchedMark();
     }
     
+    /** PostScript op: currentcmykcolor */
+    public void op_currentcmykcolor() throws PSError, ProgramError {
+        double cmyk[] = gstate.current.currentcmykcolor();
+        for (int i = 0 ; i < cmyk.length ; i++) {
+            opStack.push(new PSObjectReal(cmyk[i]));
+        }
+    }
+    
     /** PostScript op: currentcolor */
     public void op_currentcolor() {
         double[] values = gstate.current.color;
