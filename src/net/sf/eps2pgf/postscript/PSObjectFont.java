@@ -103,8 +103,6 @@ public class PSObjectFont extends PSObject implements Cloneable {
         } catch (PSErrorInvalidAccess e) {
             // because a new dictionary always has read-write access, this can never happen
         }
-        
-//      dict.setKey("FontBBox", new PSObjectArray(fontBbox));
     }
     
     /**
@@ -169,22 +167,22 @@ public class PSObjectFont extends PSObject implements Cloneable {
         }
         
         // Now load charStrings from the props
+        PSObjectDict charStrdict = new PSObjectDict();
         try {
-            PSObjectDict dict = new PSObjectDict();
             Set<String> allCharNames = Encoding.getCharNames().keySet();
             for (String charName : allCharNames) {
                 // Check whether this character name in defined in this
                 // charStrings list.
                 String propValue = props.getProperty(charName);
                 if (propValue != null) {
-                    dict.setKey(charName, propValue);
+                    charStrdict.setKey(charName, propValue);
                 }
             }
         } catch (PSErrorInvalidAccess e) {
             // this can never happen since a new dictionary always has read-write access
         }
 
-        return dict;
+        return charStrdict;
     }
     
     /**
@@ -386,6 +384,19 @@ public class PSObjectFont extends PSObject implements Cloneable {
         return dict.lookup("AFM").toFontMetric();
     }
     
+    /**
+     * Returns a list with all items in object.
+     * @return List with all items in this object. The first object (with
+     *         index 0) is always a PSObjectInt with the number of object
+     *         in a single item. For most object types this is 1, but for
+     *         dictionaries this is 2. All consecutive items (index 1 and
+     *         up) are the object's items.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This object does not have a list of items
+     */
+    public List<PSObject> getItemList() throws PSErrorInvalidAccess {
+        return dict.getItemList();
+    }
+
     /**
      * Gets the horizontal kerning distance between two characters
      * @return Kerning distance between characters in pt (1/72 inch)
