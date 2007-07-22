@@ -86,6 +86,18 @@ public class ColorConvert {
     }
     
     /**
+     * Convert a color in grayscale to CMYK
+     */
+    public static double[] grayToCMYK(double gray) {
+        double c = 0.0;
+        double m = 0.0;
+        double y = 0.0;
+        double k = 1.0 - gray;
+        double[] cmyk = {c, m, y, k};
+        return cmyk;
+    }
+    
+    /**
      * Convert a color in grayscale to the HSB color space
      * @param gray Gray value
      * @return Array with HSB values
@@ -144,6 +156,42 @@ public class ColorConvert {
                 
         }
         return rgb;
+    }
+    
+    /**
+     * Convert a color in RGB to CMYK
+     * @return Array with CMYK values: {C, M, Y, K}
+     */
+    public static double[] RGBtoCMYK(double r, double g, double b) {
+        // First step: convert rgb to cmy
+        double c = 1.0 - r;
+        double m = 1.0 - g;
+        double y = 1.0 - b;
+        
+        // Second step: generate black component and alter the other components
+        // to produce a better approximation of the original color.
+        // See http://en.wikipedia.org/wiki/CMYK_color_model#Mapping_RGB_to_CMYK
+        // And http://www.easyrgb.com/math.html
+        double k = Math.min(c, Math.min(m, y));
+        if (k == 0) {
+            c = 0;  m = 0;  y = 0;
+        } else {
+            c = (c-k)/(1-k);
+            m = (m-k)/(1-k);
+            y = (y-k)/(1-k);
+        }
+        
+        double[] cmyk = {c, m, y, k};
+        return cmyk;
+    }
+    
+    /**
+     * Convert a color in RGB to CMYK
+     * @param rgb Array with RGB values: {R, G, B}
+     * @return Array with CMYK values: {C, M, Y, K}
+     */
+    public static double[] RGBtoCMYK(double[] rgb) {
+        return RGBtoCMYK(rgb[0], rgb[1], rgb[2]);
     }
     
     /**

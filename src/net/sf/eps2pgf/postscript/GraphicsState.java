@@ -265,6 +265,23 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
+     * Returns the current color in the CMYK color space
+     */
+    public double[] currentcmykcolor() throws PSError, ProgramError {
+        String spaceName = colorSpace.get(0).toName().name;
+        if (spaceName.equals("DeviceGray")) {
+            return ColorConvert.grayToCMYK(color[0]);
+        } else if (spaceName.equals("DeviceRGB")) {
+            return ColorConvert.RGBtoCMYK(color);
+        } else if (spaceName.equals("DeviceCMYK")) {
+            return color.clone();
+        } else {
+            throw new ProgramError("You've found a bug. Current colorspace is"
+                    + " invalid. That should not be possible.");
+        }
+    }
+
+    /**
      * Returns the current color in grayscale
      */
     public double currentgray() throws PSError, ProgramError {
@@ -282,7 +299,7 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
-     * Returns the current color in the hsb (also hsv) color space
+     * Returns the current color in the HSB (also HSV) color space
      */
     public double[] currenthsbcolor() throws PSError, ProgramError {
         String spaceName = colorSpace.get(0).toName().name;
@@ -299,7 +316,7 @@ public class GraphicsState implements Cloneable {
     }
 
     /**
-     * Returns the current color in the hsb (also hsv) color space
+     * Returns the current color in the RGB color space
      */
     public double[] currentrgbcolor() throws PSError, ProgramError {
         String spaceName = colorSpace.get(0).toName().name;
