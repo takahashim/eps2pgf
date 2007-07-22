@@ -492,6 +492,14 @@ public class Interpreter {
         opStack.push(new PSObjectReal(currentUser[1]));
     }
     
+    /** PostScript op: currentrgbcolor */
+    public void op_currentrgbcolor() throws PSError, ProgramError {
+        double rgb[] = gstate.current.currentrgbcolor();
+        for (int i = 0 ; i < rgb.length ; i++) {
+            opStack.push(new PSObjectReal(rgb[i]));
+        }
+    }
+    
     /** PostScript op: curveto */
     public void op_curveto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorInvalidAccess, PSErrorRangeCheck {

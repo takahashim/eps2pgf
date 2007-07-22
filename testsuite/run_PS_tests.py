@@ -66,7 +66,7 @@ def main():
         if not re.match(nameFilter, name):
             continue
         
-        print '%(linenr)4d %(name)-30s' % {'linenr':linenr, 'name':name},
+        print '%(linenr)4d %(name)-32s' % {'linenr':linenr, 'name':name},
         
         fd = open(inputFile, 'w')
         fd.write(code)

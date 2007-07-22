@@ -299,6 +299,23 @@ public class GraphicsState implements Cloneable {
     }
 
     /**
+     * Returns the current color in the hsb (also hsv) color space
+     */
+    public double[] currentrgbcolor() throws PSError, ProgramError {
+        String spaceName = colorSpace.get(0).toName().name;
+        if (spaceName.equals("DeviceGray")) {
+            return ColorConvert.grayToRGB(color[0]);
+        } else if (spaceName.equals("DeviceRGB")) {
+            return color.clone();
+        } else if (spaceName.equals("DeviceCMYK")) {
+            return ColorConvert.CMYKtoRGB(color);
+        } else {
+            throw new ProgramError("You've found a bug. Current colorspace is"
+                    + " invalid. That should not be possible.");
+        }
+    }
+
+    /**
      * Add a curveto section to the current path
      * @param x1 X-coordinate of first control point
      * @param y1 Y-coordinate of first control point
