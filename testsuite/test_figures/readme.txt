@@ -9,7 +9,6 @@ golfer.ps                - GhostScript <www.ghostscript.com>, with some
                            small changes
 grow.ps                  - ???
 illustrator_vw.ps        - ???
-ipe-figure1.eps          - Created by Paul Wagenaars using http://tclab.kaist.ac.kr/ipe/
 tiger.eps                - GhostScript <www.ghostscript.com>, with some
                            small changes
 
