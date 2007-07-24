@@ -360,6 +360,12 @@ public class GraphicsState implements Cloneable {
         return a*d - b*c;
     }
     
+    /**
+     * Replace the current path by a flattened version of the path
+     */
+    public void flattenpath() throws PSError, ProgramError {
+        path = path.flattenpath(1);
+    }
     
     /**
      * Retrieves the current position in device space. 

@@ -172,8 +172,9 @@ path 14 - flattenpath: 100 100 moveto 110 110 100 0 120 arc flattenpath {} {} {n
 path 15 - clippath: clippath 1 setgray fill
 path 16 - pathbbox 1: 100 100 moveto 150 150 150 150 200 100 curveto pathbbox  150 sub abs 1e-3 lt  4 1 roll 200 sub abs 1e-3 lt  4 1 roll 100 sub abs 1e-3 lt  4 1 roll 100 sub abs 1e-3 lt
 path 17 - pathbbox 2: 100 100 moveto 150 150 150 150 200 100 curveto flattenpath pathbbox  137.5 sub abs 1e-2 lt  4 1 roll 200 sub abs 1e-3 lt  4 1 roll 100 sub abs 1e-3 lt  4 1 roll 100 sub abs 1e-3 lt
-path 18 - pathforall 1: 1 2 moveto 3 4 lineto 1 2 3 4 5 6 curveto 2 2 scale {sub} {add add} {add sub add sub add add} {} pathforall 6.5 exch 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt
-path 19 - pathforall 2: 1 2 moveto 3 4 lineto {exit} {} {} {} pathforall 2 eq exch 1 eq
+path 18 - pathbbox 3: 100 100 moveto 100 200 lineto 200 200 lineto 200 100 lineto closepath 45 rotate pathbbox  70.71 sub abs 0.1 lt  4 1 roll 282.84 sub abs 0.1 lt  4 1 roll -70.71 sub abs 0.1 lt  4 1 roll 141.42 sub abs 0.1 lt
+path 19 - pathforall 1: 1 2 moveto 3 4 lineto 1 2 3 4 5 6 curveto 2 2 scale {sub} {add add} {add sub add sub add add} {} pathforall 6.5 exch 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt
+path 20 - pathforall 2: 1 2 moveto 3 4 lineto {exit} {} {} {} pathforall 2 eq exch 1 eq
 
 coor  1 - matrix 1: matrix {} forall  0 eq  6 1 roll 0 eq  6 1 roll 1 eq  6 1 roll 0 eq  6 1 roll 0 eq  6 1 roll 1 eq
 coor  2 - matrix 2: matrix dup eq

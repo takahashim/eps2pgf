@@ -20,6 +20,8 @@
 
 package net.sf.eps2pgf.postscript;
 
+import net.sf.eps2pgf.postscript.errors.*;
+
 /**
  * cubic Bezier curve path section
  *
@@ -70,6 +72,83 @@ public class Curveto extends PathSection implements Cloneable {
         Curveto newSection = new Curveto();
         newSection.params = params.clone();
         return newSection;
+    }
+    
+    /**
+     * Append a flattened version of this curve to a path
+     * @param maxError Maximum distance between flattened path and real curve.
+     *                 Expressed in terms of device coordinates (using a device
+     *                 resolution of 1200dpi).
+     */
+    public void flatten(Path path, double[] currentPoint, double maxError) throws PSError {
+        // Convert maxError to device space units (path coordinates are defined
+        // in these units).
+        double deviceScale = GraphicsState.defaultCTM.getMeanScaling();
+        maxError *= 72.0 / 1200.0 * deviceScale;
+        
+        double x0 = currentPoint[0];
+        double y0 = currentPoint[1];
+        
+        // Calculate ax, ay, ... parameters (see PostScript manual p.565)
+        double cx = 3*(params[0]-x0);
+        double cy = 3*(params[1]-y0);
+        double bx = 3*(params[2]-params[0]) - cx;
+        double by = 3*(params[3]-params[1]) - cy;
+        double ax = params[4] - x0 - cx - bx;
+        double ay = params[5] - y0 - cy - by;
+        
+        // Create high resolution version of curve
+        // Try to determine a rough estimate on the number of points required for the high resolution path
+        // This method does not have a mathematical background, just some logic and trial-and-error
+        double len = Math.sqrt( Math.pow(params[0]-x0,2) + Math.pow(params[1]-y0,2) );
+        len += Math.sqrt( Math.pow(params[2]-params[0],2) + Math.pow(params[3]-params[1],2) );
+        len += Math.sqrt( Math.pow(params[4]-params[2],2) + Math.pow(params[5]-params[3],2) );
+        len /= Math.sqrt( Math.pow(params[4]-x0,2) + Math.pow(params[5]-y0,2) );
+        // Number of sections for "high resolution" version
+        int N = (int)Math.round(3000.0*len/maxError);
+        N = Math.max(N, 10);
+        
+        double[] x = new double[N];
+        double[] y = new double[N];
+        double step = 1 / ( (double)N - 1 );
+        for (int i = 0 ; i < N ; i++) {
+            double t = (double)i * step;
+            x[i] = ax*Math.pow(t,3) + bx*Math.pow(t,2) + cx*t + x0;
+            y[i] = ay*Math.pow(t,3) + by*Math.pow(t,2) + cy*t + y0;
+        }
+        
+        int lastPlotted = 0;
+        for (int i = 2 ; i < N ; i++) {
+            // Calculate distance
+            // See: http://astronomy.swin.edu.au/~pbourke/geometry/pointline/
+            // See also: http://mathworld.wolfram.com/Point-LineDistance2-Dimensional.html
+            double x1 = x[i];
+            double y1 = y[i];
+            double x2 = x[lastPlotted];
+            double y2 = y[lastPlotted];
+            double dp2 = Math.pow(x1-x2,2) + Math.pow(y1-y2,2);
+            
+            // Now loop through all points between and calculate the distance of
+            // each point to the line p1-p2.
+            double maxSoFar = 0.0;
+            for (int j = lastPlotted+1 ; j < i ; j++ ) {
+                double x3 = x[j];
+                double y3 = y[j];
+                double num = (x3-x1)*(x2-x1) + (y3-y1)*(y2-y1);
+                double u = num / dp2;
+                
+                double xm = x1 + u*(x2-x1);
+                double ym = y1 + u*(y2-y1);
+                double d = Math.sqrt( Math.pow(xm-x3,2) + Math.pow(ym-y3,2) );
+                maxSoFar = Math.max(maxSoFar, d);
+            }
+            
+            if (maxSoFar > maxError) {
+                lastPlotted = i-1;
+                path.lineto(x[lastPlotted], y[lastPlotted]);
+            }
+        }
+        path.lineto(x[N-1], y[N-1]);
     }
     
 }

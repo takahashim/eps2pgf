@@ -754,17 +754,18 @@ public class Interpreter {
         opStack.push(fonts.findFont(key));
     }
     
-    /**
-     * PostScript op: floor
-     */
+    /** PostScript op: flattenpath */
+    public void op_flattenpath() throws PSError, ProgramError {
+        gstate.current.flattenpath();
+    }
+    
+    /** PostScript op: floor */
     public void op_floor() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.pop();
         opStack.push(obj.floor());
     }
     
-    /**
-     * PostScript op: for
-     */
+    /** PostScript op: for */
     public void op_for() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             Exception {
         PSObjectArray proc = opStack.pop().toProc();

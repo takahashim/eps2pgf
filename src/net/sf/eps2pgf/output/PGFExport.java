@@ -33,7 +33,7 @@ import net.sf.eps2pgf.postscript.errors.*;
  */
 public class PGFExport implements Exporter {
     // Coordinate format (used to format X- and Y-coordinates)
-    static final DecimalFormat coorFormat = new DecimalFormat("#.##", 
+    static final DecimalFormat coorFormat = new DecimalFormat("#.###", 
             new DecimalFormatSymbols(Locale.US));
     
     // Length format (used to format linewidth, dash, etc...)
