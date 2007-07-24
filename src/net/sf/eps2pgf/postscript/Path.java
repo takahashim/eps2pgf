@@ -21,6 +21,7 @@
 package net.sf.eps2pgf.postscript;
 
 import java.util.*;
+import net.sf.eps2pgf.ProgramError;
 
 import net.sf.eps2pgf.postscript.errors.*;
 
@@ -92,6 +93,36 @@ public class Path implements Cloneable {
         sections.add(closepath);
 
         return position;
+    }
+    
+    /**
+     * Returns a flattened version of the path. This path itself it not changed,
+     * a new path is created with the flattened version of this path.
+     * @param maxError Maximum distance between flattened path and real curve.
+     *                 Expressed in terms of device coordinates (using 300dpi). 
+     */
+    public Path flattenpath(double maxError) throws PSError, ProgramError {
+        
+        
+        Path flatPath = new Path(gStateStack);
+        PathSection lastSec = new PathSection();
+        double x0, y0;
+        for (PathSection sec : sections) {
+            if (sec instanceof Moveto) {
+                flatPath.moveto(sec.params[0], sec.params[1]);
+            } else if (sec instanceof Lineto) {
+                flatPath.lineto(sec.params[0], sec.params[1]);
+            } else if (sec instanceof Closepath) {
+                flatPath.closepath();
+            } else if (sec instanceof Curveto) {
+                ((Curveto)sec).flatten(flatPath, lastSec.deviceCoor(), maxError);
+            } else {
+                throw new ProgramError("You've found a bug. Flattening this ("
+                        + sec + ") type is not implemented.");
+            }
+            lastSec = sec;
+        }
+        return flatPath;
     }
     
     /**
