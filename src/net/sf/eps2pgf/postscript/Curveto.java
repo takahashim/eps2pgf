@@ -98,16 +98,7 @@ public class Curveto extends PathSection implements Cloneable {
         double ay = params[5] - y0 - cy - by;
         
         // Create high resolution version of curve
-        // Try to determine a rough estimate on the number of points required for the high resolution path
-        // This method does not have a mathematical background, just some logic and trial-and-error
-        double len = Math.sqrt( Math.pow(params[0]-x0,2) + Math.pow(params[1]-y0,2) );
-        len += Math.sqrt( Math.pow(params[2]-params[0],2) + Math.pow(params[3]-params[1],2) );
-        len += Math.sqrt( Math.pow(params[4]-params[2],2) + Math.pow(params[5]-params[3],2) );
-        len /= Math.sqrt( Math.pow(params[4]-x0,2) + Math.pow(params[5]-y0,2) );
-        // Number of sections for "high resolution" version
-        int N = (int)Math.round(3000.0*len/maxError);
-        N = Math.max(N, 10);
-        
+        int N = 10000;
         double[] x = new double[N];
         double[] y = new double[N];
         double step = 1 / ( (double)N - 1 );
@@ -118,12 +109,16 @@ public class Curveto extends PathSection implements Cloneable {
         }
         
         int lastPlotted = 0;
-        for (int i = 2 ; i < N ; i++) {
+        int upper = N-1;
+        int lower = 2;
+        while (lower < (N-1)) {
+            int current = (lower + upper + 1) / 2;
+            
             // Calculate distance
             // See: http://astronomy.swin.edu.au/~pbourke/geometry/pointline/
             // See also: http://mathworld.wolfram.com/Point-LineDistance2-Dimensional.html
-            double x1 = x[i];
-            double y1 = y[i];
+            double x1 = x[current];
+            double y1 = y[current];
             double x2 = x[lastPlotted];
             double y2 = y[lastPlotted];
             double dp2 = Math.pow(x1-x2,2) + Math.pow(y1-y2,2);
@@ -131,7 +126,7 @@ public class Curveto extends PathSection implements Cloneable {
             // Now loop through all points between and calculate the distance of
             // each point to the line p1-p2.
             double maxSoFar = 0.0;
-            for (int j = lastPlotted+1 ; j < i ; j++ ) {
+            for (int j = lastPlotted+1 ; j < current ; j++ ) {
                 double x3 = x[j];
                 double y3 = y[j];
                 double num = (x3-x1)*(x2-x1) + (y3-y1)*(y2-y1);
@@ -144,8 +139,16 @@ public class Curveto extends PathSection implements Cloneable {
             }
             
             if (maxSoFar > maxError) {
-                lastPlotted = i-1;
+                upper = current;
+            } else {
+                lower = current;
+            }
+            
+            if ( ((lower+1) == upper) && (maxSoFar > maxError) ) {
+                lastPlotted = lower;
                 path.lineto(x[lastPlotted], y[lastPlotted]);
+                lower++;
+                upper = N-1;
             }
         }
         path.lineto(x[N-1], y[N-1]);
