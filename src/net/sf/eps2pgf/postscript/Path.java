@@ -46,6 +46,39 @@ public class Path implements Cloneable {
     }
     
     /**
+     * Return the bounding box (in device coordinates) of the current path
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorNoCurrentPoint The path is empty
+     * @return Array with X- and Y-coordinates of lower-left and upper-right
+     * corners of the smallest rectangle that encloses this path.
+     */
+    public double[] boundingBox() throws PSErrorNoCurrentPoint {
+        int N = sections.size();
+        if (N < 1) {
+            throw new PSErrorNoCurrentPoint();
+        }
+        
+        double[] bbox = {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
+                Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY};
+        for (int i = 0 ; i < N ; i++) {
+            PathSection sec = sections.get(i);
+            if ((i == (N-1)) && (sec instanceof Moveto)) {
+                break;
+            }
+            for (int j = 0 ; j < sec.params.length ; j += 2) {
+                if (Double.isNaN(sec.params[j]) || Double.isNaN(sec.params[j+1])) {
+                    break;
+                }
+                bbox[0] = Math.min(bbox[0], sec.params[j]);
+                bbox[1] = Math.min(bbox[1], sec.params[j+1]);
+                bbox[2] = Math.max(bbox[2], sec.params[j]);
+                bbox[3] = Math.max(bbox[3], sec.params[j+1]);
+            }
+        }
+        
+        return bbox;
+    }
+    
+    /**
      * Create a clone of this object.
      * @return Returns a clone of this object. 
      */
@@ -99,7 +132,10 @@ public class Path implements Cloneable {
      * Returns a flattened version of the path. This path itself it not changed,
      * a new path is created with the flattened version of this path.
      * @param maxError Maximum distance between flattened path and real curve.
-     *                 Expressed in terms of device coordinates (using 300dpi). 
+     *                 Expressed in terms of device coordinates (using 300dpi).
+     * @return Flattened versiob of this path
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Something went wrong during the "flattening" of the path
+     * @throws net.sf.eps2pgf.ProgramError If this happens there's a bug in Eps2pgf
      */
     public Path flattenpath(double maxError) throws PSError, ProgramError {
         

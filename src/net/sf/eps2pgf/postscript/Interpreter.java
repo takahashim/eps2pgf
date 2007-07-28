@@ -1182,6 +1182,14 @@ public class Interpreter {
         opStack.push(obj1.or(obj2));
     }
     
+    /** PostScript op: pathbbox */
+    public void op_pathbbox() throws PSError {
+        double[] bbox = gstate.current.pathbbox();
+        for (int i = 0 ; i < 4 ; i++) {
+            opStack.push(new PSObjectReal(bbox[i]));
+        }
+    }
+    
     /** PostScript op: pathforall */
     public void op_pathforall() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorInvalidAccess, PSErrorRangeCheck, Exception {

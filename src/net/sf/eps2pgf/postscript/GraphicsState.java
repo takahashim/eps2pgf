@@ -362,6 +362,9 @@ public class GraphicsState implements Cloneable {
     
     /**
      * Replace the current path by a flattened version of the path
+     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred
+     * @throws net.sf.eps2pgf.ProgramError This should never happeb. If it is thrown it indicates a bug in
+     * Eps2pgf.
      */
     public void flattenpath() throws PSError, ProgramError {
         path = path.flattenpath(1);
@@ -418,6 +421,28 @@ public class GraphicsState implements Cloneable {
         position[1] = y;
         double[] transformed = CTM.transform(x, y);
         path.moveto(transformed[0], transformed[1]);
+    }
+    
+    /**
+     * Implements PostScript operator 'pathbbox'. Calculates the bounding box
+     * of the current path.
+     * @return Array with four values {llx lly urx ury}, which are the X- and
+     *         Y-coordinates (in user space coordinates) of the lower-left and
+     *         upper-right corner.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred.
+     */
+    public double[] pathbbox() throws PSError {
+        double[] deviceCoors = path.boundingBox();
+        double[] ll = CTM.itransform(deviceCoors[0], deviceCoors[1]);
+        double[] lr = CTM.itransform(deviceCoors[2], deviceCoors[1]);
+        double[] ur = CTM.itransform(deviceCoors[2], deviceCoors[3]);
+        double[] ul = CTM.itransform(deviceCoors[0], deviceCoors[3]);
+        double[] bbox = new double[4];
+        bbox[0] = Math.min(Math.min(ll[0], lr[0]), Math.min(ur[0], ul[0]));
+        bbox[1] = Math.min(Math.min(ll[1], lr[1]), Math.min(ur[1], ul[1]));
+        bbox[2] = Math.max(Math.max(ll[0], lr[0]), Math.max(ur[0], ul[0]));
+        bbox[3] = Math.max(Math.max(ll[1], lr[1]), Math.max(ur[1], ul[1]));
+        return bbox;
     }
     
     /**
