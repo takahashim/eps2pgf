@@ -124,7 +124,8 @@ public class Interpreter {
             right = bbox[2];
             top = bbox[3];
         } else {
-            // If no bounding box is default we use A4 paper.
+            // If no bounding box is default we use A4 paper. Note that this
+            // bounding box is not written to the output.
             left = 0;
             bottom = 0;
             right = 595.276;
@@ -137,7 +138,11 @@ public class Interpreter {
         gstate.current.path.closepath();
         defaultClippingPath = gstate.current.path;
         op_newpath();
-        op_initclip();
+        if (bbox != null) {
+            op_initclip();
+        } else {
+            gstate.current.clippingPath = defaultClippingPath.clone();
+        }
     }
     
     /**
