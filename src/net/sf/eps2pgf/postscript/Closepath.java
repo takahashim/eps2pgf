@@ -30,9 +30,7 @@ public class Closepath extends PathSection implements Cloneable {
      * @param position Coordinate to where this closepath returns.
      */
     public Closepath(double[] position) {
-        params[0] = position[0];
-        params[1] = position[1];
-        for( int i = 2 ; i < params.length ; i++) {
+        for( int i = 0 ; i < params.length ; i++) {
             params[i] = Double.NaN;
         }
     }
