@@ -124,14 +124,11 @@ public class Interpreter {
             right = bbox[2];
             top = bbox[3];
         } else {
-            // If no bounding box is default we use A4 paper. But the figure is
-            // not automatically clipped by this, so in most situation it won't
-            // have any effect on the result (only in situation where e.g.
-            // 'initclip' is used).
+            // If no bounding box is default we use A4 paper.
             left = 0;
             bottom = 0;
-            right = 595;
-            top = 842;
+            right = 595.276;
+            top = 841.890;
         }
         gstate.current.moveto(left, bottom);
         gstate.current.lineto(right, bottom);
@@ -140,9 +137,7 @@ public class Interpreter {
         gstate.current.path.closepath();
         defaultClippingPath = gstate.current.path;
         op_newpath();
-        if (bbox != null) {
-            op_initclip();
-        }
+        op_initclip();
     }
     
     /**
