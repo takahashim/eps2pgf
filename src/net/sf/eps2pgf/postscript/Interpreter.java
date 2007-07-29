@@ -53,7 +53,7 @@ public class Interpreter {
     Fonts fonts;
     
     // Text handler, handles text in the postscript code
-    TextHandler textHandler = new TextHandler(gstate);
+    TextHandler textHandler;
     
     // Header information of the file being interpreted
     DSCHeader header;
@@ -75,6 +75,9 @@ public class Interpreter {
         
         // Create graphics state stack
         gstate = new GstateStack(output);
+        
+        // Text handler
+        textHandler = new TextHandler(gstate);
         
         docObjects = in;
         header = fileHeader;
@@ -259,9 +262,7 @@ public class Interpreter {
     }
     
     /** PostScript op: ashow */
-    public void op_ashow() throws PSErrorTypeCheck, PSErrorStackUnderflow,
-            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, 
-            PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {
+    public void op_ashow() throws PSError, IOException {
         log.fine("ashow operator encoutered. ashow is not implemented, instead the normal show is used.");
         PSObjectString string = opStack.pop().toPSString();
         double ay = opStack.pop().toReal();
@@ -324,6 +325,17 @@ public class Interpreter {
     public void op_ceiling() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.pop();
         opStack.push(obj.ceiling());
+    }
+    
+    /**
+     * PostScript op: charpath
+     * Eps2pgf does currently not come with the fonts (only with the metrics describing the outlines).
+     * So, instead of the fonts themselves, the bounding box is added.
+     */
+    public void op_charpath() throws PSError {
+        boolean bool = opStack.pop().toBool();
+        PSObjectString string = opStack.pop().toPSString();
+        textHandler.charpath(string);
     }
     
     /** PostScript op: clear */
@@ -1640,12 +1652,9 @@ public class Interpreter {
         PSObjectDict dict = opStack.pop().toDict();
         gstate.current.device.shfill(dict, gstate.current);
     }
-   
+    
     /** PostScript op: show */
-    public void op_show() throws PSErrorTypeCheck, PSErrorStackUnderflow,
-            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, 
-            PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {
-        
+    public void op_show() throws PSError, IOException {
         PSObjectString string = opStack.pop().toPSString();
         double[] dpos = textHandler.showText(gstate.current.device, string);
         gstate.current.rmoveto(dpos[0], dpos[1]);
