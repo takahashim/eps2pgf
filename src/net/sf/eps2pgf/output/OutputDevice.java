@@ -29,7 +29,20 @@ import net.sf.eps2pgf.postscript.errors.*;
  * Interface for exporters (e.g. Pgf and Tikz)
  * @author Paul Wagenaars
  */
-public interface Exporter {
+public interface OutputDevice {
+    
+    /**
+     * Implements PostScript clip operator
+     * Intersects the area inside the current clipping path with the area
+     * inside the current path to produce a new, smaller clipping path.
+     */
+    public void clip(Path clipPath) throws IOException, PSErrorUnimplemented;
+    
+    /**
+     * Retuns a <b>copy</b> default transformation matrix (converts user space
+     * coordinates to device space).
+     */
+    public PSObjectMatrix defaultCTM();
     
     /**
      * Initialize before any other methods are called. Normally, this method
@@ -41,13 +54,6 @@ public interface Exporter {
      * Finilize writing. Normally, this method writes a footer.
      */
     public void finish() throws IOException;
-    
-    /**
-     * Implements PostScript clip operator
-     * Intersects the area inside the current clipping path with the area
-     * inside the current path to produce a new, smaller clipping path.
-     */
-    public void clip(Path clipPath) throws IOException, PSErrorUnimplemented;
     
     /**
      * Fills a path using the non-zero rule

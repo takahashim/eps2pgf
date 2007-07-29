@@ -77,15 +77,9 @@ public class Curveto extends PathSection implements Cloneable {
     /**
      * Append a flattened version of this curve to a path
      * @param maxError Maximum distance between flattened path and real curve.
-     *                 Expressed in terms of device coordinates (using a device
-     *                 resolution of 1200dpi).
+     *                 Expressed in terms of device coordinates.
      */
     public void flatten(Path path, double[] currentPoint, double maxError) throws PSError {
-        // Convert maxError to device space units (path coordinates are defined
-        // in these units).
-        double deviceScale = GraphicsState.defaultCTM.getMeanScaling();
-        maxError *= 72.0 / 1200.0 * deviceScale;
-        
         double x0 = currentPoint[0];
         double y0 = currentPoint[1];
         

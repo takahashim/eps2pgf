@@ -44,7 +44,7 @@ public class TextHandler {
      * @param exp Exporter to which the output will be sent
      * @return Displacement vector [dx, dy] in user space coordinates
      */
-    public double[] showText(Exporter exp, PSObjectString string) 
+    public double[] showText(OutputDevice exp, PSObjectString string) 
             throws PSErrorTypeCheck, PSErrorRangeCheck, PSErrorUndefined, 
             PSErrorUnimplemented, PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {
         return showText(exp, string, false);
@@ -56,7 +56,7 @@ public class TextHandler {
      * @param noOutput Don't show the text in the output if set true.
      * @return Displacement vector [dx, dy] in user space coordinates
      */
-    public double[] showText(Exporter exp, PSObjectString string, boolean noOutput) 
+    public double[] showText(OutputDevice exp, PSObjectString string, boolean noOutput) 
             throws PSErrorTypeCheck, PSErrorRangeCheck, PSErrorUndefined, 
             PSErrorUnimplemented, PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {        
         PSObjectFont currentFont = gstate.current.font;
