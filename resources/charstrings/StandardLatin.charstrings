@@ -112,7 +112,8 @@
 <entry key="plus">+</entry>
 
 <entry key="q">q</entry>
-<entry key="quotedbl">\"</entry>
+<entry key="question">?</entry>
+<entry key="quotedbl">\textquotedblright</entry>
 <entry key="quoteleft">`</entry>
 <entry key="quoteright">'</entry>
 
