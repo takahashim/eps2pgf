@@ -47,13 +47,10 @@ public class Interpreter {
     List<PSObject> docObjects;
     
     // Graphics state
-    GstateStack gstate = new GstateStack();
+    GstateStack gstate;
     
     // Fonts resources
     Fonts fonts;
-    
-    // Exporter, writes the graphics data to file in another format (such as pgf)
-    Exporter exp;
     
     // Text handler, handles text in the postscript code
     TextHandler textHandler = new TextHandler(gstate);
@@ -73,15 +70,18 @@ public class Interpreter {
      * @throws java.io.FileNotFoundException Unable to find font resources
      */
     public Interpreter(List<PSObject> in, Writer out, DSCHeader fileHeader) throws FileNotFoundException {
+        // Create new output device
+        OutputDevice output = new PGFDevice(out);
+        
+        // Create graphics state stack
+        gstate = new GstateStack(output);
+        
         docObjects = in;
         header = fileHeader;
         
         // Initialize character encodings
         Encoding.initialize();
         fonts = new Fonts();
-        
-        // Create new exporter
-        exp = new PGFExport(out);
     }
     
     /**
@@ -98,21 +98,21 @@ public class Interpreter {
             op_pstack();
             System.out.println("----- End of stack");
             dictStack.dumpFull();
-            exp.finish();
+            gstate.current.device.finish();
             throw e;
         }
-        exp.finish();
+        gstate.current.device.finish();
     }
     
     /**
      * Do some initialization tasks
      **/
-    void initialize() throws IOException, PSErrorUnimplemented,
-            PSErrorInvalidAccess, PSErrorRangeCheck, PSErrorTypeCheck {
-        exp.init();
+    void initialize() throws IOException, PSError {
+        gstate.current.device.init();
         
         // Default line width in PostScript is 1pt, while in PGF it is 0.4pt
-        exp.setlinewidth(gstate.current.CTM.getMeanScaling());
+        gstate.current.device.setlinewidth(gstate.current.CTM.getMeanScaling());
+        gstate.current.setcolorspace(new PSObjectName("DeviceGray", true), true);
         
         // An eps-file defines a bounding box. Set this bounding box as the
         // default clipping path.
@@ -350,7 +350,7 @@ public class Interpreter {
     /** PostScript op: clip */
     public void op_clip() throws PSErrorUnimplemented, IOException {
         gstate.current.clip();
-        exp.clip(gstate.current.clippingPath);
+        gstate.current.device.clip(gstate.current.clippingPath);
     }
     
     /** PostScript op: clippath */
@@ -612,7 +612,7 @@ public class Interpreter {
     public void op_defaultmatrix() throws PSErrorStackUnderflow,
             PSErrorRangeCheck, PSErrorTypeCheck, PSErrorInvalidAccess {
         PSObjectMatrix matrix = opStack.pop().toMatrix();
-        matrix.copy(gstate.current.defaultCTM);
+        matrix.copy(gstate.current.device.defaultCTM());
         opStack.push(matrix);
     }
     
@@ -680,7 +680,7 @@ public class Interpreter {
     
     /** PostScript op: eofill */
     public void op_eofill() throws PSError, IOException {
-        exp.eofill(gstate.current.path);
+        gstate.current.device.eofill(gstate.current.path);
         op_newpath();
     }
     
@@ -744,7 +744,7 @@ public class Interpreter {
     
     /** PostScript op: fill */
     public void op_fill() throws PSError, IOException {
-        exp.fill(gstate.current.path);
+        gstate.current.device.fill(gstate.current.path);
         op_newpath();
     }
     
@@ -860,13 +860,13 @@ public class Interpreter {
     /** PostScript op: grestore */
     public void op_grestore() throws PSError, IOException {
         gstate.restoreGstate();
-        exp.endScope();
+        gstate.current.device.endScope();
     }
     
     /** PostScript op: gsave */
     public void op_gsave() throws PSError, IOException {
         gstate.saveGstate();
-        exp.startScope();
+        gstate.current.device.startScope();
     }
     
     /** PostScript op: gt */
@@ -971,7 +971,7 @@ public class Interpreter {
     /** PostScript op: initclip */
     public void op_initclip() throws IOException, PSErrorUnimplemented {
         gstate.current.clippingPath = defaultClippingPath.clone();
-        exp.clip(gstate.current.clippingPath);
+        gstate.current.device.clip(gstate.current.clippingPath);
     }
     
     /** PostScript op: initmatrix */
@@ -1519,8 +1519,8 @@ public class Interpreter {
         double m = opStack.pop().toReal();
         double c = opStack.pop().toReal();
         double[] cmykValues = {c, m, y, k};
-        gstate.current.setcolorspace(new PSObjectName("DeviceCMYK", true), null);
-        gstate.current.setcolor(cmykValues, exp);
+        gstate.current.setcolorspace(new PSObjectName("DeviceCMYK", true), false);
+        gstate.current.setcolor(cmykValues);
     }
     
     /** PostScript op: setcolor */
@@ -1530,14 +1530,13 @@ public class Interpreter {
         for (int i = 0 ; i < n ; i++) {
             newColor[n-i-1] = opStack.pop().toReal();
         }
-        gstate.current.setcolor(newColor, exp);
+        gstate.current.setcolor(newColor);
     }
    
     /** PostScript op: setcolorspace */
-    public void op_setcolorspace() throws PSErrorStackUnderflow, PSErrorRangeCheck,
-            PSErrorTypeCheck, PSErrorInvalidAccess, PSErrorUndefined, IOException {
+    public void op_setcolorspace() throws PSError, IOException {
         PSObject arrayOrName = opStack.pop();
-        gstate.current.setcolorspace(arrayOrName, exp);
+        gstate.current.setcolorspace(arrayOrName, true);
     }
    
     /** PostScript op: setdash */
@@ -1553,7 +1552,7 @@ public class Interpreter {
             array.set(i, new PSObjectReal(value*scaling));
         }
         
-        exp.setDash(array, offset);
+        gstate.current.device.setDash(array, offset);
     }
     
     /**
@@ -1563,7 +1562,7 @@ public class Interpreter {
         double num = opStack.pop().toReal();
         num = Math.max(num, 0.2);
         num = Math.min(num, 100);
-        // This operator doesn't do anything in eps2pgf. It is handled by PGF.
+        gstate.current.flat = num;
     }
    
     /** PostScript op: setfont */
@@ -1578,15 +1577,15 @@ public class Interpreter {
         double green = opStack.pop().toReal();
         double red = opStack.pop().toReal();
         double[] rgbValues = {red, green, blue};
-        gstate.current.setcolorspace(new PSObjectName("DeviceRGB", true), null);
-        gstate.current.setcolor(rgbValues, exp);
+        gstate.current.setcolorspace(new PSObjectName("DeviceRGB", true), false);
+        gstate.current.setcolor(rgbValues);
     }
    
     /** PostScript op: setgray */
     public void op_setgray() throws PSError, IOException {
         double[] num = { opStack.pop().toReal() };
-        gstate.current.setcolorspace(new PSObjectName("DeviceGray", true), null);
-        gstate.current.setcolor(num, exp);
+        gstate.current.setcolorspace(new PSObjectName("DeviceGray", true), false);
+        gstate.current.setcolor(num);
     }
     
     /** PostScript op: sethsbcolor */
@@ -1595,20 +1594,20 @@ public class Interpreter {
         double saturaration = opStack.pop().toReal();
         double hue = opStack.pop().toReal();
         double[] rgbValues = ColorConvert.HSBtoRGB(hue, saturaration, brightness);
-        gstate.current.setcolorspace(new PSObjectName("DeviceRGB", true), null);
-        gstate.current.setcolor(rgbValues, exp);
+        gstate.current.setcolorspace(new PSObjectName("DeviceRGB", true), false);
+        gstate.current.setcolor(rgbValues);
     }
    
     /** PostScript op: setlinecap */
     public void op_setlinecap() throws PSError, IOException {
         int cap = opStack.pop().toNonNegInt();
-        exp.setlinecap(cap);
+        gstate.current.device.setlinecap(cap);
     }
    
     /** PostScript op: setlinejoin */
     public void op_setlinejoin() throws PSError, IOException {
         int join = opStack.pop().toNonNegInt();
-        exp.setlinejoin(join);
+        gstate.current.device.setlinejoin(join);
     }
    
     /** PostScript op: setlinewidth */
@@ -1618,7 +1617,7 @@ public class Interpreter {
         // Apply CTM to linewidth, now the line width is in micrometer
         lineWidth *= gstate.current.CTM.getMeanScaling();
         
-        exp.setlinewidth(lineWidth);
+        gstate.current.device.setlinewidth(lineWidth);
     }
    
     /** PostScript op: setmatrix */
@@ -1636,7 +1635,7 @@ public class Interpreter {
         if (num < 1.0) {
             throw new PSErrorRangeCheck();
         }
-        exp.setmiterlimit(num);
+        gstate.current.device.setmiterlimit(num);
     }
     
     /**
@@ -1646,7 +1645,7 @@ public class Interpreter {
             PSErrorUnimplemented, PSErrorRangeCheck, PSErrorUndefined, IOException,
             PSErrorInvalidAccess {
         PSObjectDict dict = opStack.pop().toDict();
-        exp.shfill(dict, gstate.current);
+        gstate.current.device.shfill(dict, gstate.current);
     }
    
     /** PostScript op: show */
@@ -1655,7 +1654,7 @@ public class Interpreter {
             PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {
         
         PSObjectString string = opStack.pop().toPSString();
-        double[] dpos = textHandler.showText(exp, string);
+        double[] dpos = textHandler.showText(gstate.current.device, string);
         gstate.current.rmoveto(dpos[0], dpos[1]);
     }
     
@@ -1721,14 +1720,14 @@ public class Interpreter {
             PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {
         
         PSObjectString string = opStack.pop().toPSString();
-        double[] dpos = textHandler.showText(exp, string, true);
+        double[] dpos = textHandler.showText(gstate.current.device, string, true);
         opStack.push(new PSObjectReal(dpos[0]));
         opStack.push(new PSObjectReal(dpos[1]));
     }
 
     /** PostScript op: stroke */
     public void op_stroke() throws PSError, IOException {
-        exp.stroke(gstate.current.path);
+        gstate.current.device.stroke(gstate.current.path);
         op_newpath();
     }
    

@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.logging.*;
 import net.sf.eps2pgf.ProgramError;
 
-import net.sf.eps2pgf.output.Exporter;
+import net.sf.eps2pgf.output.OutputDevice;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
@@ -45,10 +45,6 @@ public class GraphicsState implements Cloneable {
      * [a b c d tx ty] -> x' = a*x + b*y + tx ; y' = c*x + d*y * ty
      */
     public PSObjectMatrix CTM = new PSObjectMatrix();
-    /**
-     * Default CTM (CTM is initialized to this value)
-     */
-    public static PSObjectMatrix defaultCTM = new PSObjectMatrix(25.4*1000/72.0, 0 ,0, 25.4*1000/72.0, 0, 0);
     
     /**
      * Current position in pt (before CTM is applied).
@@ -71,6 +67,11 @@ public class GraphicsState implements Cloneable {
     public PSObjectArray colorSpace = new PSObjectArray();
     
     /**
+     * Parameter describing the accuracy of flattening a path
+     */
+    public double flat = 1.0;
+    
+    /**
      * Current color (meaning of parameters depends on the colorSpace specified above)
      */
     public double[] color;
@@ -84,6 +85,11 @@ public class GraphicsState implements Cloneable {
     public PSObjectFont font;
     
     /**
+     * Current output device
+     */
+    public OutputDevice device;
+    
+    /**
      * Link to the parent graphics state stack
      */
     GstateStack parentStack;
@@ -92,19 +98,14 @@ public class GraphicsState implements Cloneable {
      * Creates a new default graphics state.
      * @param parentGraphicsStack Pointer the graphics stack of which this object is part of.
      */
-    public GraphicsState(GstateStack parentGraphicsStack) {
-        initmatrix();
-        path = new Path(parentGraphicsStack);
-        clippingPath = new Path(parentGraphicsStack);
-        font = new PSObjectFont();
-        try {
-            setcolorspace(new PSObjectName("DeviceGray", true), null);
-        } catch (PSError e) {
-            // this can never happen
-        } catch (IOException e) {
-            // this can never happen
-        }
+    public GraphicsState(GstateStack parentGraphicsStack, OutputDevice wDevice) {
         parentStack = parentGraphicsStack;
+        device = wDevice;
+                
+        initmatrix();
+        path = new Path(parentStack);
+        clippingPath = new Path(parentStack);
+        font = new PSObjectFont();
     }
     
     /**
@@ -253,7 +254,7 @@ public class GraphicsState implements Cloneable {
      * @return Returns the deep copy.
      */
     public GraphicsState clone() throws CloneNotSupportedException {
-        GraphicsState newState = new GraphicsState(parentStack);
+        GraphicsState newState = new GraphicsState(parentStack, device);
         newState.CTM = CTM.clone();
         newState.position = position.clone();
         newState.path = path.clone();
@@ -367,7 +368,12 @@ public class GraphicsState implements Cloneable {
      * Eps2pgf.
      */
     public void flattenpath() throws PSError, ProgramError {
-        path = path.flattenpath(1);
+        // Maximum difference between normal and flattened path. Defined in
+        // device space coordinates. Assume a device resolution of 1200 dpi.
+        double deviceScale = device.defaultCTM().getMeanScaling();
+        double maxError = flat * 72.0 / 1200.0 * deviceScale;
+
+        path = path.flattenpath(maxError);
     }
     
     /**
@@ -385,16 +391,7 @@ public class GraphicsState implements Cloneable {
      * Sets the current transformation matrix (CTM) to its default value
      */
     public void initmatrix() {
-        try {
-            CTM.copy(defaultCTM);
-        } catch (PSErrorRangeCheck e) {
-            // this can never happen since both are matrices
-        } catch (PSErrorTypeCheck e) {
-            // this can never happen since both are matrices
-        } catch (PSErrorInvalidAccess e) {
-            // this can never happen because user can not change access
-            // properties of these matrices.
-        }
+        CTM = device.defaultCTM();
     }
     
     /**
@@ -500,9 +497,8 @@ public class GraphicsState implements Cloneable {
     /**
      * Sets the color
      * @param newColor Parameters of new color (defined in current color space)
-     * @param exp Exporter to which the new color will be written
      */
-    public void setcolor(double[] newColor, Exporter exp) throws IOException {
+    public void setcolor(double[] newColor) throws IOException {
         int n = Math.min(color.length, newColor.length);
         for (int i = 0 ; i < n ; i++) {
             newColor[i] = Math.max(Math.min(newColor[i], 1.0), 0.0);
@@ -511,19 +507,15 @@ public class GraphicsState implements Cloneable {
         for (int i = 0 ; i < n ; i++) {
             color[i] = newColor[i];
         }
-        exp.setColor(color);
+        device.setColor(color);
     }
     
     /**
      * Sets the current color space
      * @param obj Object describing the color space. Should be a literal name or an
      * array starting with a literal name.
-     * @param exp Changing the color space does not change the color. If an exporter
-     * is passed then the default color for the specified color space is set in the
-     * exporter.
      */
-    public void setcolorspace(PSObject obj, Exporter exp) throws PSErrorRangeCheck,
-            PSErrorTypeCheck, PSErrorInvalidAccess, PSErrorUndefined, IOException {
+    public void setcolorspace(PSObject obj, boolean writeDevice) throws PSError, IOException {
         String spaceName;
         if (obj instanceof PSObjectName) {
             spaceName = ((PSObjectName)obj).name;
@@ -545,8 +537,8 @@ public class GraphicsState implements Cloneable {
         PSObjectArray newColSpace = new PSObjectArray();
         newColSpace.addToEnd(new PSObjectName(spaceName, true));
         colorSpace = newColSpace;
-        if (exp != null) {
-            exp.setColor(color);
+        if (writeDevice) {
+            device.setColor(color);
         }
     }
     

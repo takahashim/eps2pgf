@@ -21,9 +21,8 @@
 package net.sf.eps2pgf.postscript;
 
 import net.sf.eps2pgf.collections.ArrayStack;
-import net.sf.eps2pgf.postscript.errors.PSError;
-import net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow;
-import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.output.OutputDevice;
+import net.sf.eps2pgf.postscript.errors.*;
 
 /** Manages the graphics states (stack, ...)
  *
@@ -36,9 +35,9 @@ public class GstateStack {
     /**
      * Creates a new instance of GstateStack
      */
-    public GstateStack() {
+    public GstateStack(OutputDevice output) {
         stack = new ArrayStack<GraphicsState>();
-        current = new GraphicsState(this);
+        current = new GraphicsState(this, output);
     }
     
     /**

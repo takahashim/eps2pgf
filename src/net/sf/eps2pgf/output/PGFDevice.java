@@ -31,7 +31,7 @@ import net.sf.eps2pgf.postscript.errors.*;
  * Writes PGF files.
  * @author Paul Wagenaars
  */
-public class PGFExport implements Exporter {
+public class PGFDevice implements OutputDevice {
     // Coordinate format (used to format X- and Y-coordinates)
     static final DecimalFormat coorFormat = new DecimalFormat("#.###", 
             new DecimalFormatSymbols(Locale.US));
@@ -48,16 +48,24 @@ public class PGFExport implements Exporter {
     static final DecimalFormat colorFormat = new DecimalFormat("#.######",
             new DecimalFormatSymbols(Locale.US));
     
-    int scopeDepth = 0;
+    static int scopeDepth = 0;
     
-    Writer out;
+    static Writer out;
     
     /**
      * Creates a new instance of PGFExport
      * @param wOut Writer to where the PGF code will be written.
      */
-    public PGFExport(Writer wOut) {
+    public PGFDevice(Writer wOut) {
         out = wOut;
+    }
+    
+    /**
+     * Returns a copy of the default transformation matrix (default CTM).
+     * In this device the coordinates are expressed in micrometers.
+     */
+    public PSObjectMatrix defaultCTM() {
+        return new PSObjectMatrix(25.4*1000/72.0, 0 ,0, 25.4*1000/72.0, 0, 0);
     }
     
     /**
