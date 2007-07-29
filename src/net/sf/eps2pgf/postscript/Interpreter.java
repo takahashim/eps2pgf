@@ -1174,6 +1174,13 @@ public class Interpreter {
     public void op_null() throws PSError {
         opStack.push(new PSObjectNull());
     }
+    
+    /** PostScript op: nulldevice */
+    public void op_nulldevice() {
+        OutputDevice nullDevice = new NullDevice();
+        gstate.current.device = nullDevice;
+        gstate.current.initmatrix();
+    }
 
     /** PostScript op: or */
     public void op_or() throws PSErrorStackUnderflow, PSErrorTypeCheck {
@@ -1240,9 +1247,7 @@ public class Interpreter {
         opStack.pop();
     }
     
-    /** 
-     * PostScript op: pstack
-     */
+    /**  PostScript op: pstack */
     public void op_pstack() {
         for (int i = opStack.size()-1 ; i >= 0 ; i--) {
             System.out.println(opStack.get(i).isis());
@@ -1290,9 +1295,7 @@ public class Interpreter {
         throw new PSErrorUnimplemented("operator: readhexstring");
     }
     
-    /**
-     * PostScript op: readonly
-     */
+    /** PostScript op: readonly */
     public void op_readonly() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorInvalidAccess {
         PSObject obj = opStack.pop();
@@ -1440,9 +1443,7 @@ public class Interpreter {
         }
     }
     
-    /**
-     * PostScript op: round
-     */
+    /** PostScript op: round */
     public void op_round() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.pop();
         opStack.push(obj.round());
@@ -1472,9 +1473,7 @@ public class Interpreter {
         }
     }
     
-    /**
-     * PostScript operator: scalefont
-     */
+    /** PostScript operator: scalefont */
     public void op_scalefont() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorInvalidAccess {
         double scale = opStack.pop().toReal();
@@ -1555,9 +1554,7 @@ public class Interpreter {
         gstate.current.device.setDash(array, offset);
     }
     
-    /**
-     * PostScript op: setflat
-     */
+    /** PostScript op: setflat */
     public void op_setflat() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         double num = opStack.pop().toReal();
         num = Math.max(num, 0.2);
@@ -1626,9 +1623,7 @@ public class Interpreter {
         gstate.current.CTM.copy(matrix);
     }
     
-    /**
-     * PostScript op: setmiterlimit
-     */
+    /** PostScript op: setmiterlimit */
     public void op_setmiterlimit() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
             PSErrorRangeCheck, IOException {
         double num = opStack.pop().toReal();
@@ -1638,9 +1633,7 @@ public class Interpreter {
         gstate.current.device.setmiterlimit(num);
     }
     
-    /**
-     * PostScript op: shfill
-     */
+    /** PostScript op: shfill */
     public void op_shfill() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
             PSErrorUnimplemented, PSErrorRangeCheck, PSErrorUndefined, IOException,
             PSErrorInvalidAccess {
@@ -1859,9 +1852,7 @@ public class Interpreter {
         }
     }
    
-    /**
-     * PostScript op: xcheck
-     */
+    /** PostScript op: xcheck */
     public void op_xcheck() throws PSErrorStackUnderflow {
         PSObject any = opStack.pop();
         PSObjectBool check = new PSObjectBool(any.xcheck());

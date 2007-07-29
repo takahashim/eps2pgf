@@ -231,3 +231,5 @@ graphics 23 - currentrgbcolor 3: 0.1 0.2 0.3 0.4 setcmykcolor currentrgbcolor
 graphics 24 - currentcmykcolor 1: 0.25 setgray currentcmykcolor  0.75 sub abs 0.0001 lt  4 1 roll abs 0.0001 lt  4 1 roll abs 0.0001  4 1 roll abs 0.0001 lt
 graphics 25 - currentcmykcolor 2: 0.25 1 0.5 setrgbcolor currentcmykcolor
 graphics 26 - currentcmykcolor 3: 0.1 0.2 0.3 0.4 setcmykcolor currentcmykcolor 0.4 sub abs 0.0001 lt  4 1 roll 0.3 sub abs 0.0001 lt  4 1 roll 0.2 sub abs 0.0001 lt  4 1 roll 0.1 sub abs 0.0001 lt
+
+output 1 - nulldevice: nulldevice matrix currentmatrix aload pop 0 sub abs 1e-3 lt  6 1 roll 0 sub abs 1e-3 lt  6 1 roll 1 sub abs 1e-3 lt  6 1 roll 0 sub abs 1e-3 lt  6 1 roll 0 sub abs 1e-3 lt  6 1 roll 1 sub abs 1e-3 lt
