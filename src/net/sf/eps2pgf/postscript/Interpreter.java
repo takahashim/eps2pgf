@@ -520,6 +520,28 @@ public class Interpreter {
         }
     }
     
+    /** PostScript op: currentscreen */
+    public void op_currentscreen() {
+        // this operator is not really meaningfull for Eps2pgf. Therefore it
+        // just returns some values.
+        opStack.push(new PSObjectReal(150.0));
+        opStack.push(new PSObjectReal(45.0));
+        try {
+            // Spot function from PostScript Reference Manual p.486 
+            // { 180 mul cos
+            //   exch 180 mul cos
+            //   add
+            //   2 div
+            // }
+            String spotFunction = "{ 180 mul cos exch 180 mul cos add 2 div }";
+            opStack.push(Parser.convertToPSObject(spotFunction));
+        } catch (PSErrorIOError ex) {
+            // this can never happen
+        } catch (IOException ex) {
+            // this can never happen
+        }
+    }
+    
     /** PostScript op: curveto */
     public void op_curveto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorInvalidAccess, PSErrorRangeCheck {
@@ -1580,16 +1602,6 @@ public class Interpreter {
         gstate.current.font = font;
     }
    
-    /** PostScript op: setrgbcolor */
-    public void op_setrgbcolor() throws PSError, IOException {
-        double blue = opStack.pop().toReal();
-        double green = opStack.pop().toReal();
-        double red = opStack.pop().toReal();
-        double[] rgbValues = {red, green, blue};
-        gstate.current.setcolorspace(new PSObjectName("DeviceRGB", true), false);
-        gstate.current.setcolor(rgbValues);
-    }
-   
     /** PostScript op: setgray */
     public void op_setgray() throws PSError, IOException {
         double[] num = { opStack.pop().toReal() };
@@ -1645,6 +1657,25 @@ public class Interpreter {
         gstate.current.device.setmiterlimit(num);
     }
     
+    /** PostScript op: setrgbcolor */
+    public void op_setrgbcolor() throws PSError, IOException {
+        double blue = opStack.pop().toReal();
+        double green = opStack.pop().toReal();
+        double red = opStack.pop().toReal();
+        double[] rgbValues = {red, green, blue};
+        gstate.current.setcolorspace(new PSObjectName("DeviceRGB", true), false);
+        gstate.current.setcolor(rgbValues);
+    }
+    
+    /** PostScript op: setscreen */
+    public void op_setscreen() throws PSErrorStackUnderflow {
+        // This operator does not have any meaning in Eps2pgf. It just pops
+        // the arguments and continues.
+        opStack.pop();  // pop proc/halftone
+        opStack.pop();  // pop angle
+        opStack.pop();  // pop frequency
+    }
+   
     /** PostScript op: shfill */
     public void op_shfill() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
             PSErrorUnimplemented, PSErrorRangeCheck, PSErrorUndefined, IOException,
