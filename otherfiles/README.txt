@@ -66,6 +66,7 @@ Changelog
 v0.4.0 (2007-07-??)
   - Changed: Eps2pgf is now distributed under the Apache license
   - Added: lots of PostScript commands
+  - Added: Font substitution list
 
 v0.3.0 (2007-05-28)
   - Added: tons of PostScript commands
