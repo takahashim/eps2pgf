@@ -521,7 +521,7 @@ public class Interpreter {
     }
     
     /** PostScript op: currentscreen */
-    public void op_currentscreen() {
+    public void op_currentscreen() throws PSError {
         // this operator is not really meaningfull for Eps2pgf. Therefore it
         // just returns some values.
         opStack.push(new PSObjectReal(150.0));
@@ -1798,8 +1798,7 @@ public class Interpreter {
     }
     
     /** PostScript op: token */
-    public void op_token() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess, PSErrorIOError {
+    public void op_token() throws PSError {
         PSObject obj = opStack.pop();
         for (PSObject item : obj.token()) {
             opStack.push(item);

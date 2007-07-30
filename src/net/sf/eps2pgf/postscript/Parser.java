@@ -42,7 +42,7 @@ public class Parser {
      * @return List with PostScript objects
      * @throws java.io.IOException Unable to read from in
      */
-    public static List<PSObject> convertAll(Reader in) throws IOException, PSErrorIOError {
+    public static List<PSObject> convertAll(Reader in) throws IOException, PSError {
         List<PSObject> seq = new ArrayList<PSObject>();
         PSObject obj;
         while ( (obj = convertSingle(in)) != null ) {
@@ -57,7 +57,7 @@ public class Parser {
      * @throws java.io.IOException Unable to read from input
      * @return Object read from in reader or 'null' if there were no more objects
      */
-    public static PSObject convertSingle(Reader in) throws IOException, PSErrorIOError {
+    public static PSObject convertSingle(Reader in) throws IOException, PSError {
         StringBuilder strSoFar = new StringBuilder();
         boolean inComment = false;
         boolean inString = false;
@@ -249,7 +249,7 @@ public class Parser {
     /** Convert a string to a PostScript object.
      * @param str String to convert.
      */
-    static PSObject convertToPSObject(String str) throws IOException, PSErrorIOError {
+    static PSObject convertToPSObject(String str) throws IOException, PSError {
         if (PSObjectInt.isType(str)) {
             return new PSObjectInt(str);
         } else if (PSObjectReal.isType(str)) {

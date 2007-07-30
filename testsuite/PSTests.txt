@@ -3,6 +3,8 @@ parser 2: <123d>(\022=) eq  <~j34rt~>(\343\314\266\226) eq <~z~>(\000\000\000\00
 parser 3: <</a(foo)/b 3>> count 1 eq exch type /dicttype eq
 parser 4: (lka(oi){\)) dup length 9 eq exch type /stringtype eq
 parser 5: {{ {1 2 add} {/foo put}} (}) 1 2 add} count 1 eq exch type /arraytype eq
+parser 6: 16#0 0 eq  16#C 12 eq
+
 bool  1 - eq 1: 1 1 eq 1.0 1 eq 1 1.0 eq  1.0 1.0 eq
 bool  2 - eq 2: (abc) (abc) eq (abc) /abc eq /abc (abc) eq
 bool  3 - eq 3: false false eq mark [ eq null null eq

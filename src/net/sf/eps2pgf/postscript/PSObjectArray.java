@@ -79,7 +79,7 @@ public class PSObjectArray extends PSObject {
      * @param str String representing a valid procedure (executable array)
      * @throws java.io.IOException Unable to read the string
      */
-    public PSObjectArray(String str) throws IOException, PSErrorIOError {
+    public PSObjectArray(String str) throws IOException, PSError {
         // quick check whether it is a literal or executable array
         if (str.charAt(0) == '{') {
             isLiteral = false;
