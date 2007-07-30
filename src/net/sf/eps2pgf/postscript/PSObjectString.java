@@ -663,7 +663,7 @@ public class PSObjectString extends PSObject {
      * @return List with one or more objects. See PostScript manual under the
      * 'token' operator for more info.
      */
-    public List<PSObject> token() throws PSErrorInvalidAccess, PSErrorIOError {
+    public List<PSObject> token() throws PSError {
         Reader rdr = new StringReader(value.toString());
         PSObject any;
         try {

@@ -49,8 +49,19 @@ public class PSObjectInt extends PSObject {
      * Creates a new instance of PSObjectInt
      * @param str String representing an integer
      */
-    public PSObjectInt(String str) {
-        value = Integer.parseInt(str);
+    public PSObjectInt(String str) throws PSErrorTypeCheck {
+        try {
+            int i = str.indexOf("#");
+            if (i < 0) {
+                value = Integer.parseInt(str);
+            } else {
+                int base = Integer.parseInt(str.substring(0, i));
+                String strNumber = str.substring(i+1);
+                value = Integer.parseInt(strNumber, base);
+            }
+        } catch (NumberFormatException e) {
+            throw new PSErrorTypeCheck();
+        }
     }
     
     /**
@@ -214,8 +225,8 @@ public class PSObjectInt extends PSObject {
      */
     public static boolean isType(String str) {
         try {
-            Integer.parseInt(str);
-        } catch (NumberFormatException e) {
+            new PSObjectInt(str);
+        } catch (PSErrorTypeCheck e) {
             return false;
         }
         return true;
