@@ -99,13 +99,6 @@ public class NullDevice implements OutputDevice {
     }
     
     /**
-     * Implements PostScript operator setdash
-     */
-    public void setDash(PSObjectArray array, double offset) {
-        
-    }
-    
-    /**
      * Implements PostScript operator setlinecap
      */
     public void setlinecap(int cap) {

@@ -90,6 +90,17 @@ public class GraphicsState implements Cloneable {
     public double linewidth = 1.0;
     
     /**
+     * Current dash pattern
+     */
+    public PSObjectArray dashpattern = new PSObjectArray();
+    
+    /**
+     * Current dash offset
+     */
+    public double dashoffset = 0.0;
+    
+    
+    /**
      * Current output device
      */
     public OutputDevice device;
@@ -278,6 +289,8 @@ public class GraphicsState implements Cloneable {
         newState.clippingPath = clippingPath.clone();
         newState.font = font.clone();
         newState.linewidth = linewidth;
+        newState.dashpattern = dashpattern.clone();
+        newState.dashoffset = dashoffset;
         newState.color = color.clone();
         newState.colorSpace = colorSpace.clone();
         newState.deviceData = deviceData.clone();

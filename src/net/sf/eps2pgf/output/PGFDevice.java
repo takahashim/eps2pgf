@@ -74,6 +74,8 @@ public class PGFDevice implements OutputDevice {
      */
     public void init(GraphicsState gstate) throws PSError, IOException {
         gstate.deviceData.setKey("pgf_last_linewidth", new PSObjectReal(Double.NaN));
+        gstate.deviceData.setKey("pgf_last_dashpattern", new PSObjectArray());
+        gstate.deviceData.setKey("pgf_last_dashoffset", new PSObjectReal(0.0));
         
         out.write("% Created by " + net.sf.eps2pgf.Main.getNameVersion() + " ");
         Date now = new Date();
@@ -136,6 +138,7 @@ public class PGFDevice implements OutputDevice {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Encountered an unimplemented path section
      */
     public void stroke(GraphicsState gstate) throws IOException, PSError {
+        updateDash(gstate);
         updateLinewidth(gstate);
         writePath(gstate.path);
         out.write("\\pgfusepath{stroke}\n");
@@ -269,29 +272,6 @@ public class PGFDevice implements OutputDevice {
     }
     
     /**
-     * Implements PostScript operator setdash
-     * @param array Array with dash pattern (see PostScript manual for definition)
-     * @param offset Dash pattern offset (see PostScript manual for info)
-     * @throws java.io.IOException Unable to write output
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One or more element in the array is not a number
-     */
-    public void setDash(PSObjectArray array, double offset) throws IOException,
-            PSErrorTypeCheck, PSErrorInvalidAccess {
-        out.write("\\pgfsetdash{");
-        
-        try {
-            int i = 0;
-            while(true) {
-                out.write("{" + lengthFormat.format(1e-4*array.get(i++).toReal()) + "cm}");
-            }
-        } catch (PSErrorRangeCheck e) {
-                
-        } finally {
-            out.write("}{" + lengthFormat.format(1e-4*offset) + "cm}\n");
-        }
-    }
-    
-    /**
      * Implements PostScript operator setlinecap
      * @param cap Cap type (see PostScript manual for info)
      * @throws java.io.IOException Unable to write output
@@ -333,6 +313,38 @@ public class PGFDevice implements OutputDevice {
             default:
                 throw new PSErrorRangeCheck();
         }        
+    }
+    
+    /**
+     * Implements PostScript operator setdash
+     */
+    void updateDash(GraphicsState gstate) throws IOException, PSError {
+        String lastPattern = gstate.deviceData.get("pgf_last_dashpattern").isis();
+        double lastOffset = gstate.deviceData.get("pgf_last_dashoffset").toReal();
+        
+        double scaling = gstate.CTM.getMeanScaling();
+        PSObjectArray currentArray = new PSObjectArray();
+        for (int i = 0 ; i < gstate.dashpattern.size() ; i++) {
+            currentArray.addToEnd(new PSObjectReal(gstate.dashpattern.get(i).toReal() * scaling));
+        }
+        String currentPattern = currentArray.isis();
+        double currentOffset = gstate.dashoffset * scaling;
+        
+        if ( !currentPattern.equals(lastPattern) || (lastOffset != currentOffset) ) {
+            out.write("\\pgfsetdash{");
+            try {
+                int i = 0;
+                while(true) {
+                    out.write("{" + lengthFormat.format(1e-4*currentArray.get(i++).toReal()) + "cm}");
+                }
+            } catch (PSErrorRangeCheck e) {
+                
+            } finally {
+                out.write("}{" + lengthFormat.format(1e-4*currentOffset) + "cm}\n");
+            }
+            gstate.deviceData.setKey("pgf_last_dashpattern", currentArray);
+            gstate.deviceData.setKey("pgf_last_dashoffset", new PSObjectReal(currentOffset));
+        }
     }
     
     /**

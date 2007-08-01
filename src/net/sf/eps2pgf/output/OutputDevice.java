@@ -90,12 +90,6 @@ public interface OutputDevice {
     public void stroke(GraphicsState gstate) throws IOException, PSError;
     
     /**
-     * Implements PostScript operator setdash
-     */
-    public void setDash(PSObjectArray array, double offset) throws IOException,
-            PSErrorTypeCheck, PSErrorInvalidAccess;
-    
-    /**
      * Implements PostScript operator setlinecap
      */
     public void setlinecap(int cap) throws IOException, PSErrorRangeCheck;
