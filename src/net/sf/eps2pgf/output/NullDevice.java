@@ -71,6 +71,10 @@ public class NullDevice implements OutputDevice {
     public void fill(Path path) {
         
     }
+    
+    public void eoclip(Path clipPath) {
+        
+    }
 
     /**
      * Fills a path using the even-odd rule
