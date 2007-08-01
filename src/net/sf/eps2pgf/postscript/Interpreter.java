@@ -1403,18 +1403,15 @@ public class Interpreter {
     }    
     
     /** PostScript op: restore */
-    public void op_restore() throws PSErrorTypeCheck, PSErrorStackUnderflow {
-        PSObject obj = opStack.pop();
+    public void op_restore() throws PSError, IOException {
+        PSObjectName obj = opStack.pop().toName();
         
-        // Check whether the popped object is a save object (see op_save())
-        if (!(obj instanceof PSObjectName)) {
-            throw new PSErrorTypeCheck();
-        }
-        if (!((PSObjectName)obj).name.equals("-save- (dummy)")) {
+        if (!obj.name.equals("-save- (dummy)")) {
             throw new PSErrorTypeCheck();
         }
         
-        log.info("restore operator ignored. This might have an effect on the result.");
+        // grestore is not full replacement for restore, so the might be some problems
+        op_grestore();
     }    
     
     /** PostScript op: rmoveto */
@@ -1487,9 +1484,10 @@ public class Interpreter {
     }
    
     /** PostScript op: save */
-    public void op_save() throws PSError {
+    public void op_save() throws PSError, IOException {
         opStack.push(new PSObjectName("/-save- (dummy)"));
-        log.info("save operator ignored. This might have an effect on the result.");
+        // gsave is not a full replacement for save, so there might be some problems
+        op_gsave();
     }
    
     /** PostScript op: scale */
