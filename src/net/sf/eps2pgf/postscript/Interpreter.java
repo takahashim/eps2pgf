@@ -1576,15 +1576,8 @@ public class Interpreter {
         double offset = opStack.pop().toReal();
         PSObjectArray array = opStack.pop().toArray();
         
-        // Scale all distances
-        double scaling = gstate.current.CTM.getMeanScaling();
-        offset *= scaling;
-        for (int i = 0 ; i < array.size() ; i++) {
-            double value = array.get(i).toReal();
-            array.set(i, new PSObjectReal(value*scaling));
-        }
-        
-        gstate.current.device.setDash(array, offset);
+        gstate.current.dashpattern = array;
+        gstate.current.dashoffset = offset;
     }
     
     /** PostScript op: setflat */
