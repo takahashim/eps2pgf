@@ -48,7 +48,7 @@ public interface OutputDevice {
      * Initialize before any other methods are called. Normally, this method
      * writes a header.
      */
-    public void init() throws IOException;
+    public void init(GraphicsState gstate) throws PSError, IOException;
     
     /**
      * Finilize writing. Normally, this method writes a footer.
@@ -87,7 +87,7 @@ public interface OutputDevice {
     /**
      * Implements PostScript stroke operator
      */
-    public void stroke(Path path) throws IOException, PSErrorUnimplemented;
+    public void stroke(GraphicsState gstate) throws IOException, PSError;
     
     /**
      * Implements PostScript operator setdash
@@ -104,12 +104,6 @@ public interface OutputDevice {
      * Implements PostScript operator setlinejoin
      */
     public void setlinejoin(int join) throws IOException, PSErrorRangeCheck;
-    
-    /**
-     * Implements PostScript operator setlinewidth
-     * @param lineWidth Line width in mm
-     */
-    public void setlinewidth(double lineWidth) throws IOException;
     
     /**
      * Sets the current color in gray, rgb or cmyk

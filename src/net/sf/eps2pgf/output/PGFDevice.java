@@ -72,7 +72,9 @@ public class PGFDevice implements OutputDevice {
      * Writes header.
      * @throws java.io.IOException Signals that an I/O exception of some sort has occurred.
      */
-    public void init() throws IOException {
+    public void init(GraphicsState gstate) throws PSError, IOException {
+        gstate.deviceData.setKey("pgf_last_linewidth", new PSObjectReal(Double.NaN));
+        
         out.write("% Created by " + net.sf.eps2pgf.Main.getNameVersion() + " ");
         Date now = new Date();
         out.write("on " + now  + "\n");
@@ -133,8 +135,9 @@ public class PGFDevice implements OutputDevice {
      * @throws java.io.IOException Unable to write output
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Encountered an unimplemented path section
      */
-    public void stroke(Path path) throws IOException, PSErrorUnimplemented {
-        writePath(path);
+    public void stroke(GraphicsState gstate) throws IOException, PSError {
+        updateLinewidth(gstate);
+        writePath(gstate.path);
         out.write("\\pgfusepath{stroke}\n");
     }
     
@@ -333,13 +336,16 @@ public class PGFDevice implements OutputDevice {
     }
     
     /**
-     * Implements PostScript operator setlinewidth
-     * @param lineWidth Line width in micrometer
-     * @throws java.io.IOException Unable to write output
+     * Compares the current linewidth with the last-used linewidth. If they
+     * are different the new linewidth is set in the output.
      */
-    public void setlinewidth(double lineWidth) throws IOException {
-        lineWidth = Math.abs(lineWidth);
-        out.write("\\pgfsetlinewidth{"+ lengthFormat.format(1e-3*lineWidth) +"mm}\n");
+    void updateLinewidth(GraphicsState gstate) throws PSError, IOException {
+        double lastWidth = gstate.deviceData.get("pgf_last_linewidth").toReal();
+        double currentWidth = gstate.linewidth * gstate.CTM.getMeanScaling();
+        if (currentWidth != lastWidth) {
+            out.write("\\pgfsetlinewidth{"+ lengthFormat.format(1e-3*currentWidth) +"mm}\n");
+            gstate.deviceData.setKey("pgf_last_linewidth", new PSObjectReal(currentWidth));
+        }
     }
     
     /**

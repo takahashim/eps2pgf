@@ -85,9 +85,20 @@ public class GraphicsState implements Cloneable {
     public PSObjectFont font;
     
     /**
+     * Current line width (in user space coordinates)
+     */
+    public double linewidth = 1.0;
+    
+    /**
      * Current output device
      */
     public OutputDevice device;
+    
+    /**
+     * Dictionary that can be used by the output device to store information.
+     * The contents of this dictionary is output device specific.
+     */
+    public PSObjectDict deviceData = new PSObjectDict();
     
     /**
      * Link to the parent graphics state stack
@@ -266,8 +277,10 @@ public class GraphicsState implements Cloneable {
         newState.path = path.clone();
         newState.clippingPath = clippingPath.clone();
         newState.font = font.clone();
+        newState.linewidth = linewidth;
         newState.color = color.clone();
         newState.colorSpace = colorSpace.clone();
+        newState.deviceData = deviceData.clone();
         return newState;
     }
     
