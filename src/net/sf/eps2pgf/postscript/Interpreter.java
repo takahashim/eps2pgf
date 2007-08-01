@@ -222,8 +222,7 @@ public class Interpreter {
     }
     
     /** PostScript op: acrt */
-    public void op_arct() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void op_arct() throws PSError {
         double r = opStack.pop().toNonNegReal();
         double y2 = opStack.pop().toReal();
         double x2 = opStack.pop().toReal();
@@ -233,8 +232,7 @@ public class Interpreter {
     }
     
     /** PostScript op: acrto */
-    public void op_arcto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void op_arcto() throws PSError {
         double r = opStack.pop().toNonNegReal();
         double y2 = opStack.pop().toReal();
         double x2 = opStack.pop().toReal();
