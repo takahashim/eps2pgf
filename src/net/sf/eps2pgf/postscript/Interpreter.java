@@ -111,10 +111,8 @@ public class Interpreter {
      * Do some initialization tasks
      **/
     void initialize() throws IOException, PSError {
-        gstate.current.device.init();
+        gstate.current.device.init(gstate.current);
         
-        // Default line width in PostScript is 1pt, while in PGF it is 0.4pt
-        gstate.current.device.setlinewidth(gstate.current.CTM.getMeanScaling());
         gstate.current.setcolorspace(new PSObjectName("DeviceGray", true), true);
         
         // An eps-file defines a bounding box. Set this bounding box as the
@@ -1635,11 +1633,7 @@ public class Interpreter {
     /** PostScript op: setlinewidth */
     public void op_setlinewidth() throws PSError, IOException {
         double lineWidth = opStack.pop().toReal();
-        
-        // Apply CTM to linewidth, now the line width is in micrometer
-        lineWidth *= gstate.current.CTM.getMeanScaling();
-        
-        gstate.current.device.setlinewidth(lineWidth);
+        gstate.current.linewidth = Math.abs(lineWidth);
     }
    
     /** PostScript op: setmatrix */
@@ -1761,7 +1755,7 @@ public class Interpreter {
 
     /** PostScript op: stroke */
     public void op_stroke() throws PSError, IOException {
-        gstate.current.device.stroke(gstate.current.path);
+        gstate.current.device.stroke(gstate.current);
         op_newpath();
     }
    

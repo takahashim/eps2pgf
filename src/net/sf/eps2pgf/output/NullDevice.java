@@ -53,7 +53,7 @@ public class NullDevice implements OutputDevice {
      * Initialize before any other methods are called. Normally, this method
      * writes a header.
      */
-    public void init() {
+    public void init(GraphicsState gstate) {
         
     }
     
@@ -94,7 +94,7 @@ public class NullDevice implements OutputDevice {
     /**
      * Implements PostScript stroke operator
      */
-    public void stroke(Path path) {
+    public void stroke(GraphicsState gstate) {
         
     }
     
@@ -116,14 +116,6 @@ public class NullDevice implements OutputDevice {
      * Implements PostScript operator setlinejoin
      */
     public void setlinejoin(int join) {
-        
-    }
-    
-    /**
-     * Implements PostScript operator setlinewidth
-     * @param lineWidth Line width in mm
-     */
-    public void setlinewidth(double lineWidth) {
         
     }
     
