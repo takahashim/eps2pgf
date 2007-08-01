@@ -49,6 +49,17 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
+     * Creates a new instance of PSObjectDict. The new dict shares its data
+     * with the supplied dict.
+     * @param sharedData Share data with this dict.
+     */
+    public PSObjectDict(PSObjectDict sharedData) {
+        map = sharedData.map;
+        capacity = sharedData.capacity;
+        copyCommonAttributes(sharedData);
+    }
+    
+    /**
      * Creates a deep copy of this object.
      * 
      * @return Deep copy of this object.
@@ -97,7 +108,7 @@ public class PSObjectDict extends PSObject {
      * @return Duplicate of this object
      */
     public PSObjectDict dup() {
-        return this;
+        return new PSObjectDict(this);
     }
     
     /**
