@@ -78,9 +78,9 @@
 <entry key="exclam">!</entry>
 <entry key="existential">{\exists}</entry>
 
-<entry key="greater">&gt;</entry>
+<entry key="greater">{\textgreater}</entry>
 
-<entry key="less">&lt;</entry>
+<entry key="less">{\textless}</entry>
 
 <entry key="minus">{\textminus}</entry>
 

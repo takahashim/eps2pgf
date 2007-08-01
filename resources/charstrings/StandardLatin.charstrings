@@ -78,7 +78,7 @@
 
 <entry key="g">g</entry>
 <entry key="grave">{\textasciigrave}</entry>
-<entry key="greater">&gt;</entry>
+<entry key="greater">{\textgreater}</entry>
 
 <entry key="h">h</entry>
 <entry key="hungarumlaut">\H{}</entry>
@@ -90,7 +90,7 @@
 <entry key="k">k</entry>
 
 <entry key="l">l</entry>
-<entry key="less">&lt;</entry>
+<entry key="less">{\textless}</entry>
 
 <entry key="m">m</entry>
 <entry key="macron">{\textasciimacron}</entry>
