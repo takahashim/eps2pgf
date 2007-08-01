@@ -62,6 +62,16 @@ public interface OutputDevice {
     public void fill(Path path) throws IOException, PSErrorUnimplemented;
 
     /**
+     * Set the current clipping path in the graphics state as clipping path
+     * in the output document. The even-odd rule is used to determine which point
+     * are inside the path.
+     * @param clipPath Path to use for clipping
+     * @throws java.io.IOException Unable to write output
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Encountered an unimplemented path element
+     */
+    public void eoclip(Path clipPath) throws IOException, PSErrorUnimplemented;
+    
+    /**
      * Fills a path using the even-odd rule
      * See the PostScript manual (fill operator) for more info.
      */

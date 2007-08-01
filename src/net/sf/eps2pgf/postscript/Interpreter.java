@@ -712,6 +712,12 @@ public class Interpreter {
         dictStack.popDict();
     }
     
+    /** PostScript op: eoclip */
+    public void op_eoclip() throws PSErrorUnimplemented, IOException {
+        gstate.current.clip();
+        gstate.current.device.eoclip(gstate.current.clippingPath);
+    }
+    
     /** PostScript op: eofill */
     public void op_eofill() throws PSError, IOException {
         gstate.current.device.eofill(gstate.current.path);
