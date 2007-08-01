@@ -117,15 +117,6 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * Creates a new font dictionary. Its data is shared with the supplied font
-     * dictionary.
-     */
-    public PSObjectFont(PSObjectFont sharedData) {
-        dict = sharedData.dict;
-        copyCommonAttributes(sharedData);
-    }
-    
-    /**
      * Creates an exact deep copy of this font.
      * @return Created copy
      * @throws java.lang.CloneNotSupportedException Unable to clone this font
@@ -143,7 +134,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @return Duplicate of this object
      */
     public PSObjectFont dup() {
-        return new PSObjectFont(this);
+        return this;
     }
     
     /**
