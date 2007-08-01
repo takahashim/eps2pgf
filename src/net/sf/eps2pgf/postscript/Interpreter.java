@@ -658,7 +658,6 @@ public class Interpreter {
     /** PostScript op: dict */
     public void op_dict() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
             PSErrorRangeCheck {
-        
         int capacity = opStack.pop().toNonNegInt();
         opStack.push(new PSObjectDict(capacity));
     }
