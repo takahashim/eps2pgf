@@ -117,6 +117,36 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
+     * Creates a new font dictionary. Its data is shared with the supplied font
+     * dictionary.
+     */
+    public PSObjectFont(PSObjectFont sharedData) {
+        dict = sharedData.dict;
+        copyCommonAttributes(sharedData);
+    }
+    
+    /**
+     * Creates an exact deep copy of this font.
+     * @return Created copy
+     * @throws java.lang.CloneNotSupportedException Unable to clone this font
+     */
+    public PSObjectFont clone() {
+        PSObjectDict newDict = dict.clone();
+        PSObjectFont newFont = null;
+        newFont = new PSObjectFont(newDict);
+        return newFont;
+    }
+    
+    /**
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
+     * of composite object is not copied, but shared.
+     * @return Duplicate of this object
+     */
+    public PSObjectFont dup() {
+        return new PSObjectFont(this);
+    }
+    
+    /**
      * Load font metrics (*.afm) from the resource directory
      * @param resourceDir Resource directory with font information
      * @param fontName Name of the font to load
@@ -521,18 +551,6 @@ public class PSObjectFont extends PSObject implements Cloneable {
         return this;
     }
 
-    /**
-     * Creates an exact deep copy of this font.
-     * @return Created copy
-     * @throws java.lang.CloneNotSupportedException Unable to clone this font
-     */
-    public PSObjectFont clone() {
-        PSObjectDict newDict = dict.clone();
-        PSObjectFont newFont = null;
-        newFont = new PSObjectFont(newDict);
-        return newFont;
-    }
-    
     /**
      * Creates a human-readable string representation of this font.
      * @return Human-readable string representation of this font. See the
