@@ -63,7 +63,7 @@ license. The license of each component is distributed along with it.
 ----------------------------------------------------------------------------
 Changelog
 ----------------------------------------------------------------------------
-v0.4.0 (2007-07-??)
+v0.4.0 (2007-08-04)
   - Changed: Eps2pgf is now distributed under the Apache license
   - Added: lots of PostScript commands
   - Added: Font substitution list
