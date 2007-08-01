@@ -36,7 +36,7 @@ public class PSObjectDict extends PSObject {
     
     /** Creates a new instance of PSObjectDict */
     public PSObjectDict() {
-        capacity = Integer.MAX_VALUE;
+        capacity = 0;
     }
     
     /**
