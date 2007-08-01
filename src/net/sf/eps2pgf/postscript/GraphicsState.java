@@ -139,6 +139,8 @@ public class GraphicsState implements Cloneable {
         double y0 = y + r*Math.sin(angle1);
         if ( (Math.abs(position[0]-x0) > 1e-6) || (Math.abs(position[1]-y0) > 1e-6) ) {
             lineto(x0, y0);
+        } else if (Double.isNaN(position[0]) || Double.isNaN(position[1])) {
+            moveto(x0, y0);
         }
         
         // take step from angle1 to multiples of 90 degrees
@@ -179,9 +181,13 @@ public class GraphicsState implements Cloneable {
      * Implements the 'arcto' PostScript operator
      */
     public double[] arcto(double x1, double y1, double x2, double y2, double r) 
-            throws PSErrorInvalidAccess, PSErrorRangeCheck, PSErrorTypeCheck {
+            throws PSError {
         double x0 = position[0];
         double y0 = position[1];
+        
+        if (Double.isNaN(x0) || Double.isNaN(y0)) {
+            throw new PSErrorNoCurrentPoint();
+        }
         
         // Calculate some angles
         double phi1 = Math.atan2(y0-y1, x0-x1);
