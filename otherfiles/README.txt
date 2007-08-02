@@ -11,6 +11,13 @@ Introduction
 Convert Encapsulated PostScript (EPS) graphics files to the Portable
 Graphics Format (PGF, http://sourceforge.net/projects/pgf/) for inclusion in
 LaTeX documents. Texts in the figure are typeset by LaTeX
+
+The goal of Eps2pgf is to support all PostScript figures created by programs
+that used regularly by LaTeX users to create figures. That means that
+Eps2pgf does not necessarily support every possible PostScript operator, but
+you should never encouter a figure that Eps2pgf can not convert. If you
+encouter a figure that the latest version of Eps2pgf fails to process,
+please send it to me so that I can improve Eps2pgf.
 ----------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------
