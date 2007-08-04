@@ -110,27 +110,6 @@ public class Parser {
                 }
             }
             
-            // In a procedure
-            else if (inProc) {
-                // End of the procedure
-                if (chr == '}') {
-                    procDepth--;
-                    if (procDepth == 0) {
-                        tokenAfter = true;
-                        inProc = false;
-                    }
-                }
-                // A string in a procedure
-                else if (chr == '(') {
-                    stringDepth++;
-                    inString = true;
-                }
-                // a procedure in a procedure
-                else if (chr == '{') {
-                    procDepth++;
-                }
-            }
-
             else if (inHexString) {
                 // End of the hex string
                 if (chr == '>') {
@@ -153,6 +132,27 @@ public class Parser {
                 inComment = true;
             }
             
+            // In a procedure
+            else if (inProc) {
+                // End of the procedure
+                if (chr == '}') {
+                    procDepth--;
+                    if (procDepth == 0) {
+                        tokenAfter = true;
+                        inProc = false;
+                    }
+                }
+                // A string in a procedure
+                else if (chr == '(') {
+                    stringDepth++;
+                    inString = true;
+                }
+                // a procedure in a procedure
+                else if (chr == '{') {
+                    procDepth++;
+                }
+            }
+
             // start of string
             else if (chr == '(') {
                 stringDepth++;
