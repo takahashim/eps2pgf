@@ -492,6 +492,11 @@ public class Interpreter {
         }
     }
     
+    /** PostScript op: currentlinewidth */
+    public void op_currentlinewidth() {
+        opStack.push(new PSObjectReal(gstate.current.linewidth));
+    }
+    
     /** PostScript op: currentmatrix */
     public void op_currentmatrix() throws PSError {
         PSObjectMatrix matrix = opStack.pop().toMatrix();
