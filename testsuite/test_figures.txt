@@ -4,6 +4,7 @@ autocad_nozzle:
 colorcir:
 coreldraw_Graphic1:
 creohn_Sheep_in_gray:
+doretree:
 dvips1:
 golfer:
 grow:
