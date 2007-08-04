@@ -1,6 +1,7 @@
 alphabet:
 autocad_columbia: 
 autocad_nozzle:
+colorcir:
 coreldraw_Graphic1:
 creohn_Sheep_in_gray:
 dvips1:
