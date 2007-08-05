@@ -22,10 +22,8 @@ package net.sf.eps2pgf;
 
 import java.io.*;
 import java.util.*;
-import net.sf.eps2pgf.postscript.Interpreter;
-import net.sf.eps2pgf.postscript.PSObject;
-import net.sf.eps2pgf.postscript.Parser;
-import net.sf.eps2pgf.postscript.DSCHeader;
+
+import net.sf.eps2pgf.postscript.*;
 
 /**
  * Object that converts Encapsulated PostScript (EPS) to Portable Graphics
@@ -55,18 +53,24 @@ public class Converter {
         List<PSObject> inputObjects;
         Reader in = new BufferedReader(new FileReader(inFile));
         DSCHeader header = new DSCHeader(in);
-        inputObjects = Parser.convertAll(in);
-        in.close();
         
-        // Execute parsed file
+        
+        // Open output file
         Writer out = new BufferedWriter(new FileWriter(outFile));
-        Interpreter interp = new Interpreter(inputObjects, out, header);
+        
+        // Create PostScript interpreter and add file to execution stack
+        Interpreter interp = new Interpreter(out, header);
+        interp.execStack.push(new PSObjectFile(in));
+        
+        // Run the interpreter
         try {
             interp.start();
         } catch (Exception e) {
+            in.close();
             out.close();
             throw e;
         }
+        in.close();
         out.close();
     }
     

@@ -22,40 +22,98 @@ package net.sf.eps2pgf.postscript;
 
 import java.util.*;
 
+import net.sf.eps2pgf.postscript.*;
+import net.sf.eps2pgf.postscript.errors.*;
+
 /**
- *
+ * Execution stack. Stack of objects that await processing by the interpreter.
  * @author Paul Wagenaars
  */
 public class ExecStack {
-    // Execution stack (see PostScript manual for more info)
-    Stack<LinkedList<PSObject>> execStack = new Stack<LinkedList<PSObject>>();
+    /**
+     * Execution stack (see PostScript manual for more info)
+     */
+    PSObjectArray stack = new PSObjectArray();
+    
+    /**
+     * A reference to the top-most item on the execution stack for faster access.
+     */
+    PSObject top = null;
+    
+    /**
+     * Gets the next PostScript token from the top-most item on this execution stack.
+     * @return Returns next token. Returns <code>null</code> when there are no
+     *         more tokens left on this stack.
+     * @throws net.sf.eps2pgf.postscript.errors.PSError There was a PostScript error retrieving the next token
+     */
+    public PSObject getNextToken() throws PSError {
+        // Check for empty stack
+        if (stack.size() == 0) {
+            return null;
+        }
+        
+        // Check for valid top
+        if (top == null) {
+            top = stack.get(stack.size() - 1);
+        }
+        
+        // Loop through all object on the stack until we find a token
+        while (top != null) {
+            List<PSObject> list = top.token();
+            if (list.size() == 2) {
+                return list.get(0);
+            } else if (list.size() == 3) {
+                pop();
+                push(list.get(0));
+                return list.get(1);
+            } else {
+                pop();
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Pops an item from the execution stack.
+     * NOTE: DO NOT USED THIS METHOD TO RETRIEVE THE NEXT TOKEN FROM THE
+     *       EXECUTION STACK FOR PROCESSING. USE getNextToken() INSTEAD.
+     * @return Returns popped element. Returns null when no more items are left.
+     */
+    public PSObject pop() {
+        try {
+            int N = stack.size();
+            if (N < 1) {
+                return null;
+            }
+            PSObject poppedObj = stack.remove(N-1);
+            if (N >= 2) {
+                top = stack.get(N-2);
+            } else {
+                top = null;
+            }
+            return poppedObj;
+        } catch (PSErrorInvalidAccess e) {
+            // This should never happen. A PostScript program can not change the
+            // access parameters of the stack.
+        } catch (PSErrorRangeCheck e) {
+            // This can never happen, since the stack size (N) is used.
+        }
+        return null;
+    }
 
-    /** Add a list with PSObjects to the execution stack */
-    public void addObjectList(LinkedList<PSObject> newList) {
-        execStack.push(newList);
-    }
-    
-    /** Copy and add a list with PSObjects to the execution stack */
-    public void copyAndAddObjectList(LinkedList<PSObject> oldList) {
-        LinkedList<PSObject> newList = new LinkedList<PSObject>();
-        for(int i = 0 ; i < oldList.size() ; i++) {
-            newList.add(oldList.get(i));
+    /**
+     * Pushes a new item on this execution stack.
+     * @param obj Object to push on the stack.
+     */
+    public void push(PSObject obj) {
+        try {
+            stack.addToEnd(obj);
+        } catch (PSErrorInvalidAccess e) {
+            // This should never happen. A PostScript program can not change the
+            // access parameters of the stack.
         }
-        addObjectList(newList);
+        top = obj;
     }
     
-    /** Checks whether the execution stack is empty */
-    public boolean empty() {
-        return execStack.empty();
-    }
-    
-    /** Retrieves the next object */
-    public PSObject getNext() {
-        LinkedList<PSObject> currentExecList = execStack.peek();
-        PSObject obj = currentExecList.remove();
-        if (currentExecList.isEmpty()) {
-            execStack.pop();
-        }
-        return obj;
-    }
 }

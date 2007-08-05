@@ -659,7 +659,7 @@ public class PSObjectString extends PSObject {
     /**
      * Reads characters from this object, interpreting them as PostScript
      * code, until it has scanned and constructed an entire object.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to read a token from this object type
+     * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to read a token from this object
      * @return List with one or more objects. See PostScript manual under the
      * 'token' operator for more info.
      */

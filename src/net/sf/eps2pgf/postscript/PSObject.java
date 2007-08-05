@@ -20,7 +20,7 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.util.List;
+import java.util.*;
 
 import org.fontbox.afm.*;
 
@@ -585,12 +585,18 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     /**
      * Reads characters from this object, interpreting them as PostScript
      * code, until it has scanned and constructed an entire object.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to read a token from this object type
-     * @return List with one or more objects. See PostScript manual under the
-     * 'token' operator for more info.
+     * Please note that this method does not perform a type check following the
+     * offical 'token' operator. This method will always return a result.
+     * @return List with one or more objects. The following are possible:
+     *         1 object : { <false boolean> }
+     *         2 objects: { <next token>, <true boolean> }
+     *         3 objects: { <remainder of this object>, <next token>, <true boolean> }
      */
     public List<PSObject> token() throws PSError {
-        throw new PSErrorTypeCheck();
+        List<PSObject> list = new ArrayList<PSObject>(2);
+        list.set(0, this);
+        list.set(1, new PSObjectBool(true));
+        return list;
     }
     
     /**

@@ -43,8 +43,8 @@ public class Interpreter {
     // Dictionary stack
     DictStack dictStack = new DictStack(this);
     
-    // Base of execution stack (this is basically the document)
-    List<PSObject> docObjects;
+    // Execution stack
+    public ExecStack execStack = new ExecStack();
     
     // Graphics state
     GstateStack gstate;
@@ -65,11 +65,10 @@ public class Interpreter {
     
     /**
      * Creates a new instance of Interpreter
-     * @param in PostScript document
      * @param out Destination for output code
      * @throws java.io.FileNotFoundException Unable to find font resources
      */
-    public Interpreter(List<PSObject> in, Writer out, DSCHeader fileHeader) throws FileNotFoundException {
+    public Interpreter(Writer out, DSCHeader fileHeader) throws FileNotFoundException {
         // Create new output device
         OutputDevice output = new PGFDevice(out);
         
@@ -79,7 +78,6 @@ public class Interpreter {
         // Text handler
         textHandler = new TextHandler(gstate);
         
-        docObjects = in;
         header = fileHeader;
         
         // Initialize character encodings
@@ -95,7 +93,10 @@ public class Interpreter {
         initialize();
         
         try {
-            processObjects(docObjects);
+            PSObject obj;
+            while ( (obj = execStack.getNextToken()) != null ) {
+                obj.process(this);
+            }
         } catch (PSError e) {
             System.out.println("----- Start of stack");
             op_pstack();
@@ -1793,6 +1794,9 @@ public class Interpreter {
     /** PostScript op: token */
     public void op_token() throws PSError {
         PSObject obj = opStack.pop();
+        if ( !(obj instanceof PSObjectString) && !(obj instanceof PSObjectFile) ) {
+            throw new PSErrorTypeCheck();
+        }
         for (PSObject item : obj.token()) {
             opStack.push(item);
         }
