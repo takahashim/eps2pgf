@@ -156,6 +156,7 @@ control 15 - exit 2: [1 2 3] {exit} forall  99 {exit} repeat
 control 16 - exit 3: {exit} loop
 control 17 - stop: {1 2 stop 3 4} stopped  3 1 roll 2 eq  3 1 roll 1 eq
 control 18 - stopped: {add} stopped  {1 2} stopped false eq
+control 19 - execstack: {1 2 100 array execstack 3 4} exec pop pop dup length 1 sub get dup 0 get 3 eq  exch 1 get 4 eq
 
 path  1 - newpath: newpath
 path  2 - currentpoint/moveto: 0 0 moveto currentpoint 0 eq exch 0 eq
