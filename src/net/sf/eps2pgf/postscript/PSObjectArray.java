@@ -246,17 +246,6 @@ public class PSObjectArray extends PSObject {
         }
     }
     
-    /** Executes this object in the supplied interpreter */
-    public void execute(Interpreter interp) throws Exception {
-        if (isLiteral) {
-            interp.opStack.push(dup());
-        } else {
-            List<PSObject> list = getItemList();
-            list.remove(0);  // remove first item (= number of object per item)
-            interp.processObjects(list);
-        }
-    }
-    
     /**
      * PostScript operator 'executeonly'. Set access attribute to executeonly.
      */
@@ -553,6 +542,35 @@ public class PSObjectArray extends PSObject {
             throw new PSErrorTypeCheck();
         }
         return this;
+    }
+    
+    /**
+     * Reads characters from this object, interpreting them as PostScript
+     * code, until it has scanned and constructed an entire object.
+     * Please note that this method does not perform a type check following the
+     * offical 'token' operator. This method will always return a result.
+     * @return List with one or more objects. The following are possible:
+     *         1 object : { <false boolean> }
+     *         2 objects: { <next token>, <true boolean> }
+     *         3 objects: { <remainder of this object>, <next token>, <true boolean> }
+     */
+    public List<PSObject> token() throws PSError {
+        List<PSObject> list;
+        int N = size();
+        if (N == 0) {
+            list = new ArrayList<PSObject>(1);
+            list.add(0, new PSObjectBool(false));
+        } else {
+            list = new ArrayList<PSObject>(3);
+            if (N > 1) {
+                list.add(0, new PSObjectArray(this, 1, N-1));
+            } else {
+                list.add(0, new PSObjectArray());
+            }
+            list.add(1, get(0));
+            list.add(2, new PSObjectBool(true));
+        }
+        return list;
     }
     
     /**

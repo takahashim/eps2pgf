@@ -21,6 +21,7 @@
 package net.sf.eps2pgf.postscript;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.*;
 
@@ -93,10 +94,7 @@ public class Interpreter {
         initialize();
         
         try {
-            PSObject obj;
-            while ( (obj = execStack.getNextToken()) != null ) {
-                obj.process(this);
-            }
+            run();
         } catch (PSError e) {
             System.out.println("----- Start of stack");
             op_pstack();
@@ -106,6 +104,43 @@ public class Interpreter {
             throw e;
         }
         gstate.current.device.finish();
+    }
+    
+    /**
+     * Execute all objects on the execution stack one by one
+     */
+    public void run() throws Exception {
+        while ( execStack.size() > 0 ) {
+            PSObject obj = execStack.getNextToken();
+            if (obj != null) {
+                executeObject(obj, false);
+            }
+        }
+    }
+    
+    /**
+     * Look at the current element at the top of the execution stack, then
+     * execute the supplied object and start running until the same object is
+     * again on top of the execution stack.
+     */
+    public void runObject(PSObject objectToRun) throws Exception {
+        PSObject topAtStart = execStack.top;
+        executeObject(objectToRun);
+        try {
+            while (execStack.top != topAtStart) {
+                PSObject obj = execStack.getNextToken();
+                if (obj != null) {
+                    executeObject(obj, false);
+                }            
+            }
+        } catch (PSError e) {
+            // There was an error. Restore the execution stack to its original
+            // state. After that the error is thrown again.
+            while (execStack.top != topAtStart) {
+                execStack.getNextToken();
+            }
+            throw e;
+        }
     }
     
     /**
@@ -148,14 +183,66 @@ public class Interpreter {
     }
     
     /**
-     * Process/interpret a list of PostScript objects
-     * @param objList List with PostScript objects to process
-     * @throws java.lang.Exception Something went wrong while processing the object
+     * Execute/process an object in this interpreter. How the object is exactly
+     * executed depends on the object type and properties. The object is
+     * executed indirectly (executed as a result of executing another object).
+     * See section "3.5.5 Execution of specific types" of the PostScript manual
+     * for more info.
+     * @param obj Object that is to be executed
      */
-    public void processObjects(List<PSObject> objList) throws Exception {
-        for (int i = 0 ; i < objList.size() ; i++) {
-            objList.get(i).process(this);
-        }        
+    public void executeObject(PSObject obj) throws Exception {
+        executeObject(obj, true);
+    }
+    
+    /**
+     * Execute/process an object in this interpreter. How the object is exactly
+     * executed depends on the object type and properties.
+     * See section "3.5.5 Execution of specific types" of the PostScript manual
+     * for more info.
+     * @param obj Object that is to be executed
+     * @param indirect Indicates how the object was encoutered: directly
+     *                 (encountered by the interpreter) or indirect (as a
+     *                 result of executing some other object)
+     */
+    public void executeObject(PSObject obj, boolean indirect) throws Exception {
+        if (obj.isLiteral) {
+            // Object is literal
+            opStack.push(obj);
+        } else {
+            // Object is executable
+            if (obj instanceof PSObjectArray) {
+                if (indirect) {
+                    execStack.push(obj);
+                } else {
+                    // directly encountered by interpreter
+                    opStack.push(obj);
+                }
+            } else if (obj instanceof PSObjectString) {
+                execStack.push(obj);
+            } else if (obj instanceof PSObjectFile) {
+                execStack.push(obj);
+            } else if (obj instanceof PSObjectName) {
+                String key = obj.toName().name;
+                PSObject value = dictStack.lookup(key);
+                if (value == null) {
+                    throw new PSErrorUndefined(key);
+                } else {
+                    executeObject(value.dup());
+                }
+            } else if (obj instanceof PSObjectOperator) {
+                try {
+                    ((PSObjectOperator)obj).opMethod.invoke(this);
+                } catch (InvocationTargetException e) {
+                    if (e.getCause() instanceof PSError) {
+                        throw (PSError)e.getCause();
+                    } else {
+                        throw e;
+                    }
+                }
+            } else if (obj instanceof PSObjectNull) {
+                // don't do anything with an executable null
+            } 
+        }  // end of check whether object is literal
     }
     
     /** PostScript op: abs */
@@ -754,7 +841,7 @@ public class Interpreter {
      */
     public void op_exec() throws PSErrorStackUnderflow, Exception {
         PSObject any = opStack.pop();
-        any.execute(this);
+        executeObject(any);
     }
     
     /** PostScript op: executeonly */
@@ -845,7 +932,8 @@ public class Interpreter {
                 } else {
                     opStack.push(new PSObjectReal(control));
                 }
-                proc.execute(this);
+                
+                runObject(proc);
 
                 control += inc;
             }
@@ -865,7 +953,7 @@ public class Interpreter {
                 for (int i = 0 ; i < N ; i++) {
                      opStack.push(items.remove(0));
                 }
-                proc.execute(this);
+                runObject(proc);
             }
         } catch (PSErrorInvalidExit e) {
             // 'exit' operator called from within this loop
@@ -963,7 +1051,7 @@ public class Interpreter {
         PSObjectArray proc = opStack.pop().toProc();
         boolean bool = opStack.pop().toBool();
         if (bool) {
-            proc.execute(this);
+            runObject(proc);
         }
     }
     
@@ -974,9 +1062,9 @@ public class Interpreter {
         boolean bool = opStack.pop().toBool();
         
         if (bool) {
-            proc1.execute(this);
+            runObject(proc1);
         } else {
-            proc2.execute(this);
+            runObject(proc2);
         }
     }
     
@@ -1103,7 +1191,7 @@ public class Interpreter {
         
         try {
             while (true) {
-                proc.execute(this);
+                runObject(proc);
             }
         } catch (PSErrorInvalidExit e) {
             // 'exit' operator called from within this loop
@@ -1271,7 +1359,7 @@ public class Interpreter {
                     opStack.push(new PSObjectReal(coor[0]));
                     opStack.push(new PSObjectReal(coor[1]));
                 }
-                proc.execute(this);
+                runObject(proc);
             }
         } catch (PSErrorInvalidExit e) {
             // 'exit' operator executed within this loop
@@ -1399,7 +1487,7 @@ public class Interpreter {
         
         try {
             for (int i = 0 ; i < n ; i++) {
-                proc.execute(this);
+                runObject(proc);
             }
         } catch (PSErrorInvalidExit e) {
             // 'exit' operator called from within this loop
@@ -1719,7 +1807,7 @@ public class Interpreter {
     public void op_stopped() throws PSErrorStackUnderflow, PSErrorUnimplemented, Exception {
         PSObject any = opStack.pop();
         try {
-            any.execute(this);
+            runObject(any);
         } catch (PSErrorUnimplemented e) {
             // Don't catch unimplemented errors since they indicate that
             // eps2pgf is not fully implemented. It is not an actual
