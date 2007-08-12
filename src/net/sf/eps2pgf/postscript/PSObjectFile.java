@@ -26,7 +26,7 @@ import java.util.*;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
- *
+ * PostScript file object
  * @author Paul Wagenaars
  */
 public class PSObjectFile extends PSObject {
@@ -36,9 +36,31 @@ public class PSObjectFile extends PSObject {
      */
     Reader rdr;
     
-    /** Creates a new instance of PSObjectFile */
+    /**
+     * Creates a new instance of PSObjectFile
+     * @param fileReader Reader to access the file
+     */
     public PSObjectFile(Reader fileReader) {
         rdr = fileReader;
+    }
+    
+    /**
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
+     * of composite object is not copied, but shared.
+     * @return Shallow copy of this object.
+     */
+    public PSObjectFile dup() {
+        PSObjectFile dupFile = new PSObjectFile(rdr);
+        dupFile.copyCommonAttributes(this);
+        return dupFile;
+    }
+    
+    /**
+     * Returns this object
+     * @return File object representation of this object
+     */
+    public PSObjectFile toFile() {
+        return this;
     }
     
     /**
@@ -63,6 +85,14 @@ public class PSObjectFile extends PSObject {
             retList.add(new PSObjectBool(false));
         }
         return retList;
+    }
+
+    /**
+     * Returns the type of this object
+     * @return Type of this object (see PostScript manual for possible values)
+     */
+    public String type() {
+        return "filetype";
     }
 
 }

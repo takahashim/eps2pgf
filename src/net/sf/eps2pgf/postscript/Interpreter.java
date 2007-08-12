@@ -562,7 +562,12 @@ public class Interpreter {
     
     /** PostScript op: currentfile */
     public void op_currentfile() throws PSError {
-        throw new PSErrorUnimplemented("operator: currentfile");
+        PSObjectFile file = execStack.getTopmostFile().dup();
+        if (file == null) {
+            file = new PSObjectFile(null);
+        }
+        file.cvlit();
+        opStack.push(file);
     }
     
     /** PostScript op: currentflat */

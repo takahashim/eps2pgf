@@ -41,6 +41,22 @@ public class ExecStack {
     PSObject top = null;
     
     /**
+     * Returns the top-most file object on this execution stack
+     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred.
+     * @return Topmost file or <code>null</code> when there is no file on this
+     * execution stack.
+     */
+    public PSObjectFile getTopmostFile() throws PSError {
+        for (int i = size()-1 ; i >= 0 ; i--) {
+            PSObject obj = stack.get(i);
+            if (obj instanceof PSObjectFile) {
+                return obj.toFile();
+            }
+        }
+        return null;
+    }
+    
+    /**
      * Gets the next PostScript token from the top-most item on this execution stack.
      * @return Returns next token. Returns <code>null</code> when there are no
      *         more tokens left on the top item on the stack. This empty top
