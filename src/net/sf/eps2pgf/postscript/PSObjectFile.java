@@ -56,6 +56,15 @@ public class PSObjectFile extends PSObject {
     }
     
     /**
+     * Return PostScript text representation of this object. See the
+     * PostScript manual under the == operator
+     * @return Text representation of this object.
+     */
+    public String isis() {
+        return "-file-";
+    }
+    
+    /**
      * Returns this object
      * @return File object representation of this object
      */
