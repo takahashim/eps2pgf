@@ -517,6 +517,11 @@ public class Interpreter {
         opStack.push(new PSObjectInt(dictStack.countdictstack()));
     }
     
+    /** PostScript op: countexecstack */
+    public void op_countexecstack() {
+        opStack.push(new PSObjectInt(execStack.size()));
+    }
+    
     /** PostScript op: counttomark */
     public void op_counttomark() throws PSErrorUnmatchedMark {
         int n = opStack.size();
@@ -812,9 +817,7 @@ public class Interpreter {
         op_newpath();
     }
     
-    /**
-     * PostScript op: errordict
-     */
+    /** PostScript op: errordict */
     public void op_errordict() throws PSErrorUnimplemented {
         throw new PSErrorUnimplemented("errordict operator");
     }
@@ -826,9 +829,7 @@ public class Interpreter {
         opStack.push(new PSObjectBool(any1.eq(any2)));
     }
     
-    /**
-     * PostScript op: exch
-     */
+    /** PostScript op: exch */
     public void op_exch() throws PSErrorStackUnderflow {
         PSObject any2 = opStack.pop();
         PSObject any1 = opStack.pop();
@@ -836,12 +837,17 @@ public class Interpreter {
         opStack.push(any1);
     }
     
-    /**
-     * PostScript op: exec
-     */
+    /** PostScript op: exec */
     public void op_exec() throws PSErrorStackUnderflow, Exception {
         PSObject any = opStack.pop();
         executeObject(any);
+    }
+    
+    /** PostScript op: execstack */
+    public void op_execstack() throws PSError {
+        PSObjectArray array = opStack.pop().toArray();
+        PSObject subArray = array.copy(execStack.stack);
+        opStack.push(subArray);
     }
     
     /** PostScript op: executeonly */
