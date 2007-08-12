@@ -65,7 +65,10 @@ public class ExecStack {
                 return list.get(0);
             } else if (list.size() == 3) {
                 pop();
-                push(list.get(0));
+                PSObject remaining = list.get(0);
+                if (remaining != null) {
+                    push(remaining);
+                }
                 return list.get(1);
             } else {
                 pop();
