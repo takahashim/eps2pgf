@@ -89,36 +89,6 @@ public class PSObjectName extends PSObject {
         }
     }
     
-    /**
-     * Executes this object in the supplied interpreter
-     * @param interp Interpreter in which this object is executed.
-     * @throws java.lang.Exception An error occured during the execution of this object.
-     */
-    public void execute(Interpreter interp) throws Exception {
-        if (isLiteral) {
-            // Literal name, just push it on the stack
-            interp.opStack.push(dup());
-        } else {
-            // Executable name, look it up in the dict stack and execute
-            // the associated object.
-            PSObject obj = interp.dictStack.lookup(name);
-            if (obj == null) {
-                throw new PSErrorUndefined(name);
-            }
-            obj.execute(interp);
-        }
-    }
-    
-    /**
-     * Process this object in the supplied interpreter. This is the way
-     * objects from the operand stack are processed.
-     * @param interp Interpreter in which this object is processed.
-     * @throws java.lang.Exception An error occured during the execution of this object.
-     */
-    public void process(Interpreter interp) throws Exception {
-        execute(interp);
-    }
-    
     /** Convert this object to dictionary key, if possible. */
     public String toDictKey() {
         return name;

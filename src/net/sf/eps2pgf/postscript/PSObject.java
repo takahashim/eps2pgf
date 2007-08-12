@@ -190,15 +190,6 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
-     * Executes this object in the supplied interpreter
-     * @param interp Interpreter in which this object is executed.
-     * @throws java.lang.Exception An error occured during the execution of this object.
-     */
-    public void execute(Interpreter interp) throws Exception {
-        interp.opStack.push(dup());
-    }
-    
-    /**
      * PostScript operator 'executeonly'. Set access attribute to executeonly.
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not set access attribute of this object type to 'executeonly'
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess 'access' attribute of this object does not allow changes
@@ -345,16 +336,6 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     /** PostScript operator 'or' */
     public PSObject or(PSObject obj2) throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
-    }
-    
-    /**
-     * Process this object in the supplied interpreter. This is the way
-     * objects from the operand stack are processed.
-     * @param interp Interpreter in which this object is processed.
-     * @throws java.lang.Exception An error occured during the execution of this object.
-     */
-    public void process(Interpreter interp) throws Exception {
-        interp.opStack.push(this);
     }
     
     /**
@@ -594,8 +575,8 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      */
     public List<PSObject> token() throws PSError {
         List<PSObject> list = new ArrayList<PSObject>(2);
-        list.set(0, this);
-        list.set(1, new PSObjectBool(true));
+        list.add(0, this);
+        list.add(1, new PSObjectBool(true));
         return list;
     }
     

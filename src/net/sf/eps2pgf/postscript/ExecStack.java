@@ -43,7 +43,8 @@ public class ExecStack {
     /**
      * Gets the next PostScript token from the top-most item on this execution stack.
      * @return Returns next token. Returns <code>null</code> when there are no
-     *         more tokens left on this stack.
+     *         more tokens left on the top item on the stack. This empty top
+     *         item is popped and <code>null</code> is returned.
      * @throws net.sf.eps2pgf.postscript.errors.PSError There was a PostScript error retrieving the next token
      */
     public PSObject getNextToken() throws PSError {
@@ -68,6 +69,7 @@ public class ExecStack {
                 return list.get(1);
             } else {
                 pop();
+                return null;
             }
         }
         
@@ -114,6 +116,14 @@ public class ExecStack {
             // access parameters of the stack.
         }
         top = obj;
+    }
+    
+    /**
+     * Return the number of items on this exection stack
+     * @return Number of items on the stack
+     */
+    public int size() {
+        return stack.size();
     }
     
 }

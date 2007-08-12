@@ -246,23 +246,6 @@ public class PSObjectString extends PSObject {
     }
     
     /**
-     * Executes this object in the supplied interpreter
-     * @param interp Interpreter in which this object is executed.
-     * @throws java.lang.Exception An error occured during the execution of this object.
-     */
-    public void execute(Interpreter interp) throws Exception {
-        if (isLiteral) {
-            interp.opStack.push(dup());
-        } else {
-            PSObject obj;
-            Reader strRdr = new StringReader(toString());
-            while ( (obj = Parser.convertSingle(strRdr)) != null) {
-                obj.process(interp);
-            }
-        }
-    }
-    
-    /**
      * PostScript operator 'executeonly'. Set access attribute to executeonly.
      */
     public void executeonly() throws PSErrorInvalidAccess {
@@ -664,7 +647,7 @@ public class PSObjectString extends PSObject {
      * 'token' operator for more info.
      */
     public List<PSObject> token() throws PSError {
-        Reader rdr = new StringReader(value.toString());
+        Reader rdr = new StringReader(toString());
         PSObject any;
         try {
             any = Parser.convertSingle(rdr);

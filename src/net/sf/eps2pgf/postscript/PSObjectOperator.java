@@ -22,6 +22,7 @@ package net.sf.eps2pgf.postscript;
 
 import java.util.*;
 import java.lang.reflect.*;
+
 import net.sf.eps2pgf.postscript.errors.PSError;
 
 /**
@@ -29,8 +30,8 @@ import net.sf.eps2pgf.postscript.errors.PSError;
  * @author Paul Wagenaars
  */
 public class PSObjectOperator extends PSObject {
-    String name;
-    Method opMethod;
+    public String name;
+    public Method opMethod;
     
     /**
      * Creates a new instance of PSObjectOperator
@@ -74,37 +75,6 @@ public class PSObjectOperator extends PSObject {
         return new PSObjectOperator(this);
     }
     
-    /**
-     * Executes this object in the supplied interpreter
-     * @param interp Interpreter in which this object is executed.
-     * @throws java.lang.Exception An error occured during the execution of this object.
-     */
-    public void execute(Interpreter interp) throws Exception {
-        if (isLiteral) {
-            interp.opStack.push(dup());
-        } else {
-            try {
-                opMethod.invoke(interp);
-            } catch (InvocationTargetException e) {
-                if (e.getCause() instanceof PSError) {
-                    throw (PSError)e.getCause();
-                } else {
-                    throw e;
-                }
-            }
-        }
-    }
-    
-    /**
-     * Process this object in the supplied interpreter. This is the way
-     * objects from the operand stack are processed.
-     * @param interp Interpreter in which this object is processed.
-     * @throws java.lang.Exception An error occured during the execution of this object.
-     */
-    public void process(Interpreter interp) throws Exception {
-        execute(interp);
-    }
-
     /**
      * Returns the type of this object
      * @return Type of this object (see PostScript manual for possible values)
