@@ -574,9 +574,10 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      *         3 objects: { <remainder of this object>, <next token>, <true boolean> }
      */
     public List<PSObject> token() throws PSError {
-        List<PSObject> list = new ArrayList<PSObject>(2);
-        list.add(0, this);
-        list.add(1, new PSObjectBool(true));
+        List<PSObject> list = new ArrayList<PSObject>(3);
+        list.add(0, null);
+        list.add(1, this);
+        list.add(2, new PSObjectBool(true));
         return list;
     }
     
