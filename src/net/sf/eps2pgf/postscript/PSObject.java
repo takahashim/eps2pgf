@@ -437,6 +437,15 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
+     * Convert this object to a file object
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a dict key
+     * @return File object representation of this object
+     */
+    public PSObjectFile toFile() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Convert this object to a font dictionary, if possible.
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a dictionary
      * @return Dictionary representation of this object.
