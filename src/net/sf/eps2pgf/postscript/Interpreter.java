@@ -29,7 +29,7 @@ import org.fontbox.afm.*;
 import org.fontbox.util.BoundingBox;
 
 import net.sf.eps2pgf.*;
-import net.sf.eps2pgf.collections.ArrayStack;
+import net.sf.eps2pgf.util.ArrayStack;
 import net.sf.eps2pgf.output.*;
 import net.sf.eps2pgf.postscript.errors.*;
 
