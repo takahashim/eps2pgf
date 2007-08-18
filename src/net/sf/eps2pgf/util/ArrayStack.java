@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.collections;
+package net.sf.eps2pgf.util;
 
 import java.util.*;
 import net.sf.eps2pgf.postscript.errors.PSError;

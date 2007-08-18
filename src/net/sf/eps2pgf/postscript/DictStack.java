@@ -22,7 +22,7 @@ package net.sf.eps2pgf.postscript;
 
 import java.lang.reflect.*;
 import java.util.*;
-import net.sf.eps2pgf.collections.ArrayStack;
+import net.sf.eps2pgf.util.ArrayStack;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /** PostScript dictionary stack

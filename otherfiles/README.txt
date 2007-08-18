@@ -64,6 +64,7 @@ license. The license of each component is distributed along with it.
   - 14 Core PostScript AFM files (see resources\afm\MustRead.html)
   - FontBox (see lib\LICENSE_FontBox.txt)
   - JSAP (see lib\LICENSE_JSAP.txt)
+  - freehep-io (see lib\LICENSE_freehep-io.txt)
 
 ----------------------------------------------------------------------------
 

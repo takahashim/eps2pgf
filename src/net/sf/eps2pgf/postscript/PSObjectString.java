@@ -24,6 +24,9 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
+import org.freehep.util.io.ASCII85InputStream;
+
+import net.sf.eps2pgf.util.*;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
@@ -446,47 +449,21 @@ public class PSObjectString extends PSObject {
      */
     public String parseBase85(String str) throws PSErrorIOError {
         str = str.replaceAll("\\s+", "");
-        StringBuilder parsedStr = new StringBuilder();
+        str = str.replaceAll("z", "!!!!!");
         
-        int nextChar = 0;
-        long[] c = new long[5];
-        int n = str.length();
-        for (int i = 0 ; i < n ; i++) {
-            char chr = str.charAt(i);
-            
-            if ( (chr == 'z') && (nextChar == 0) ) {
-                c[0] = '!';
-                c[1] = '!';
-                c[2] = '!';
-                c[3] = '!';
-                c[4] = '!';
-                nextChar = 5;
-            } else if ( (chr >= '!') && (chr <= 'u') ) {
-                c[nextChar++] = chr;
-            } else {
-                throw new PSErrorIOError();
+        StringReader strReader = new StringReader(str);
+        ReaderInputStream strInputStream = new ReaderInputStream(strReader);
+        ASCII85InputStream a85Stream = new ASCII85InputStream(strInputStream);
+        
+        StringBuilder parsedStr = new StringBuilder();
+        try {
+            int i = a85Stream.read();
+            while (i != -1) {
+                parsedStr.append((char)i);
+                i = a85Stream.read();
             }
-            
-            if ( (i == (n-1)) && (nextChar > 0) ) {
-                while (nextChar < 5) {
-                    c[nextChar++] = '!';
-                }
-            }
-            
-            if (nextChar >= 5) {
-                nextChar = 0;
-                long d = 0;
-                for (int j = 0 ; j < 5 ; j++) {
-                    d = 85L*d + c[j] - 33L;
-                }
-                if (d >= 256L*256L*256L*256L) {
-                    throw new PSErrorIOError();
-                }
-                parsedStr.append((char)((d >> 24) & 0x00FF));
-                parsedStr.append((char)((d >> 16) & 0x00FF));
-                parsedStr.append((char)((d >> 8) & 0x00FF));
-                parsedStr.append((char)(d & 0x00FF));
-            }
+        } catch (IOException e) {
+            // end of string has been reached
         }
         
         return parsedStr.toString();
