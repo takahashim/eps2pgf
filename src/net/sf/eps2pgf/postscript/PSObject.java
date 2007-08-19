@@ -318,9 +318,8 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     /**
      * PostScript operator 'noaccess'. Set access attribute to 'none'.
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not change 'access' attribute of this object type
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess 'access' attribute of this object does not allow changes
      */
-    public void noaccess() throws PSErrorTypeCheck, PSErrorInvalidAccess {
+    public void noaccess() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     

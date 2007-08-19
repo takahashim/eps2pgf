@@ -120,7 +120,6 @@ public class PSObjectString extends PSObject {
      *         If not found, list with {string, false}.
      */
     public List<PSObject> anchorsearch(String seek) throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         String string = toString();
         int n = string.length();
         int m = seek.length();
@@ -156,8 +155,6 @@ public class PSObjectString extends PSObject {
      */
     public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck,
             PSErrorInvalidAccess {
-        checkAccess(false, false, true);
-        obj1.checkAccess(false, true, false);
         String obj1Str = obj1.toPSString().toString();
         putinterval(0, obj1Str);
         return getinterval(0, obj1Str.length());
@@ -167,7 +164,6 @@ public class PSObjectString extends PSObject {
      * PostScript operator 'cvi'. Convert this object to an integer
      */
     public int cvi() throws PSErrorTypeCheck, PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         PSObjectReal ro = new PSObjectReal(value.toString());
         return ro.cvi();
     }
@@ -176,7 +172,6 @@ public class PSObjectString extends PSObject {
      * PostScript operator 'cvn'. Convert this object to a name object.
      */
     public PSObjectName cvn() throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         return new PSObjectName(value.toString(), isLiteral);
     }
 
@@ -184,7 +179,6 @@ public class PSObjectString extends PSObject {
      * PostScript operator 'cvr'. Convert this object to a real
      */
     public double cvr() throws PSErrorTypeCheck, PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         PSObjectReal ro = new PSObjectReal(value.toString());
         return ro.toReal();
     }
@@ -195,7 +189,6 @@ public class PSObjectString extends PSObject {
      * @return Text representation
      */
     public String cvs() throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         return toString();
     }
 
@@ -206,7 +199,6 @@ public class PSObjectString extends PSObject {
      */
     public PSObjectArray decode(PSObjectArray encoding) throws PSErrorRangeCheck,
             PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         PSObjectArray arr = new PSObjectArray();
         for (int i = 0 ; i < count ; i++) {
             int chr = get(i);
@@ -235,8 +227,6 @@ public class PSObjectString extends PSObject {
      * @return True if objects are equal, false otherwise
      */
     public boolean eq(PSObject obj) throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
-        obj.checkAccess(false, true, false);
         if (obj instanceof PSObjectName) {
             PSObjectName objName = (PSObjectName)obj;
             return (toString().equals(objName.name));
@@ -251,8 +241,7 @@ public class PSObjectString extends PSObject {
     /**
      * PostScript operator 'executeonly'. Set access attribute to executeonly.
      */
-    public void executeonly() throws PSErrorInvalidAccess {
-        checkAccess(true, false, false);
+    public void executeonly() {
         access = ACCESS_EXECUTEONLY;
     }
 
@@ -262,7 +251,6 @@ public class PSObjectString extends PSObject {
      * @return Integer value of requested character
      */
     public int get(int index) throws PSErrorRangeCheck, PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         if ( (index < 0) || (index >= count) ) {
             throw new PSErrorRangeCheck();
         }
@@ -277,7 +265,6 @@ public class PSObjectString extends PSObject {
      */
     public PSObject get(PSObject index) throws PSErrorTypeCheck, PSErrorRangeCheck,
             PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         int chr = get(index.toInt());
         return new PSObjectInt(chr);
     }
@@ -293,7 +280,6 @@ public class PSObjectString extends PSObject {
      */
     public PSObjectString getinterval(int index, int count) throws PSErrorRangeCheck,
             PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         return new PSObjectString(this, index, count);
     }
     
@@ -307,7 +293,6 @@ public class PSObjectString extends PSObject {
      */
     public List<PSObject> getItemList() throws PSErrorTypeCheck,
             PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         List<PSObject> items = new LinkedList<PSObject>();
         items.add(new PSObjectInt(1));
         
@@ -329,8 +314,6 @@ public class PSObjectString extends PSObject {
      * otherwise.
      */
     public boolean gt(PSObject obj2) throws PSErrorTypeCheck, PSErrorInvalidAccess {
-        checkAccess(false, true, true);
-        obj2.checkAccess(false, true, false);
         String obj1Str = value.toString();
         String obj2Str = obj2.toPSString().toString();
         return (obj1Str.compareTo(obj2Str) > 0);
@@ -366,7 +349,6 @@ public class PSObjectString extends PSObject {
      * @return Length of this object
      */
     public int length() throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         return count;
     }
 
@@ -383,7 +365,6 @@ public class PSObjectString extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck The new string is longer than the current string
      */
     public void overwrite(String newStr) throws PSErrorRangeCheck, PSErrorInvalidAccess {
-        checkAccess(false, false, true);
         putinterval(0, newStr);
         count = newStr.length();
     }
@@ -500,8 +481,6 @@ public class PSObjectString extends PSObject {
      */
     public void put(PSObject index, PSObject newValue) throws PSErrorRangeCheck,
             PSErrorTypeCheck, PSErrorInvalidAccess {
-        checkAccess(false, false, true);
-        
         int idx = index.toInt();
         if ( (idx < 0) || (idx >= count) ) {
             throw new PSErrorRangeCheck();
@@ -523,7 +502,6 @@ public class PSObjectString extends PSObject {
      */
     public void putinterval(int index, String newStr) throws PSErrorRangeCheck,
             PSErrorInvalidAccess {
-        checkAccess(false, false, true);
         if ((index < 0) || (newStr.length() > (count-index))) {
             throw new PSErrorRangeCheck();
         }
@@ -537,7 +515,6 @@ public class PSObjectString extends PSObject {
      */
     public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck, PSErrorRangeCheck,
             PSErrorInvalidAccess {
-        obj.checkAccess(false, true, false);
         String str = obj.toPSString().toString();
         putinterval(index, str);
     }
@@ -558,7 +535,6 @@ public class PSObjectString extends PSObject {
      * PostScript operator: 'readonly'
      */
     public void readonly() throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         access = ACCESS_READONLY;
     }
     
@@ -570,7 +546,6 @@ public class PSObjectString extends PSObject {
      *         If not found, list with {string, false}.
      */
     public List<PSObject> search(String seek) throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         String string = toString();
         int n = string.length();
         int m = seek.length();
@@ -604,7 +579,6 @@ public class PSObjectString extends PSObject {
 
     /** Convert this object to dictionary key, if possible. */
     public String toDictKey() throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         return toString();
     }
     

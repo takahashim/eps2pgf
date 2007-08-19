@@ -129,7 +129,6 @@ public class PSObjectArray extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
      */
     public void addAt(int index, PSObject value) throws PSErrorInvalidAccess {
-        checkAccess(false, false, true);
         array.add(index+offset, value);
     }
     
@@ -138,7 +137,6 @@ public class PSObjectArray extends PSObject {
      * @param value Value of the new element
      */
     public void addToEnd(PSObject value) throws PSErrorInvalidAccess {
-        checkAccess(false, false, true);
         array.add(value);
     }
     
@@ -233,8 +231,6 @@ public class PSObjectArray extends PSObject {
      * @return True if objects are equal, false otherwise
      */
     public boolean eq(PSObject obj) throws PSErrorInvalidAccess {
-        checkAccess(false, true, true);
-        obj.checkAccess(false, true, true);
         try {
             PSObjectArray objArr = obj.toArray();
             if ( (count != objArr.count) || (offset != objArr.offset) ) {
@@ -249,8 +245,7 @@ public class PSObjectArray extends PSObject {
     /**
      * PostScript operator 'executeonly'. Set access attribute to executeonly.
      */
-    public void executeonly() throws PSErrorInvalidAccess {
-        checkAccess(true, false, false);
+    public void executeonly() {
         access = ACCESS_EXECUTEONLY;
     }
     
@@ -261,7 +256,6 @@ public class PSObjectArray extends PSObject {
      * @return Value of the specifiec element.
      */
     public PSObject get(int index) throws PSErrorRangeCheck, PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         if ( (index < 0) || (index >= size()) ) {
             throw new PSErrorRangeCheck();
         }
@@ -286,7 +280,6 @@ public class PSObjectArray extends PSObject {
      *         up) are the object's items.
      */
     public List<PSObject> getItemList() throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         List<PSObject> items = new LinkedList<PSObject>();
         items.add(new PSObjectInt(1));
         for (PSObject obj : this) {
@@ -305,7 +298,6 @@ public class PSObjectArray extends PSObject {
      */
     public PSObjectArray getinterval(int index, int count) throws PSErrorRangeCheck,
             PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         return new PSObjectArray(this, index, count);
     }
     
@@ -364,7 +356,6 @@ public class PSObjectArray extends PSObject {
      * @return Length of this object
      */
     public int length() throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         return size();
     }
     
@@ -392,8 +383,6 @@ public class PSObjectArray extends PSObject {
      */
     public void put(int index, PSObject value) throws PSErrorRangeCheck,
             PSErrorInvalidAccess {
-        checkAccess(false, false, true);
-        checkAccess(false, true, false);
         if ( (index < 0) || (index >= size()) ) {
             throw new PSErrorRangeCheck();
         }
@@ -432,7 +421,6 @@ public class PSObjectArray extends PSObject {
      * PostScript operator: 'readonly'
      */
     public void readonly() throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         access = ACCESS_READONLY;
     }
     
@@ -443,7 +431,6 @@ public class PSObjectArray extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSError Index out of range.
      */
     public PSObject remove(int index) throws PSErrorRangeCheck, PSErrorInvalidAccess {
-        checkAccess(false, false, true);
         if ( (index < 0) || (index >= size()) ) {
             throw new PSErrorRangeCheck();
         }
@@ -458,8 +445,6 @@ public class PSObjectArray extends PSObject {
      */
     public void set(int index, PSObject value) throws PSErrorRangeCheck,
             PSErrorInvalidAccess {
-        checkAccess(false, false, true);
-        value.checkAccess(false, true, false);
         if ( (index < 0) || (index >= size()) ) {
             throw new PSErrorRangeCheck();
         }

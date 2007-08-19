@@ -41,7 +41,8 @@ public class PSObjectFile extends PSObject {
      * @param fileReader Reader to access the file
      */
     public PSObjectFile(Reader fileReader) {
-        rdr = fileReader;
+        this.rdr = fileReader;
+        this.isLiteral = false;
     }
     
     /**
@@ -56,12 +57,26 @@ public class PSObjectFile extends PSObject {
     }
     
     /**
+     * PostScript operator 'executeonly'. Set access attribute to executeonly.
+     */
+    public void executeonly() {
+        access = ACCESS_EXECUTEONLY;
+    }
+    
+    /**
      * Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      * @return Text representation of this object.
      */
     public String isis() {
         return "-file-";
+    }
+    
+    /**
+     * PostScript operator: 'noaccess'
+     */
+    public void noaccess() {
+        access = ACCESS_NONE;
     }
     
     /**

@@ -69,8 +69,6 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Invalid or incompatible object type(s) for copy operator
      */
     public PSObject copy(PSObject obj1) throws PSErrorTypeCheck, PSErrorInvalidAccess {
-        obj1.checkAccess(false, true, false);
-        
         PSObjectDict dict1 = obj1.toDict();
         for (Map.Entry<String, PSObject> entry : dict1.map.entrySet()) {
             setKey(entry.getKey(), entry.getValue());
@@ -109,7 +107,6 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
      */
     public PSObject get(String key) throws PSErrorUndefined, PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         PSObject value = lookup(key);
         if (value == null) {
             throw new PSErrorUndefined();
@@ -141,7 +138,6 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This object does not have a list of items
      */
     public List<PSObject> getItemList() throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         List<PSObject> lst = new ArrayList<PSObject>();
         lst.add(new PSObjectInt(2));
         for (Map.Entry<String, PSObject> entry : map.entrySet()) {
@@ -178,7 +174,6 @@ public class PSObjectDict extends PSObject {
      * @return Returns true when the key is known, returns false otherwise
      */
     public boolean known(String key) throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         return map.containsKey(key);
     }
     
@@ -188,7 +183,6 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
      */
     public int length() throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         return map.size();
     }
     
@@ -211,7 +205,6 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
      */
     public PSObject lookup(String key) throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         return map.get(key);
     }
     
@@ -221,15 +214,13 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No read access to this object
      */
     public int maxlength() throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         return Math.max(capacity, length());
     }
     
     /**
      * PostScript operator: 'noaccess'
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess Access attribute does no allow changes to this object
      */
-    public void noaccess() throws PSErrorInvalidAccess {
+    public void noaccess() {
         access = ACCESS_NONE;
     }
     
@@ -265,7 +256,6 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess Access attribute does no allow changes to this object
      */
     public void readonly() throws PSErrorInvalidAccess {
-        checkAccess(true, true, false);
         access = ACCESS_READONLY;
     }
     
@@ -276,7 +266,6 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No write access to this object
      */
     public void setKey(String key, PSObject value) throws PSErrorInvalidAccess {
-        checkAccess(false, false, true);
         map.put(key, value);
     }
     
@@ -300,7 +289,6 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No write access to this object
      */
     public PSObjectString setKey(String key, String value) throws PSErrorInvalidAccess {
-        checkAccess(false, true, false);
         PSObjectString psoValue = new PSObjectString(value);
         map.put(key, psoValue);
         return psoValue;
@@ -357,7 +345,6 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No write access to this object
      */
     public void undef(PSObject key) throws PSErrorTypeCheck, PSErrorInvalidAccess {
-        checkAccess(false, false, true);
         String keyStr = key.toDictKey();
         map.remove(keyStr);
     }
