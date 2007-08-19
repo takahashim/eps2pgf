@@ -55,16 +55,12 @@ public class PSObjectMatrix extends PSObjectArray {
      * Transformation" for more info.
      */
     public PSObjectMatrix(double a, double b, double c, double d, double tx, double ty) {
-        try {
-            addAt(0, new PSObjectReal(a));
-            addAt(1, new PSObjectReal(b));
-            addAt(2, new PSObjectReal(c));
-            addAt(3, new PSObjectReal(d));
-            addAt(4, new PSObjectReal(tx));
-            addAt(5, new PSObjectReal(ty));
-        } catch (PSErrorInvalidAccess e) {
-            // this can never happen with a brand new array/matrix
-        }
+        addAt(0, new PSObjectReal(a));
+        addAt(1, new PSObjectReal(b));
+        addAt(2, new PSObjectReal(c));
+        addAt(3, new PSObjectReal(d));
+        addAt(4, new PSObjectReal(tx));
+        addAt(5, new PSObjectReal(ty));
     }
     
     /**
@@ -119,8 +115,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * newMatrix = conc * matrix
      * @param conc Matrix describing the transformation.
      */
-    public void concat(PSObjectMatrix conc) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public void concat(PSObjectMatrix conc) throws PSErrorRangeCheck, PSErrorTypeCheck {
         // [a b c d tx ty] [a b 0 ; c d 0 ; tx ty 1]
         double a = conc.getReal(0)*getReal(0) + conc.getReal(1)*getReal(2);
         double b = conc.getReal(0)*getReal(1) + conc.getReal(1)*getReal(3);
@@ -139,8 +134,7 @@ public class PSObjectMatrix extends PSObjectArray {
     /**
      * Applies this matrix to a *distance* vector
      */
-    public double[] dtransform(double x, double y) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public double[] dtransform(double x, double y) throws PSErrorRangeCheck, PSErrorTypeCheck {
         // [a b c d tx ty]
         double[] converted = new double[2];
         converted[0] = getReal(0)*x + getReal(2)*y;
@@ -168,8 +162,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * Returns the mean scaling factor described by this matrix
      * @return Mean scaling factor (= mean(sqrt(a^2+c^2) + sqrt(b^2+d^2)) )
      */
-    public double getMeanScaling() throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public double getMeanScaling() throws PSErrorRangeCheck, PSErrorTypeCheck {
         return 0.5 * (getXScaling() + getYScaling());
     }
     
@@ -177,24 +170,21 @@ public class PSObjectMatrix extends PSObjectArray {
      * Determines the rotation for this transformation matrix
      * @return Rotation in degrees
      */
-    public double getRotation() throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public double getRotation() throws PSErrorRangeCheck, PSErrorTypeCheck {
         return Math.atan2(getReal(1), getReal(0)) / Math.PI * 180;
     }
     
     /**
      * Returns the x-scaling factor described by this matrix
      */
-    public double getXScaling() throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public double getXScaling() throws PSErrorRangeCheck, PSErrorTypeCheck {
         return Math.sqrt(Math.pow(getReal(0), 2) + Math.pow(getReal(2), 2));
     }
     
     /**
      * Returns the y-scaling factor described by this matrix
      */
-    public double getYScaling() throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public double getYScaling() throws PSErrorRangeCheck, PSErrorTypeCheck {
         return Math.sqrt(Math.pow(getReal(1), 2) + Math.pow(getReal(3), 2));
     }
     
@@ -204,8 +194,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * @param y dy translation
      * @return Inverse transformed translation
      */
-    public double[] idtransform(double x, double y) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public double[] idtransform(double x, double y) throws PSErrorRangeCheck, PSErrorTypeCheck {
         double a = getReal(0);
         double b = getReal(1);
         double c = getReal(2);
@@ -223,8 +212,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * @param coor Translation vector {dx, dy}
      * @return Inverse transformed translation
      */
-    public double[] idtransform(double[] coor) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public double[] idtransform(double[] coor) throws PSErrorRangeCheck, PSErrorTypeCheck {
         return idtransform(coor[0], coor[1]);
     }
     
@@ -232,7 +220,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * Calculate the inverse of this matrix. The result replaces the current
      * values in this matrix.
      */
-    public void invert() throws PSErrorInvalidAccess, PSErrorUndefinedResult,
+    public void invert() throws PSErrorUndefinedResult,
             PSErrorRangeCheck, PSErrorTypeCheck {
         double a = getReal(0);
         double b = getReal(1);
@@ -260,8 +248,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * @param y Y-coordinate
      * @return Inverse transformed coordinate
      */
-    public double[] itransform(double x, double y) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public double[] itransform(double x, double y) throws PSErrorRangeCheck, PSErrorTypeCheck {
         double a = getReal(0);
         double b = getReal(1);
         double c = getReal(2);
@@ -281,8 +268,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * @param coor Coordinate
      * @return Inverse transformed coordinate
      */
-    public double[] itransform(double[] coor) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public double[] itransform(double[] coor) throws PSErrorRangeCheck, PSErrorTypeCheck {
         return itransform(coor[0], coor[1]);
     }
     
@@ -293,8 +279,7 @@ public class PSObjectMatrix extends PSObjectArray {
      *                         [  0      0     1]
      * @param angle Angle in degrees for counterclockwise rotation.
      */
-    public void rotate(double angle) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public void rotate(double angle) throws PSErrorRangeCheck, PSErrorTypeCheck {
         // [a b c d xx yy]
         double cosa = Math.cos(angle*Math.PI/180);
         double sina = Math.sin(angle*Math.PI/180);
@@ -316,8 +301,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * @param sx X-coodinate scaling factor.
      * @param sy Y-coordinate scaling factor.
      */
-    public void scale(double sx, double sy) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public void scale(double sx, double sy) throws PSErrorRangeCheck, PSErrorTypeCheck {
         // [a b c d xx yy]
         setReal(0, sx*getReal(0));
         setReal(1, sx*getReal(1));
@@ -338,8 +322,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * @param coor Coordinate {x, y}
      * @return Transformed coordinate
      */
-    public double[] transform(double[] coor) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public double[] transform(double[] coor) throws PSErrorRangeCheck, PSErrorTypeCheck {
         return transform(coor[0], coor[1]);
     }
     
@@ -349,8 +332,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * @param y Y-coordinate
      * @return Transformed coordinate
      */
-    public double[] transform(double x, double y) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public double[] transform(double x, double y) throws PSErrorRangeCheck, PSErrorTypeCheck {
         // [a b c d tx ty]
         double[] converted = new double[2];
         converted[0] = getReal(0)*x + getReal(2)*y + getReal(4);
@@ -366,8 +348,7 @@ public class PSObjectMatrix extends PSObjectArray {
      * @param tx X-coordinate translation
      * @param ty Y-coordinate translation
      */
-    public void translate(double tx, double ty) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public void translate(double tx, double ty) throws PSErrorRangeCheck, PSErrorTypeCheck {
         // [a b c d xx yy]
         setReal(4, tx*getReal(0) + ty*getReal(2) + getReal(4));
         setReal(5, tx*getReal(1) + ty*getReal(3) + getReal(5));

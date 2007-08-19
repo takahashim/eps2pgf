@@ -119,7 +119,7 @@ public class PSObjectString extends PSObject {
      *         If found, list with {post, match, true}.
      *         If not found, list with {string, false}.
      */
-    public List<PSObject> anchorsearch(String seek) throws PSErrorInvalidAccess {
+    public List<PSObject> anchorsearch(String seek) {
         String string = toString();
         int n = string.length();
         int m = seek.length();
@@ -153,8 +153,7 @@ public class PSObjectString extends PSObject {
      * @param obj1 Copy values from obj1
      * @return Returns subsequence of this object
      */
-    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
         String obj1Str = obj1.toPSString().toString();
         putinterval(0, obj1Str);
         return getinterval(0, obj1Str.length());
@@ -163,7 +162,7 @@ public class PSObjectString extends PSObject {
     /**
      * PostScript operator 'cvi'. Convert this object to an integer
      */
-    public int cvi() throws PSErrorTypeCheck, PSErrorInvalidAccess {
+    public int cvi() throws PSErrorTypeCheck {
         PSObjectReal ro = new PSObjectReal(value.toString());
         return ro.cvi();
     }
@@ -171,14 +170,14 @@ public class PSObjectString extends PSObject {
     /**
      * PostScript operator 'cvn'. Convert this object to a name object.
      */
-    public PSObjectName cvn() throws PSErrorInvalidAccess {
+    public PSObjectName cvn() {
         return new PSObjectName(value.toString(), isLiteral);
     }
 
     /**
      * PostScript operator 'cvr'. Convert this object to a real
      */
-    public double cvr() throws PSErrorTypeCheck, PSErrorInvalidAccess {
+    public double cvr() throws PSErrorTypeCheck {
         PSObjectReal ro = new PSObjectReal(value.toString());
         return ro.toReal();
     }
@@ -188,7 +187,7 @@ public class PSObjectString extends PSObject {
      * operator 'cvs' for more info)
      * @return Text representation
      */
-    public String cvs() throws PSErrorInvalidAccess {
+    public String cvs() {
         return toString();
     }
 
@@ -197,8 +196,7 @@ public class PSObjectString extends PSObject {
      * @param encoding Encoding to use to decode this string
      * @return Array with character names
      */
-    public PSObjectArray decode(PSObjectArray encoding) throws PSErrorRangeCheck,
-            PSErrorInvalidAccess {
+    public PSObjectArray decode(PSObjectArray encoding) throws PSErrorRangeCheck {
         PSObjectArray arr = new PSObjectArray();
         for (int i = 0 ; i < count ; i++) {
             int chr = get(i);
@@ -226,7 +224,7 @@ public class PSObjectString extends PSObject {
      * @param obj Object to compare this object with
      * @return True if objects are equal, false otherwise
      */
-    public boolean eq(PSObject obj) throws PSErrorInvalidAccess {
+    public boolean eq(PSObject obj) {
         if (obj instanceof PSObjectName) {
             PSObjectName objName = (PSObjectName)obj;
             return (toString().equals(objName.name));
@@ -250,7 +248,7 @@ public class PSObjectString extends PSObject {
      * @param index Index of character (first character has index 0)
      * @return Integer value of requested character
      */
-    public int get(int index) throws PSErrorRangeCheck, PSErrorInvalidAccess {
+    public int get(int index) throws PSErrorRangeCheck {
         if ( (index < 0) || (index >= count) ) {
             throw new PSErrorRangeCheck();
         }
@@ -263,8 +261,7 @@ public class PSObjectString extends PSObject {
      * @param index Index of character (first character has index 0)
      * @return Integer value of requested character
      */
-    public PSObject get(PSObject index) throws PSErrorTypeCheck, PSErrorRangeCheck,
-            PSErrorInvalidAccess {
+    public PSObject get(PSObject index) throws PSErrorTypeCheck, PSErrorRangeCheck {
         int chr = get(index.toInt());
         return new PSObjectInt(chr);
     }
@@ -278,8 +275,7 @@ public class PSObjectString extends PSObject {
      * @return Object representing a subarray of this object. The data is shared
      * between both objects.
      */
-    public PSObjectString getinterval(int index, int count) throws PSErrorRangeCheck,
-            PSErrorInvalidAccess {
+    public PSObjectString getinterval(int index, int count) throws PSErrorRangeCheck {
         return new PSObjectString(this, index, count);
     }
     
@@ -291,8 +287,7 @@ public class PSObjectString extends PSObject {
      *         dictionaries this is 2. All consecutive items (index 1 and
      *         up) are the object's items.
      */
-    public List<PSObject> getItemList() throws PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public List<PSObject> getItemList() throws PSErrorTypeCheck {
         List<PSObject> items = new LinkedList<PSObject>();
         items.add(new PSObjectInt(1));
         
@@ -313,7 +308,7 @@ public class PSObjectString extends PSObject {
      * @return Returns true when this object is greater than obj2, return false
      * otherwise.
      */
-    public boolean gt(PSObject obj2) throws PSErrorTypeCheck, PSErrorInvalidAccess {
+    public boolean gt(PSObject obj2) throws PSErrorTypeCheck {
         String obj1Str = value.toString();
         String obj2Str = obj2.toPSString().toString();
         return (obj1Str.compareTo(obj2Str) > 0);
@@ -348,7 +343,7 @@ public class PSObjectString extends PSObject {
      * Implements PostScript operate: length
      * @return Length of this object
      */
-    public int length() throws PSErrorInvalidAccess {
+    public int length() {
         return count;
     }
 
@@ -364,7 +359,7 @@ public class PSObjectString extends PSObject {
      * @param newStr New value for this object
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck The new string is longer than the current string
      */
-    public void overwrite(String newStr) throws PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void overwrite(String newStr) throws PSErrorRangeCheck {
         putinterval(0, newStr);
         count = newStr.length();
     }
@@ -480,7 +475,7 @@ public class PSObjectString extends PSObject {
      * @param newValue New value
      */
     public void put(PSObject index, PSObject newValue) throws PSErrorRangeCheck,
-            PSErrorTypeCheck, PSErrorInvalidAccess {
+            PSErrorTypeCheck {
         int idx = index.toInt();
         if ( (idx < 0) || (idx >= count) ) {
             throw new PSErrorRangeCheck();
@@ -500,8 +495,7 @@ public class PSObjectString extends PSObject {
      * @param index Start index of subsequence
      * @param newStr String to put in this string
      */
-    public void putinterval(int index, String newStr) throws PSErrorRangeCheck,
-            PSErrorInvalidAccess {
+    public void putinterval(int index, String newStr) throws PSErrorRangeCheck {
         if ((index < 0) || (newStr.length() > (count-index))) {
             throw new PSErrorRangeCheck();
         }
@@ -513,8 +507,7 @@ public class PSObjectString extends PSObject {
      * @param index Start index of subsequence
      * @param obj Subsequence
      */
-    public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck, PSErrorRangeCheck,
-            PSErrorInvalidAccess {
+    public void putinterval(int index, PSObject obj) throws PSErrorTypeCheck, PSErrorRangeCheck {
         String str = obj.toPSString().toString();
         putinterval(index, str);
     }
@@ -534,7 +527,7 @@ public class PSObjectString extends PSObject {
     /**
      * PostScript operator: 'readonly'
      */
-    public void readonly() throws PSErrorInvalidAccess {
+    public void readonly() {
         access = ACCESS_READONLY;
     }
     
@@ -545,7 +538,7 @@ public class PSObjectString extends PSObject {
      *         If found, list with {post, match, pre, true}.
      *         If not found, list with {string, false}.
      */
-    public List<PSObject> search(String seek) throws PSErrorInvalidAccess {
+    public List<PSObject> search(String seek) {
         String string = toString();
         int n = string.length();
         int m = seek.length();
@@ -578,7 +571,7 @@ public class PSObjectString extends PSObject {
     }
 
     /** Convert this object to dictionary key, if possible. */
-    public String toDictKey() throws PSErrorInvalidAccess {
+    public String toDictKey() {
         return toString();
     }
     

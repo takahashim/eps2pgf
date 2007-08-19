@@ -137,12 +137,11 @@ public class GraphicsState implements Cloneable {
      * @param r Radius of circle
      * @param angle1 Angle in degrees of starting point
      * @param angle2 Angle in degrees of end point
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No access to a required object
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck A value is out of range
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck An object has an incorrect type
      */
     public void arc(double x, double y, double r, double angle1, double angle2, boolean isPositive)
-            throws PSErrorInvalidAccess, PSErrorRangeCheck, PSErrorTypeCheck {
+            throws PSErrorRangeCheck, PSErrorTypeCheck {
         double mult = 1;
         if (!isPositive) {
             mult = -1;
@@ -375,8 +374,7 @@ public class GraphicsState implements Cloneable {
      * @param y3 Y-coordinate of end point
      */
     public void curveto(double x1, double y1, double x2, double y2, 
-            double x3, double y3) throws PSErrorInvalidAccess, PSErrorRangeCheck,
-            PSErrorTypeCheck {
+            double x3, double y3) throws PSErrorRangeCheck, PSErrorTypeCheck {
         position[0] = x3;
         position[1] = y3;
         double[] coor1 = CTM.transform(x1, y1);
@@ -431,8 +429,7 @@ public class GraphicsState implements Cloneable {
      * @param x X-coordinate (before CTM is applied)
      * @param y Y-coordinate (before CTM is applied)
      */
-    public void lineto(double x, double y) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public void lineto(double x, double y) throws PSErrorRangeCheck, PSErrorTypeCheck {
         position[0] = x;
         position[1] = y;
         double[] transformed = CTM.transform(x, y);
@@ -444,8 +441,7 @@ public class GraphicsState implements Cloneable {
      * @param x X-coordinate (before CTM is applied)
      * @param y Y-coordinate (before CTM is applied)
      */
-    public void moveto(double x, double y) throws PSErrorInvalidAccess,
-            PSErrorRangeCheck, PSErrorTypeCheck {
+    public void moveto(double x, double y) throws PSErrorRangeCheck, PSErrorTypeCheck {
         position[0] = x;
         position[1] = y;
         double[] transformed = CTM.transform(x, y);
@@ -484,8 +480,7 @@ public class GraphicsState implements Cloneable {
      * @param dy3 Y-coordinate of end point
      */
     public void rcurveto(double dx1, double dy1, double dx2, double dy2, 
-            double dx3, double dy3) throws PSErrorInvalidAccess, PSErrorRangeCheck,
-            PSErrorTypeCheck {
+            double dx3, double dy3) throws PSErrorRangeCheck, PSErrorTypeCheck {
         double[] coor1 = CTM.transform(position[0] + dx1, position[1] + dy1);
         double[] coor2 = CTM.transform(position[0] + dx2, position[1] + dy2);
         double[] coor3 = CTM.transform(position[0] + dx3, position[1] + dy3);
@@ -499,8 +494,7 @@ public class GraphicsState implements Cloneable {
      * @param dx delta X-coordinate (before CTM is applied)
      * @param dy delta Y-coordinate (before CTM is applied)
      */
-    public void rlineto(double dx, double dy) throws PSErrorNoCurrentPoint,
-            PSErrorInvalidAccess, PSErrorRangeCheck, PSErrorTypeCheck {
+    public void rlineto(double dx, double dy) throws PSError {
         if (position[0] == Double.NaN) {
             throw new PSErrorNoCurrentPoint();
         }
@@ -515,8 +509,7 @@ public class GraphicsState implements Cloneable {
      * @param dx delta X-coordinate (before CTM is applied)
      * @param dy delta Y-coordinate (before CTM is applied)
      */
-    public void rmoveto(double dx, double dy) throws PSErrorNoCurrentPoint,
-            PSErrorInvalidAccess, PSErrorRangeCheck, PSErrorTypeCheck {
+    public void rmoveto(double dx, double dy) throws PSError {
         if (position[0] == Double.NaN) {
             throw new PSErrorNoCurrentPoint();
         }
@@ -579,8 +572,7 @@ public class GraphicsState implements Cloneable {
      * of the current path and transforming it back to user space
      * coordinates. This is usually done after the CTM has been altered.
      */
-    public void updatePosition() throws PSErrorInvalidAccess, PSErrorRangeCheck,
-            PSErrorTypeCheck {
+    public void updatePosition() throws PSErrorRangeCheck, PSErrorTypeCheck {
         try {
             double[] posd = getCurrentPosInDeviceSpace();
             position = CTM.itransform(posd);

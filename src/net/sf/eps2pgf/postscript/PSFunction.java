@@ -46,8 +46,7 @@ public class PSFunction {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck A dictionary field has an invalid type
      * @return New PostScript function
      */
-    public static PSFunction newFunction(PSObjectDict dict) throws PSErrorUndefined,
-            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorTypeCheck, PSErrorInvalidAccess {
+    public static PSFunction newFunction(PSObjectDict dict) throws PSError {
         PSObject typeObj = dict.lookup("FunctionType");
         if (typeObj == null) {
             throw new PSErrorRangeCheck();
@@ -75,8 +74,7 @@ public class PSFunction {
      * Load entries common to all PostScript functions
      * @param dict PostScript dictionary describing the function
      */
-    void loadCommonEntries(PSObjectDict dict) throws PSErrorUndefined, 
-            PSErrorTypeCheck, PSErrorInvalidAccess {
+    void loadCommonEntries(PSObjectDict dict) throws PSErrorUndefined, PSErrorTypeCheck {
         // Load domain field
         domain = dict.get("Domain").toArray().toDoubleArray();
         m = (int)Math.floor(domain.length/2);

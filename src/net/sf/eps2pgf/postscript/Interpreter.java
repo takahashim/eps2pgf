@@ -261,8 +261,9 @@ public class Interpreter {
     }
     
     /** PostScript op: aload */
-    public void op_aload() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    public void op_aload() throws PSError {
         PSObject array = opStack.pop();
+        array.checkAccess(false, true, false);
         for (PSObject obj : array.toArray()) {
             opStack.push(obj);
         }
@@ -270,10 +271,13 @@ public class Interpreter {
     }
     
     /** PostScript op: anchorsearch */
-    public void op_anchorsearch() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
-        String seek = opStack.pop().toPSString().toString();
+    public void op_anchorsearch() throws PSError {
+        PSObjectString seekObj = opStack.pop().toPSString();
+        seekObj.checkAccess(false, true, false);
         PSObjectString string = opStack.pop().toPSString();
+        seekObj.checkAccess(false, true, false);
+        
+        String seek = seekObj.toString();
         List<PSObject> result = string.anchorsearch(seek);
         while (!result.isEmpty()) {
             opStack.push(result.remove(0));
@@ -288,8 +292,7 @@ public class Interpreter {
     }
     
     /** PostScript op: arc */
-    public void op_arc() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess, PSErrorRangeCheck {
+    public void op_arc() throws PSError {
         double angle2 = opStack.pop().toReal();
         double angle1 = opStack.pop().toReal();
         double r = opStack.pop().toReal();
@@ -299,8 +302,7 @@ public class Interpreter {
     }
     
     /** PostScript op: arcn */
-    public void op_arcn() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess, PSErrorRangeCheck {
+    public void op_arcn() throws PSError {
         double angle2 = opStack.pop().toReal();
         double angle1 = opStack.pop().toReal();
         double r = opStack.pop().toNonNegReal();
@@ -351,6 +353,7 @@ public class Interpreter {
     public void op_ashow() throws PSError, IOException {
         log.fine("ashow operator encoutered. ashow is not implemented, instead the normal show is used.");
         PSObjectString string = opStack.pop().toPSString();
+        string.checkAccess(false, true, false);
         double ay = opStack.pop().toReal();
         double ax = opStack.pop().toReal();
         opStack.push(string);
@@ -359,9 +362,9 @@ public class Interpreter {
     
     
     /** PostScript op: astore */
-    public void op_astore() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_astore() throws PSError {
         PSObjectArray array = opStack.pop().toArray();
+        array.checkAccess(false, true, true);
         int n = array.size();
         try {
             for (int i = (n-1) ; i >= 0 ; i--) {
@@ -385,8 +388,9 @@ public class Interpreter {
     }
     
     /** PostScript op: begin */
-    public void op_begin() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    public void op_begin() throws PSError {
         PSObjectDict dict = opStack.pop().toDict();
+        dict.checkAccess(true, true, false);
         dictStack.pushDict(dict);
     }
     
@@ -457,8 +461,7 @@ public class Interpreter {
     }
     
     /** PostScript op: closepath */
-    public void op_closepath() throws PSErrorInvalidAccess, PSErrorRangeCheck,
-            PSErrorTypeCheck {
+    public void op_closepath() throws PSErrorRangeCheck, PSErrorTypeCheck {
         double[] startPos = gstate.current.path.closepath();
         if (startPos != null) {
             gstate.current.moveto(startPos[0], startPos[1]);
@@ -473,8 +476,7 @@ public class Interpreter {
     }
     
     /** PostScript op: concantmatrix */
-    public void op_concatmatrix() throws PSErrorStackUnderflow, PSErrorRangeCheck,
-            PSErrorTypeCheck, PSErrorInvalidAccess {
+    public void op_concatmatrix() throws PSError {
         PSObjectMatrix matrix3 = opStack.pop().toMatrix();
         PSObjectMatrix matrix2 = opStack.pop().toMatrix();
         PSObjectMatrix matrix1 = opStack.pop().toMatrix();
@@ -496,6 +498,8 @@ public class Interpreter {
             }
         } else {
             PSObject obj1 = opStack.pop();
+            obj.checkAccess(false, false, true);
+            obj1.checkAccess(false, true, false);
             PSObject subseq = obj.copy(obj1);
             opStack.push(subseq);
         }
@@ -605,8 +609,7 @@ public class Interpreter {
     }
     
     /** PostScript op: currentpoint */
-    public void op_currentpoint() throws PSErrorNoCurrentPoint, PSErrorTypeCheck,
-            PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void op_currentpoint() throws PSError {
         double[] currentDevice = gstate.current.getCurrentPosInDeviceSpace();
         double[] currentUser = gstate.current.CTM.itransform(currentDevice);
         opStack.push(new PSObjectReal(currentUser[0]));
@@ -644,8 +647,7 @@ public class Interpreter {
     }
     
     /** PostScript op: curveto */
-    public void op_curveto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess, PSErrorRangeCheck {
+    public void op_curveto() throws PSError {
         double y3 = opStack.pop().toReal();
         double x3 = opStack.pop().toReal();
         double y2 = opStack.pop().toReal();
@@ -656,9 +658,9 @@ public class Interpreter {
     }
     
     /** PostScrip op: cvi */
-    public void op_cvi() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_cvi() throws PSError {
         PSObject obj = opStack.pop();
+        obj.checkAccess(false, true, false);
         opStack.push(new PSObjectInt(obj.cvi()));
     }
     
@@ -669,33 +671,34 @@ public class Interpreter {
     }
     
     /** PostScript op: cvn */
-    public void op_cvn() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_cvn() throws PSError {
         PSObjectString str = opStack.pop().toPSString();
+        str.checkAccess(false, true, false);
         opStack.push(str.cvn());
     }
     
     /** PostScript op: cvr */
-    public void op_cvr() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_cvr() throws PSError {
         PSObject any = opStack.pop();
+        any.checkAccess(false, true, false);
         opStack.push(new PSObjectReal(any.cvr()));
     }
     
     /** PostScript op: cvrs */
-    public void op_cvrs() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorRangeCheck {
+    public void op_cvrs() throws PSError {
         PSObjectString string = opStack.pop().toPSString();
+        string.checkAccess(false, false, true);
         int radix = opStack.pop().toInt();
         PSObject num = opStack.pop();
         opStack.push(new PSObjectString(num.cvrs(radix)));
     }
     
     /** PostScript op: cvs */
-    public void op_cvs() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void op_cvs() throws PSError {
         PSObjectString string = opStack.pop().toPSString();
         PSObject any = opStack.pop();
+        string.checkAccess(false, false, true);
+        any.checkAccess(false, true, false);
         string.overwrite(any.cvs());
         opStack.push(string);
     }
@@ -740,12 +743,12 @@ public class Interpreter {
     public void op_def() throws PSError {
         PSObject value = opStack.pop();
         PSObject key = opStack.pop();
+        dictStack.checkAccess(false, false, true);
         dictStack.def(key, value);
     }
     
     /** PostScript op: defaultmatrix */
-    public void op_defaultmatrix() throws PSErrorStackUnderflow,
-            PSErrorRangeCheck, PSErrorTypeCheck, PSErrorInvalidAccess {
+    public void op_defaultmatrix() throws PSError {
         PSObjectMatrix matrix = opStack.pop().toMatrix();
         matrix.copy(gstate.current.device.defaultCTM());
         opStack.push(matrix);
@@ -766,9 +769,9 @@ public class Interpreter {
     }
     
     /** PostScript op: dictstack */
-    public void op_dictstack() throws PSErrorStackUnderflow,
-            PSErrorTypeCheck, PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void op_dictstack() throws PSError {
         PSObjectArray array = opStack.pop().toArray();
+        array.checkAccess(false, false, true);
         opStack.push(dictStack.dictstack(array));
     }
     
@@ -780,8 +783,7 @@ public class Interpreter {
     }
     
     /** PostScript op: dtransform */
-    public void op_dtransform() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void op_dtransform() throws PSError {
         PSObject obj = opStack.pop();
         PSObjectMatrix matrix = null;
         try {
@@ -810,6 +812,7 @@ public class Interpreter {
     /** PostScript op: eexec */
     public void op_eexec() throws PSError, Exception {
         PSObject obj = opStack.pop();
+        obj.checkAccess(true, false, false);
         
         Reader rawReader;
         if (obj instanceof PSObjectFile) {
@@ -862,9 +865,11 @@ public class Interpreter {
     }
     
     /** PostScript op: eq */
-    public void op_eq() throws PSErrorTypeCheck, PSErrorStackUnderflow, PSErrorInvalidAccess {
+    public void op_eq() throws PSError {
         PSObject any2 = opStack.pop();
+        any2.checkAccess(false, true, false);
         PSObject any1 = opStack.pop();
+        any1.checkAccess(false, true, false);
         opStack.push(new PSObjectBool(any1.eq(any2)));
     }
     
@@ -885,13 +890,13 @@ public class Interpreter {
     /** PostScript op: execstack */
     public void op_execstack() throws PSError {
         PSObjectArray array = opStack.pop().toArray();
+        array.checkAccess(false, false, true);
         PSObject subArray = array.copy(execStack.stack);
         opStack.push(subArray);
     }
     
     /** PostScript op: executeonly */
-    public void op_executeonly() throws PSErrorStackUnderflow,
-            PSErrorTypeCheck, PSErrorInvalidAccess {
+    public void op_executeonly() throws PSError {
         PSObject obj = opStack.pop();
         obj.checkAccess(true, false, false);
         obj.executeonly();
@@ -991,7 +996,10 @@ public class Interpreter {
     /** PostScript op: forall */
     public void op_forall() throws Exception {
         PSObjectArray proc = opStack.pop().toProc();
+        proc.checkAccess(true, false, false);
         PSObject obj = opStack.pop();
+        obj.checkAccess(false, true, false);
+        
         List<PSObject> items = obj.getItemList();
         int N = items.remove(0).toNonNegInt();
         try {
@@ -1007,20 +1015,23 @@ public class Interpreter {
     }
     
     /** PostScript op: ge */
-    public void op_ge() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_ge() throws PSError {
         PSObject obj2 = opStack.pop();
+        obj2.checkAccess(false, true, false);
         PSObject obj1 = opStack.pop();
+        obj1.checkAccess(false, true, false);
+        
         boolean gt = obj1.gt(obj2);
         boolean eq = obj1.eq(obj2);
         opStack.push(new PSObjectBool(gt || eq));
     }
     
     /** PostScript op: get */
-    public void op_get() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorUndefined, PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void op_get() throws PSError {
         PSObject indexKey = opStack.pop();
         PSObject obj = opStack.pop();
+        obj.checkAccess(false, true, false);
+        
         opStack.push(obj.get(indexKey));
     }
     
@@ -1029,6 +1040,8 @@ public class Interpreter {
         int count = opStack.pop().toNonNegInt();
         int index = opStack.pop().toNonNegInt();
         PSObject obj = opStack.pop();
+        obj.checkAccess(false, true, false);
+        
         opStack.push(obj.getinterval(index, count));
     }
     
@@ -1045,17 +1058,18 @@ public class Interpreter {
     }
     
     /** PostScript op: gt */
-    public void op_gt() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_gt() throws PSError {
         PSObject obj2 = opStack.pop();
+        obj2.checkAccess(false, true, false);
         PSObject obj1 = opStack.pop();
+        obj1.checkAccess(false, true, false);
+        
         boolean chk = obj1.gt(obj2);
         opStack.push(new PSObjectBool(chk));
     }
     
     /** PostScript op: identmatrix */
-    public void op_identmatrix() throws PSErrorStackUnderflow, PSErrorRangeCheck,
-            PSErrorTypeCheck, PSErrorInvalidAccess {
+    public void op_identmatrix() throws PSError {
         PSObjectMatrix matrix = opStack.pop().toMatrix();
         matrix.copy(new PSObjectMatrix());
         opStack.push(matrix);
@@ -1070,8 +1084,7 @@ public class Interpreter {
     }
     
     /** PostScript op: idtransform */
-    public void op_idtransform() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void op_idtransform() throws PSError {
         PSObject obj = opStack.pop();
         PSObjectMatrix matrix = null;
         try {
@@ -1128,8 +1141,7 @@ public class Interpreter {
     }
     
     /** PostScript op: invertmatrix */
-    public void op_invertmatrix() throws PSErrorStackUnderflow, PSErrorRangeCheck,
-            PSErrorInvalidAccess, PSErrorTypeCheck, PSErrorUndefinedResult {
+    public void op_invertmatrix() throws PSError {
         PSObjectMatrix matrix2 = opStack.pop().toMatrix();
         PSObjectMatrix matrix1 = opStack.pop().toMatrix();
         matrix2.copy(matrix1);
@@ -1155,8 +1167,7 @@ public class Interpreter {
     }
     
     /** PostScript op: itransform */
-    public void op_itransform() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
-            PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void op_itransform() throws PSError {
         PSObject obj = opStack.pop();
         PSObjectMatrix matrix = null;
         try {
@@ -1182,31 +1193,22 @@ public class Interpreter {
     public void op_known() throws PSError {
         PSObject key = opStack.pop();
         PSObjectDict dict = opStack.pop().toDict();
+        dict.checkAccess(false, true, false);
+        
         opStack.push(new PSObjectBool(dict.known(key)));
     }
     
-    /** PostScript op: load */
-    public void op_load() throws PSError {
-        String key = opStack.pop().toDictKey();
-        PSObject value = dictStack.lookup(key);
-        if (value == null) {
-            opStack.push(new PSObjectName("/"+key));
-            throw new PSErrorUndefined();
-        }
-        opStack.push(value);
-    }
-    
     /** PostScript op: le */
-    public void op_le() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_le() throws PSError {
         op_gt();
         op_not();
     }
     
     /** PostScript op: length */
-    public void op_length() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_length() throws PSError {
         PSObject obj = opStack.pop();
+        obj.checkAccess(false, true, false);
+        
         opStack.push(new PSObjectInt(obj.length()));
     }
     
@@ -1222,6 +1224,20 @@ public class Interpreter {
         double num = opStack.pop().toReal();
         double result = Math.log(num);
         opStack.push(new PSObjectReal(result));
+    }
+    
+    /** PostScript op: load */
+    public void op_load() throws PSError {
+        String key = opStack.pop().toDictKey();
+        PSObjectDict definedInDict = dictStack.where(key);
+        definedInDict.checkAccess(false, true, false);
+        
+        PSObject value = dictStack.lookup(key);
+        if (value == null) {
+            opStack.push(new PSObjectName("/"+key));
+            throw new PSErrorUndefined();
+        }
+        opStack.push(value);
     }
     
     /** PostScript op: log */
@@ -1247,15 +1263,13 @@ public class Interpreter {
     }
     
     /** PostScript op: lt */
-    public void op_lt() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_lt() throws PSError {
         op_ge();
         op_not();
     }
     
     /** PostScript op: makefont */
-    public void op_makefont() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
-            PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void op_makefont() throws PSError {
         PSObjectMatrix matrix = opStack.pop().toMatrix();
         PSObjectDict font = opStack.pop().toDict();
         font = font.clone();
@@ -1285,9 +1299,10 @@ public class Interpreter {
     }
     
     /** PostScript op: maxlength */
-    public void op_maxlength() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_maxlength() throws PSError {
         PSObjectDict dict = opStack.pop().toDict();
+        dict.checkAccess(false, true, false);
+        
         opStack.push(new PSObjectInt(dict.maxlength()));
     }
     
@@ -1332,8 +1347,7 @@ public class Interpreter {
     }
     
     /** PostScript op: noaccess */
-    public void op_noaccess() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_noaccess() throws PSError {
         PSObject obj = opStack.pop();
         if (obj instanceof PSObjectDict) {
             obj.checkAccess(false, false, true);
@@ -1376,8 +1390,7 @@ public class Interpreter {
     }
     
     /** PostScript op: pathforall */
-    public void op_pathforall() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess, PSErrorRangeCheck, Exception {
+    public void op_pathforall() throws PSError, Exception {
         PSObjectArray close = opStack.pop().toProc();
         PSObjectArray curve = opStack.pop().toProc();
         PSObjectArray line = opStack.pop().toProc();
@@ -1437,15 +1450,19 @@ public class Interpreter {
         PSObject any = opStack.pop();
         PSObject indexKey = opStack.pop();
         PSObject obj = opStack.pop();
+        obj.checkAccess(false, false, true);
+        
         obj.put(indexKey, any);
     }
     
     /** PostScript op: putinterval */
-    public void op_putinterval() throws PSErrorRangeCheck,
-            PSErrorStackUnderflow, PSErrorTypeCheck, PSErrorInvalidAccess {
+    public void op_putinterval() throws PSError {
         PSObject subseq = opStack.pop();
+        subseq.checkAccess(false, true, false);
         int index = opStack.pop().toNonNegInt();
         PSObject seq = opStack.pop();
+        seq.checkAccess(false, false, true);
+        
         seq.putinterval(index, subseq);
     }
     
@@ -1458,7 +1475,7 @@ public class Interpreter {
     
     /** PostScript op: rcurveto */
     public void op_rcurveto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess, PSErrorRangeCheck {
+            PSErrorRangeCheck {
         double dy3 = opStack.pop().toReal();
         double dx3 = opStack.pop().toReal();
         double dy2 = opStack.pop().toReal();
@@ -1474,8 +1491,7 @@ public class Interpreter {
     }
     
     /** PostScript op: readonly */
-    public void op_readonly() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_readonly() throws PSError {
         PSObject obj = opStack.pop();
         obj.checkAccess(false, true, false);
         obj.readonly();
@@ -1557,16 +1573,14 @@ public class Interpreter {
     }    
     
     /** PostScript op: rmoveto */
-    public void op_rlineto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorNoCurrentPoint, PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void op_rlineto() throws PSError {
         double dy = opStack.pop().toReal();
         double dx = opStack.pop().toReal();
         gstate.current.rlineto(dx, dy);
     }    
 
     /** PostScript op: rmoveto */
-    public void op_rmoveto() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorNoCurrentPoint, PSErrorInvalidAccess, PSErrorRangeCheck {
+    public void op_rmoveto() throws PSError {
         double dy = opStack.pop().toReal();
         double dx = opStack.pop().toReal();
         gstate.current.rmoveto(dx, dy);
@@ -1651,8 +1665,7 @@ public class Interpreter {
     }
     
     /** PostScript operator: scalefont */
-    public void op_scalefont() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_scalefont() throws PSError {
         double scale = opStack.pop().toReal();
         
         // "font scale scalefont" is equivalent to 
@@ -1678,10 +1691,13 @@ public class Interpreter {
     }
     
     /** PostScript op: search */
-    public void op_search() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
-        String seek = opStack.pop().toPSString().toString();
+    public void op_search() throws PSError {
+        PSObjectString seekObj = opStack.pop().toPSString();
+        seekObj.checkAccess(false, true, false);
         PSObjectString string = opStack.pop().toPSString();
+        string.checkAccess(false, true, false);
+        
+        String seek = seekObj.toString();
         List<PSObject> result = string.search(seek);
         while (!result.isEmpty()) {
             opStack.push(result.remove(0));
@@ -1809,9 +1825,7 @@ public class Interpreter {
     }
    
     /** PostScript op: shfill */
-    public void op_shfill() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
-            PSErrorUnimplemented, PSErrorRangeCheck, PSErrorUndefined, IOException,
-            PSErrorInvalidAccess {
+    public void op_shfill() throws PSError, IOException {
         PSObjectDict dict = opStack.pop().toDict();
         gstate.current.device.shfill(dict, gstate.current);
     }
@@ -1880,11 +1894,10 @@ public class Interpreter {
     }
    
     /** PostScript op: stringwidth */
-    public void op_stringwidth() throws PSErrorTypeCheck, PSErrorStackUnderflow,
-            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorUndefined, 
-            PSErrorNoCurrentPoint, PSErrorInvalidAccess, IOException {
-        
+    public void op_stringwidth() throws PSError, IOException {
         PSObjectString string = opStack.pop().toPSString();
+        string.checkAccess(false, true, false);
+        
         double[] dpos = textHandler.showText(gstate.current.device, string, true);
         opStack.push(new PSObjectReal(dpos[0]));
         opStack.push(new PSObjectReal(dpos[1]));
@@ -1919,6 +1932,12 @@ public class Interpreter {
     public void op_store() throws PSError {
         PSObject value = opStack.pop();
         PSObject key = opStack.pop();
+        
+        PSObject dictWithKey = dictStack.where(key);
+        if (dictWithKey != null) {
+            dictStack.where(key).checkAccess(false, false, true);
+        }
+        
         dictStack.store(key, value);
     }
 
@@ -1932,6 +1951,8 @@ public class Interpreter {
     /** PostScript op: token */
     public void op_token() throws PSError {
         PSObject obj = opStack.pop();
+        obj.checkAccess(false, true, false);
+        
         if ( !(obj instanceof PSObjectString) && !(obj instanceof PSObjectFile) ) {
             throw new PSErrorTypeCheck();
         }
@@ -1941,8 +1962,7 @@ public class Interpreter {
     }
     
     /** PostScript op: transform */
-    public void op_transform() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorRangeCheck, PSErrorInvalidAccess {
+    public void op_transform() throws PSError {
         PSObject obj = opStack.pop();
         PSObjectMatrix matrix = null;
         try {
@@ -1999,10 +2019,11 @@ public class Interpreter {
     }
     
     /** PostScript op: undef */
-    public void op_undef() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_undef() throws PSError {
         PSObject key = opStack.pop();
         PSObjectDict dict = opStack.pop().toDict();
+        dict.checkAccess(false, false, true);
+        
         dict.undef(key);
     }
     
@@ -2014,8 +2035,7 @@ public class Interpreter {
     }
     
     /** PostScript op: where */
-    public void op_where() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void op_where() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject key = opStack.pop();
         PSObjectDict dict = dictStack.where(key);
         if (dict == null) {

@@ -46,11 +46,20 @@ public class DictStack {
     
     /** Create a new dictionary stack */
     public DictStack(Interpreter interp) {
-        try {
-            fillSystemDict(interp);
-            systemdict.readonly();
-        } catch (PSErrorInvalidAccess e) {
-            // this can never happen since all newly created dictionaries are read-write
+        fillSystemDict(interp);
+        systemdict.readonly();
+    }
+    
+    /**
+     * Check the access attribute of this object. Throws an exception when
+     * not allowed.
+     */
+    public void checkAccess(boolean execute, boolean read, boolean write)
+            throws PSErrorInvalidAccess, PSErrorStackUnderflow {
+        if (dictStack.size() > 0) {
+            dictStack.peek().checkAccess(execute, read, write);
+        } else {
+            userdict.checkAccess(execute, read, write);
         }
     }
     
@@ -64,7 +73,7 @@ public class DictStack {
                 dictStack.pop();
             }
         } catch (PSErrorStackUnderflow e) {
-            // we reached the end of the stacl, it's empty now.
+            // we reached the end of the stack, it's empty now.
         }
     }
     
@@ -77,14 +86,12 @@ public class DictStack {
     }
     
     /** Define key->value in current dictionary. */
-    public void def(PSObject key, PSObject value) throws PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void def(PSObject key, PSObject value) throws PSErrorTypeCheck {
         def(key.toDictKey(), value);
     }
     
     /** Define key->value in current dictionary. */
-    public void def(String key, PSObject value) throws PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public void def(String key, PSObject value) throws PSErrorTypeCheck {
         try {
             PSObjectDict dict = dictStack.peek();
             dict.setKey(key, value);
@@ -100,11 +107,9 @@ public class DictStack {
      * subarray of 'array'.
      * @param array Array to which the dictionaries will be stored
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck <CODE>array</CODE> is too short to store all dictionaries
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No write access to <code>array</code>
      * @return Subarray of <code>array</code> with all dictionaries
      */
-    public PSObjectArray dictstack(PSObjectArray array) throws PSErrorRangeCheck,
-            PSErrorInvalidAccess {
+    public PSObjectArray dictstack(PSObjectArray array) throws PSErrorRangeCheck {
         int n = countdictstack();
         if (n > array.length()) {
             throw new PSErrorRangeCheck();
@@ -129,16 +134,12 @@ public class DictStack {
         System.out.println("  --- userdict");
         userdict.dumpFull("    - ");
         System.out.println("  --- systemdict");
-        try {
-            System.out.println("    - " + systemdict.length() + " key->value pairs.");
-        } catch (PSErrorInvalidAccess e) {
-            System.out.println("    - ?? key->value pairs.");
-        }
+        System.out.println("    - " + systemdict.length() + " key->value pairs.");
         System.out.println("----- End of dictionary stack");
     }
 
     /** Fill the system dictionary */
-    private void fillSystemDict(Interpreter interp) throws PSErrorInvalidAccess {
+    private void fillSystemDict(Interpreter interp) {
         // Add operators
         Method[] mthds = interp.getClass().getMethods();
         HashMap<String, String> replaceNames = new HashMap<String, String>();
@@ -214,7 +215,7 @@ public class DictStack {
     }
     
     /** Search the dictionary that defines a specific key. */
-    public PSObjectDict where(String key) throws PSErrorInvalidAccess {
+    public PSObjectDict where(String key) {
         // First look in the non-permanent dictionaries
         for(int i = dictStack.size()-1 ; i >= 0 ; i--) {
             PSObjectDict dict = dictStack.get(i);
@@ -242,14 +243,13 @@ public class DictStack {
     }
     
     /** Search the dictionary that defines a specific key. */
-    public PSObjectDict where(PSObject key) throws PSErrorTypeCheck,
-            PSErrorInvalidAccess {
+    public PSObjectDict where(PSObject key) throws PSErrorTypeCheck {
         return where(key.toDictKey());
     }
     
     
     /** Lookup a key in the dictionary stack */
-    public PSObject lookup(String key) throws PSErrorInvalidAccess {
+    public PSObject lookup(String key) {
         PSObjectDict dict = where(key);
         if (dict == null) {
             return null;
@@ -261,23 +261,19 @@ public class DictStack {
     
     
     /** Implement PostScript operator: store */
-    public void store(String key, PSObject value) throws PSErrorTypeCheck, PSErrorInvalidAccess {
+    public void store(String key, PSObject value) throws PSErrorTypeCheck {
         PSObjectDict dict = where(key);
         if (dict == null) {
             // Key is currently not defined in any dictionary. So define it in
             // the current dictionary.
             def(key, value);
-        } else if (dict == systemdict) {
-            // If it is defined in the system dictionary, throw an exception.
-            // The user can not alter the system dictionary.
-            throw new PSErrorInvalidAccess();
         } else {
             dict.setKey(key, value);
         }        
     }
     
     /** Implement PostScript operator: store */
-    public void store(PSObject key, PSObject value) throws PSErrorTypeCheck, PSErrorInvalidAccess {
+    public void store(PSObject key, PSObject value) throws PSErrorTypeCheck {
         store(key.toDictKey(), value);
     }
     

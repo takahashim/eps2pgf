@@ -49,8 +49,6 @@ public class PSObjectIterator implements Iterator<PSObject> {
             return (nextIndex < obj.length());
         } catch (PSErrorTypeCheck e) {
             return false;
-        } catch (PSErrorInvalidAccess e) {
-            return false;
         }
     }
     

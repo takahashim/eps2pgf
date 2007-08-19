@@ -99,8 +99,7 @@ public class Path implements Cloneable {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Value out of range
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object of invalid type
      */
-    public double[] closepath() throws PSErrorInvalidAccess, PSErrorRangeCheck,
-            PSErrorTypeCheck {
+    public double[] closepath() throws PSErrorRangeCheck, PSErrorTypeCheck {
         int len = sections.size();
         // If the path is empty closepath does nothing
         if (len == 0) {

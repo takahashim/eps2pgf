@@ -38,8 +38,7 @@ public class ExponentialFunction extends PSFunction {
     double[] C1;
     
     /** Creates a new instance of ExponentialFunction */
-    public ExponentialFunction(PSObjectDict dict) throws PSErrorRangeCheck, 
-            PSErrorTypeCheck, PSErrorUndefined, PSErrorInvalidAccess {
+    public ExponentialFunction(PSObjectDict dict) throws PSError {
         // First, load all entries common to all functions
         loadCommonEntries(dict);
         
