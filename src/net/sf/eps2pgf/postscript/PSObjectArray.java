@@ -534,11 +534,6 @@ public class PSObjectArray extends PSObject {
             list = new ArrayList<PSObject>(3);
             if (N == 1) {
                 list.add(0, new PSObjectArray());
-            } else if (N == 2) {
-                // There is only one element left. Instead of the array with
-                // only one element left, we push the last object itself.
-                // See PostScript manual 3.5.5 for more info.
-                list.add(0, get(1));
             } else {
                 list.add(0, new PSObjectArray(this, 1, N-1));
             }
