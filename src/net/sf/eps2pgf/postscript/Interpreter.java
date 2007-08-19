@@ -27,11 +27,13 @@ import java.util.logging.*;
 
 import org.fontbox.afm.*;
 import org.fontbox.util.BoundingBox;
+import org.freehep.util.io.EEXECDecryption;
 
 import net.sf.eps2pgf.*;
 import net.sf.eps2pgf.util.ArrayStack;
 import net.sf.eps2pgf.output.*;
 import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.util.ReaderInputStream;
 
 /**
  * Interprets a PostScript document and produces output
@@ -805,6 +807,38 @@ public class Interpreter {
         opStack.push(opStack.peek().dup());
     }
     
+    /** PostScript op: eexec */
+    public void op_eexec() throws PSError, Exception {
+        PSObject obj = opStack.pop();
+        
+        Reader rawReader;
+        if (obj instanceof PSObjectFile) {
+            rawReader = ((PSObjectFile)obj).rdr;
+        } else if (obj instanceof PSObjectString) {
+            rawReader = new StringReader(((PSObjectString)obj).toString());
+        } else {
+            throw new PSErrorTypeCheck();
+        }
+        InputStream rawStream = new ReaderInputStream(rawReader);
+        InputStream eexecStream = new EEXECDecryption(rawStream);
+        Reader eexecReader = new BufferedReader(new InputStreamReader(eexecStream));
+        PSObjectFile eexecFile = new PSObjectFile(eexecReader);
+        
+        // Consume all whitespaces at the beginning as the freehep decrypted
+        // doesn't like them.
+        int nextChar;
+        do {
+            rawReader.mark(1);
+            nextChar = rawReader.read();
+        } while (Character.isWhitespace(nextChar));
+        rawReader.reset();
+        
+        opStack.push(dictStack.lookup("systemdict"));
+        op_begin();
+        runObject(eexecFile);
+        op_end();
+    }
+    
     /** PostScript op: end */
     public void op_end() throws PSErrorDictStackUnderflow {
         dictStack.popDict();
@@ -859,6 +893,7 @@ public class Interpreter {
     public void op_executeonly() throws PSErrorStackUnderflow,
             PSErrorTypeCheck, PSErrorInvalidAccess {
         PSObject obj = opStack.pop();
+        obj.checkAccess(true, false, false);
         obj.executeonly();
         opStack.push(obj);
     }
@@ -1300,6 +1335,9 @@ public class Interpreter {
     public void op_noaccess() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorInvalidAccess {
         PSObject obj = opStack.pop();
+        if (obj instanceof PSObjectDict) {
+            obj.checkAccess(false, false, true);
+        }
         obj.noaccess();
         opStack.push(obj);
     }
@@ -1439,6 +1477,7 @@ public class Interpreter {
     public void op_readonly() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorInvalidAccess {
         PSObject obj = opStack.pop();
+        obj.checkAccess(false, true, false);
         obj.readonly();
         opStack.push(obj);
     }

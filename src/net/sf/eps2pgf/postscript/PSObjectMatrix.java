@@ -234,7 +234,6 @@ public class PSObjectMatrix extends PSObjectArray {
      */
     public void invert() throws PSErrorInvalidAccess, PSErrorUndefinedResult,
             PSErrorRangeCheck, PSErrorTypeCheck {
-        checkAccess(false, true, true);
         double a = getReal(0);
         double b = getReal(1);
         double c = getReal(2);
