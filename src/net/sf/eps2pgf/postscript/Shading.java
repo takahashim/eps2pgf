@@ -53,8 +53,7 @@ public class Shading {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented A feature is not (yet) implemented
      * @return New shading object
      */
-    public static Shading newShading(PSObjectDict dict) throws PSErrorRangeCheck, 
-            PSErrorTypeCheck, PSErrorUndefined, PSErrorUnimplemented, PSErrorInvalidAccess {
+    public static Shading newShading(PSObjectDict dict) throws PSError {
         PSObject shadingTypeObj = dict.lookup("ShadingType");
         if (shadingTypeObj == null) {
             throw new PSErrorRangeCheck();
@@ -75,9 +74,7 @@ public class Shading {
     /**
      * Load the entries common to all types of shading dictionaries
      */
-    void loadCommonEntries(PSObjectDict dict) throws PSErrorRangeCheck, 
-            PSErrorUnimplemented, PSErrorTypeCheck, PSErrorUndefined,
-            PSErrorInvalidAccess {
+    void loadCommonEntries(PSObjectDict dict) throws PSError {
         PSObject colSpaceObj = dict.get("ColorSpace");
         if (colSpaceObj instanceof PSObjectName) {
             ColorSpace = ((PSObjectName)colSpaceObj).name;

@@ -80,9 +80,7 @@ public interface OutputDevice {
     /**
      * Shading fill (shfill PostScript operator)
      */
-    public void shfill(PSObjectDict dict, GraphicsState gstate) throws PSErrorTypeCheck, 
-            PSErrorUnimplemented, PSErrorRangeCheck, PSErrorUndefined, IOException,
-            PSErrorInvalidAccess;
+    public void shfill(PSObjectDict dict, GraphicsState gstate) throws PSError, IOException;
 
     /**
      * Implements PostScript stroke operator

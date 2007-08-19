@@ -114,9 +114,6 @@ public class ExecStack {
                 top = null;
             }
             return poppedObj;
-        } catch (PSErrorInvalidAccess e) {
-            // This should never happen. A PostScript program can not change the
-            // access parameters of the stack.
         } catch (PSErrorRangeCheck e) {
             // This can never happen, since the stack size (N) is used.
         }
@@ -128,12 +125,7 @@ public class ExecStack {
      * @param obj Object to push on the stack.
      */
     public void push(PSObject obj) {
-        try {
-            stack.addToEnd(obj);
-        } catch (PSErrorInvalidAccess e) {
-            // This should never happen. A PostScript program can not change the
-            // access parameters of the stack.
-        }
+        stack.addToEnd(obj);
         top = obj;
     }
     

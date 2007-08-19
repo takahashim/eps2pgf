@@ -48,9 +48,7 @@ public class StitchingFunction extends PSFunction {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One of the entries has an invalid type
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented A feature is not (yet) implemented
      */
-    public StitchingFunction(PSObjectDict dict) throws PSErrorRangeCheck, 
-            PSErrorTypeCheck, PSErrorUnimplemented, PSErrorUndefined,
-            PSErrorInvalidAccess {
+    public StitchingFunction(PSObjectDict dict) throws PSError {
         // First, load all common entries
         loadCommonEntries(dict);
         

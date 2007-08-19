@@ -82,11 +82,10 @@ public class Fonts {
      * @return Requested font
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied opject is not the correct type
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont Unable to find the requested font.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No access to a required resource.
      * @throws net.sf.eps2pgf.ProgramError This should never happen. This error indicates a bug in Eps2pgf.
      */
     public PSObjectFont findFont(PSObject fontNameObj) throws PSErrorTypeCheck, 
-            PSErrorInvalidFont, PSErrorInvalidAccess, ProgramError {
+            PSErrorInvalidFont, ProgramError {
         String fontName = fontNameObj.toDictKey();
         return findFont(fontName);
     }
@@ -161,12 +160,11 @@ public class Fonts {
      * @return Defined font
      * @param key Key to associate the font with
      * @param font Font to define
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess No access to a required resource.
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Part of this method is not implemented
      * @throws PSErrorTypeCheck Unable to use the key as dictionary key
      */
     public PSObjectFont defineFont(PSObject key, PSObjectFont font) 
-            throws PSErrorTypeCheck, PSErrorUnimplemented, PSErrorInvalidAccess {
+            throws PSErrorTypeCheck, PSErrorUnimplemented {
         if (font.getFID() >= 0) {
             throw new PSErrorUnimplemented("Associating a font with more than one key.");
         } else {

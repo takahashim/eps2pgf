@@ -196,9 +196,7 @@ public class PGFDevice implements OutputDevice {
     /**
      * Shading fill (shfill PostScript operator)
      */
-    public void shfill(PSObjectDict dict, GraphicsState gstate) throws PSErrorTypeCheck, 
-            PSErrorUnimplemented, PSErrorRangeCheck, PSErrorUndefined, IOException,
-            PSErrorInvalidAccess {
+    public void shfill(PSObjectDict dict, GraphicsState gstate) throws PSError, IOException {
         Shading shading = Shading.newShading(dict);
         if (shading instanceof RadialShading) {
             radialShading((RadialShading)shading, gstate);
@@ -211,7 +209,7 @@ public class PGFDevice implements OutputDevice {
      * Create a radial shading
      */
     void radialShading(RadialShading shading, GraphicsState gstate) throws IOException, 
-            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorInvalidAccess, PSErrorTypeCheck {
+            PSErrorRangeCheck, PSErrorUnimplemented, PSErrorTypeCheck {
         // Convert coordinates and radii from user space to coordinate space
         // PGF does not support the Extend parameters for shadings. So we
         // try to emulate the effect.

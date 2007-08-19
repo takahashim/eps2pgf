@@ -149,11 +149,7 @@ public class PSObjectName extends PSObject {
             return this;
         } else {
             PSObject lookedUp;
-            try {
-                lookedUp = interp.dictStack.lookup(name);
-            } catch (PSErrorInvalidAccess e) {
-                lookedUp = null;
-            }
+            lookedUp = interp.dictStack.lookup(name);
             if ( (lookedUp != null) && (lookedUp instanceof PSObjectOperator) ) {
                 return lookedUp;
             }  else {
