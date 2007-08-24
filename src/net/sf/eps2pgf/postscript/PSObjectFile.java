@@ -80,6 +80,34 @@ public class PSObjectFile extends PSObject {
     }
     
     /**
+     * Reads characters from this file and stores them in the supplied string
+     * until the string is full or the end-of-file is encountered.
+     * @returns (Sub)string of the supplied string with the new characters. If
+     *          this string is shorter than the supplied string that indicates
+     *          that the end-of-file was reached before the string was full.
+     */
+    public PSObjectString readstring(PSObjectString string) throws PSErrorIOError {
+        int n = string.length();
+        int length = n;
+        try {
+            for (int i = 0 ; i < n ; i++) {
+                int chr = rdr.read();
+                if (chr == -1) {
+                    length = i;
+                    break;
+                }
+                string.set(i, (char)chr);
+            }
+            return string.getinterval(0, length);
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen
+        }
+        return null;
+    }
+    
+    /**
      * Returns this object
      * @return File object representation of this object
      */

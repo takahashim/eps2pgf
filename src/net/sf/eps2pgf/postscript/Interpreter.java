@@ -1498,6 +1498,23 @@ public class Interpreter {
         opStack.push(obj);
     }
     
+    /** PostScript op: readstring */
+    public void op_readstring() throws PSError {
+        PSObjectString string = opStack.pop().toPSString();
+        string.checkAccess(false, true, false);
+        if (string.length() == 0) {
+            throw new PSErrorRangeCheck();
+        }
+        PSObjectFile file = opStack.pop().toFile();
+        file.checkAccess(false, false, true);
+        
+        PSObjectString substring = file.readstring(string);
+        boolean bool = (string.length() == substring.length());
+        
+        opStack.push(substring);
+        opStack.push(new PSObjectBool(bool));
+    }
+    
     /** PostScript op: rectclip */
     public void op_rectclip() throws PSError, IOException {
         PSObject heightObj = opStack.pop();

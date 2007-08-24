@@ -561,6 +561,19 @@ public class PSObjectString extends PSObject {
         }
         return result;
     }
+    
+    /**
+     * Changes a single character in this string
+     * @param index Index of the character to be replaced
+     * @param chr 
+     */
+    public void set(int index, char chr) throws PSErrorRangeCheck {
+        if ( (index < 0) || (index >= count) ) {
+            throw new PSErrorRangeCheck();
+        }
+        
+        value.setCharAt(index + offset, chr);
+    }
 
     /**
      * Convert this object to a string object, if possible
