@@ -240,3 +240,5 @@ graphics 27 - currentlinewidth: currentlinewidth 1 eq  2 setlinewidth 0.5 0.5 sc
 output 1 - nulldevice: nulldevice matrix currentmatrix aload pop 0 sub abs 1e-3 lt  6 1 roll 0 sub abs 1e-3 lt  6 1 roll 1 sub abs 1e-3 lt  6 1 roll 0 sub abs 1e-3 lt  6 1 roll 0 sub abs 1e-3 lt  6 1 roll 1 sub abs 1e-3 lt
 
 file 1 - currentfile: currentfile type /filetype eq
+file 2 - readstring 1: currentfile (abc) readstring  123 pop exch ( 12) eq
+file 3 - readstring 2: {currentfile () readstring} stopped
