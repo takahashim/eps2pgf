@@ -52,6 +52,10 @@ public class Converter {
         // Parse input file
         List<PSObject> inputObjects;
         Reader in = new BufferedReader(new FileReader(inFile));
+        int psLength = Preview.processBinaryHeader(in);
+        if (psLength > 0) {
+            in = new LimitedLengthReader(in, psLength);
+        }
         DSCHeader header = new DSCHeader(in);
         
         
