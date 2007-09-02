@@ -207,6 +207,7 @@ public class Interpreter {
      *                 result of executing some other object)
      */
     public void executeObject(PSObject obj, boolean indirect) throws Exception {
+        //System.out.println("-=-=- " + obj.isis());
         if (obj.isLiteral) {
             // Object is literal
             opStack.push(obj);

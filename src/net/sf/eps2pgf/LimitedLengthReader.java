@@ -56,9 +56,10 @@ public class LimitedLengthReader extends Reader {
      * @param rdrIn Reader from which characters will be read.
      * @param maxLength Maximum number of characters to read from the supplied Reader.
      */
-    public LimitedLengthReader(Reader rdrIn, int maxLength) {
+    public LimitedLengthReader(Reader rdrIn, int offset, int maxLength) throws IOException {
         length = maxLength;
         rdr = rdrIn;
+        rdr.skip(offset);
     }
     
     /**

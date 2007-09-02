@@ -34,32 +34,32 @@ public class Preview {
      * For definition of this header see Encapsulated PostScript File Format Specification
      * 
      */
-    public static int processBinaryHeader(Reader rdr) throws IOException {
+    public static int[] processBinaryHeader(File file) throws IOException {
+        RandomAccessFile rFile = new RandomAccessFile(file, "r");
+        
         // Check first fout bytes for standard combination
         int[] bytes = {0xC5, 0xD0, 0xD3, 0xC6};
-        rdr.mark(4);
         for (int i = 0 ; i < 4 ; i++) {
-            if (rdr.read() != bytes[i]) {
-                rdr.reset();
-                return -1;
+            if (rFile.read() != bytes[i]) {
+                rFile.close();
+                return null;
             }
         }
         
         // Read starting position of PostScript code
         for (int i = 0 ; i < 4 ; i++) {
-            bytes[i] = (byte)rdr.read();
+            bytes[i] = rFile.read();
         }
         int startPos = bytes[0] + 256*(bytes[1] + 256*(bytes[2] + 256*bytes[3]));
         
         // Read length of section with PostScript code
         for (int i = 0 ; i < 4 ; i++) {
-            bytes[i] = (byte)rdr.read();
+            bytes[i] = rFile.read();
         }
         int length = bytes[0] + 256*(bytes[1] + 256*(bytes[2] + 256*bytes[3]));
         
-        // Skip to the start of the PostScript code
-        rdr.skip(startPos - 12);
-                
-        return length;
+        rFile.close();
+        int[] dim = {startPos, length};
+        return dim;
     }
 }
