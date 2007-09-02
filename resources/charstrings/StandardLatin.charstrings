@@ -7,19 +7,54 @@
 <entry key="A">A</entry>
 <entry key="AE">{\AE}</entry>
 <entry key="Aacute">\&apos;A</entry>
+<entry key="Abreve">\u{A}</entry>
 <entry key="Acircumflex">\^A</entry>
 <entry key="Adieresis">\&quot;A</entry>
 <entry key="Agrave">\`A</entry>
+<entry key="Amacron">\=A</entry>
+<entry key="Aogonek">\k{A}</entry>
 <entry key="Aring">{\AA}</entry>
+<entry key="Atilde">\~A</entry>
 
 <entry key="B">B</entry>
+
 <entry key="C">C</entry>
+<entry key="Cacute">\'C</entry>
+<entry key="Ccaron">\v{C}</entry>
+<entry key="Ccedilla">\c{C}</entry>
+
 <entry key="D">D</entry>
+<entry key="Dcaron">\v{D}</entry>
+<entry key="Dcroat">{\DJ}</entry>
+<entry key="Delta">$\Delta$</entry>
+
 <entry key="E">E</entry>
+<entry key="Eacute">\'E</entry>
+<entry key="Ecaron">\v{E}</entry>
+<entry key="Ecircumflex">\^E</entry>
+<entry key="Edieresis">\"E</entry>
+<entry key="Edotaccent">\.E</entry>
+<entry key="Egrave">\`E</entry>
+<entry key="Emacron">\=E</entry>
+<entry key="Eogonek">\k{E}</entry>
+<entry key="Eth">{\DH}</entry>
+
 <entry key="F">F</entry>
+
 <entry key="G">G</entry>
+<entry key="Gbreve">\u{G}</entry>
+
 <entry key="H">H</entry>
+
 <entry key="I">I</entry>
+<entry key="Iacute">\'I</entry>
+<entry key="Icircumflex">\^I</entry>
+<entry key="Idieresis">\"I</entry>
+<entry key="Idotaccent">\.I</entry>
+<entry key="Igrave">\`I</entry>
+<entry key="Imacron">\=I</entry>
+<entry key="Iogonek">\k{I}</entry>
+
 <entry key="J">J</entry>
 <entry key="K">K</entry>
 <entry key="L">L</entry>
@@ -79,7 +114,7 @@
 
 <entry key="e">e</entry>
 <entry key="eight">8</entry>
-<entry key="eth">{\eth}</entry>
+<entry key="eth">{\dh}</entry>
 <entry key="equal">=</entry>
 <entry key="exclam">!</entry>
 <entry key="exclamdown">{\textexclamdown}</entry>
