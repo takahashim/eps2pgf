@@ -1,5 +1,5 @@
 ============================================================================
-                              Eps2pgf v0.4.0
+                              Eps2pgf v0.5.0
 ============================================================================
 
 Website: http://sourceforge.net/projects/eps2pgf
@@ -71,6 +71,9 @@ license. The license of each component is distributed along with it.
 ----------------------------------------------------------------------------
 Changelog
 ----------------------------------------------------------------------------
+v0.5.0 (2007-09-??)
+  - Added: handling of binary headers found in some eps files
+
 v0.4.0 (2007-08-04)
   - Changed: Eps2pgf is now distributed under the Apache license
   - Added: lots of PostScript commands
