@@ -49,15 +49,19 @@ public class Converter {
      * @throws java.lang.Exception Something went wrong
      */
     public void convert() throws Exception {
-        // Parse input file
-        List<PSObject> inputObjects;
-        Reader in = new BufferedReader(new FileReader(inFile));
-        int psLength = Preview.processBinaryHeader(in);
-        if (psLength > 0) {
-            in = new LimitedLengthReader(in, psLength);
-        }
-        DSCHeader header = new DSCHeader(in);
+        // Check for a binary header
+        int[] dim = Preview.processBinaryHeader(inFile);
         
+        // Open the file for reading the postscript code
+        Reader in = new BufferedReader(new FileReader(inFile));
+        
+        // If it has a binary header, read only the postscript code and skip binary data
+        if (dim != null) {
+            in = new LimitedLengthReader(in, dim[0], dim[1]);
+        }
+        
+        // Read info from the DSC header
+        DSCHeader header = new DSCHeader(in);
         
         // Open output file
         Writer out = new BufferedWriter(new FileWriter(outFile));
@@ -74,6 +78,7 @@ public class Converter {
             out.close();
             throw e;
         }
+
         in.close();
         out.close();
     }
