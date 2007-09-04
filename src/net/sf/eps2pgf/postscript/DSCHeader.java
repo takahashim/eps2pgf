@@ -21,7 +21,7 @@
 package net.sf.eps2pgf.postscript;
 
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 import java.util.regex.*;
 
 /**
@@ -41,7 +41,7 @@ public class DSCHeader {
      * @param in Read header from this reader
      * @throws java.io.IOException Unable to read from reader
      */
-    public DSCHeader(Reader in) throws IOException {
+    public DSCHeader(InputStream in) throws IOException {
         loadAllDSCComments(in);
     }
     
@@ -49,7 +49,7 @@ public class DSCHeader {
      * Read and interpret all DSC comments from the header
      * @param in Read header from this reader
      */
-    void loadAllDSCComments(Reader in) throws IOException {
+    void loadAllDSCComments(InputStream in) throws IOException {
         String[] comment;
         while ( (comment = readDSCComment(in)) != null ) {
             String fieldname = comment[0].toLowerCase();
@@ -85,7 +85,7 @@ public class DSCHeader {
      * Read the next DSC comment
      * @param in Read comments from this reader
      */
-    String[] readDSCComment(Reader in) throws IOException {
+    String[] readDSCComment(InputStream in) throws IOException {
         Matcher matcher;
                 
         while (true) {
@@ -114,7 +114,7 @@ public class DSCHeader {
      * immediately if the current line 
      * @param in Read comments from this reader
      */
-    String readCommentLine(Reader in) throws IOException {
+    String readCommentLine(InputStream in) throws IOException {
         StringBuffer line = new StringBuffer();
         int nextChar;
         boolean lineEnded = false;

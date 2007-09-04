@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.output;
+package net.sf.eps2pgf.io;
 
 import java.io.*;
 import java.text.*;

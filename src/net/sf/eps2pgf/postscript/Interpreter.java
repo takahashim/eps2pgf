@@ -20,10 +20,18 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.Writer;
+import java.io.FileNotFoundException;
+import java.io.BufferedInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.*;
+import net.sf.eps2pgf.io.NullDevice;
+import net.sf.eps2pgf.io.OutputDevice;
+import net.sf.eps2pgf.io.PGFDevice;
+import net.sf.eps2pgf.io.TextHandler;
 
 import org.fontbox.afm.*;
 import org.fontbox.util.BoundingBox;
@@ -31,7 +39,6 @@ import org.freehep.util.io.EEXECDecryption;
 
 import net.sf.eps2pgf.*;
 import net.sf.eps2pgf.util.ArrayStack;
-import net.sf.eps2pgf.output.*;
 import net.sf.eps2pgf.postscript.errors.*;
 import net.sf.eps2pgf.util.ReaderInputStream;
 
@@ -818,27 +825,26 @@ public class Interpreter {
         PSObject obj = opStack.pop();
         obj.checkAccess(true, false, false);
         
-        Reader rawReader;
+        InputStream rawInStream;
         if (obj instanceof PSObjectFile) {
-            rawReader = ((PSObjectFile)obj).rdr;
+            rawInStream = ((PSObjectFile)obj).inStr;
         } else if (obj instanceof PSObjectString) {
-            rawReader = new StringReader(((PSObjectString)obj).toString());
+            rawInStream = new PSStringInputStream(((PSObjectString)obj));
         } else {
             throw new PSErrorTypeCheck();
         }
-        InputStream rawStream = new ReaderInputStream(rawReader);
-        InputStream eexecStream = new EEXECDecryption(rawStream);
-        Reader eexecReader = new BufferedReader(new InputStreamReader(eexecStream));
-        PSObjectFile eexecFile = new PSObjectFile(eexecReader);
+        InputStream eexecInStream = new EEXECDecryption(rawInStream);
+        InputStream eexecBufInStream = new BufferedInputStream(eexecInStream);
+        PSObjectFile eexecFile = new PSObjectFile(eexecBufInStream);
         
         // Consume all whitespaces at the beginning as the freehep decrypted
         // doesn't like them.
         int nextChar;
         do {
-            rawReader.mark(1);
-            nextChar = rawReader.read();
+            rawInStream.mark(1);
+            nextChar = rawInStream.read();
         } while (Character.isWhitespace(nextChar));
-        rawReader.reset();
+        rawInStream.reset();
         
         opStack.push(dictStack.lookup("systemdict"));
         op_begin();
