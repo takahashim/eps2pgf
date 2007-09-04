@@ -455,7 +455,6 @@ public class PSObjectString extends PSObject {
         if ( (str.length() % 2) != 0 ) {
             str += "0";
         }
-        
         int n = str.length()/2;
         StringBuilder parsedStr = new StringBuilder(n);
         for (int i = 0 ; i < n ; i++) {

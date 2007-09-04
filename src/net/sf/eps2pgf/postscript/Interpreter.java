@@ -44,7 +44,7 @@ public class Interpreter {
     ArrayStack<PSObject> opStack = new ArrayStack<PSObject>();
     
     // Dictionary stack
-    DictStack dictStack = new DictStack(this);
+    DictStack dictStack;
     
     // Execution stack
     public ExecStack execStack = new ExecStack();
@@ -72,6 +72,13 @@ public class Interpreter {
      * @throws java.io.FileNotFoundException Unable to find font resources
      */
     public Interpreter(Writer out, DSCHeader fileHeader) throws FileNotFoundException {
+        // Initialize character encodings and fonts
+        Encoding.initialize();
+        fonts = new Fonts();
+        
+        // Create dictionary stack
+        dictStack = new DictStack(this);
+
         // Create new output device
         OutputDevice output = new PGFDevice(out);
         
@@ -82,10 +89,6 @@ public class Interpreter {
         textHandler = new TextHandler(gstate);
         
         header = fileHeader;
-        
-        // Initialize character encodings
-        Encoding.initialize();
-        fonts = new Fonts();
     }
     
     /**
