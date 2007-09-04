@@ -23,6 +23,7 @@ package net.sf.eps2pgf.postscript;
 import java.io.*;
 import java.util.*;
 
+import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /** PostScript object: array
@@ -89,9 +90,9 @@ public class PSObjectArray extends PSObject {
         
         str = str.substring(1,str.length()-1);
         
-        StringReader strReader = new StringReader(str);
+        InputStream inStream = new PSStringInputStream(new PSObjectString(str));
         
-        array = Parser.convertAll(strReader);
+        array = Parser.convertAll(inStream);
         count = array.size();
         offset = 0;
     }

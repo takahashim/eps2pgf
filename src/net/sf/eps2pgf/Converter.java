@@ -22,6 +22,7 @@ package net.sf.eps2pgf;
 
 import java.io.*;
 import java.util.*;
+import net.sf.eps2pgf.io.LimitedSectionInputStream;
 
 import net.sf.eps2pgf.postscript.*;
 

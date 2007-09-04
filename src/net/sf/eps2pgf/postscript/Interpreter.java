@@ -28,19 +28,17 @@ import java.io.BufferedInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.*;
+
+import org.freehep.util.io.EEXECDecryption;
+
+import net.sf.eps2pgf.*;
+import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.NullDevice;
 import net.sf.eps2pgf.io.OutputDevice;
 import net.sf.eps2pgf.io.PGFDevice;
 import net.sf.eps2pgf.io.TextHandler;
-
-import org.fontbox.afm.*;
-import org.fontbox.util.BoundingBox;
-import org.freehep.util.io.EEXECDecryption;
-
-import net.sf.eps2pgf.*;
 import net.sf.eps2pgf.util.ArrayStack;
 import net.sf.eps2pgf.postscript.errors.*;
-import net.sf.eps2pgf.util.ReaderInputStream;
 
 /**
  * Interprets a PostScript document and produces output
@@ -833,9 +831,8 @@ public class Interpreter {
         } else {
             throw new PSErrorTypeCheck();
         }
-        InputStream eexecInStream = new EEXECDecryption(rawInStream);
-        InputStream eexecBufInStream = new BufferedInputStream(eexecInStream);
-        PSObjectFile eexecFile = new PSObjectFile(eexecBufInStream);
+        InputStream eexecInStream = new BufferedInputStream(new EEXECDecryption(rawInStream));
+        PSObjectFile eexecFile = new PSObjectFile(eexecInStream);
         
         // Consume all whitespaces at the beginning as the freehep decrypted
         // doesn't like them.
