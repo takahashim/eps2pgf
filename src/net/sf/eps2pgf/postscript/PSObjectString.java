@@ -23,6 +23,7 @@ package net.sf.eps2pgf.postscript;
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
+import net.sf.eps2pgf.io.PSStringInputStream;
 
 import org.freehep.util.io.ASCII85InputStream;
 
@@ -603,10 +604,10 @@ public class PSObjectString extends PSObject {
      * 'token' operator for more info.
      */
     public List<PSObject> token() throws PSError {
-        Reader rdr = new StringReader(toString());
+        InputStream inStream = new PSStringInputStream(this);
         PSObject any;
         try {
-            any = Parser.convertSingle(rdr);
+            any = Parser.convertSingle(inStream);
         } catch (IOException e) {
             any = null;
         }
