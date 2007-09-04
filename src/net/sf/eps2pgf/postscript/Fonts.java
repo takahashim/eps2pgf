@@ -32,7 +32,7 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class Fonts {
-    private Map<String, PSObjectFont> fonts = new HashMap<String, PSObjectFont>();
+    PSObjectDict FontDirectory = new PSObjectDict();
     String defaultFont = "Times-Roman";
     
     File resourceDir;
@@ -46,6 +46,9 @@ public class Fonts {
      * @throws java.io.FileNotFoundException Unable to find resource dir
      */
     public Fonts() throws FileNotFoundException {
+        // Make FontDirectory read-only (for the user)
+        FontDirectory.readonly();
+        
         // Try to find the resource dir
         File classPath = new File(System.getProperty("java.class.path"));
         if (!(classPath.isAbsolute())) {
@@ -104,8 +107,15 @@ public class Fonts {
         }
         
         // First we search whether this font has already been loaded
-        if (fonts.containsKey(fontName)) {
-            return fonts.get(fontName);
+        try {
+            PSObject font = FontDirectory.get(fontName);
+            if (!(font instanceof PSObjectFont)) {
+                throw new ProgramError("Non PSObjectFont object found in FontDirectory");
+            }
+            return (PSObjectFont)font;
+        } catch (PSErrorUndefined e) {
+            // The font was not found in the FontDirectory, so we will have to
+            // load it from disk.
         }
         
         // Appartly the font hasn't already been loaded.
@@ -150,7 +160,7 @@ public class Fonts {
         
         // Now the font is loaded, add it to the fonts list so that it
         // doesn't need to loaded again.
-        fonts.put(fontName, font);
+        FontDirectory.setKey(fontName, font);
         
         return font;
     }
@@ -169,7 +179,7 @@ public class Fonts {
             throw new PSErrorUnimplemented("Associating a font with more than one key.");
         } else {
             font.setFID();
-            fonts.put(key.toDictKey(), font);
+            FontDirectory.setKey(key, font);
         }
         return font;
     }
