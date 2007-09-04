@@ -20,7 +20,8 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.IOException;
 import java.util.*;
 
 import net.sf.eps2pgf.postscript.errors.*;
@@ -31,17 +32,16 @@ import net.sf.eps2pgf.postscript.errors.*;
  */
 public class PSObjectFile extends PSObject {
     /**
-     * Reader (should be a file, other readers are possible) from which the
-     * data will be read.
+     * Input stream from which data is read
      */
-    Reader rdr;
+    InputStream inStr;
     
     /**
      * Creates a new instance of PSObjectFile
      * @param fileReader Reader to access the file
      */
-    public PSObjectFile(Reader fileReader) {
-        this.rdr = fileReader;
+    public PSObjectFile(InputStream fileInputStream) {
+        this.inStr = fileInputStream;
         this.isLiteral = false;
     }
     
@@ -51,7 +51,7 @@ public class PSObjectFile extends PSObject {
      * @return Shallow copy of this object.
      */
     public PSObjectFile dup() {
-        PSObjectFile dupFile = new PSObjectFile(rdr);
+        PSObjectFile dupFile = new PSObjectFile(inStr);
         dupFile.copyCommonAttributes(this);
         return dupFile;
     }
@@ -91,7 +91,7 @@ public class PSObjectFile extends PSObject {
         int length = n;
         try {
             for (int i = 0 ; i < n ; i++) {
-                int chr = rdr.read();
+                int chr = inStr.read();
                 if (chr == -1) {
                     length = i;
                     break;
@@ -125,7 +125,7 @@ public class PSObjectFile extends PSObject {
     public List<PSObject> token() throws PSError {
         PSObject any;
         try {
-            any = Parser.convertSingle(rdr);
+            any = Parser.convertSingle(inStr);
         } catch (IOException e) {
             throw new PSErrorIOError();
         }

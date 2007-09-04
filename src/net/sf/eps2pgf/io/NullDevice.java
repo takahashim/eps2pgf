@@ -1,5 +1,5 @@
 /*
- * Exporter.java
+ * NullDevice.java
  *
  * This file is part of Eps2pgf.
  *
@@ -18,118 +18,148 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.output;
+package net.sf.eps2pgf.io;
 
-import java.io.*;
+import java.io.IOException;
 
 import net.sf.eps2pgf.postscript.*;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
- * Interface for exporters (e.g. Pgf and Tikz)
+ * Discards all output written to this device
+ *
  * @author Paul Wagenaars
  */
-public interface OutputDevice {
+public class NullDevice implements OutputDevice {
     
     /**
      * Implements PostScript clip operator
      * Intersects the area inside the current clipping path with the area
      * inside the current path to produce a new, smaller clipping path.
      */
-    public void clip(Path clipPath) throws IOException, PSErrorUnimplemented;
+    public void clip(Path clipPath) {
+        
+    }
     
     /**
      * Retuns a <b>copy</b> default transformation matrix (converts user space
      * coordinates to device space).
      */
-    public PSObjectMatrix defaultCTM();
+    public PSObjectMatrix defaultCTM() {
+        return new PSObjectMatrix(1, 0 ,0, 1, 0, 0);
+    }
     
     /**
      * Initialize before any other methods are called. Normally, this method
      * writes a header.
      */
-    public void init(GraphicsState gstate) throws PSError, IOException;
+    public void init(GraphicsState gstate) {
+        
+    }
     
     /**
      * Finilize writing. Normally, this method writes a footer.
      */
-    public void finish() throws IOException;
+    public void finish() {
+        
+    }
     
     /**
      * Fills a path using the non-zero rule
      * See the PostScript manual (fill operator) for more info.
      */
-    public void fill(Path path) throws IOException, PSErrorUnimplemented;
-
-    /**
-     * Set the current clipping path in the graphics state as clipping path
-     * in the output document. The even-odd rule is used to determine which point
-     * are inside the path.
-     * @param clipPath Path to use for clipping
-     * @throws java.io.IOException Unable to write output
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Encountered an unimplemented path element
-     */
-    public void eoclip(Path clipPath) throws IOException, PSErrorUnimplemented;
+    public void fill(Path path) {
+        
+    }
     
+    public void eoclip(Path clipPath) {
+        
+    }
+
     /**
      * Fills a path using the even-odd rule
      * See the PostScript manual (fill operator) for more info.
      */
-    public void eofill(Path path) throws IOException, PSErrorUnimplemented;
+    public void eofill(Path path) {
+        
+    }
     
     /**
      * Shading fill (shfill PostScript operator)
      */
-    public void shfill(PSObjectDict dict, GraphicsState gstate) throws PSError, IOException;
+    public void shfill(PSObjectDict dict, GraphicsState gstate) {
+        
+    }
 
     /**
      * Implements PostScript stroke operator
      */
-    public void stroke(GraphicsState gstate) throws IOException, PSError;
+    public void stroke(GraphicsState gstate) {
+        
+    }
     
     /**
      * Implements PostScript operator setlinecap
      */
-    public void setlinecap(int cap) throws IOException, PSErrorRangeCheck;
+    public void setlinecap(int cap) {
+        
+    }
     
     /**
      * Implements PostScript operator setlinejoin
      */
-    public void setlinejoin(int join) throws IOException, PSErrorRangeCheck;
+    public void setlinejoin(int join) {
+        
+    }
     
     /**
      * Sets the current color in gray, rgb or cmyk
      */
-    public void setColor(double[] colorLevels) throws IOException;
+    public void setColor(double[] colorLevels) {
+        
+    }
     
     /**
      * Sets the miter limit
      */
-    public void setmiterlimit(double num) throws IOException;
+    public void setmiterlimit(double num) {
+        
+    }
     
     /**
      * Starts a new scope
      */
-    public void startScope() throws IOException;
+    public void startScope() {
+        
+    }
     
     /**
      * Ends the current scope scope
      */
-    public void endScope() throws IOException;
+    public void endScope() {
+        
+    }
     
     /**
      * Draws text
      */
     public void show(String text, double[] position, double angle,
-            double fontsize, String anchor) throws IOException;
+            double fontsize, String anchor) {
+        
+    }
     
     /**
      * Draws a red dot (usefull for debugging, don't use otherwise)
      */
-    public void drawDot(double x, double y) throws IOException;
+    public void drawDot(double x, double y) {
+        
+    }
     
     /**
      * Draws a blue rectangle (usefull for debugging, don't use otherwise)
      */
-    public void drawRect(double[] lowerLeft, double[] upperRight) throws IOException;
+    public void drawRect(double[] lowerLeft, double[] upperRight) {
+        
+    }
+    
 }

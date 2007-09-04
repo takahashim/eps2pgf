@@ -20,7 +20,8 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.IOException;
 import java.util.*;
 
 import net.sf.eps2pgf.postscript.errors.*;
@@ -42,7 +43,7 @@ public class Parser {
      * @return List with PostScript objects
      * @throws java.io.IOException Unable to read from in
      */
-    public static List<PSObject> convertAll(Reader in) throws IOException, PSError {
+    public static List<PSObject> convertAll(InputStream in) throws IOException, PSError {
         List<PSObject> seq = new ArrayList<PSObject>();
         PSObject obj;
         while ( (obj = convertSingle(in)) != null ) {
@@ -57,7 +58,7 @@ public class Parser {
      * @throws java.io.IOException Unable to read from input
      * @return Object read from in reader or 'null' if there were no more objects
      */
-    public static PSObject convertSingle(Reader in) throws IOException, PSError {
+    public static PSObject convertSingle(InputStream in) throws IOException, PSError {
         StringBuilder strSoFar = new StringBuilder();
         boolean inComment = false;
         boolean inString = false;

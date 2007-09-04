@@ -53,11 +53,11 @@ public class Converter {
         int[] dim = Preview.processBinaryHeader(inFile);
         
         // Open the file for reading the postscript code
-        Reader in = new BufferedReader(new FileReader(inFile));
+        InputStream in = new BufferedInputStream(new FileInputStream(inFile));
         
         // If it has a binary header, read only the postscript code and skip binary data
         if (dim != null) {
-            in = new LimitedLengthReader(in, dim[0], dim[1]);
+            in = new LimitedSectionInputStream(in, dim[0], dim[1]);
         }
         
         // Read info from the DSC header

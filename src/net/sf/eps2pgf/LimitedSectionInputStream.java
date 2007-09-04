@@ -20,20 +20,20 @@
 
 package net.sf.eps2pgf;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.InputStream;
 
 /**
  * Sets a maximum to the number of characters to be read from a Reader. Attempts
  * to read more characters results is an EOF.
  * @author Paul Wagenaars
  */
-public class LimitedLengthReader extends Reader {
+public class LimitedSectionInputStream extends InputStream {
     /**
      * Reader from which characters are read
      */
-    private Reader rdr;
+    private InputStream rdr;
     
     /**
      * Maximum number of characters that will be read. EOF is returned if more
@@ -56,7 +56,7 @@ public class LimitedLengthReader extends Reader {
      * @param rdrIn Reader from which characters will be read.
      * @param maxLength Maximum number of characters to read from the supplied Reader.
      */
-    public LimitedLengthReader(Reader rdrIn, int offset, int maxLength) throws IOException {
+    public LimitedSectionInputStream(InputStream rdrIn, int offset, int maxLength) throws IOException {
         length = maxLength;
         rdr = rdrIn;
         rdr.skip(offset);
@@ -81,7 +81,7 @@ public class LimitedLengthReader extends Reader {
      * attempting to reset the stream may fail.
      * @throws java.io.IOException If an I/O error occurs
      */
-    public void mark(int readAheadLimit) throws IOException {
+    public void mark(int readAheadLimit) {
         rdr.mark(readAheadLimit);
         lastMark = charsRead;
     }
@@ -118,7 +118,7 @@ public class LimitedLengthReader extends Reader {
      * @return The number of characters read, or -1 if the end of the stream has
      * been reached
      */
-    public int read(char[] cbuf) throws IOException {
+    public int read(byte[] cbuf) throws IOException {
         int len = Math.min(length-charsRead, cbuf.length);
         int n = rdr.read(cbuf, 0, len);
         if (n > 0) {
@@ -141,7 +141,7 @@ public class LimitedLengthReader extends Reader {
      * @return The number of characters read, or -1 if the end of the stream has
      * been reached
      */
-    public int read(char[] cbuf, int off, int len) throws IOException {
+    public int read(byte[] cbuf, int off, int len) throws IOException {
         int maxLength = Math.min(length-charsRead, len);
         int n = rdr.read(cbuf, 0, maxLength);
         if (n > 0) {
@@ -150,17 +150,6 @@ public class LimitedLengthReader extends Reader {
             n = -1;
         }
         return n;
-    }
-    
-    /**
-     * Tell whether this stream is ready to be read.
-     * @throws java.io.IOException If an I/O error occurs
-     * @return True if the next read() is guaranteed not to block for input,
-     * false otherwise. Note that returning false does not guarantee that
-     * the next read will block.
-     */
-    public boolean ready() throws IOException {
-        return rdr.ready();
     }
     
     /**

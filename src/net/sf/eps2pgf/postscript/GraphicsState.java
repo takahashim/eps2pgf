@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.logging.*;
 import net.sf.eps2pgf.ProgramError;
 
-import net.sf.eps2pgf.output.OutputDevice;
+import net.sf.eps2pgf.io.OutputDevice;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
