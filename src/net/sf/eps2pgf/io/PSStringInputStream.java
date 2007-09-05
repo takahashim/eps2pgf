@@ -41,6 +41,8 @@ public class PSStringInputStream extends InputStream {
      */
     private int ptr;
     
+    private int lastMark;
+    
     /**
      * Creates a new instance of PSStringInputStream
      * @param psString PostScript string from which the character will be read
@@ -48,6 +50,28 @@ public class PSStringInputStream extends InputStream {
     public PSStringInputStream(PSObjectString psString) {
         string = psString;
         ptr = 0;
+        lastMark = -1;
+    }
+    
+    /**
+     * Marks the current position in this input stream. A subsequent call to
+     * the reset method repositions this stream at the last marked position so
+     * that subsequent reads re-read the same bytes.
+     * @param readlimit This parameter has no meaning for PSStringInputStream
+     */
+    public void mark(int readlimit) {
+        lastMark = ptr;
+    }
+    
+    /**
+     * Tests if this input stream supports the mark and reset methods. Whether
+     * or not mark and reset are supported is an invariant property of a
+     * particular input stream instance. The markSupported method of
+     * this object returns <code>false</code>.
+     * @return Always returns <code>true</code>
+     */
+    public boolean markSupported() {
+        return true;
     }
     
     /**
@@ -66,5 +90,17 @@ public class PSStringInputStream extends InputStream {
         } catch (PSErrorRangeCheck e) {
             return -1;
         }
+    }
+    
+    /**
+     * Repositions this stream to the position at the time the mark method was
+     * last called on this input stream.
+     * @throws java.io.IOException When this stream has not yet been <code>mark</code>ed.
+     */
+    public void reset() throws IOException {
+        if (lastMark < 0) {
+            throw new IOException();
+        }
+        ptr = lastMark;
     }
 }
