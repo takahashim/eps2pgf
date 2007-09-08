@@ -23,12 +23,15 @@ package net.sf.eps2pgf.postscript;
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
-import net.sf.eps2pgf.io.PSStringInputStream;
+import net.sf.eps2pgf.postscript.filters.HexDecode;
+
 
 import org.freehep.util.io.ASCII85InputStream;
 
 import net.sf.eps2pgf.util.*;
 import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.io.PSStringInputStream;
+import net.sf.eps2pgf.io.StringInputStream;
 
 /**
  * String PostScript object.
@@ -452,20 +455,19 @@ public class PSObjectString extends PSObject {
      * @return Decoded string
      */
     public String parseHex(String str) throws PSErrorIOError {
-        str = str.replaceAll("\\s+", "");
-        if ( (str.length() % 2) != 0 ) {
-            str += "0";
-        }
-        int n = str.length()/2;
-        StringBuilder parsedStr = new StringBuilder(n);
-        for (int i = 0 ; i < n ; i++) {
-            String currChar = str.substring(2*i, 2*(i+1));
-            try {
-                parsedStr.append((char)Integer.parseInt(currChar, 16));
-            } catch (NumberFormatException e) {
-                throw new PSErrorIOError();
+        InputStream stringStream = new StringInputStream(str);
+        InputStream inStream = new HexDecode(stringStream);
+        
+        StringBuilder parsedStr = new StringBuilder();
+        int c;
+        try {
+            while ( (c = inStream.read()) != -1 ) {
+                parsedStr.append((char)c);
             }
+        } catch (IOException e) {
+            throw new PSErrorIOError();
         }
+
         return parsedStr.toString();
     }
     
