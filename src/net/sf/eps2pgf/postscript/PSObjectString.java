@@ -23,15 +23,14 @@ package net.sf.eps2pgf.postscript;
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
-import net.sf.eps2pgf.postscript.filters.HexDecode;
-
-
-import org.freehep.util.io.ASCII85InputStream;
 
 import net.sf.eps2pgf.util.*;
 import net.sf.eps2pgf.postscript.errors.*;
 import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.StringInputStream;
+
+import net.sf.eps2pgf.postscript.filters.HexDecode;
+import net.sf.eps2pgf.postscript.filters.Base85Decode;
 
 /**
  * String PostScript object.
@@ -428,24 +427,19 @@ public class PSObjectString extends PSObject {
      * @return Decoded string
      */
     public String parseBase85(String str) throws PSErrorIOError {
-        str = str.replaceAll("\\s+", "");
-        str = str.replaceAll("z", "!!!!!");
-        
-        StringReader strReader = new StringReader(str);
-        ReaderInputStream strInputStream = new ReaderInputStream(strReader);
-        ASCII85InputStream a85Stream = new ASCII85InputStream(strInputStream);
+        InputStream stringStream = new StringInputStream(str);
+        InputStream inStream = new Base85Decode(stringStream);
         
         StringBuilder parsedStr = new StringBuilder();
+        int c;
         try {
-            int i = a85Stream.read();
-            while (i != -1) {
-                parsedStr.append((char)i);
-                i = a85Stream.read();
+            while ( (c = inStream.read()) != -1 ) {
+                parsedStr.append((char)c);
             }
         } catch (IOException e) {
-            // end of string has been reached
+            throw new PSErrorIOError();
         }
-        
+
         return parsedStr.toString();
     }
     
