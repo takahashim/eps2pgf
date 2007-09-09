@@ -46,6 +46,18 @@ public class PSObjectFile extends PSObject {
     }
     
     /**
+     * PostScript operator 'closefile'. Breaks connection between this file
+     * object and the <code>InputStream</code>.
+     */
+    public void closefile() throws PSErrorIOError {
+        try {
+            inStr.close();
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
+    }
+    
+    /**
      * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
      * of composite object is not copied, but shared.
      * @return Shallow copy of this object.

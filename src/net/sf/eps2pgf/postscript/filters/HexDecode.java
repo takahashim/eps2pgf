@@ -30,6 +30,7 @@ import java.io.IOException;
 public class HexDecode extends InputStream {
     private InputStream in;
     
+    
     /**
      * Creates a new instance of HexDecode
      * @param in <code>InputStream</code> from which hex data will be read.
@@ -58,7 +59,7 @@ public class HexDecode extends InputStream {
      * @throws java.io.IOException An I/O error occurred.
      */
     public void close() throws IOException {
-        in.close();
+        in = null;
     }
     
     /**
@@ -103,6 +104,10 @@ public class HexDecode extends InputStream {
      * @return The next byte of data, or -1 if the end of the stream is reached.
      */
     public int read() throws IOException {
+        if (in == null) {
+            return -1;
+        }
+        
         int c1 = readNextHexChar();
         if (c1 == -1) {
             return -1;
@@ -150,6 +155,9 @@ public class HexDecode extends InputStream {
      * @throws java.io.IOException An I/O exception occurred.
      */
     public void reset() throws IOException {
+        if (in == null) {
+            throw new IOException();
+        }
         in.reset();
     }
     

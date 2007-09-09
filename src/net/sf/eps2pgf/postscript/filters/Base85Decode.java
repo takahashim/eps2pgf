@@ -36,22 +36,22 @@ public class Base85Decode extends InputStream {
     /**
      * Five byte block of raw bytes
      */
-    long[] raw;
+    private long[] raw;
     
     /**
      * Four byte block of decoded bytes
      */
-    int[] decoded;
+    private int[] decoded;
     
     /**
      * Pointer to next char to be read from
      */
-    int nextChar;
+    private int nextChar;
     
     /**
      * Number of valid decoded characters
      */
-    int goodChars;
+    private int goodChars;
     
     /**
      * Creates a new instance of Base85Decode
@@ -81,10 +81,9 @@ public class Base85Decode extends InputStream {
     /**
      * Closes this input stream and releases any system resources associated with
      * the stream.
-     * @throws java.io.IOException An I/O error occurred.
      */
-    public void close() throws IOException {
-        in.close();
+    public void close() {
+        in = null;
     }
     
     private static void decodeChars(long[] rawBytes, int[] decodedBytes) throws IOException {
@@ -144,6 +143,10 @@ public class Base85Decode extends InputStream {
      * @return The next byte of data, or -1 if the end of the stream is reached.
      */
     public int read() throws IOException {
+        if (in == null) {
+            return -1;
+        }
+        
         if (nextChar >= goodChars) {
             int goodRawChars = readNextFiveChars(in, raw);
             if (goodRawChars < 2) {
@@ -202,6 +205,10 @@ public class Base85Decode extends InputStream {
      * @throws java.io.IOException An I/O exception occurred.
      */
     public void reset() throws IOException {
+        if (in == null) {
+            throw new IOException();
+        }
         in.reset();
+        nextChar = 5;
     }
 }

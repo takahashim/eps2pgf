@@ -468,6 +468,12 @@ public class Interpreter {
         gstate.current.path = gstate.current.clippingPath.clone();
     }
     
+    /** PostScript op: closefile */
+    public void op_closefile() throws PSError {
+        PSObjectFile file = opStack.pop().toFile();
+        file.closefile();
+    }
+    
     /** PostScript op: closepath */
     public void op_closepath() throws PSErrorRangeCheck, PSErrorTypeCheck {
         double[] startPos = gstate.current.path.closepath();
@@ -832,15 +838,6 @@ public class Interpreter {
         }
         InputStream eexecInStream = new EexecDecode(rawInStream);
         PSObjectFile eexecFile = new PSObjectFile(eexecInStream);
-        
-        // Consume all whitespaces at the beginning as the freehep decrypted
-        // doesn't like them.
-        int nextChar;
-        do {
-            rawInStream.mark(1);
-            nextChar = rawInStream.read();
-        } while (Character.isWhitespace(nextChar));
-        rawInStream.reset();
         
         opStack.push(dictStack.lookup("systemdict"));
         op_begin();
