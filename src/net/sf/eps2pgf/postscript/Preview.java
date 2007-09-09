@@ -34,7 +34,7 @@ public class Preview {
      * For definition of this header see Encapsulated PostScript File Format Specification
      * 
      */
-    public static int[] processBinaryHeader(File file) throws IOException {
+    public static int[] getPostScriptSection(File file) throws IOException {
         RandomAccessFile rFile = new RandomAccessFile(file, "r");
         
         // Check first fout bytes for standard combination
