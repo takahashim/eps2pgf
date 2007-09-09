@@ -20,7 +20,6 @@
 
 package net.sf.eps2pgf.postscript.filters;
 
-import java.io.FilterInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 
