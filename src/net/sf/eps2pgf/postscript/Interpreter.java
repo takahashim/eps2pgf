@@ -146,7 +146,7 @@ public class Interpreter {
             // There was an error. Restore the execution stack to its original
             // state. After that the error is thrown again.
             while (execStack.top != topAtStart) {
-                execStack.getNextToken();
+                execStack.pop();
             }
             throw e;
         }
