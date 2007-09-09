@@ -51,7 +51,7 @@ public class Converter {
      */
     public void convert() throws Exception {
         // Check for a binary header
-        int[] dim = Preview.processBinaryHeader(inFile);
+        int[] dim = Preview.getPostScriptSection(inFile);
         
         // Open the file for reading the postscript code
         InputStream in = new BufferedInputStream(new FileInputStream(inFile));
