@@ -5,5 +5,4 @@
 	<entry key="encoding">Standard</entry>
 	<entry key="latexprecode">\textsf{\textbf{</entry>
 	<entry key="latexpostcode">}}</entry>
-	<entry key="charstrings">StandardLatin</entry>
 </properties>
