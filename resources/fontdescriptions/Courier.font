@@ -5,5 +5,4 @@
 	<entry key="encoding">Standard</entry>
 	<entry key="latexprecode">\texttt{</entry>
 	<entry key="latexpostcode">}</entry>
-	<entry key="charstrings">StandardLatin</entry>
 </properties>
