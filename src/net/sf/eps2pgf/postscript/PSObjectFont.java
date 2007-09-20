@@ -91,8 +91,6 @@ public class PSObjectFont extends PSObject implements Cloneable {
         dict.setKey("PaintType", new PSObjectInt(2));
         dict.setKey("LatexPreCode", props.getProperty("latexprecode", ""));
         dict.setKey("LatexPostCode", props.getProperty("latexpostcode", ""));
-        String charStrings = props.getProperty("charstrings", "StandardLatin");
-        dict.setKey("CharStrings", loadCharStrings(resourceDir, charStrings));
         FontMetric fontMetrics = loadAfm(resourceDir, fontName);
         dict.setKey("AFM", new PSObjectAfm(fontMetrics));
     }
@@ -106,6 +104,51 @@ public class PSObjectFont extends PSObject implements Cloneable {
         dict = aDict;
         access = aDict.access;
         isLiteral = aDict.isLiteral;
+    }
+    
+    /**
+     * Convert an array with character names to a string to corresponding
+     * LaTeX code
+     * @param charNames Character names to convert
+     * @return LaTeX code corresponding to supplied character names
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This font is not a valid font dictionary
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented "String" contains an unknown charString
+     */
+    public String charNames2texStrings(PSObjectArray charNames) throws 
+            PSErrorTypeCheck, PSErrorUnimplemented {
+        StringBuilder str = new StringBuilder();
+        
+        // See if texstrings are defined for this font. If not, copy standard texstrings
+        PSObject texStringsObj = dict.lookup("TexStrings");
+        PSObjectDict texStrings;
+        if (texStringsObj != null) {
+            texStrings = dict.lookup("TexStrings").toDict();
+        } else {
+            texStrings = Fonts.texstrings.clone();
+            dict.setKey("TexStrings", texStrings);
+        }
+        
+        PSObjectString preCode = dict.lookup("LatexPreCode").toPSString();
+        PSObjectString postCode = dict.lookup("LatexPostCode").toPSString();
+
+        str.append(preCode.toString());
+        for (int i = 0 ; i < charNames.size() ; i++) {
+            PSObjectName charName;
+            try {
+                charName = charNames.get(i).toName();
+                PSObject code = texStrings.lookup(charName);
+                if (code == null) {
+                    throw new PSErrorUnimplemented("CharString for "
+                            + charNames.get(i).isis() + " is unknown.");
+                }
+                str.append(code.toPSString().toString());
+            } catch (PSErrorRangeCheck e) {
+                // This can never happen inside this for loop
+            }
+        }
+        str.append(postCode.toString());
+
+        return str.toString();
     }
     
     /**
@@ -154,79 +197,6 @@ public class PSObjectFont extends PSObject implements Cloneable {
         }
         
         return fontMetric;
-    }
-    
-    /**
-     * Load a file with charString (= character names -> latex code)
-     * @param resourceDir Resource directory
-     * @param charStringsName Name of the charStrings list to load
-     * @return Dictionary with character names and associated latex code
-     */
-    PSObjectDict loadCharStrings(File resourceDir, String charStringsName) throws PSErrorInvalidFont {
-        File charStrFile = new File(resourceDir, "charstrings" + 
-                File.separator + charStringsName + ".charstrings");
-        
-        Properties props;
-        try {
-            FileInputStream in = new FileInputStream(charStrFile);
-            props = new Properties();
-            props.loadFromXML(in);
-            in.close();
-        } catch (FileNotFoundException e) {
-            log.severe("Unable to load charStrings " + charStringsName + ".\n");
-            throw new PSErrorInvalidFont();
-        } catch (IOException e) {
-            throw new PSErrorInvalidFont();
-        }
-        
-        // Now load charStrings from the props
-        PSObjectDict charStrdict = new PSObjectDict();
-        Set<String> allCharNames = Encoding.getCharNames().keySet();
-        for (String charName : allCharNames) {
-            // Check whether this character name in defined in this
-            // charStrings list.
-            String propValue = props.getProperty(charName);
-            if (propValue != null) {
-                charStrdict.setKey(charName, propValue);
-            }
-        }
-
-        return charStrdict;
-    }
-    
-    /**
-     * Convert an array with character names to a string to corresponding
-     * LaTeX code
-     * @param charNames Character names to convert
-     * @return LaTeX code corresponding to supplied character names
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This font is not a valid font dictionary
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented "String" contains an unknown charString
-     */
-    public String charNames2charStrings(PSObjectArray charNames) throws 
-            PSErrorTypeCheck, PSErrorUnimplemented {
-        StringBuilder str = new StringBuilder();
-        PSObjectDict charStrings = dict.lookup("CharStrings").toDict();
-        PSObjectString preCode = dict.lookup("LatexPreCode").toPSString();
-        PSObjectString postCode = dict.lookup("LatexPostCode").toPSString();
-
-        str.append(preCode.toString());
-        for (int i = 0 ; i < charNames.size() ; i++) {
-            PSObjectName charName;
-            try {
-                charName = charNames.get(i).toName();
-                PSObject code = charStrings.lookup(charName);
-                if (code == null) {
-                    throw new PSErrorUnimplemented("CharString for "
-                            + charNames.get(i).isis() + " is unknown.");
-                }
-                str.append(code.toPSString().toString());
-            } catch (PSErrorRangeCheck e) {
-                // This can never happen inside this for loop
-            }
-        }
-        str.append(postCode.toString());
-
-        return str.toString();
     }
     
     /**

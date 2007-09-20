@@ -46,7 +46,7 @@ public class TextHandler {
         PSObjectFont currentFont = gstate.current.font;
         
         PSObjectArray charNames = string.decode(currentFont.getEncoding());
-        String text = currentFont.charNames2charStrings(charNames);
+        String text = currentFont.charNames2texStrings(charNames);
         
         double angle = gstate.current.CTM.getRotation();
         
@@ -100,7 +100,7 @@ public class TextHandler {
         
         PSObjectArray charNames = string.decode(currentFont.getEncoding());
         
-        String text = currentFont.charNames2charStrings(charNames);
+        String text = currentFont.charNames2texStrings(charNames);
         
         double angle = gstate.current.CTM.getRotation();
         

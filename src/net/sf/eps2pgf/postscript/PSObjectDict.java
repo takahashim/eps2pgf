@@ -191,7 +191,7 @@ public class PSObjectDict extends PSObject {
     
     /**
      * Looks up a key in this dictionary
-     * @return Object associated with the key.
+     * @return Object associated with the key, <code>null</code> if no object is associated with this key.
      * @param key Key of the entry to look up.
      */
     public PSObject lookup(String key) {

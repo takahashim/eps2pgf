@@ -56,9 +56,6 @@ public class Interpreter {
     // Graphics state
     GstateStack gstate;
     
-    // Fonts resources
-    Fonts fonts;
-    
     // Text handler, handles text in the postscript code
     TextHandler textHandler;
     
@@ -75,10 +72,10 @@ public class Interpreter {
      * @param out Destination for output code
      * @throws java.io.FileNotFoundException Unable to find font resources
      */
-    public Interpreter(Writer out, DSCHeader fileHeader) throws FileNotFoundException {
+    public Interpreter(Writer out, DSCHeader fileHeader) throws ProgramError {
         // Initialize character encodings and fonts
         Encoding.initialize();
-        fonts = new Fonts();
+        Fonts.initialize();
         
         // Create dictionary stack
         dictStack = new DictStack(this);
@@ -772,7 +769,7 @@ public class Interpreter {
     public void op_definefont() throws PSError {
         PSObjectFont font = opStack.pop().toFont();
         PSObject key = opStack.pop();
-        opStack.push( fonts.defineFont(key, font) );
+        opStack.push( Fonts.defineFont(key, font) );
     }
     
     /** PostScript op: dict */
@@ -933,7 +930,7 @@ public class Interpreter {
     /** PostScript op: findfont */
     public void op_findfont() throws PSError, ProgramError {
         PSObject key = opStack.pop();
-        opStack.push(fonts.findFont(key));
+        opStack.push(Fonts.findFont(key));
     }
     
     /** PostScript op: flattenpath */
