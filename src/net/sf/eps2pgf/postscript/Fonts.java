@@ -20,32 +20,42 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.Set;
+import java.util.logging.Logger;
 
-import net.sf.eps2pgf.*;
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
+import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /**
  * Manages font resources
  * @author Paul Wagenaars
  */
 public class Fonts {
-    PSObjectDict FontDirectory = new PSObjectDict();
-    String defaultFont = "Times-Roman";
+    static PSObjectDict FontDirectory = new PSObjectDict();
     
-    File resourceDir;
+    static String defaultFont = "Times-Roman";
     
-    Properties fontSubstitutions;
+    static File resourceDir;
     
-    Logger log = Logger.getLogger("global");
+    static Properties fontSubstitutions;
+    
+    static PSObjectDict texstrings;
+    
+    static Logger log = Logger.getLogger("global");
     
     /**
-     * Create a new Fonts instance
+     * Initializes Fonts 
      * @throws java.io.FileNotFoundException Unable to find resource dir
      */
-    public Fonts() throws FileNotFoundException {
+    public static void initialize() throws ProgramError {
         // Make FontDirectory read-only (for the user)
         FontDirectory.readonly();
         
@@ -72,10 +82,30 @@ public class Fonts {
             classPath = classPath.getParentFile();
         }
         if (resourceDir == null) {
-            throw new FileNotFoundException("Unable to find resource dir.");
+            throw new ProgramError("Unable to find resource dir.");
         }
         
         fontSubstitutions = loadFontSubstitutions(new File(resourceDir, "fontSubstitution.xml"));
+        texstrings = loadTexstrings(new File(resourceDir, "texStrings.xml"));
+    }
+    
+    /**
+     * Define a new font and associate it with a key.
+     * @return Defined font
+     * @param key Key to associate the font with
+     * @param font Font to define
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Part of this method is not implemented
+     * @throws PSErrorTypeCheck Unable to use the key as dictionary key
+     */
+    public static PSObjectFont defineFont(PSObject key, PSObjectFont font) 
+            throws PSErrorTypeCheck, PSErrorUnimplemented {
+        if (font.getFID() >= 0) {
+            throw new PSErrorUnimplemented("Associating a font with more than one key.");
+        } else {
+            font.setFID();
+            FontDirectory.setKey(key, font);
+        }
+        return font;
     }
     
     /**
@@ -87,7 +117,7 @@ public class Fonts {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont Unable to find the requested font.
      * @throws net.sf.eps2pgf.ProgramError This should never happen. This error indicates a bug in Eps2pgf.
      */
-    public PSObjectFont findFont(PSObject fontNameObj) throws PSErrorTypeCheck, 
+    public static PSObjectFont findFont(PSObject fontNameObj) throws PSErrorTypeCheck, 
             PSErrorInvalidFont, ProgramError {
         String fontName = fontNameObj.toDictKey();
         return findFont(fontName);
@@ -99,7 +129,7 @@ public class Fonts {
      * @return Font (dictionary) of the requested font
      * @throws ProgramError Unable to load the requested font and the default font
      */
-    public PSObjectFont findFont(String fontName) throws ProgramError {
+    public static PSObjectFont findFont(String fontName) throws ProgramError {
         String subFontName = findSubstitutionFont(fontName);
         if (subFontName != null) {
             log.info("Substituting font " + subFontName + " for " + fontName);
@@ -139,7 +169,7 @@ public class Fonts {
      *         found, the requested font itself is returned.
      * @param fontName Name of the font for which a substitute is searched
      */
-    public String findSubstitutionFont(String fontName) {
+    public static String findSubstitutionFont(String fontName) {
         String subFont = fontSubstitutions.getProperty(fontName);
         if (subFont == null) {
             return null;
@@ -154,7 +184,7 @@ public class Fonts {
      * @param fontName Name of the font
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont Unable to find requested font.
      */
-    public PSObjectFont loadFont(String fontName) throws PSErrorInvalidFont {
+    public static PSObjectFont loadFont(String fontName) throws PSErrorInvalidFont {
         log.info("Loading " + fontName + " font from " + resourceDir);
         PSObjectFont font = new PSObjectFont(resourceDir, fontName);
         
@@ -166,31 +196,12 @@ public class Fonts {
     }
     
     /**
-     * Define a new font and associate it with a key.
-     * @return Defined font
-     * @param key Key to associate the font with
-     * @param font Font to define
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Part of this method is not implemented
-     * @throws PSErrorTypeCheck Unable to use the key as dictionary key
-     */
-    public PSObjectFont defineFont(PSObject key, PSObjectFont font) 
-            throws PSErrorTypeCheck, PSErrorUnimplemented {
-        if (font.getFID() >= 0) {
-            throw new PSErrorUnimplemented("Associating a font with more than one key.");
-        } else {
-            font.setFID();
-            FontDirectory.setKey(key, font);
-        }
-        return font;
-    }
-    
-    /**
      * Load list with font substitutions
      * @param fontSubFile File from which the substitution list will be loaded
      * @return List with font substitution. Returns null if the list could not
      *         be loaded.
      */
-    public Properties loadFontSubstitutions(File fontSubFile) {
+    public static Properties loadFontSubstitutions(File fontSubFile) {
         Properties fontSubList;
         try {
             FileInputStream in = new FileInputStream(fontSubFile);
@@ -203,6 +214,41 @@ public class Fonts {
             return null;
         }
         return fontSubList;
+    }
+    
+    /**
+     * Load the list with texstring (string to produce a certain character in LaTeX)
+     * @param texstringsFile File from which texstrings have to be loaded.
+     * @throws net.sf.eps2pgf.ProgramError Unable to read the texstrings from file.
+     * @return Dictionary with all loaded "character names -> texstring" pairs.
+     */
+    public static PSObjectDict loadTexstrings(File texstringsFile) throws ProgramError {
+        Properties props;
+        try {
+            FileInputStream in = new FileInputStream(texstringsFile);
+            props = new Properties();
+            props.loadFromXML(in);
+            in.close();
+        } catch (FileNotFoundException e) {
+            log.severe("Unable to load texstrings " + texstringsFile + ".\n");
+            throw new ProgramError("Unable to find texstrings file. " + e);
+        } catch (IOException e) {
+            throw new ProgramError("There was an error loading the texstrings file. " + e);
+        }
+        
+        // Now load texstrings from the props
+        PSObjectDict texstringsdict = new PSObjectDict();
+        Set<String> allCharNames = Encoding.getCharNames().keySet();
+        for (String charName : allCharNames) {
+            // Check whether this character name in defined in this
+            // texstrings list.
+            String propValue = props.getProperty(charName);
+            if (propValue != null) {
+                texstringsdict.setKey(charName, propValue);
+            }
+        }
+
+        return texstringsdict;
     }
 
 }

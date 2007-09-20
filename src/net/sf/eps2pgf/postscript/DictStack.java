@@ -189,8 +189,8 @@ public class DictStack {
         systemdict.setKey("userdict", userdict);
         systemdict.setKey("globaldict", globaldict);
         systemdict.setKey("statusdict", new PSObjectDict());
-        systemdict.setKey("FontDirectory", interp.fonts.FontDirectory);
-}
+        systemdict.setKey("FontDirectory", Fonts.FontDirectory);
+    }
 
     /** Push a dictionary onto the stack */
     public void pushDict(PSObjectDict dict) {
