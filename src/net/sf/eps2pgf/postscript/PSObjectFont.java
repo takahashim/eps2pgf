@@ -97,8 +97,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
     
     /**
      * Creates a new font dictionary with aDict as dictionary.
+     * 
      * @param aDict Dictionary to use as font dictionary
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Dictionary is not a valid font
      */
     public PSObjectFont(PSObjectDict aDict) {
         dict = aDict;
@@ -153,8 +153,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
     
     /**
      * Creates an exact deep copy of this font.
+     * 
      * @return Created copy
-     * @throws java.lang.CloneNotSupportedException Unable to clone this font
      */
     public PSObjectFont clone() {
         PSObjectDict newDict = dict.clone();
@@ -173,38 +173,12 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * Load font metrics (*.afm) from the resource directory
-     * @param resourceDir Resource directory with font information
-     * @param fontName Name of the font to load
-     * @return Font metrics of requested font
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont Font file not found
-     */
-    public FontMetric loadAfm(File resourceDir, String fontName) throws PSErrorInvalidFont {
-        File afmFile = new File(resourceDir, "afm" + 
-                File.separator + fontName + ".afm");
-        
-        FontMetric fontMetric;
-        try {
-            FileInputStream in = new FileInputStream(afmFile);
-            AFMParser afm = new AFMParser(in);
-            afm.parse();
-            fontMetric = afm.getResult();
-            in.close();
-        } catch (FileNotFoundException e) {
-            throw new PSErrorInvalidFont();
-        } catch (IOException e) {
-            throw new PSErrorInvalidFont();
-        }
-        
-        return fontMetric;
-    }
-    
-    /**
      * PostScript operator: get
      * Return value associated with key.
      * @param key Key for which the associated value will be returned
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
      * @return Value associated with key
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied key is not a valid dictionary key
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
      */
     public PSObject get(PSObject key) throws PSErrorUndefined, PSErrorTypeCheck {
         return dict.get(key);
@@ -281,16 +255,12 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * Returns the fontname of this font
-     * @return Fontname
+     * Return the encoding in this font
+     * @return Encoding defined by this font
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Encoding vector is not defined by this font
      */
-    String getFontName() {
-        try {
-            return dict.lookup("FontName").toName().name;
-        } catch (PSErrorTypeCheck e) {
-            // No font name is defined
-            return "";
-        }
+    public PSObjectArray getEncoding() throws PSErrorTypeCheck {
+        return dict.lookup("Encoding").toArray();
     }
     
     /**
@@ -309,25 +279,6 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * Set the font ID for this font to the next available ID
-     * @return New font ID
-     */
-    int setFID() {
-        int FID = nextFID++;
-        dict.setKey("FID", new PSObjectInt(FID));
-        return FID;
-    }
-    
-    /**
-     * Return the encoding in this font
-     * @return Encoding defined by this font
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Encoding vector is not defined by this font
-     */
-    public PSObjectArray getEncoding() throws PSErrorTypeCheck {
-        return dict.lookup("Encoding").toArray();
-    }
-    
-    /**
      * Return the FontMatrix
      * @return FontMatrix defined by this font
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This font does not contain a valid font matrix
@@ -335,15 +286,6 @@ public class PSObjectFont extends PSObject implements Cloneable {
      */
     public PSObjectMatrix getFontMatrix() throws PSErrorTypeCheck, PSErrorRangeCheck {
         return dict.lookup("FontMatrix").toMatrix();
-    }
-    
-    /**
-     * PostScript operator put. Replace a single value in this object.
-     * @param index Index or key for new value
-     * @param value New value
-     */
-    public void put(PSObject index, PSObject value) throws PSErrorTypeCheck {
-        dict.put(index, value);
     }
     
     /**
@@ -356,13 +298,26 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
+     * Returns the fontname of this font
+     * @return Fontname
+     */
+    String getFontName() {
+        try {
+            return dict.lookup("FontName").toName().name;
+        } catch (PSErrorTypeCheck e) {
+            // No font name is defined
+            return "";
+        }
+    }
+    
+    /**
      * Returns a list with all items in object.
+     * 
      * @return List with all items in this object. The first object (with
      *         index 0) is always a PSObjectInt with the number of object
      *         in a single item. For most object types this is 1, but for
      *         dictionaries this is 2. All consecutive items (index 1 and
      *         up) are the object's items.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This object does not have a list of items
      */
     public List<PSObject> getItemList() {
         return dict.getItemList();
@@ -418,6 +373,60 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
+     * Creates a human-readable string representation of this font.
+     * @return Human-readable string representation of this font. See the
+     * PostScript specification on the == operator for more info.
+     */
+    public String isis() {
+        return "-font " + getFontName() + " (FID " + getFID() + ")-";
+    }
+
+    /**
+     * Get the number of elements
+     * @return The number of dictionary entries in this font.
+     */
+    public int length() {
+        return dict.length();
+    }
+    
+    /**
+     * Load font metrics (*.afm) from the resource directory
+     * @param resourceDir Resource directory with font information
+     * @param fontName Name of the font to load
+     * @return Font metrics of requested font
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont Font file not found
+     */
+    public FontMetric loadAfm(File resourceDir, String fontName) throws PSErrorInvalidFont {
+        File afmFile = new File(resourceDir, "afm" + 
+                File.separator + fontName + ".afm");
+        
+        FontMetric fontMetric;
+        try {
+            FileInputStream in = new FileInputStream(afmFile);
+            AFMParser afm = new AFMParser(in);
+            afm.parse();
+            fontMetric = afm.getResult();
+            in.close();
+        } catch (FileNotFoundException e) {
+            throw new PSErrorInvalidFont();
+        } catch (IOException e) {
+            throw new PSErrorInvalidFont();
+        }
+        
+        return fontMetric;
+    }
+    
+    /**
+     * PostScript operator put. Replace a single value in this object.
+     * @param index Index or key for new value
+     * @param value New value
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied key is not a valid dictionary key.
+     */
+    public void put(PSObject index, PSObject value) throws PSErrorTypeCheck {
+        dict.put(index, value);
+    }
+    
+    /**
      * Create a copy of the array with character names with all pairs with
      * ligatures replaced by their ligatures.
      * @param charNames Character names of the text to search for ligature replacements
@@ -468,11 +477,13 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * Get the number of elements
-     * @return The number of dictionary entries in this font.
+     * Set the font ID for this font to the next available ID
+     * @return New font ID
      */
-    public int length() {
-        return dict.length();
+    int setFID() {
+        int FID = nextFID++;
+        dict.setKey("FID", new PSObjectInt(FID));
+        return FID;
     }
     
     /**
@@ -489,15 +500,6 @@ public class PSObjectFont extends PSObject implements Cloneable {
      */
     public PSObjectFont toFont() {
         return this;
-    }
-
-    /**
-     * Creates a human-readable string representation of this font.
-     * @return Human-readable string representation of this font. See the
-     * PostScript specification on the == operator for more info.
-     */
-    public String isis() {
-        return "-font " + getFontName() + " (FID " + getFID() + ")-";
     }
 
     /**
