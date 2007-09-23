@@ -197,7 +197,7 @@ public class Encoding {
             "Ecircumflexsmall", "Icircumflexsmall", "Ocircumflexsmall",
             "Ucircumflexsmall", "Hungarumlautsmall", "parenleftinferior",
             "parenleftsuperior", "questiondownsmall", "parenrightinferior",
-            "parenrightsuperior", "threequartersemdash"
+            "parenrightsuperior", "threequartersemdash",
         };
         names = new HashMap<String, PSObjectName>(n.length);
         for (int i = 0 ; i < n.length ; i++) {

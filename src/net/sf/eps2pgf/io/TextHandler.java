@@ -51,9 +51,8 @@ public class TextHandler {
         double angle = gstate.current.CTM.getRotation();
         
         // Calculate scaling and fontsize in points (=1/72 inch)
-        PSObjectMatrix fontMatrix = currentFont.getFontMatrix();
-        double scaling = fontMatrix.getMeanScaling() * gstate.current.CTM.getMeanScaling();
-        double fontsize = scaling / 1000 / 25.4 * 72;  // convert micrometer to pt
+        double scaling = gstate.current.CTM.getMeanScaling();
+        double fontsize = currentFont.getFontSize() * gstate.current.getMeanUserScaling();
 
         BoundingBox bbox = currentFont.getBBox(charNames);
 
@@ -82,8 +81,7 @@ public class TextHandler {
      * @return Displacement vector [dx, dy] in user space coordinates
      */
     public double[] showText(OutputDevice exp, PSObjectString string) 
-            throws PSErrorTypeCheck, PSErrorRangeCheck, PSErrorUndefined, 
-            PSErrorUnimplemented, PSErrorNoCurrentPoint, IOException {
+            throws PSError, IOException {
         return showText(exp, string, false);
     }
     
@@ -94,8 +92,7 @@ public class TextHandler {
      * @return Displacement vector [dx, dy] in user space coordinates
      */
     public double[] showText(OutputDevice exp, PSObjectString string, boolean noOutput) 
-            throws PSErrorTypeCheck, PSErrorRangeCheck, PSErrorUndefined, 
-            PSErrorUnimplemented, PSErrorNoCurrentPoint, IOException {        
+            throws PSError, IOException {        
         PSObjectFont currentFont = gstate.current.font;
         
         PSObjectArray charNames = string.decode(currentFont.getEncoding());
@@ -105,9 +102,8 @@ public class TextHandler {
         double angle = gstate.current.CTM.getRotation();
         
         // Calculate scaling and fontsize in points (=1/72 inch)
-        PSObjectMatrix fontMatrix = currentFont.getFontMatrix();
-        double scaling = fontMatrix.getMeanScaling() * gstate.current.CTM.getMeanScaling();
-        double fontsize = scaling / 1000 / 25.4 * 72;  // convert micrometer to pt
+        double scaling = gstate.current.CTM.getMeanScaling();
+        double fontsize = currentFont.getFontSize() * gstate.current.getMeanUserScaling();
 
         // Draw text
         if (!noOutput) {

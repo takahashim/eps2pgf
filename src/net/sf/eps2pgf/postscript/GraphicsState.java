@@ -418,6 +418,25 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
+     * Gets the mean scaling relative to the default CTM. This is a combination
+     * of all transformations applied by the PostScript program.
+     * @return
+     */
+    public double getMeanUserScaling() {
+        double scaling = Double.NaN;
+        try {
+            scaling = CTM.getMeanScaling() / device.defaultCTM().getMeanScaling();
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen, since none of the matrices above are
+            // controlled by the is user.
+        } catch (PSErrorTypeCheck e) {
+            // this can never happen, since none of the matrices above are
+            // controlled by the is user.
+        }
+        return scaling;
+    }
+    
+    /**
      * Sets the current transformation matrix (CTM) to its default value
      */
     public void initmatrix() {
