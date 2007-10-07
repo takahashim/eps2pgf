@@ -165,6 +165,13 @@ public class PSObjectName extends PSObject {
     public int length() {
         return name.length();
     }
+    
+    /**
+     * Return human readable string representation of this object
+     */
+    public String toString() {
+        return "Name: " + isis();
+    }
 
     /**
      * Returns the type of this object
