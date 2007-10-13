@@ -61,7 +61,7 @@ public class Path implements Cloneable {
                 Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY};
         for (int i = 0 ; i < N ; i++) {
             PathSection sec = sections.get(i);
-            if ((i == (N-1)) && (sec instanceof Moveto)) {
+            if ((N > 1) && (i == (N-1)) && (sec instanceof Moveto)) {
                 break;
             }
             for (int j = 0 ; j < sec.params.length ; j += 2) {
