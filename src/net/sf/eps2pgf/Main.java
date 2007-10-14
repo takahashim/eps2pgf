@@ -20,7 +20,6 @@
 
 package net.sf.eps2pgf;
 
-import java.io.*;
 import java.util.logging.*;
 
 /**
