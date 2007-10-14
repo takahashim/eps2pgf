@@ -20,9 +20,12 @@
 
 package net.sf.eps2pgf;
 
-import java.io.File;
-
-import com.martiansoftware.jsap.*;
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
+import com.martiansoftware.jsap.UnflaggedOption;
 
 /**
  * Parses command line arguments and manages settings and options by the user
