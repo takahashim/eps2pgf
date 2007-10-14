@@ -20,9 +20,7 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.util.*;
-
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.errors.PSError;
 
 /**
  * Represent radial (type 3) shading dictionary

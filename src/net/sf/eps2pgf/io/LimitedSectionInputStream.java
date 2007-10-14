@@ -20,7 +20,6 @@
 
 package net.sf.eps2pgf.io;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 

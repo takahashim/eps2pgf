@@ -20,10 +20,10 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.util.*;
+import java.util.List;
 
-import net.sf.eps2pgf.postscript.*;
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
 
 /**
  * Execution stack. Stack of objects that await processing by the interpreter.

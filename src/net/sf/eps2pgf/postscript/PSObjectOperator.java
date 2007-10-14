@@ -20,10 +20,7 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.util.*;
-import java.lang.reflect.*;
-
-import net.sf.eps2pgf.postscript.errors.PSError;
+import java.lang.reflect.Method;
 
 /**
  * Object that represents a PostScript operator. Either a built-in or user-defined operator.
