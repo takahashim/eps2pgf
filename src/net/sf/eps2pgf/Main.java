@@ -90,7 +90,7 @@ public class Main {
     public static void printVersionCopyright() {
         System.out.println(getNameVersion());
         System.out.println("");
-        System.out.println("Copyright 2007 Paul Wagenaars <pwagenaars@fastmail.fm>");
+        System.out.println("Copyright 2007 Paul Wagenaars <paul@wagenaars.org>");
         System.out.println("");
         System.out.println("Licensed under the Apache License, Version 2.0 (the \"License\");");
         System.out.println("you may not use this file except in compliance with the License.");
