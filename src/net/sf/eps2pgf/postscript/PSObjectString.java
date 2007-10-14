@@ -20,17 +20,22 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import net.sf.eps2pgf.util.*;
-import net.sf.eps2pgf.postscript.errors.*;
 import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.StringInputStream;
-
-import net.sf.eps2pgf.postscript.filters.HexDecode;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorIOError;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.postscript.filters.Base85Decode;
+import net.sf.eps2pgf.postscript.filters.HexDecode;
 
 /**
  * String PostScript object.

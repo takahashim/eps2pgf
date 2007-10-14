@@ -20,10 +20,7 @@
 
 package net.sf.eps2pgf.io;
 
-import java.io.IOException;
-
 import net.sf.eps2pgf.postscript.*;
-import net.sf.eps2pgf.postscript.errors.*;
 
 /**
  * Discards all output written to this device
@@ -42,7 +39,7 @@ public class NullDevice implements OutputDevice {
     }
     
     /**
-     * Retuns a <b>copy</b> default transformation matrix (converts user space
+     * Returns a <b>copy</b> default transformation matrix (converts user space
      * coordinates to device space).
      */
     public PSObjectMatrix defaultCTM() {

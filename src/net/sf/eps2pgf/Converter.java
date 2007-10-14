@@ -20,11 +20,19 @@
 
 package net.sf.eps2pgf;
 
-import java.io.*;
-import java.util.*;
-import net.sf.eps2pgf.io.LimitedSectionInputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.Writer;
 
-import net.sf.eps2pgf.postscript.*;
+import net.sf.eps2pgf.io.LimitedSectionInputStream;
+import net.sf.eps2pgf.postscript.DSCHeader;
+import net.sf.eps2pgf.postscript.Interpreter;
+import net.sf.eps2pgf.postscript.PSObjectFile;
+import net.sf.eps2pgf.postscript.Preview;
 
 /**
  * Object that converts Encapsulated PostScript (EPS) to Portable Graphics

@@ -20,9 +20,6 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.lang.reflect.*;
-import net.sf.eps2pgf.postscript.errors.*;
-
 /** PostScript object: literal name
  *
  * @author Paul Wagenaars
