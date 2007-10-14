@@ -52,7 +52,10 @@ public class PSObjectFont extends PSObject implements Cloneable {
     public static String KEY_STROKEWIDTH = "StrokeWidth";
     public static String KEY_PRIVATE = "Private";
     public static String KEY_CHARSTRINGS = "CharStrings";
-    public static String KEY_FID = "FID";    
+    public static String KEY_FID = "FID";
+    
+    // Standard fields in Private Dictionary
+    public static String KEY_PRV_SUBRS = "Subrs";
     
     // Eps2pgf specific fields in font dictionary
     public static String KEY_LATEXPRECODE = "LatexPreCode";
@@ -144,7 +147,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @return Returns <code>true</code> if this font was already valid. Returns
      *         <code>false</code> when one or more fields were missing.
      */
-    boolean assertValidFont() {
+    boolean assertValidFont() throws PSError {
         boolean alreadyValid = true;
         
         // See if texstrings are defined for this font. If not, copy standard texstrings
@@ -166,10 +169,14 @@ public class PSObjectFont extends PSObject implements Cloneable {
         
         // Check for font metrics
         if (!dict.known(KEY_AFM)) {
+            alreadyValid = false;
             if (!dict.known(KEY_CHARSTRINGS)) {
-                
+                throw new PSErrorInvalidFont();
             }
-            
+            // Extract metrics information from character descriptions
+            PSObjectDict charStrings = dict.get(KEY_CHARSTRINGS).toDict();
+            PSObjectDict privateDict = dict.get(KEY_PRIVATE).toDict();
+            dict.setKey(KEY_AFM, new PSObjectAfm(charStrings, privateDict));
         }
         
         return alreadyValid;
@@ -180,11 +187,10 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * LaTeX code
      * @param charNames Character names to convert
      * @return LaTeX code corresponding to supplied character names
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This font is not a valid font dictionary
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented "String" contains an unknown charString
+     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred.
      */
     public String charNames2texStrings(PSObjectArray charNames) throws 
-            PSErrorTypeCheck, PSErrorUnimplemented {
+            PSError {
         assertValidFont();
         
         StringBuilder str = new StringBuilder();
@@ -256,7 +262,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @return Bounding box
      */
     public BoundingBox getBBox(PSObjectArray charNames) throws PSError {
-        charNames = replaceLigatures(charNames);
+        //charNames = replaceLigatures(charNames);
         
         BoundingBox bbox = new BoundingBox();
 
@@ -397,34 +403,13 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
 
     /**
-     * Gets the horizontal kerning distance between two characters
-     * @return Kerning distance between characters in pt (1/72 inch)
-     * @param firstChar First kerning character
-     * @param secondChar Second kerning character
-     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred.
-     */
-    public double getKernX(String firstChar, String secondChar) throws PSError {
-        FontMetric fm = getFontMetric();
-        List kernPairs = fm.getKernPairs();
-        for (Object obj : kernPairs) {
-            KernPair kp = (KernPair)obj;
-            if (firstChar.equals(kp.getFirstKernCharacter()) 
-                    && secondChar.equals(kp.getSecondKernCharacter())) {
-                double scaling = getFontMatrix().getMeanScaling();
-                return kp.getX()*scaling;
-            }
-        }
-        return 0;
-    }
-    
-    /**
      * Determines the total width of a string
      * @param charNames Array with character names describing the string
      * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred.
      * @return Width of the string in pt (= 1/72 inch)
      */
     public double getWidth(PSObjectArray charNames) throws PSError {
-        charNames = replaceLigatures(charNames);
+        //charNames = replaceLigatures(charNames);
         double width = 0;
         for (int i = 0 ; i < charNames.size() ; i++) {
             try {
@@ -432,12 +417,6 @@ public class PSObjectFont extends PSObject implements Cloneable {
                 CharMetric cm = getCharMetric(charName);
                 double scaling = getFontMatrix().getMeanScaling();
                 width += cm.getWx()*scaling;
-                
-                // Kerning with previous character???
-                if (i > 0) {
-                    String prevCharName = charNames.get(i-1).toName().name;
-                    width += getKernX(prevCharName, charName);
-                }
             } catch (PSErrorRangeCheck e) {
                     // This can never happen inside the for loop
             }
@@ -497,56 +476,6 @@ public class PSObjectFont extends PSObject implements Cloneable {
      */
     public void put(PSObject index, PSObject value) throws PSErrorTypeCheck {
         dict.put(index, value);
-    }
-    
-    /**
-     * Create a copy of the array with character names with all pairs with
-     * ligatures replaced by their ligatures.
-     * @param charNames Character names of the text to search for ligature replacements
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Font metric information is not defined in this font
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined One or more character names are not defined in the font
-     * @return New array with character names
-     */
-    public PSObjectArray replaceLigatures(PSObjectArray charNames) 
-            throws PSErrorTypeCheck, PSErrorUndefined {
-        PSObjectArray arr = new PSObjectArray();
-        for (int i = 0 ; i < charNames.size() ; i++) {
-            try {
-                PSObjectName charName = charNames.get(i).toName();
-                
-                // Check for ligatures
-                Boolean ligFound = false;
-                if (i < (charNames.size()-1)) {
-                    String nextChar = charNames.get(i+1).toName().name;
-                    CharMetric cm = getCharMetric(charName.name);
-                    List ligatures = cm.getLigatures();
-                    for (Object obj : ligatures) {
-                        Ligature lig = (Ligature)obj;
-                        if (nextChar.equals(lig.getSuccessor())) {
-                            PSObjectName name = new PSObjectName(lig.getLigature(), true);
-                            arr.addToEnd(name);
-                            i++;
-                            ligFound = true;
-                            break;
-                        }
-                    }
-                }
-                
-                if (!ligFound) {
-                    arr.addToEnd(charName);
-                }
-            } catch (PSErrorRangeCheck e) {
-                // This can never happen inside the for loop
-            }
-        }
-        
-        // It is possible the ligature on their turn also have ligatures.
-        // Therefore we repeat this process until everything is replaced.
-        if (arr.size() < charNames.size()) {
-            arr = replaceLigatures(arr);
-        }
-        
-        return arr;
     }
     
     /**
