@@ -277,12 +277,12 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                     gstate.current.rcurveto(dx1, dy1, (dx1+dx2), (dy1+dy2), (dx1+dx2+dx3), (dy1+dy2+dy3));
                 } else if (cmd.equals("hstem")) {
                     // Not much to for this command, except for popping two values from the stack
-                    int dy = opStack.pop().toInt();
-                    int y = opStack.pop().toInt();
+                    opStack.pop().toInt();  // dy
+                    opStack.pop().toInt();  // y
                 } else if (cmd.equals("vstem")) {
                     // Not much to for this command, except for popping two values from the stack
-                    int dx = opStack.pop().toInt();
-                    int x = opStack.pop().toInt();
+                    opStack.pop().toInt();  // dx
+                    opStack.pop().toInt();  // x
                 } else if (cmd.equals("hsbw")) {
                     int wx = opStack.pop().toInt();
                     int sbx = opStack.pop().toInt();
