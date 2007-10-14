@@ -46,13 +46,11 @@ public class TextHandler {
         PSObjectFont currentFont = gstate.current.font;
         
         PSObjectArray charNames = string.decode(currentFont.getEncoding());
-        String text = currentFont.charNames2texStrings(charNames);
         
         double angle = gstate.current.CTM.getRotation();
         
         // Calculate scaling and fontsize in points (=1/72 inch)
         double scaling = gstate.current.CTM.getMeanScaling();
-        double fontsize = currentFont.getFontSize() * gstate.current.getMeanUserScaling();
 
         BoundingBox bbox = currentFont.getBBox(charNames);
 

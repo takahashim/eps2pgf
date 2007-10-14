@@ -357,8 +357,8 @@ public class Interpreter {
         log.fine("ashow operator encoutered. ashow is not implemented, instead the normal show is used.");
         PSObjectString string = opStack.pop().toPSString();
         string.checkAccess(false, true, false);
-        double ay = opStack.pop().toReal();
-        double ax = opStack.pop().toReal();
+        opStack.pop().toReal(); // read ay
+        opStack.pop().toReal();  // read ax
         opStack.push(string);
         op_show();
     }
@@ -399,7 +399,7 @@ public class Interpreter {
     
     /** PostScript op: bind */
     public void op_bind() throws PSErrorStackUnderflow, PSErrorTypeCheck {
-        PSObjectArray obj = opStack.peek().toArray().bind(this);
+        opStack.peek().toArray().bind(this);
     }
     
     /** PostScript op: bitshift */
@@ -426,7 +426,7 @@ public class Interpreter {
      * So, instead of the fonts themselves, the bounding box is added.
      */
     public void op_charpath() throws PSError {
-        boolean bool = opStack.pop().toBool();
+        opStack.pop().toBool();  // bool
         PSObjectString string = opStack.pop().toPSString();
         textHandler.charpath(string);
     }

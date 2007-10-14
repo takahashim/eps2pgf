@@ -132,14 +132,13 @@ public class Path implements Cloneable {
      * a new path is created with the flattened version of this path.
      * @param maxError Maximum distance between flattened path and real curve.
      *                 Expressed in terms of actual device coordinates.
-     * @return Flattened versiob of this path
+     * @return Flattened version of this path
      * @throws net.sf.eps2pgf.postscript.errors.PSError Something went wrong during the "flattening" of the path
      * @throws net.sf.eps2pgf.ProgramError If this happens there's a bug in Eps2pgf
      */
     public Path flattenpath(double maxError) throws PSError, ProgramError {
         Path flatPath = new Path(gStateStack);
         PathSection lastSec = new PathSection();
-        double x0, y0;
         for (PathSection sec : sections) {
             if (sec instanceof Moveto) {
                 flatPath.moveto(sec.params[0], sec.params[1]);
