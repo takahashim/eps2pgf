@@ -24,4 +24,6 @@ package net.sf.eps2pgf.postscript.errors;
  *
  * @author Paul Wagenaars
  */
-public class PSErrorUndefinedResult extends PSError {}
+public class PSErrorUndefinedResult extends PSError {
+	private static final long serialVersionUID = 1L;
+}

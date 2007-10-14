@@ -20,8 +20,10 @@
 
 package net.sf.eps2pgf.postscript.errors;
 
-/** PostScript error: typecheck
+/** PostScript error: type check
  *
  * @author Paul Wagenaars
  */
-public class PSErrorTypeCheck extends PSError {}
+public class PSErrorTypeCheck extends PSError {
+	private static final long serialVersionUID = 1L;
+}

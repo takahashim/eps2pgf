@@ -25,6 +25,8 @@ package net.sf.eps2pgf.postscript.errors;
  * @author Paul Wagenaars
  */
 public class PSError extends Exception {
+	private static final long serialVersionUID = 1L;
+	
     String methodName = "";
     
     /** Creates a new instance of PSError */
