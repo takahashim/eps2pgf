@@ -29,7 +29,8 @@ import net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow;
  * @author Paul Wagenaars
  */
 public class ArrayStack<E> extends ArrayList<E> {
-    
+	private static final long serialVersionUID = 1L;
+	
     /** Creates a new instance of ArrayStack */
     public ArrayStack() {
         super();

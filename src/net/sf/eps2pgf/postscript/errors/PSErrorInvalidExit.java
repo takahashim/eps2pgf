@@ -24,4 +24,6 @@ package net.sf.eps2pgf.postscript.errors;
  *
  * @author Paul Wagenaars
  */
-public class PSErrorInvalidExit extends PSError {}
+public class PSErrorInvalidExit extends PSError {
+	private static final long serialVersionUID = 1L;
+}
