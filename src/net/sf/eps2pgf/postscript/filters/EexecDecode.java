@@ -64,6 +64,22 @@ public class EexecDecode extends InputStream {
         c2 = 22719;
     }
     
+    /**
+     * Wrap a eexec decryption layer around and input stream
+     * @param in Stream from which encrypted data will be read
+     */
+    public EexecDecode (InputStream in, int password, boolean binaryInput) {
+        if (binaryInput) {
+            this.in = in;
+        } else {
+            this.in = new HexDecode(in);
+        }
+        n = 4;
+        R = password;
+        c1 = 52845;
+        c2 = 22719;
+    }
+    
     public int available() throws IOException {
         return (in.available() - n);
     }

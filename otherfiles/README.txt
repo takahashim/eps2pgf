@@ -3,7 +3,7 @@
 ============================================================================
 
 Website: http://sourceforge.net/projects/eps2pgf
-Author: Paul Wagenaars <pwagenaars@fastmail.fm>
+Author: Paul Wagenaars <paul@wagenaars.org>
 
 ----------------------------------------------------------------------------
 Introduction
