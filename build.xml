@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="eps2pgf" basedir="." default="jar">
+	<property name="src.dir" value="src" />
+	<property name="build.dir" value="build" />
+	<property name="dist.dir" value="dist_root" />
+	<property name="lib.dir" value="${dist.dir}/lib" />
+	<property name="jar.file" value="${dist.dir}/${ant.project.name}.jar" />
+	<property name="zip.file" value="${ant.project.name}.zip" />
+	
+	<property name="base-class" value="net.sf.eps2pgf.Main" />
+	
+	<!-- Specify libraries -->
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar" />
+	</path>
+	<manifestclasspath property="jar.classpath" jarfile="${jar.file}">
+		<classpath refid="classpath" />
+	</manifestclasspath>
+	
+	<!-- Cleaning targets -->
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete file="${jar.file}" />
+		<delete file="${zip.file}" />
+	</target>
+	
+	<!-- Compile target -->
+	<target name="compile">
+		<mkdir dir="${build.dir}" />
+		<javac
+			srcdir="${src.dir}"
+			destdir="${build.dir}"
+			classpathref="classpath"
+			target="1.5"
+		/>
+	</target>
+
+	<!-- Create jar file -->
+	<target name="jar" depends="compile">
+		<jar destfile="${jar.file}" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="${base-class}" />
+				<attribute name="Class-path" value="${jar.classpath}" />
+			</manifest>
+		</jar>
+	</target>
+	
+	<!-- Create zip file -->
+	<target name="zip" depends="jar">
+		<zip
+			destfile="${zip.file}"
+			basedir="${dist.dir}"
+			level="9"
+		/>
+	</target>
+
+	<!-- Combined targets -->
+	<target name="clean-build" depends="clean,jar" />
+	<target name="clean-build-zip" depends="clean,jar,zip" />
+
+</project>
