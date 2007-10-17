@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="eps2pgf" basedir="." default="jar">
-	<property name="src.dir" value="src" />
-	<property name="build.dir" value="build" />
-	<property name="dist.dir" value="dist_root" />
-	<property name="lib.dir" value="${dist.dir}/lib" />
-	<property name="jar.file" value="${dist.dir}/${ant.project.name}.jar" />
-	<property name="zip.file" value="${ant.project.name}.zip" />
+	<property file="build.properties" />
 	
 	<property name="base-class" value="net.sf.eps2pgf.Main" />
 	
@@ -38,10 +33,15 @@
 
 	<!-- Create jar file -->
 	<target name="jar" depends="compile">
+		<tstamp>
+			<format property="NOW" pattern="yyyy-MM-dd HH:mm" />
+		</tstamp>
 		<jar destfile="${jar.file}" basedir="${build.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="${base-class}" />
 				<attribute name="Class-path" value="${jar.classpath}" />
+				<attribute name="Version" value="${app.version}" />
+				<attribute name="Built-On" value="${NOW}" />
 			</manifest>
 		</jar>
 	</target>
