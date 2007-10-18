@@ -28,9 +28,9 @@ import java.util.logging.*;
  */
 public class Main {
     static final String appName = "Eps2pgf";
-    static final int versionMajor = 0;
-    static final int versionMinor = 5;
-    static final int versionRevision = 0;
+    static final String appVersion = "@VERSION@";
+    static final String appBuildDate = "@BUILDDATE@";
+    
     static Options opts = new Options();;
     
     static Logger log = Logger.getLogger("global");
@@ -81,7 +81,7 @@ public class Main {
      * @return Application name followed by the version number
      */
     public static String getNameVersion() {
-        return appName + " " + versionMajor + "." + versionMinor + "." + versionRevision;
+        return appName + " " + appVersion + " (build on " + appBuildDate + ")";
     }
     
     /**
