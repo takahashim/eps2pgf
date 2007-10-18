@@ -2,9 +2,11 @@
 
 <project name="eps2pgf" basedir="." default="jar">
 	<property file="build.properties" />
-	
-	<property name="base-class" value="net.sf.eps2pgf.Main" />
-	
+
+	<tstamp>
+		<format property="NOW" pattern="yyyy-MM-dd" />
+	</tstamp>
+
 	<!-- Specify libraries -->
 	<path id="classpath">
 		<fileset dir="${lib.dir}" includes="**/*.jar" />
@@ -16,26 +18,36 @@
 	<!-- Cleaning targets -->
 	<target name="clean">
 		<delete dir="${build.dir}" />
+		<delete dir="${temp.build.dir}" />
+		<delete dir="${temp.dist.dir}" />
 		<delete file="${jar.file}" />
 		<delete file="${zip.file}" />
+		<delete file="${dist.dir}/${readme.file}" />
 	</target>
 	
 	<!-- Compile target -->
 	<target name="compile">
+		<mkdir dir="${temp.build.dir}" />
+		<copy todir="${temp.build.dir}">
+			<fileset dir="${src.dir}" />
+		</copy>
+		
+		<replace dir="${temp.build.dir}" token="@VERSION@" value="${app.version}" />
+		<replace dir="${temp.build.dir}" token="@BUILDDATE@" value="${NOW}" />
+
 		<mkdir dir="${build.dir}" />
 		<javac
-			srcdir="${src.dir}"
+			srcdir="${temp.build.dir}"
 			destdir="${build.dir}"
 			classpathref="classpath"
 			target="1.5"
 		/>
+		
+		<delete dir="${temp.build.dir}" />
 	</target>
 
-	<!-- Create jar file -->
+	<!-- Create jar file & create other files in dist dir -->
 	<target name="jar" depends="compile">
-		<tstamp>
-			<format property="NOW" pattern="yyyy-MM-dd HH:mm" />
-		</tstamp>
 		<jar destfile="${jar.file}" basedir="${build.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="${base-class}" />
@@ -44,6 +56,11 @@
 				<attribute name="Built-On" value="${NOW}" />
 			</manifest>
 		</jar>
+		
+		<copy file="${otherfiles.dir}/${readme.file}"
+			tofile="${dist.dir}/${readme.file}" />
+		<replace file="${dist.dir}/${readme.file}" token="@VERSION@"
+			value="${app.version}" />
 	</target>
 	
 	<!-- Create zip file -->
