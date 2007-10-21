@@ -23,22 +23,33 @@ package net.sf.eps2pgf;
 import java.util.logging.*;
 
 /**
- * Main class of Eps2pgf program
+ * Main class of Eps2pgf program.
+ * 
  * @author Paul Wagenaars
  */
 public class Main {
+    
+    /** Application name */
     static final String appName = "Eps2pgf";
+    
+    /** Application version */
     static final String appVersion = "@VERSION@";
+    
+    /** Date application was build */
     static final String appBuildDate = "@BUILDDATE@";
     
+    /** Handles program options */
     static Options opts = new Options();;
     
+    /** The log. */
     static Logger log = Logger.getLogger("global");
     
     /**
-     * Main program method
+     * Main program method.
+     * 
      * @param args the command line arguments
-     * @throws java.lang.Exception Something went wrong
+     * 
+     * @throws Exception the exception
      */
     public static void main(String[] args) throws Exception {
         opts.parse(args);
@@ -77,7 +88,8 @@ public class Main {
     }
     
     /**
-     * Creates a string with the program name and version
+     * Creates a string with the program name and version.
+     * 
      * @return Application name followed by the version number
      */
     public static String getNameVersion() {
@@ -85,7 +97,7 @@ public class Main {
     }
     
     /**
-     * Print version and copyright information
+     * Print version and copyright information.
      */
     public static void printVersionCopyright() {
         System.out.println(getNameVersion());
@@ -106,7 +118,7 @@ public class Main {
     }
 
     /**
-     * Prints information on program usage
+     * Prints information on program usage.
      */
     public static void printHelp() {
         System.out.println();
