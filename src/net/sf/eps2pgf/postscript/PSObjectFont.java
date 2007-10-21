@@ -31,40 +31,80 @@ import net.sf.eps2pgf.postscript.errors.*;
 
 /**
  * Wrapper around a font dictionary. This class provides methods to handle the
- * font dictionry.
+ * font dictionary.
+ * 
  * @author Paul Wagenaars
  */
 public class PSObjectFont extends PSObject implements Cloneable {
+    
+    /** The next font id. */
     private static int nextFID = 0;
+    
+    /** The font dictionary. */
     PSObjectDict dict;
+    
+    /** The log. */
     Logger log = Logger.getLogger("global");
     
     // Standard fields in font dictionary
+    /** The fontinfo field name. */
     public static String KEY_FONTINFO = "FontInfo";
+    
+    /** The fontname field name. */
     public static String KEY_FONTNAME = "FontName";
+    
+    /** The encoding field name. */
     public static String KEY_ENCODING = "Encoding";
+    
+    /** The painttype field name. */
     public static String KEY_PAINTTYPE = "PaintType";
+    
+    /** The fonttype field name. */
     public static String KEY_FONTTYPE = "FontType";
+    
+    /** The fontmatrix field name. */
     public static String KEY_FONTMATRIX = "FontMatrix";
+    
+    /** The fontbbox field name. */
     public static String KEY_FONTBBOX = "FontBBox";
+    
+    /** The uniqueid field name. */
     public static String KEY_UNIQUEID = "UniqueID";
+    
+    /** The metrics field name. */
     public static String KEY_METRICS = "Metrics";
+    
+    /** The strokewidth field name. */
     public static String KEY_STROKEWIDTH = "StrokeWidth";
+    
+    /** The private field name. */
     public static String KEY_PRIVATE = "Private";
+    
+    /** The charstrings field name. */
     public static String KEY_CHARSTRINGS = "CharStrings";
+    
+    /** The fid field name. */
     public static String KEY_FID = "FID";
     
     // Standard fields in Private Dictionary
+    /** The subrs field name. */
     public static String KEY_PRV_SUBRS = "Subrs";
     
     // Eps2pgf specific fields in font dictionary
+    /** The latexprecode field name. */
     public static String KEY_LATEXPRECODE = "LatexPreCode";
-    public static String KEY_LATXEPOSTCODE = "LatexPostCode";
+    
+    /** The latexpostcode field name. */
+    public static String KEY_LATEXPOSTCODE = "LatexPostCode";
+    
+    /** The afm field name. */
     public static String KEY_AFM = "AFM";
+    
+    /** The texstrings field name. */
     public static String KEY_TEXSTRINGS = "TexStrings";
     
     /**
-     * Create a new empty instance. It only sets the FID.
+     * Create a new empty instance. It sets the FID, font type and default matrix.
      */
     public PSObjectFont() {
         dict = new PSObjectDict();
@@ -75,9 +115,11 @@ public class PSObjectFont extends PSObject implements Cloneable {
     
     /**
      * Creates a new instance of PSObjectFont by loading it from disk.
+     * 
      * @param resourceDir Resource directory with font information
      * @param fontName Name of the font to load
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont Font file not found or font file is invalid
+     * 
+     * @throws PSErrorInvalidFont the PS error invalid font
      */
     public PSObjectFont(File resourceDir, String fontName) throws PSErrorInvalidFont {
         File fontFile = new File(resourceDir, "fontdescriptions" + 
@@ -114,7 +156,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
         }
         dict.setKey(KEY_PAINTTYPE, new PSObjectInt(2));
         dict.setKey(KEY_LATEXPRECODE, props.getProperty("latexprecode", ""));
-        dict.setKey(KEY_LATXEPOSTCODE, props.getProperty("latexpostcode", ""));
+        dict.setKey(KEY_LATEXPOSTCODE, props.getProperty("latexpostcode", ""));
         FontMetric fontMetrics = loadAfm(resourceDir, fontName);
         dict.setKey(KEY_AFM, new PSObjectAfm(fontMetrics));
         
@@ -144,8 +186,11 @@ public class PSObjectFont extends PSObject implements Cloneable {
     /**
      * Assert that this font contains all fields that are expected from a font.
      * If they don't exist they will be created.
+     * 
      * @return Returns <code>true</code> if this font was already valid. Returns
-     *         <code>false</code> when one or more fields were missing.
+     * <code>false</code> when one or more fields were missing.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
     boolean assertValidFont() throws PSError {
         boolean alreadyValid = true;
@@ -162,8 +207,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
             dict.setKey(KEY_LATEXPRECODE, "");
             alreadyValid = false;
         }
-        if (!dict.known(KEY_LATXEPOSTCODE)) {
-            dict.setKey(KEY_LATXEPOSTCODE, "");
+        if (!dict.known(KEY_LATEXPOSTCODE)) {
+            dict.setKey(KEY_LATEXPOSTCODE, "");
             alreadyValid = false;
         }
         
@@ -184,10 +229,13 @@ public class PSObjectFont extends PSObject implements Cloneable {
     
     /**
      * Convert an array with character names to a string to corresponding
-     * LaTeX code
+     * LaTeX code.
+     * 
      * @param charNames Character names to convert
+     * 
      * @return LaTeX code corresponding to supplied character names
-     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred.
+     * 
+     * @throws PSError a PostScript error occurred
      */
     public String charNames2texStrings(PSObjectArray charNames) throws 
             PSError {
@@ -196,7 +244,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
         StringBuilder str = new StringBuilder();
         PSObjectDict texStrings = dict.lookup(KEY_TEXSTRINGS).toDict();
         PSObjectString preCode = dict.lookup(KEY_LATEXPRECODE).toPSString();
-        PSObjectString postCode = dict.lookup(KEY_LATXEPOSTCODE).toPSString();
+        PSObjectString postCode = dict.lookup(KEY_LATEXPOSTCODE).toPSString();
         
         str.append(preCode.toString());
         for (int i = 0 ; i < charNames.size() ; i++) {
@@ -236,6 +284,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
     /**
      * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
      * of composite object is not copied, but shared.
+     * 
      * @return Duplicate of this object
      */
     public PSObjectFont dup() {
@@ -245,21 +294,27 @@ public class PSObjectFont extends PSObject implements Cloneable {
     /**
      * PostScript operator: get
      * Return value associated with key.
+     * 
      * @param key Key for which the associated value will be returned
+     * 
      * @return Value associated with key
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied key is not a valid dictionary key
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
+     * 
+     * @throws PSErrorUndefined the PostScript error undefined
+     * @throws PSErrorTypeCheck the PostScript error type check
      */
     public PSObject get(PSObject key) throws PSErrorUndefined, PSErrorTypeCheck {
         return dict.get(key);
     }
 
     /**
-     * Get the bounding box of a text (defined by a series of charStrings
+     * Get the bounding box of a text (defined by a series of charStrings.
+     * 
      * @param charNames Character names of the text for which the bounding box must be
      * determined.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred.
+     * 
      * @return Bounding box
+     * 
+     * @throws PSError a PostScript error occurred
      */
     public BoundingBox getBBox(PSObjectArray charNames) throws PSError {
         //charNames = replaceLigatures(charNames);
@@ -292,7 +347,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
             }
         }
         
-        // Determin left and right boundary of bounding box
+        // Determine left and right boundary of bounding box
         double scaling = getFontMatrix().getMeanScaling();
         double leftX = cmFirstChar.getBoundingBox().getLowerLeftX()*scaling;
         double rightX = getWidth(charNames) - cmLastChar.getWx()*scaling
@@ -306,7 +361,14 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * Retrieves the metrics for a single character
+     * Retrieves the metrics for a single character.
+     * 
+     * @param charName the char name
+     * 
+     * @return the char metric
+     * 
+     * @throws PSErrorTypeCheck the PS error type check
+     * @throws PSErrorUndefined the PS error undefined
      */
     CharMetric getCharMetric(String charName) throws PSErrorTypeCheck, PSErrorUndefined {
         FontMetric fm = getFontMetric();
@@ -324,9 +386,11 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * Return the encoding in this font
+     * Return the encoding in this font.
+     * 
      * @return Encoding defined by this font
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Encoding vector is not defined by this font
+     * 
+     * @throws PSErrorTypeCheck the PS error type check
      */
     public PSObjectArray getEncoding() throws PSErrorTypeCheck {
         return dict.lookup(KEY_ENCODING).toArray();
@@ -334,6 +398,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
     
     /**
      * Returns the font ID, if defined. Returns -1 when no FID is defined.
+     * 
+     * @return the FID
      */
     int getFID() {
         try {
@@ -348,26 +414,31 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * Return the FontMatrix
+     * Return the FontMatrix.
+     * 
      * @return FontMatrix defined by this font
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This font does not contain a valid font matrix
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Invalid number of elements in FontMatrix array
+     * 
+     * @throws PSErrorTypeCheck the PS error type check
+     * @throws PSErrorRangeCheck the PS error range check
      */
     public PSObjectMatrix getFontMatrix() throws PSErrorTypeCheck, PSErrorRangeCheck {
         return dict.lookup(KEY_FONTMATRIX).toMatrix();
     }
     
     /**
-     * Returns the font metrics of this font
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This font is invalid. The AFM field is not set properly.
+     * Returns the font metrics of this font.
+     * 
      * @return Font metrics
+     * 
+     * @throws PSErrorTypeCheck the PS error type check
      */
     public FontMetric getFontMetric() throws PSErrorTypeCheck {
         return dict.lookup(KEY_AFM).toFontMetric();
     }
     
     /**
-     * Returns the fontname of this font
+     * Returns the fontname of this font.
+     * 
      * @return Fontname
      */
     String getFontName() {
@@ -380,10 +451,12 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * Returns the font size in pt (= 1/72 inch)
+     * Returns the font size in pt (= 1/72 inch).
+     * 
      * @return Font size of this font in pt (= 1/72 inch)
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck This font does not contain a valid font matrix
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Invalid number of elements in FontMatrix array
+     * 
+     * @throws PSErrorTypeCheck the PS error type check
+     * @throws PSErrorRangeCheck the PS error range check
      */
     public double getFontSize() throws PSErrorTypeCheck, PSErrorRangeCheck {
         return dict.lookup(KEY_FONTMATRIX).toMatrix().getMeanScaling() * 1000;
@@ -393,20 +466,23 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * Returns a list with all items in object.
      * 
      * @return List with all items in this object. The first object (with
-     *         index 0) is always a PSObjectInt with the number of object
-     *         in a single item. For most object types this is 1, but for
-     *         dictionaries this is 2. All consecutive items (index 1 and
-     *         up) are the object's items.
+     * index 0) is always a PSObjectInt with the number of object
+     * in a single item. For most object types this is 1, but for
+     * dictionaries this is 2. All consecutive items (index 1 and
+     * up) are the object's items.
      */
     public List<PSObject> getItemList() {
         return dict.getItemList();
     }
 
     /**
-     * Determines the total width of a string
+     * Determines the total width of a string.
+     * 
      * @param charNames Array with character names describing the string
-     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred.
+     * 
      * @return Width of the string in pt (= 1/72 inch)
+     * 
+     * @throws PSError the PS error
      */
     public double getWidth(PSObjectArray charNames) throws PSError {
         //charNames = replaceLigatures(charNames);
@@ -426,6 +502,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
     
     /**
      * Creates a human-readable string representation of this font.
+     * 
      * @return Human-readable string representation of this font. See the
      * PostScript specification on the == operator for more info.
      */
@@ -434,7 +511,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
 
     /**
-     * Get the number of elements
+     * Get the number of elements.
+     * 
      * @return The number of dictionary entries in this font.
      */
     public int length() {
@@ -443,10 +521,13 @@ public class PSObjectFont extends PSObject implements Cloneable {
     
     /**
      * Load font metrics (*.afm) from the resource directory
+     * 
      * @param resourceDir Resource directory with font information
      * @param fontName Name of the font to load
+     * 
      * @return Font metrics of requested font
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont Font file not found
+     * 
+     * @throws PSErrorInvalidFont the PS error invalid font
      */
     public FontMetric loadAfm(File resourceDir, String fontName) throws PSErrorInvalidFont {
         File afmFile = new File(resourceDir, "afm" + 
@@ -470,16 +551,19 @@ public class PSObjectFont extends PSObject implements Cloneable {
     
     /**
      * PostScript operator put. Replace a single value in this object.
+     * 
      * @param index Index or key for new value
      * @param value New value
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied key is not a valid dictionary key.
+     * 
+     * @throws PSErrorTypeCheck the PS error type check
      */
     public void put(PSObject index, PSObject value) throws PSErrorTypeCheck {
         dict.put(index, value);
     }
     
     /**
-     * Set the font ID for this font to the next available ID
+     * Set the font ID for this font to the next available ID.
+     * 
      * @return New font ID
      */
     int setFID() {
@@ -489,7 +573,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * Return the dictionary used by this font
+     * Return the dictionary used by this font.
+     * 
      * @return Dictionary object of this font
      */
     public PSObjectDict toDict() {
@@ -498,6 +583,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
     
     /**
      * Return this object.
+     * 
      * @return This object
      */
     public PSObjectFont toFont() {
@@ -505,7 +591,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
 
     /**
-     * Returns the type of this object
+     * Returns the type of this object.
+     * 
      * @return Type of this object (see PostScript manual for possible values)
      */
     public String type() {
