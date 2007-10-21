@@ -32,7 +32,7 @@ import net.sf.eps2pgf.io.LimitedSectionInputStream;
 import net.sf.eps2pgf.postscript.DSCHeader;
 import net.sf.eps2pgf.postscript.Interpreter;
 import net.sf.eps2pgf.postscript.PSObjectFile;
-import net.sf.eps2pgf.postscript.Preview;
+import net.sf.eps2pgf.postscript.Header;
 
 /**
  * Object that converts Encapsulated PostScript (EPS) to Portable Graphics
@@ -59,7 +59,7 @@ public class Converter {
      */
     public void convert() throws Exception {
         // Check for a binary header
-        int[] dim = Preview.getPostScriptSection(inFile);
+        int[] dim = Header.getPostScriptSection(inFile);
         
         // Open the file for reading the postscript code
         InputStream in = new BufferedInputStream(new FileInputStream(inFile));
