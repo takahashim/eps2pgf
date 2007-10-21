@@ -16,5 +16,6 @@ golfer.ps                - GhostScript <www.ghostscript.com>, with some small
                            changes.
 grow.ps                  - ???
 illustrator_vw.ps        - ???
+mathematica2.eps         - Figure exported from Mathematica
 tiger.eps                - GhostScript <www.ghostscript.com>, with some small
                            changes.
