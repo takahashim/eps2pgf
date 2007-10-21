@@ -457,8 +457,8 @@ public class PGFDevice implements OutputDevice {
         // as is pgf.
         String angStr = lengthFormat.format(angle);
         
-        text = "{\\fontsize{" + fontSizeFormat.format(fontsize) + "}{" 
-                + fontSizeFormat.format(1.2*fontsize) + "}\\selectfont" + text + "}";
+        text = "\\fontsize{" + fontSizeFormat.format(fontsize) + "}{" 
+                + fontSizeFormat.format(1.2*fontsize) + "}\\selectfont{" + text + "}";
         out.write(String.format("\\pgftext[%sx=%scm,y=%scm,rotate=%s]{%s}\n",
                 posOpts, x, y, angStr, text));
     }

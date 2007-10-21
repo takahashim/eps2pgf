@@ -60,6 +60,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
         PSObjectArray subrsArray = privateDict.get(PSObjectFont.KEY_PRV_SUBRS).toArray();
         subrs = parseSubrs(subrsArray);
         
+        fontMetrics = new FontMetric();
         List<PSObject> items = charStrings.getItemList();
         try {
             for (int i = 1 ; i < items.size() ; i += 2) {
@@ -68,6 +69,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                 System.out.println("-=-=- " + charName.isis());
                 CharMetric charMetric = charString2CharMetric(charName.name, 
                         charString.toString());
+                fontMetrics.addCharMetric(charMetric);
             }
         } catch (PSError e) {
             throw new PSErrorInvalidFont();
@@ -114,7 +116,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
         System.out.println("-=-=- [" + (int)bbox[0] + " " + (int)bbox[1]
                 + " " + (int)bbox[2] + " " + (int)bbox[3] + "]");
         
-        return null;
+        return charMetric;
     }
     
     /**
