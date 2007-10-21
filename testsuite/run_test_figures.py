@@ -24,7 +24,7 @@ import sys
 import subprocess
 import time
 
-eps2pgfCmd = "java -jar ..\\dist\\eps2pgf.jar \"%epsFile%\" --output \"%pgfFile%\""
+eps2pgfCmd = "java -jar ..\\dist_root\\eps2pgf.jar \"%epsFile%\" --output \"%pgfFile%\""
 latexCmd = "pdflatex --interaction=errorstopmode -output-directory=\"%outputDir%\" \"%texFile%\""
 
 nextArg = 1
