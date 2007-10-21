@@ -51,6 +51,10 @@ public class Fonts {
     
     static Logger log = Logger.getLogger("global");
     
+    static final String RESOURCE_DIR_NAME = "resources";
+    static final String AFM_DIR_NAME = "afm";
+    static final String FONTDESC_DIR_NAME = "fontdescriptions";
+    
     /**
      * Initializes Fonts 
      * @throws java.io.FileNotFoundException Unable to find resource dir
@@ -61,25 +65,13 @@ public class Fonts {
         
         // Try to find the resource dir
         File classPath = new File(System.getProperty("java.class.path"));
+        File userDir = new File(System.getProperty("user.dir"));
         if (!(classPath.isAbsolute())) {
-            classPath = new File(System.getProperty("user.dir"), 
-                    System.getProperty("java.class.path"));
+            classPath = new File(userDir, classPath.getPath()); 
         }
-        while (classPath != null) {
-            // Check whether this dir has a valid resource subdir
-            // It just checks for a "resources" directory with two known subdirectories
-            resourceDir = new File(classPath, "resources");
-            if (resourceDir.exists()) {
-                File afmDir = new File(resourceDir, "afm");
-                if (afmDir.exists()) {
-                    File fontDescDir = new File(resourceDir, "fontdescriptions");
-                    if (fontDescDir.exists()) {
-                        break;
-                    }
-                }
-            }
-            resourceDir = null;
-            classPath = classPath.getParentFile();
+        resourceDir = findResourceDirInPath(classPath);
+        if (resourceDir == null) {
+        	resourceDir = findResourceDirInPath(userDir);
         }
         if (resourceDir == null) {
             throw new ProgramError("Unable to find resource dir.");
@@ -148,7 +140,7 @@ public class Fonts {
             // load it from disk.
         }
         
-        // Appartly the font hasn't already been loaded.
+        // Apparently the font hasn't already been loaded.
         try {
             return loadFont(fontName);
         } catch (PSErrorInvalidFont e) {
@@ -160,6 +152,34 @@ public class Fonts {
                 return findFont(defaultFont);
             }
         }
+    }
+    
+    /**
+     * Try to find the resource in the current directory or its parent
+     * directories.
+     * @param dir 
+     */
+    public static File findResourceDirInPath(File dir) {
+    	File returnDir = null;
+    	
+        while (dir != null) {
+            // Check whether this dir has a valid resource subdir
+            // It just checks for a "resources" directory with two known subdirectories
+            returnDir = new File(dir, RESOURCE_DIR_NAME);
+            if (returnDir.exists()) {
+                File afmDir = new File(returnDir, AFM_DIR_NAME);
+                if (afmDir.exists()) {
+                    File fontDescDir = new File(returnDir, FONTDESC_DIR_NAME);
+                    if (fontDescDir.exists()) {
+                        break;
+                    }
+                }
+            }
+            returnDir = null;
+            dir = dir.getParentFile();
+        }
+        
+        return returnDir;
     }
     
     /**
