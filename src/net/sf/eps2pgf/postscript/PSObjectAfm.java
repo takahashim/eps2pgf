@@ -66,7 +66,6 @@ public class PSObjectAfm extends PSObject implements Cloneable {
             for (int i = 1 ; i < items.size() ; i += 2) {
                 PSObjectName charName = items.get(i).toName();
                 PSObjectString charString = items.get(i+1).toPSString();
-                System.out.println("-=-=- " + charName.isis());
                 CharMetric charMetric = charString2CharMetric(charName.name, 
                         charString.toString());
                 fontMetrics.addCharMetric(charMetric);
@@ -110,11 +109,6 @@ public class PSObjectAfm extends PSObject implements Cloneable {
         boundingBox.setUpperRightX((float)bbox[2]);
         boundingBox.setUpperRightY((float)bbox[3]);
         charMetric.setBoundingBox(boundingBox);
-        
-        System.out.println("-=-=-   sb (" + sb[0] + ", " + sb[1] + ")");
-        System.out.println("-=-=-   w  (" + w[0] + ", " + w[1] + ")");
-        System.out.println("-=-=- [" + (int)bbox[0] + " " + (int)bbox[1]
-                + " " + (int)bbox[2] + " " + (int)bbox[3] + "]");
         
         return charMetric;
     }
