@@ -3,6 +3,7 @@
 <properties>
     <comment></comment>
 	<entry key="encoding">Standard</entry>
+	<entry key="texstrings">default</entry>
 	<entry key="latexprecode">\textrm{</entry>
 	<entry key="latexpostcode">}</entry>
 </properties>

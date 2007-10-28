@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-<comment>String to create a character in LaTeX</comment>
+	<comment>String to create a character in LaTeX</comment>
+	<entry key="eps2pgf_select_regexp">.*</entry>
+	<entry key="eps2pgf_select_order">999</entry>
 
 <entry key=".notdef"></entry>
 
@@ -118,10 +120,10 @@
 <entry key="Zeta">Z</entry>
         
 <entry key="a">a</entry>
-<entry key="acute">{\textasciiacute}</entry>
+<entry key="acute">$\acute{\,}$</entry>
 <entry key="ae">{\ae}</entry>
 <entry key="alpha">$\alpha$</entry>
-<entry key="ampersand">{\&amp;}</entry>
+<entry key="ampersand">\&amp;</entry>
 <entry key="angle">$\angle$</entry>
 <entry key="aring">{\aa}</entry>
 <entry key="asciicircum">{\textasciicircum}</entry>
@@ -171,8 +173,8 @@
 
 <entry key="g">g</entry>
 <entry key="gamma">$\gamma$</entry>
-<entry key="grave">{\textasciigrave}</entry>
-<entry key="greater">{\textgreater}</entry>
+<entry key="grave">$\grave{\,}$</entry>
+<entry key="greater">&gt;</entry>
 
 <entry key="h">h</entry>
 <entry key="hungarumlaut">\H{}</entry>
@@ -190,7 +192,7 @@
 
 <entry key="l">l</entry>
 <entry key="lambda">$\lambda$</entry>
-<entry key="less">{\textless}</entry>
+<entry key="less">&lt;</entry>
 
 <entry key="m">m</entry>
 <entry key="macron">{\textasciimacron}</entry>
