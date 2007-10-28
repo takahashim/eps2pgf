@@ -3,6 +3,7 @@
 <properties>
     <comment></comment>
 	<entry key="encoding">Symbol</entry>
-	<entry key="latexprecode">$</entry>
-	<entry key="latexpostcode">$</entry>
+	<entry key="texstrings">default</entry>
+	<entry key="latexprecode"></entry>
+	<entry key="latexpostcode"></entry>
 </properties>

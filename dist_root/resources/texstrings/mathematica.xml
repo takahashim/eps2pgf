@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>String to create a character in LaTeX</comment>
+	<entry key="eps2pgf_select_regexp">Mathematica.*</entry>
+	<entry key="eps2pgf_select_order">10</entry>
+	
+	<entry key=""></entry>
+	<entry key=".notdef"></entry>
+
+	<entry key="Acute">$\acute{\,}$</entry>
+	<entry key="Aleph">$\aleph$</entry>
+	<entry key="Alpha">$\alpha$</entry>
+	<entry key="Ampersand">\&amp;</entry>
+	<entry key="Angle">$\angle$</entry>
+	<entry key="Approxequal">$\approx$</entry>
+	<entry key="ArrowHorizEx">$-$</entry>
+	<entry key="ArrowVertEx">$|$</entry>
+	<entry key="AtSign">@</entry>
+
+	<entry key="Beta">$\beta$</entry>
+	<entry key="BraceEx">|</entry>
+	<entry key="brokenbar">|</entry>
+	<entry key="Bullet">\textbullet</entry>
+	
+	<entry key="CapAlpha">A</entry>
+	<entry key="CapBeta">B</entry>
+	<entry key="CapChi">X</entry>
+	<entry key="CapDelta">$\Delta$</entry>
+	<entry key="CapEpsilon">E</entry>
+	<entry key="CapGamma">$\Gamma$</entry>
+	<entry key="CapEta">H</entry>
+	<entry key="CapIota">I</entry>
+	<entry key="CapKappa">K</entry>
+	<entry key="CapLambda">$\Lambda$</entry>
+	<entry key="CapMu">M</entry>
+	<entry key="CapNu">N</entry>
+	<entry key="CapOmega">$\Omega$</entry>
+	<entry key="CapOmicron">O</entry>
+	<entry key="CapPhi">$\Phi$</entry>
+	<entry key="CapPi">$\Pi$</entry>
+	<entry key="CapRho">P</entry>
+	<entry key="CapSigma">$\Sigma$</entry>
+	<entry key="CapTau">T</entry>
+	<entry key="CapTheta">$\Theta$</entry>
+	<entry key="CapUpsilon">$\Upsilon$</entry>
+	<entry key="CapXi">$\Xi$</entry>
+	<entry key="CapPsi">$\Psi$</entry>
+	<entry key="CapZeta">Z</entry>
+	<entry key="CarriageReturn">\Pisymbol{psy}{191}</entry>
+	<entry key="Chi">$\chi$</entry>
+	<entry key="CircleMultiply">$\otimes$</entry>
+	<entry key="CirclePlus">$\oplus$</entry>
+	<entry key="ClubSuit">$\clubsuit$</entry>
+	<entry key="Colon">:</entry>
+	<entry key="ColonEqual">$\mathrel{\mathop:}=$</entry>
+	<entry key="Comma">,</entry>
+	<entry key="Continuation">$\ddots$</entry>
+	<entry key="Copyright">\copyright</entry>
+	<entry key="CR"></entry>
+	<entry key="Cross">$\times$</entry>
+	<entry key="CurlyCapUpsilon">$\Upsilon$</entry>
+	<entry key="CurlyPhi">$\varphi$</entry>
+	<entry key="CurlyPi">$\varpi$</entry>
+	<entry key="CurlyTheta">$\vartheta$</entry>
+
+	<entry key="DC1"></entry>
+	<entry key="DC2"></entry>
+	<entry key="DC3"></entry>
+	<entry key="DC4"></entry>
+	<entry key="DblDownArrow">$\Downarrow$</entry>
+	<entry key="DblEqual">==</entry>
+	<entry key="DblExtens">=</entry>
+	<entry key="DblLongLArrow">$\Longleftarrow$</entry>
+	<entry key="DblLongLRArrow">$\Longleftrightarrow$</entry>
+	<entry key="DblLRArrow2">$\Leftrightarrow$</entry>
+	<entry key="DblLArrow">$\Leftarrow$</entry>
+	<entry key="DblLRArrow">$\Leftrightarrow$</entry>
+	<entry key="DblLongRArrow">$\Longrightarrow$</entry>
+	<entry key="DblRArrow">$\Rightarrow$</entry>
+	<entry key="DblUpArrow">$\Uparrow$</entry>
+	<entry key="DblUpDownArrow">$\Updownarrow$</entry>
+	<entry key="DblUpExtens1">$\|$</entry>
+	<entry key="Degree">$^\circ$</entry>
+	<entry key="DEL"></entry>
+	<entry key="Delta">$\delta$</entry>
+	<entry key="Diamond2">$\diamond$</entry>
+	<entry key="DiamondSuit">$\diamondsuit$</entry>
+	<entry key="Diffd">\textbf{\textit{d}}</entry>
+	<entry key="Divide">$\div$</entry>
+	<entry key="DLE"></entry>
+	<entry key="DotMath">$\cdot$</entry>
+	<entry key="DoubleAcute">$\acute{\,}\acute{\,}$</entry>
+	<entry key="DoublePrime">$\prime\prime$</entry>
+	<entry key="DownArrow">$\downarrow$</entry>
+
+	<entry key="Eight">8</entry>
+	<entry key="Element">$\in$</entry>
+	<entry key="Ellipsis">$\ldots$</entry>
+	<entry key="EmptySet">$\emptyset$</entry>
+	<entry key="Epsilon">$\epsilon$</entry>
+	<entry key="Equal">=</entry>
+	<entry key="Equivalence">$\equiv$</entry>
+	<entry key="EscapeChar"></entry>
+	<entry key="Eta">$\eta$</entry>
+	<entry key="Eth">{\DH}</entry>
+	<entry key="eth">{\dh}</entry>
+	<entry key="Exclamation">!</entry>
+	<entry key="Exists">$\exists$</entry>
+	<entry key="Expe">\textbf{\textit{e}}</entry>
+	
+	<entry key="FinalSigma">$\varsigma$</entry>
+	<entry key="Five">5</entry>
+	<entry key="ForAll">$\forall$</entry>
+	<entry key="Four">4</entry>
+	<entry key="Fraction">/</entry>
+	<entry key="FractionBarExt">$\frac{\,}{\,}$</entry>
+
+	<entry key="Gamma">$\gamma$</entry>
+	<entry key="Grave">$\grave{\,}$</entry>
+	<entry key="Gradient">$\nabla$</entry>
+	<entry key="Greater">&gt;</entry>
+	<entry key="GreaterEqual">$\ge$</entry>
+	
+	<entry key="Hat">$\hat{}$</entry>
+	<entry key="HeartSuit">$\heartsuit$</entry>
+	<entry key="HT"></entry>
+	
+	<entry key="IFraktur">$\Im$</entry>
+	<entry key="Iota">$\iota$</entry>
+    <entry key="Imagi">\textbf{\textit{i}}</entry>
+    <entry key="Infinity">$\infty$</entry>
+    <entry key="Intergral">$\int$</entry>
+    <entry key="IntegralBot">$\int$</entry>
+    <entry key="IntegralEx">$\int$</entry>
+    <entry key="IntegralTop">$\int$</entry>
+    <entry key="Intersection">$\cap$</entry>
+
+	<entry key="Kappa">$\kappa$</entry>
+
+    <entry key="LAngle">$\langle$</entry>
+    <entry key="LArrow">$\leftarrow$</entry>
+	<entry key="Lambda">$\lambda$</entry>
+	<entry key="LBrace">{\{}</entry>
+	<entry key="LBraceBot">{\{}</entry>
+	<entry key="LBraceMid">{\{}</entry>
+	<entry key="LBraceTop">{\{}</entry>
+	<entry key="LBrace1">{\{}</entry>
+	<entry key="LBrace2">{\LARGE\{}</entry>
+	<entry key="LBrace3">{\huge\{}</entry>
+	<entry key="LBrace4">{\Huge\{}</entry>
+	<entry key="LBracket">[</entry>
+	<entry key="LBracketBot">[</entry>
+	<entry key="LBracketEx">[</entry>
+	<entry key="LBracketTop">[</entry>
+	<entry key="LBracket1">[</entry>
+	<entry key="LBracket2">{\LARGE[}</entry>
+	<entry key="LBracket3">{\huge[}</entry>
+	<entry key="LBracket4">{\Huge[}</entry>
+	<entry key="Less">&lt;</entry>
+	<entry key="LessEqual">$\le$</entry>
+	<entry key="LF"></entry>
+	<entry key="LogicalNot">$\lnot$</entry>
+	<entry key="LongLArrow">$\longleftarrow$</entry>
+	<entry key="LongLRArrow">$\longleftrightarrow$</entry>
+	<entry key="LongRArrow">$\longrightarrow$</entry>
+	<entry key="Lozenge">$\lozenge$</entry>
+	<entry key="LParen">(</entry>
+	<entry key="LParenBot">(</entry>
+	<entry key="LParenEx">(</entry>
+	<entry key="LParenTop">(</entry>
+	<entry key="LParen1">(</entry>
+	<entry key="LParen2">{\LARGE(}</entry>
+	<entry key="LParen3">{\huge(}</entry>
+	<entry key="LParen4">{\Huge(}</entry>
+	<entry key="LRArrow">$\leftrightarrow$</entry>
+	<entry key="LSkeleton">$\ll$</entry>
+	<entry key="Lslash">{\L}</entry>
+	<entry key="lslash">{\l}</entry>
+
+	<entry key="Minus">$-$</entry>
+	<entry key="minus">$-$</entry>
+	<entry key="Mu">$\mu$</entry>
+	<entry key="Multiply">$\times$</entry>
+	<entry key="multiply">$\times$</entry>
+
+    <entry key="NbSpace"></entry>
+	<entry key="Nine">9</entry>
+	<entry key="NotElement">$\notin$</entry>
+	<entry key="NotEqual">$\ne$</entry>
+	<entry key="NotSquareSprsetEqual">$\supseteq$</entry>
+	<entry key="NotSubset">$\subset\!\!\!\!\!\!\:\!\:\!/$</entry>
+	<entry key="Nu">$\nu$</entry>
+	<entry key="NUL"></entry>
+	<entry key="NumberSign">{\#}</entry>
+
+	<entry key="Omega">$\omega$</entry>
+	<entry key="Omicron">o</entry>
+	<entry key="One">1</entry>
+	<entry key="onehalf">$\frac{1}{2}$</entry>
+	<entry key="onequarter">$\frac{1}{4}$</entry>
+	<entry key="onesuperior">$^1$</entry>
+	<entry key="OverBar">$\overline{\:}$</entry>
+	<entry key="OverDot">$\dot{}$</entry>
+	<entry key="OverTilde">\~{}</entry>
+
+    <entry key="PartialDiff">$\partial$</entry>
+	<entry key="Percent">{\%}</entry>
+	<entry key="Period">.</entry>
+	<entry key="Perpendicular">$\perp$</entry>
+	<entry key="Phi">$\phi$</entry>
+	<entry key="Pi">$\pi$</entry>
+	<entry key="Placeholder">$\square$</entry>
+	<entry key="Plus">+</entry>
+	<entry key="PlusMinus">$\pm$</entry>
+	<entry key="Prime">$\prime$</entry>
+	<entry key="Product">$\prod$</entry>
+	<entry key="ProperSubset">$\subset$</entry>
+	<entry key="ProperSuperset">$\supset$</entry>
+	<entry key="Proportional">$\propto$</entry>
+	<entry key="Psi">$\psi$</entry>
+	
+	<entry key="Question">?</entry>
+
+    <entry key="RAngle">$\rangle$</entry>
+    <entry key="RArrow">$\rightarrow$</entry>
+    <entry key="Radical">$\surd$</entry>
+	<entry key="RBrace">{\}}</entry>
+	<entry key="RBraceBot">{\}}</entry>
+	<entry key="RBraceEx">{\}}</entry>
+	<entry key="RBraceMid">{\}}</entry>
+	<entry key="RBraceTop">{\}}</entry>
+	<entry key="RBrace1">{\}}</entry>
+	<entry key="RBrace2">{\LARGE\}}</entry>
+	<entry key="RBrace3">{\huge\}}</entry>
+	<entry key="RBrace4">{\Huge\}}</entry>
+	<entry key="RBracket">]</entry>
+	<entry key="RBracketBot">]</entry>
+	<entry key="RBracketEx">]</entry>
+	<entry key="RBracketTop">]</entry>
+	<entry key="RBracket1">]</entry>
+	<entry key="RBracket2">{\LARGE]}</entry>
+	<entry key="RBracket3">{\huge]}</entry>
+	<entry key="RBracket4">{\Huge]}</entry>
+	<entry key="ReflexSubset">$\subseteq$</entry>
+	<entry key="RegTM">\circledR</entry>
+	<entry key="RFraktur">$\Re$</entry>
+	<entry key="Rho">$\rho$</entry>
+	<entry key="RParen">)</entry>
+	<entry key="RParenBot">)</entry>
+	<entry key="RParenEx">)</entry>
+	<entry key="RParenTop">)</entry>
+	<entry key="RParen1">)</entry>
+	<entry key="RParen2">{\LARGE)}</entry>
+	<entry key="RParen3">{\huge)}</entry>
+	<entry key="RParen4">{\Huge)}</entry>
+	<entry key="RS"></entry>
+	<entry key="RSkeleton">$\gg$</entry>
+	<entry key="RuleDelayed">$:\rightarrow$</entry>
+
+    <entry key="Scaron">\v{S}</entry>
+    <entry key="scaron">\v{s}</entry>
+	<entry key="SelectPlaceholder">$\blacksquare$</entry>
+	<entry key="SemiColon">;</entry>
+	<entry key="Seven">7</entry>
+	<entry key="Sigma">$\sigma$</entry>
+	<entry key="Six">6</entry>
+	<entry key="Skeleton">$\centerdot$</entry>
+	<entry key="Slash">/</entry>
+	<entry key="Slot">{\#}</entry>
+	<entry key="SmallMember">$\ni$</entry>
+	<entry key="Solidmedsqr">$\blacksquare$</entry>
+	<entry key="Space"> </entry>
+	<entry key="Spacer">\textvisiblespace</entry>
+	<entry key="SpadeSuit">$\spadesuit$</entry>
+	<entry key="Star">*</entry>
+	<entry key="Sum">$\sum$</entry>
+
+	<entry key="Tau">$\tau$</entry>
+	<entry key="Therefore">$\therefore$</entry>
+	<entry key="Theta">$\theta$</entry>
+	<entry key="Thorn">{\TH}</entry>
+	<entry key="thorn">{\th}</entry>
+	<entry key="Three">3</entry>
+	<entry key="threequarters">$\frac{3}{4}$</entry>
+	<entry key="threesuperior">$^3$</entry>
+	<entry key="Tilde">{\textasciitilde}</entry>
+	<entry key="TildeFullEqual">$\cong$</entry>
+	<entry key="TM">\texttrademark</entry>
+	<entry key="Two">2</entry>
+	<entry key="twosuperior">$^2$</entry>
+
+	<entry key="Underbar">{\_}</entry>
+	<entry key="Union">$\cup$</entry>
+	<entry key="UpArrow">$\uparrow$</entry>
+	<entry key="UpDownArrow">$\updownarrow$</entry>
+	<entry key="Upsilon">$\upsilon$</entry>
+	<entry key="US"></entry>
+	
+	<entry key="Vee">$\vee$</entry>
+	<entry key="VertBar">{\textbar}</entry>
+
+    <entry key="Wedge">$\wedge$</entry>
+    <entry key="Weierstrass">$\wp$</entry>
+    <entry key="Wolf">W</entry>
+
+	<entry key="Xi">$\xi$</entry>
+	
+	<entry key="Yacute">{\'Y}</entry>
+	<entry key="yacute">{\'y}</entry>
+
+    <entry key="Zcaron">\v{Z}</entry>
+    <entry key="zcaron">\v{z}</entry>
+	<entry key="Zero">0</entry>
+	<entry key="Zeta">$\zeta$</entry>
+
+</properties>

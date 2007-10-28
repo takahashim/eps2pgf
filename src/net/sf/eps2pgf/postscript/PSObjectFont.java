@@ -155,12 +155,15 @@ public class PSObjectFont extends PSObject implements Cloneable {
             throw new PSErrorInvalidFont();
         }
         dict.setKey(KEY_PAINTTYPE, new PSObjectInt(2));
+        
         dict.setKey(KEY_LATEXPRECODE, props.getProperty("latexprecode", ""));
         dict.setKey(KEY_LATEXPOSTCODE, props.getProperty("latexpostcode", ""));
         FontMetric fontMetrics = loadAfm(resourceDir, fontName);
         dict.setKey(KEY_AFM, new PSObjectAfm(fontMetrics));
+        String texStringName = props.getProperty("texstrings", "default");
+        dict.setKey(KEY_TEXSTRINGS, Fonts.getTexStringDict(texStringName));
         
-        // An AFM file foes not specify CharStrings. Instead, we make a fake answer
+        // An AFM file foes not specify CharStrings. Instead, we make a fake entry
         List charMetrics = fontMetrics.getCharMetrics();
         PSObjectDict charStrings = new PSObjectDict();
         for (Object obj : charMetrics) {
@@ -197,8 +200,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
         
         // See if texstrings are defined for this font. If not, copy standard texstrings
         if (!dict.known(KEY_TEXSTRINGS)) {
-            PSObjectDict texStrings = Fonts.texstrings.clone();
-            dict.setKey(KEY_TEXSTRINGS, texStrings);
+        	String fontname = dict.get(KEY_FONTNAME).toName().name;
+        	dict.setKey(KEY_TEXSTRINGS, Fonts.getTexStringDictByFontname(fontname));
             alreadyValid = false;
         }
         
@@ -252,12 +255,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
                 String charName = charNames.get(i).toName().toDictKey();
                 PSObject code = texStrings.lookup(charName);
                 if (code == null) {
-                    // Maybe there is an all-lower-case version of this character name defined
-                    code = texStrings.lookup(charName.toLowerCase());
-                    if (code == null) {
-                        throw new PSErrorUnimplemented("TexString for "
-                                + charNames.get(i).isis() + " is unknown.");
-                    }
+                    throw new PSErrorUnimplemented("TexString for "
+                            + charNames.get(i).isis() + " is unknown.");
                 }
                 str.append(code.toPSString().toString());
             } catch (PSErrorRangeCheck e) {
@@ -382,7 +381,11 @@ public class PSObjectFont extends PSObject implements Cloneable {
                 return cm;
             }
         }
-        throw new PSErrorUndefined();
+        if (charName.equals(".notdef")) {
+        	throw new PSErrorUndefined();
+        } else {
+        	return getCharMetric(".notdef");
+        }
     }
     
     /**

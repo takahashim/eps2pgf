@@ -24,8 +24,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
@@ -47,13 +49,17 @@ public class Fonts {
     
     static Properties fontSubstitutions;
     
-    static PSObjectDict texstrings;
+    static Map<String,Properties> allTexStrings;
     
     static Logger log = Logger.getLogger("global");
     
     static final String RESOURCE_DIR_NAME = "resources";
     static final String AFM_DIR_NAME = "afm";
     static final String FONTDESC_DIR_NAME = "fontdescriptions";
+    static final String TEXSTRINGS_DIR_NAME = "texstrings";
+    
+    static final String TEXSTRINGS_ORDER = "eps2pgf_select_order";
+    static final String TEXSTRINGS_REGEXP = "eps2pgf_select_regexp";
     
     /**
      * Initializes Fonts 
@@ -78,7 +84,7 @@ public class Fonts {
         }
         
         fontSubstitutions = loadFontSubstitutions(new File(resourceDir, "fontSubstitution.xml"));
-        texstrings = loadTexstrings(new File(resourceDir, "texStrings.xml"));
+        allTexStrings = loadAllTexstrings();
     }
     
     /**
@@ -242,33 +248,72 @@ public class Fonts {
      * @throws net.sf.eps2pgf.ProgramError Unable to read the texstrings from file.
      * @return Dictionary with all loaded "character names -> texstring" pairs.
      */
-    public static PSObjectDict loadTexstrings(File texstringsFile) throws ProgramError {
-        Properties props;
-        try {
-            FileInputStream in = new FileInputStream(texstringsFile);
-            props = new Properties();
-            props.loadFromXML(in);
-            in.close();
-        } catch (FileNotFoundException e) {
-            log.severe("Unable to load texstrings " + texstringsFile + ".\n");
-            throw new ProgramError("Unable to find texstrings file. " + e);
-        } catch (IOException e) {
-            throw new ProgramError("There was an error loading the texstrings file. " + e);
-        }
-        
-        // Now load texstrings from the props
-        PSObjectDict texstringsdict = new PSObjectDict();
-        Set<String> allCharNames = Encoding.getCharNames().keySet();
-        for (String charName : allCharNames) {
-            // Check whether this character name in defined in this
-            // texstrings list.
-            String propValue = props.getProperty(charName);
-            if (propValue != null) {
-                texstringsdict.setKey(charName, propValue);
+    public static Map<String, Properties> loadAllTexstrings() throws ProgramError {
+    	File texStringsDir = new File(resourceDir, TEXSTRINGS_DIR_NAME);
+    	File[] texStringFiles = texStringsDir.listFiles();
+    	Map<String, Properties> texStrings = new HashMap<String, Properties>();
+    	
+    	for (int i = 0 ; i < texStringFiles.length ; i++) {
+            Properties props;
+            try {
+                FileInputStream in = new FileInputStream(texStringFiles[i]);
+                props = new Properties();
+                props.loadFromXML(in);
+                in.close();
+            } catch (IOException e) {
+                continue;
             }
-        }
-
-        return texstringsdict;
+            String name = texStringFiles[i].getName();
+            if (name.endsWith(".xml")) {
+            	name = name.substring(0, name.length()-4);
+            }
+            texStrings.put(name, props);
+    	}
+        
+        return texStrings;
+    }
+    
+    /**
+     * Retrieves a set of TeX strings specified by the filename.
+     * @param name Filename of the set of TeX strings, e.g. default
+     */
+    public static PSObjectDict getTexStringDict(String filename) {
+    	Properties props = allTexStrings.get(filename);
+    	PSObjectDict texStringDict = new PSObjectDict();
+    	
+    	for(Enumeration<Object> e = props.keys() ; e.hasMoreElements() ;) {
+    		String key = e.nextElement().toString();
+    		if (key.startsWith("eps2pgf")) {
+    			continue;
+    		}
+    		texStringDict.setKey(key, props.getProperty(key));
+    	}
+    	
+    	return texStringDict;
     }
 
+    /**
+     * Retrieve a set of TeX strings specified by the font name and
+     * the regexps in the texstrings files. This selects the set of
+     * TeX strings with a regexp that matches the fontname. If there
+     * are multiple matches the set with lowest order is selected.
+     */
+    public static PSObjectDict getTexStringDictByFontname(String fontname) {
+    	String matchName = "default";
+    	int matchOrder = Integer.MAX_VALUE; 
+    	for (String texStringName : allTexStrings.keySet()) {
+    		Properties props = allTexStrings.get(texStringName);
+    		String orderStr = props.getProperty(TEXSTRINGS_ORDER, "999999");
+    		int order = Integer.parseInt(orderStr);
+    		if (order > matchOrder) {
+    			continue;
+    		}
+    		String regexp = props.getProperty(TEXSTRINGS_REGEXP, "^$");
+    		if (fontname.matches(regexp)) {
+    			matchName = texStringName;
+    			matchOrder = order;
+    		}
+    	}
+    	return getTexStringDict(matchName);
+    }
 }
