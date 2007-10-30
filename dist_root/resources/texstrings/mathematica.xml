@@ -86,7 +86,7 @@
 	<entry key="Delta">$\delta$</entry>
 	<entry key="Diamond2">$\diamond$</entry>
 	<entry key="DiamondSuit">$\diamondsuit$</entry>
-	<entry key="Diffd">\textbf{\textit{d}}</entry>
+	<entry key="Diffd">\textrm{\textbf{\textit{d}}}</entry>
 	<entry key="Divide">$\div$</entry>
 	<entry key="DLE"></entry>
 	<entry key="DotMath">$\cdot$</entry>
@@ -107,7 +107,7 @@
 	<entry key="eth">{\dh}</entry>
 	<entry key="Exclamation">!</entry>
 	<entry key="Exists">$\exists$</entry>
-	<entry key="Expe">\textbf{\textit{e}}</entry>
+	<entry key="Expe">\textrm{\textbf{\textit{e}}}</entry>
 	
 	<entry key="FinalSigma">$\varsigma$</entry>
 	<entry key="Five">5</entry>
@@ -128,7 +128,7 @@
 	
 	<entry key="IFraktur">$\Im$</entry>
 	<entry key="Iota">$\iota$</entry>
-    <entry key="Imagi">\textbf{\textit{i}}</entry>
+    <entry key="Imagi">\textrm{\textbf{\textit{i}}}</entry>
     <entry key="Infinity">$\infty$</entry>
     <entry key="Intergral">$\int$</entry>
     <entry key="IntegralBot">$\int$</entry>

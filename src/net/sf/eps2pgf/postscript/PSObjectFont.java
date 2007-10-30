@@ -205,13 +205,36 @@ public class PSObjectFont extends PSObject implements Cloneable {
             alreadyValid = false;
         }
         
-        // Check latex pre- and post code
-        if (!dict.known(KEY_LATEXPRECODE)) {
-            dict.setKey(KEY_LATEXPRECODE, "");
-            alreadyValid = false;
-        }
-        if (!dict.known(KEY_LATEXPOSTCODE)) {
-            dict.setKey(KEY_LATEXPOSTCODE, "");
+        // If the LaTeX pre- and post codes are unknown, try to derive
+        // them from the font name.
+        if (!dict.known(KEY_LATEXPRECODE) || !dict.known(KEY_LATEXPOSTCODE)) {
+            String[][] fontTypes = {
+            		{"Serif",     "\\textrm{", "}"},
+            		{"Roman",     "\\textrm{", "}"},
+            		{"Sans",      "\\textsf{", "}"},
+            		{"Mono",      "\\texttt{", "}"},
+            		{"Monospace", "\\texttt{", "}"},
+            		{"Bold",      "\\textbf{", "}"},
+            		{"Oblique",   "\\textsl{", "}"},
+            		{"Obli",      "\\textsl{", "}"},
+            		{"Slanted",   "\\textsl{", "}"},
+            		{"Italic",    "\\textit{", "}"},
+            		{"Ital",      "\\textit{", "}"}};
+            String pre = "";
+            String post = "";
+            for (int i = 0 ; i < fontTypes.length ; i++) {
+            	// Append an "A" to the font name to make sure that
+            	// there is at least one [^a-z] character after the
+            	// font type string. 
+            	String fontname = dict.get(KEY_FONTNAME).toName().name + "A";
+            	String regexp = ".*" + fontTypes[i][0] + "[^a-z].*";
+            	if (fontname.matches(regexp)) {
+            		pre += fontTypes[i][1];
+            		post += fontTypes[i][2];
+            	}
+            }
+        	dict.setKey(KEY_LATEXPRECODE, pre);
+        	dict.setKey(KEY_LATEXPOSTCODE, post);
             alreadyValid = false;
         }
         
