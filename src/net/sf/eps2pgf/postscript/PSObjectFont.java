@@ -230,7 +230,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
             	String regexp = ".*" + fontTypes[i][0] + "[^a-z].*";
             	if (fontname.matches(regexp)) {
             		pre += fontTypes[i][1];
-            		post += fontTypes[i][2];
+            		post = fontTypes[i][2] + post;
             	}
             }
         	dict.setKey(KEY_LATEXPRECODE, pre);
