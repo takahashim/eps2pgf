@@ -404,11 +404,17 @@ public class PSObjectFont extends PSObject implements Cloneable {
                 return cm;
             }
         }
-        if (charName.equals(".notdef")) {
-        	throw new PSErrorUndefined();
-        } else {
-        	return getCharMetric(".notdef");
-        }
+        
+        // CharMetric was not found, let's return an empty one
+        CharMetric empty = new CharMetric();
+        BoundingBox bbox = new BoundingBox();
+        bbox.setLowerLeftX(0);
+        bbox.setLowerLeftY(0);
+        bbox.setUpperRightX(0);
+        bbox.setUpperRightY(0);
+        empty.setBoundingBox(bbox);
+        empty.setWx(0);
+        return empty;
     }
     
     /**

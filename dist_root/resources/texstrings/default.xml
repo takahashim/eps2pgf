@@ -72,6 +72,7 @@
 
 <entry key="L">L</entry>
 <entry key="Lambda">$\Lambda$</entry>
+<entry key="Lslash">{\L}</entry>
 
 <entry key="M">M</entry>
 <entry key="Mu">M</entry>
@@ -83,6 +84,7 @@
 <entry key="OE">{\OE}</entry>
 <entry key="Omega">$\Omega$</entry>
 <entry key="Omicron">O</entry>
+<entry key="Oslash">{\O}</entry>
 
 <entry key="P">P</entry>
 <entry key="Phi">$\Phi$</entry>
@@ -140,17 +142,22 @@
 <entry key="bracketleft">[</entry>
 <entry key="bracketright">]</entry>
 <entry key="breve">{\textasciibreve}</entry>
+<entry key="bullet">{\textbullet}</entry>
 
 <entry key="c">c</entry>
 <entry key="caron">{\textasciicaron}</entry>
 <entry key="cedilla">\c{}</entry>
+<entry key="cent">{\textcent}</entry>
 <entry key="chi">$\chi$</entry>
 <entry key="circumflex">{\textasciicircum}</entry>
 <entry key="colon">:</entry>
 <entry key="comma">,</entry>
 <entry key="congruent">$\cong$</entry>
+<entry key="currency">{\textcurrency}</entry>
 
 <entry key="d">d</entry>
+<entry key="dagger">{\dag}</entry>
+<entry key="daggerdbl">{\ddag}</entry>
 <entry key="delta">$\delta$</entry>
 <entry key="dieresis">{\textasciidieresis}</entry>
 <entry key="dollar">{\$}</entry>
@@ -159,6 +166,9 @@
 
 <entry key="e">e</entry>
 <entry key="eight">8</entry>
+<entry key="ellipsis">{\dots}</entry>
+<entry key="emdash">{\textemdash}</entry>
+<entry key="endash">{\textendash}</entry>
 <entry key="epsilon">$\epsilon$</entry>
 <entry key="eta">$\eta$</entry>
 <entry key="eth">{\dh}</entry>
@@ -168,13 +178,22 @@
 <entry key="existential">$\exists$</entry>
 
 <entry key="f">f</entry>
+<entry key="fi">fi</entry>
 <entry key="five">5</entry>
+<entry key="fl">fl</entry>
+<entry key="florin">\textit{f}</entry>
 <entry key="four">4</entry>
+<entry key="fraction">/</entry>
 
 <entry key="g">g</entry>
 <entry key="gamma">$\gamma$</entry>
+<entry key="germandbls">{\ss}</entry>
 <entry key="grave">$\grave{\,}$</entry>
 <entry key="greater">&gt;</entry>
+<entry key="guillemotleft">{\guillemotleft}</entry>
+<entry key="guillemotright">{\guillemotright}</entry>
+<entry key="guilsinglleft">{\guilsinglleft}</entry>
+<entry key="guilsinglright">{\guilsinglright}</entry>
 
 <entry key="h">h</entry>
 <entry key="hungarumlaut">\H{}</entry>
@@ -193,6 +212,7 @@
 <entry key="l">l</entry>
 <entry key="lambda">$\lambda$</entry>
 <entry key="less">&lt;</entry>
+<entry key="lslash">{\l}</entry>
 
 <entry key="m">m</entry>
 <entry key="macron">{\textasciimacron}</entry>
@@ -211,14 +231,19 @@
 <entry key="omega">$\omega$</entry>
 <entry key="omicron">o</entry>
 <entry key="one">1</entry>
+<entry key="ordfeminine">$^\mathrm{a}$</entry>
+<entry key="ordmasculine">$^\mathrm{o}$</entry>
 <entry key="oslash">{\o}</entry>
 <entry key="otilde">\~o</entry>
 
 <entry key="p">p</entry>
+<entry key="paragraph">{\P}</entry>
 <entry key="parenleft">(</entry>
 <entry key="parenright">)</entry>
 <entry key="percent">{\%}</entry>
 <entry key="period">.</entry>
+<entry key="periodcentered">{\textperiodcentered}</entry>
+<entry key="perthousand">{\textperthousand}</entry>
 <entry key="phi">$\phi$</entry>
 <entry key="pi">$\pi$</entry>
 <entry key="plus">+</entry>
@@ -226,9 +251,15 @@
 
 <entry key="q">q</entry>
 <entry key="question">?</entry>
-<entry key="quotedbl">\textquotedblright</entry>
+<entry key="questiondown">{\textquestiondown}</entry>
+<entry key="quotedbl">{\textquotedbl}</entry>
+<entry key="quotedblbase">{\quotedblbase}</entry>
+<entry key="quotedblleft">{\textquotedblleft}</entry>
+<entry key="quotedblright">{\textquotedblright}</entry>
 <entry key="quoteleft">`</entry>
 <entry key="quoteright">'</entry>
+<entry key="quotesingle">{\textquotesingle}</entry>
+<entry key="quotesinglbase">{\quotesinglbase}</entry>
 
 <entry key="r">r</entry>
 <entry key="rho">$\rho$</entry>
@@ -236,12 +267,14 @@
 
 <entry key="s">s</entry>
 <entry key="scaron">\v{s}</entry>
+<entry key="section">{\S}</entry>
 <entry key="semicolon">;</entry>
 <entry key="seven">7</entry>
 <entry key="sigma">$\sigma$</entry>
 <entry key="six">6</entry>
 <entry key="slash">/</entry>
 <entry key="space"> </entry>
+<entry key="sterling">{\pounds}</entry>
 <entry key="suchthat">$\ni$</entry>
 
 <entry key="t">t</entry>
@@ -265,6 +298,7 @@
 <entry key="xi">$\xi$</entry>
 
 <entry key="y">y</entry>
+<entry key="yen">{\yen}</entry>
 
 <entry key="z">z</entry>
 <entry key="zero">0</entry>
