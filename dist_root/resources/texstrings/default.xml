@@ -46,6 +46,7 @@
 <entry key="Epsilon">E</entry>
 <entry key="Eta">H</entry>
 <entry key="Eth">{\DH}</entry>
+<entry key="Euro">{\texteuro}</entry>
 
 <entry key="F">F</entry>
 
@@ -60,6 +61,7 @@
 <entry key="Icircumflex">\^I</entry>
 <entry key="Idieresis">\"I</entry>
 <entry key="Idotaccent">\.I</entry>
+<entry key="Ifraktur">$\Im$</entry>
 <entry key="Igrave">\`I</entry>
 <entry key="Imacron">\=I</entry>
 <entry key="Iogonek">\k{I}</entry>
@@ -94,6 +96,7 @@
 <entry key="Q">Q</entry>
 
 <entry key="R">R</entry>
+<entry key="Rfraktur">$\Re$</entry>
 <entry key="Rho">P</entry>
 
 <entry key="S">S</entry>
@@ -124,10 +127,26 @@
 <entry key="a">a</entry>
 <entry key="acute">$\acute{\,}$</entry>
 <entry key="ae">{\ae}</entry>
+<entry key="aleph">$\aleph$</entry>
 <entry key="alpha">$\alpha$</entry>
 <entry key="ampersand">\&amp;</entry>
 <entry key="angle">$\angle$</entry>
+<entry key="angleleft">$\langle$</entry>
+<entry key="angleright">$\rangle$</entry>
+<entry key="approxequal">$\approx$</entry>
 <entry key="aring">{\aa}</entry>
+<entry key="arrowboth">$\leftrightarrow$</entry>
+<entry key="arrowdblboth">$\Leftrightarrow$</entry>
+<entry key="arrowdbldown">$\Downarrow$</entry>
+<entry key="arrowdblleft">$\Leftarrow$</entry>
+<entry key="arrowdblright">$\Rightarrow$</entry>
+<entry key="arrowdown">$\downarrow$</entry>
+<entry key="arrowhorizex">$-$</entry>
+<entry key="arrowleft">$\leftarrow$</entry>
+<entry key="arrowright">$\rightarrow$</entry>
+<entry key="arrowup">$\uparrow$</entry>
+<entry key="arrowdblup">$\Uparrow$</entry>
+<entry key="arrowvertex">$|$</entry>
 <entry key="asciicircum">{\textasciicircum}</entry>
 <entry key="asciitilde">{\textasciitilde}</entry>
 <entry key="asterisk">*</entry>
@@ -137,20 +156,39 @@
 <entry key="backslash">$\backslash$</entry>
 <entry key="bar">{\textbar}</entry>
 <entry key="beta">$\beta$</entry>
+<entry key="braceex">|</entry>
 <entry key="braceleft">{\{}</entry>
+<entry key="braceleftmid">{\{}</entry>
+<entry key="braceleftbt">{\{}</entry>
+<entry key="bracelefttp">{\{}</entry>
 <entry key="braceright">{\}}</entry>
+<entry key="bracerightbt">{\}}</entry>
+<entry key="bracerightmid">{\}}</entry>
+<entry key="bracerighttp">{\}}</entry>
 <entry key="bracketleft">[</entry>
+<entry key="bracketleftbt">[</entry>
+<entry key="bracketlefttp">[</entry>
+<entry key="bracketleftex">|</entry>
 <entry key="bracketright">]</entry>
+<entry key="bracketrightbt">]</entry>
+<entry key="bracketrightex">|</entry>
+<entry key="bracketrighttp">]</entry>
 <entry key="breve">{\textasciibreve}</entry>
 <entry key="bullet">{\textbullet}</entry>
 
 <entry key="c">c</entry>
+<entry key="carriagereturn">\Pisymbol{psy}{191}</entry>
 <entry key="caron">{\textasciicaron}</entry>
 <entry key="cedilla">\c{}</entry>
 <entry key="cent">{\textcent}</entry>
 <entry key="chi">$\chi$</entry>
+<entry key="circlemultiply">$\otimes$</entry>
+<entry key="circleplus">$\oplus$</entry>
 <entry key="circumflex">{\textasciicircum}</entry>
+<entry key="club">$\clubsuit$</entry>
 <entry key="colon">:</entry>
+<entry key="copyrightsans">\copyright</entry>
+<entry key="copyrightserif">\copyright</entry>
 <entry key="comma">,</entry>
 <entry key="congruent">$\cong$</entry>
 <entry key="currency">{\textcurrency}</entry>
@@ -158,18 +196,25 @@
 <entry key="d">d</entry>
 <entry key="dagger">{\dag}</entry>
 <entry key="daggerdbl">{\ddag}</entry>
+<entry key="degree">$^\circ$</entry>
 <entry key="delta">$\delta$</entry>
+<entry key="diamond">$\diamondsuit$</entry>
 <entry key="dieresis">{\textasciidieresis}</entry>
+<entry key="divide">$\div$</entry>
 <entry key="dollar">{\$}</entry>
 <entry key="dotaccent">$\dot{}$</entry>
 <entry key="dotlessi">{\i}</entry>
+<entry key="dotmath">$\cdot$</entry>
 
 <entry key="e">e</entry>
 <entry key="eight">8</entry>
+<entry key="element">$\in$</entry>
 <entry key="ellipsis">{\dots}</entry>
 <entry key="emdash">{\textemdash}</entry>
+<entry key="emptyset">$\emptyset$</entry>
 <entry key="endash">{\textendash}</entry>
 <entry key="epsilon">$\epsilon$</entry>
+<entry key="equivalence">$\equiv$</entry>
 <entry key="eta">$\eta$</entry>
 <entry key="eth">{\dh}</entry>
 <entry key="equal">=</entry>
@@ -188,20 +233,29 @@
 <entry key="g">g</entry>
 <entry key="gamma">$\gamma$</entry>
 <entry key="germandbls">{\ss}</entry>
+<entry key="gradient">$\nabla$</entry>
 <entry key="grave">$\grave{\,}$</entry>
 <entry key="greater">&gt;</entry>
+<entry key="greaterequal">$\ge$</entry>
 <entry key="guillemotleft">{\guillemotleft}</entry>
 <entry key="guillemotright">{\guillemotright}</entry>
 <entry key="guilsinglleft">{\guilsinglleft}</entry>
 <entry key="guilsinglright">{\guilsinglright}</entry>
 
 <entry key="h">h</entry>
+<entry key="heart">$\heartsuit$</entry>
 <entry key="hungarumlaut">\H{}</entry>
 
 <entry key="i">i</entry>
 <entry key="icircumflex">\^i</entry>
 <entry key="idieresis">\"i</entry>
 <entry key="igrave">\`i</entry>
+<entry key="infinity">$\infty$</entry>
+<entry key="integral">$\int$</entry>
+<entry key="integralbt">$\int$</entry>
+<entry key="integralex">|</entry>
+<entry key="integraltp">$\int$</entry>
+<entry key="intersection">$\cap$</entry>
 <entry key="iota">$\iota$</entry>
 
 <entry key="j">j</entry>
@@ -212,15 +266,25 @@
 <entry key="l">l</entry>
 <entry key="lambda">$\lambda$</entry>
 <entry key="less">&lt;</entry>
+<entry key="lessequal">$\le$</entry>
+<entry key="logicaland">$\wedge$</entry>
+<entry key="logicalnot">$\lnot$</entry>
+<entry key="logicalor">$\vee$</entry>
+<entry key="lozenge">$\lozenge$</entry>
 <entry key="lslash">{\l}</entry>
 
 <entry key="m">m</entry>
 <entry key="macron">{\textasciimacron}</entry>
 <entry key="minus">$-$</entry>
+<entry key="minute">$^\prime$</entry>
 <entry key="mu">$\mu$</entry>
+<entry key="multiply">$\times$</entry>
 
 <entry key="n">n</entry>
 <entry key="nine">9</entry>
+<entry key="notequal">$\ne$</entry>
+<entry key="notelement">$\notin$</entry>
+<entry key="notsubset">$\subset\!\!\!\!\!\!\:\!\:\!/$</entry>
 <entry key="ntilde">\~n</entry>
 <entry key="nu">$\nu$</entry>
 <entry key="numbersign">{\#}</entry>
@@ -229,6 +293,7 @@
 <entry key="oe">{\oe}</entry>
 <entry key="ogonek">\k{}</entry>
 <entry key="omega">$\omega$</entry>
+<entry key="omega1">$\varpi$</entry>
 <entry key="omicron">o</entry>
 <entry key="one">1</entry>
 <entry key="ordfeminine">$^\mathrm{a}$</entry>
@@ -239,14 +304,28 @@
 <entry key="p">p</entry>
 <entry key="paragraph">{\P}</entry>
 <entry key="parenleft">(</entry>
+<entry key="parenleftbt">(</entry>
+<entry key="parenlefttp">(</entry>
+<entry key="parenleftex">|</entry>
 <entry key="parenright">)</entry>
+<entry key="parenrightbt">)</entry>
+<entry key="parenrightex">|</entry>
+<entry key="parenrighttp">)</entry>
+<entry key="partialdiff">$\partial$</entry>
 <entry key="percent">{\%}</entry>
 <entry key="period">.</entry>
 <entry key="periodcentered">{\textperiodcentered}</entry>
+<entry key="perpendicular">$\bot$</entry>
 <entry key="perthousand">{\textperthousand}</entry>
 <entry key="phi">$\phi$</entry>
+<entry key="phi1">$\varphi$</entry>
 <entry key="pi">$\pi$</entry>
 <entry key="plus">+</entry>
+<entry key="plusminus">$\pm$</entry>
+<entry key="product">$\prod$</entry>
+<entry key="propersubset">$\subset$</entry>
+<entry key="propersuperset">$\supset$</entry>
+<entry key="proportional">$\propto$</entry>
 <entry key="psi">$\psi$</entry>
 
 <entry key="q">q</entry>
@@ -262,37 +341,54 @@
 <entry key="quotesinglbase">{\quotesinglbase}</entry>
 
 <entry key="r">r</entry>
+<entry key="radical">$\surd$</entry>
+<entry key="radicalex">$^{-}$</entry>
+<entry key="reflexsubset">$\subseteq$</entry>
+<entry key="reflexsuperset">$\supseteq$</entry>
+<entry key="registersans">\circledR</entry>
+<entry key="registerserif">\circledR</entry>
 <entry key="rho">$\rho$</entry>
 <entry key="ring">$\mathring{}$</entry>
 
 <entry key="s">s</entry>
 <entry key="scaron">\v{s}</entry>
+<entry key="second">$^{\prime\prime}$</entry>
 <entry key="section">{\S}</entry>
 <entry key="semicolon">;</entry>
 <entry key="seven">7</entry>
 <entry key="sigma">$\sigma$</entry>
+<entry key="sigma1">$\varsigma$</entry>
+<entry key="similar">$\sim$</entry>
 <entry key="six">6</entry>
 <entry key="slash">/</entry>
 <entry key="space"> </entry>
+<entry key="spade">$\spadesuit$</entry>
 <entry key="sterling">{\pounds}</entry>
 <entry key="suchthat">$\ni$</entry>
+<entry key="summation">$\sum$</entry>
 
 <entry key="t">t</entry>
 <entry key="tau">$\tau$</entry>
+<entry key="therefore">$\therefore$</entry>
 <entry key="theta">$\theta$</entry>
+<entry key="theta1">$\vartheta$</entry>
 <entry key="three">3</entry>
 <entry key="tilde">{\textasciitilde}</entry>
+<entry key="trademarksans">\texttrademark</entry>
+<entry key="trademarkserif">\texttrademark</entry>
 <entry key="two">2</entry>
 
 <entry key="u">u</entry>
 <entry key="uacute">\'u</entry>
 <entry key="underscore">{\_}</entry>
+<entry key="union">$\cup$</entry>
 <entry key="universal">$\forall$</entry>
 <entry key="upsilon">$\upsilon$</entry>
 
 <entry key="v">v</entry>
 
 <entry key="w">w</entry>
+<entry key="weierstrass">$\wp$</entry>
 
 <entry key="x">x</entry>
 <entry key="xi">$\xi$</entry>
