@@ -17,5 +17,6 @@ golfer.ps                - GhostScript <www.ghostscript.com>, with some small
 grow.ps                  - ???
 illustrator_vw.ps        - ???
 mathematica2.eps         - Figure exported from Mathematica
+showtext_mathematica1    - show all symbols in the Mathematica1 font (font is embedded)
 tiger.eps                - GhostScript <www.ghostscript.com>, with some small
                            changes.
