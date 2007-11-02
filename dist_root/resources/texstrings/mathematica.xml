@@ -91,7 +91,7 @@
 	<entry key="DLE"></entry>
 	<entry key="DotMath">$\cdot$</entry>
 	<entry key="DoubleAcute">$\acute{\,}\acute{\,}$</entry>
-	<entry key="DoublePrime">$\prime\prime$</entry>
+	<entry key="DoublePrime">$^{\prime\prime$}</entry>
 	<entry key="DownArrow">$\downarrow$</entry>
 
 	<entry key="Eight">8</entry>
@@ -213,7 +213,7 @@
 	<entry key="Placeholder">$\square$</entry>
 	<entry key="Plus">+</entry>
 	<entry key="PlusMinus">$\pm$</entry>
-	<entry key="Prime">$\prime$</entry>
+	<entry key="Prime">$^\prime$</entry>
 	<entry key="Product">$\prod$</entry>
 	<entry key="ProperSubset">$\subset$</entry>
 	<entry key="ProperSuperset">$\supset$</entry>
