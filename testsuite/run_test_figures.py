@@ -189,6 +189,11 @@ def createTexFile(texFile, pgfFile):
     """
     f = open(texFile, 'w')
     f.write('\\documentclass{article}\n')
+    f.write('\\usepackage{lmodern}\n')
+    f.write('\\usepackage[T1]{fontenc}\n')
+    f.write('\\usepackage{amssymb}\n')
+    f.write('\\usepackage{pifont}\n')
+    f.write('\\usepackage{textcomp}\n')
     f.write('\\usepackage{pgf}\n')
     f.write('\\pagestyle{empty}\n')
     f.write('\\begin{document}\n')
