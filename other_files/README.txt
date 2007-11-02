@@ -70,8 +70,10 @@ license. The license of each component is distributed along with it.
 ----------------------------------------------------------------------------
 Changelog
 ----------------------------------------------------------------------------
-v0.5.0 (2007-09-??)
+v0.5.0 (2007-11-04)
   - Added: handling of binary headers found in some eps files
+  - Added: support for embedded fonts
+  - Added: special support for embedded Mathematica fonts (not yet complete)
 
 v0.4.0 (2007-08-04)
   - Changed: Eps2pgf is now distributed under the Apache license
