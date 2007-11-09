@@ -26,7 +26,7 @@ import net.sf.eps2pgf.postscript.*;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
- * Interface for exporters (e.g. Pgf and Tikz)
+ * Interface for exporters (e.g. PGF and TikZ)
  * @author Paul Wagenaars
  */
 public interface OutputDevice {
@@ -39,7 +39,7 @@ public interface OutputDevice {
     public void clip(Path clipPath) throws IOException, PSErrorUnimplemented;
     
     /**
-     * Retuns a <b>copy</b> default transformation matrix (converts user space
+     * Returns a <b>copy</b> default transformation matrix (converts user space
      * coordinates to device space).
      */
     public PSObjectMatrix defaultCTM();
@@ -51,7 +51,7 @@ public interface OutputDevice {
     public void init(GraphicsState gstate) throws PSError, IOException;
     
     /**
-     * Finilize writing. Normally, this method writes a footer.
+     * Finalize writing. Normally, this method writes a footer.
      */
     public void finish() throws IOException;
     
@@ -124,12 +124,12 @@ public interface OutputDevice {
             double fontsize, String anchor) throws IOException;
     
     /**
-     * Draws a red dot (usefull for debugging, don't use otherwise)
+     * Draws a red dot (useful for debugging, don't use otherwise)
      */
     public void drawDot(double x, double y) throws IOException;
     
     /**
-     * Draws a blue rectangle (usefull for debugging, don't use otherwise)
+     * Draws a blue rectangle (useful for debugging, don't use otherwise)
      */
     public void drawRect(double[] lowerLeft, double[] upperRight) throws IOException;
 }
