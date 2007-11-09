@@ -222,7 +222,7 @@ public class PGFDevice implements OutputDevice {
 
         double max_s = 1.0;
         if (shading.extend1) {
-            // Find the s value for which the radius is big (0.3 metres ~ a4 paper)
+            // Find the s value for which the radius is big (0.3 meters ~ a4 paper)
             max_s = shading.getSForDistance(0.3*1e6/scaling, 1, Double.POSITIVE_INFINITY);
             coor1 = gstate.CTM.transform(shading.getCoord(max_s));
         }
@@ -464,7 +464,7 @@ public class PGFDevice implements OutputDevice {
     }
     
     /**
-     * Draws a red dot (usefull for debugging, don't use otherwise)
+     * Draws a red dot (useful for debugging, don't use otherwise)
      * @param x X-coordinate (micrometer)
      * @param y Y-coordinate (micrometer)
      * @throws java.io.IOException Unable to write output
@@ -475,7 +475,7 @@ public class PGFDevice implements OutputDevice {
     }
     
     /**
-     * Draws a blue rectangle (usefull for debugging, don't use otherwise)
+     * Draws a blue rectangle (useful for debugging, don't use otherwise)
      * @param lowerLeft X- and Y-coordinate (in micrometer) of lower left corner
      * @param upperRight X- and Y-coordinate (in micrometer) of upper right corner
      * @throws java.io.IOException Unable to write output
