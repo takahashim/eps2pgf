@@ -20,7 +20,11 @@
 
 package net.sf.eps2pgf.io;
 
-import net.sf.eps2pgf.postscript.*;
+import net.sf.eps2pgf.postscript.GraphicsState;
+import net.sf.eps2pgf.postscript.PSObjectDict;
+import net.sf.eps2pgf.postscript.PSObjectMatrix;
+import net.sf.eps2pgf.postscript.Path;
+import net.sf.eps2pgf.postscript.colors.PSColor;
 
 /**
  * Discards all output written to this device
@@ -112,7 +116,7 @@ public class NullDevice implements OutputDevice {
     /**
      * Sets the current color in gray, rgb or cmyk
      */
-    public void setColor(double[] colorLevels) {
+    public void setColor(PSColor color) {
         
     }
     

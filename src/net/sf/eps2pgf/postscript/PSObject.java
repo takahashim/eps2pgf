@@ -559,7 +559,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     
     /**
      * Convert this object to a real number, if possible.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unbale to convert this object to a real number
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object to a real number
      * @return Floating-point number representation of this object
      */
     public double toReal() throws PSErrorTypeCheck {
@@ -570,7 +570,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * Reads characters from this object, interpreting them as PostScript
      * code, until it has scanned and constructed an entire object.
      * Please note that this method does not perform a type check following the
-     * offical 'token' operator. This method will always return a result.
+     * official 'token' operator. This method will always return a result.
      * @return List with one or more objects. The following are possible:
      *         1 object : { <false boolean> }
      *         2 objects: { <next token>, <true boolean> }
@@ -605,7 +605,7 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * PostScript operator 'wcheck'. Checks whether the access attribute is
      * 'unlimited'.
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not check 'access' attribute of this object type
-     * @return Returns true when this object is writeable; returns false otherwise
+     * @return Returns true when this object is writable; returns false otherwise
      */
     public boolean wcheck() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();

@@ -20,22 +20,34 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.logging.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
-import net.sf.eps2pgf.*;
-import net.sf.eps2pgf.io.PSStringInputStream;
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.NullDevice;
 import net.sf.eps2pgf.io.OutputDevice;
 import net.sf.eps2pgf.io.PGFDevice;
+import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.TextHandler;
-import net.sf.eps2pgf.util.ArrayStack;
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.colors.RGB;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorDictStackUnderflow;
+import net.sf.eps2pgf.postscript.errors.PSErrorIOError;
+import net.sf.eps2pgf.postscript.errors.PSErrorInvalidExit;
+import net.sf.eps2pgf.postscript.errors.PSErrorInvalidStop;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
+import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.postscript.errors.PSErrorUnmatchedMark;
 import net.sf.eps2pgf.postscript.filters.EexecDecode;
+import net.sf.eps2pgf.util.ArrayStack;
 
 /**
  * Interprets a PostScript document and produces output
@@ -559,7 +571,7 @@ public class Interpreter {
     
     /** PostScript op: currentcolor */
     public void op_currentcolor() {
-        double[] values = gstate.current.color;
+        double[] values = gstate.current.color.levels;
         for (int i = 0 ; i < values.length ; i++) {
             opStack.push(new PSObjectReal(values[i]));
         }
@@ -567,7 +579,7 @@ public class Interpreter {
     
     /** PostScript op: currentcolorspace */
     public void op_currentcolorspace() {
-        opStack.push(gstate.current.colorSpace.clone());
+        opStack.push(gstate.current.color.getColorSpace());
     }
     
     /** PostScript op: currentdict */
@@ -1731,8 +1743,8 @@ public class Interpreter {
     }
     
     /** PostScript op: setcolor */
-    public void op_setcolor() throws PSErrorStackUnderflow, PSErrorTypeCheck, IOException {
-        int n = gstate.current.color.length;
+    public void op_setcolor() throws PSError, IOException {
+        int n = gstate.current.color.levels.length;
         double[] newColor = new double[n];
         for (int i = 0 ; i < n ; i++) {
             newColor[n-i-1] = opStack.pop().toReal();
@@ -1781,7 +1793,7 @@ public class Interpreter {
         double brightness = opStack.pop().toReal();
         double saturaration = opStack.pop().toReal();
         double hue = opStack.pop().toReal();
-        double[] rgbValues = ColorConvert.HSBtoRGB(hue, saturaration, brightness);
+        double[] rgbValues = RGB.HSBtoRGB(hue, saturaration, brightness);
         gstate.current.setcolorspace(new PSObjectName("DeviceRGB", true), false);
         gstate.current.setcolor(rgbValues);
     }
