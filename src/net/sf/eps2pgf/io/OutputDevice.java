@@ -20,10 +20,16 @@
 
 package net.sf.eps2pgf.io;
 
-import java.io.*;
+import java.io.IOException;
 
-import net.sf.eps2pgf.postscript.*;
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.GraphicsState;
+import net.sf.eps2pgf.postscript.PSObjectDict;
+import net.sf.eps2pgf.postscript.PSObjectMatrix;
+import net.sf.eps2pgf.postscript.Path;
+import net.sf.eps2pgf.postscript.colors.PSColor;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /**
  * Interface for exporters (e.g. PGF and TikZ)
@@ -100,7 +106,7 @@ public interface OutputDevice {
     /**
      * Sets the current color in gray, rgb or cmyk
      */
-    public void setColor(double[] colorLevels) throws IOException;
+    public void setColor(PSColor color) throws IOException;
     
     /**
      * Sets the miter limit

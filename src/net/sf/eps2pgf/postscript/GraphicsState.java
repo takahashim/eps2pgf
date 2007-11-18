@@ -25,6 +25,8 @@ import java.util.logging.*;
 import net.sf.eps2pgf.ProgramError;
 
 import net.sf.eps2pgf.io.OutputDevice;
+import net.sf.eps2pgf.postscript.colors.ColorUtils;
+import net.sf.eps2pgf.postscript.colors.PSColor;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
@@ -62,22 +64,14 @@ public class GraphicsState implements Cloneable {
     public Path clippingPath;
     
     /**
-     * Current color space
+     * Current color (meaning of parameters depends on the colorSpace specified above)
      */
-    public PSObjectArray colorSpace = new PSObjectArray();
+    public PSColor color;
     
     /**
      * Parameter describing the accuracy of flattening a path
      */
     public double flat = 1.0;
-    
-    /**
-     * Current color (meaning of parameters depends on the colorSpace specified above)
-     */
-    public double[] color;
-    static double[] defaultGray = {0.0};
-    static double[] defaultRgb = {0.0, 0.0, 0.0};
-    static double[] defaultCmyk = {0.0, 0.0, 0.0, 1.0};
     
     /**
      * Current font
@@ -277,7 +271,7 @@ public class GraphicsState implements Cloneable {
     
     /**
      * Creates a deep copy of this object.
-     * @throws java.lang.CloneNotSupportedException Indicates that clone is not (fully) supported. This should not happen.
+     * @throws CloneNotSupportedException Indicates that clone is not (fully) supported. This should not happen.
      * @return Returns the deep copy.
      */
     public GraphicsState clone() throws CloneNotSupportedException {
@@ -291,7 +285,6 @@ public class GraphicsState implements Cloneable {
         newState.dashpattern = dashpattern.clone();
         newState.dashoffset = dashoffset;
         newState.color = color.clone();
-        newState.colorSpace = colorSpace.clone();
         newState.deviceData = deviceData.clone();
         return newState;
     }
@@ -300,68 +293,28 @@ public class GraphicsState implements Cloneable {
      * Returns the current color in the CMYK color space
      */
     public double[] currentcmykcolor() throws PSError, ProgramError {
-        String spaceName = colorSpace.get(0).toName().name;
-        if (spaceName.equals("DeviceGray")) {
-            return ColorConvert.grayToCMYK(color[0]);
-        } else if (spaceName.equals("DeviceRGB")) {
-            return ColorConvert.RGBtoCMYK(color);
-        } else if (spaceName.equals("DeviceCMYK")) {
-            return color.clone();
-        } else {
-            throw new ProgramError("You've found a bug. Current colorspace is"
-                    + " invalid. That should not be possible.");
-        }
+        return color.getCMYK();
     }
 
     /**
-     * Returns the current color in grayscale
+     * Returns the current color in gray scale
      */
     public double currentgray() throws PSError, ProgramError {
-        String spaceName = colorSpace.get(0).toName().name;
-        if (spaceName.equals("DeviceGray")) {
-            return color[0];
-        } else if (spaceName.equals("DeviceRGB")) {
-            return ColorConvert.RGBtoGray(color);
-        } else if (spaceName.equals("DeviceCMYK")) {
-            return ColorConvert.CMYKtoGray(color);
-        } else {
-            throw new ProgramError("You've found a bug. Current colorspace is"
-                    + " invalid. That should not be possible.");
-        }
+        return color.getGray();
     }
     
     /**
      * Returns the current color in the HSB (also HSV) color space
      */
     public double[] currenthsbcolor() throws PSError, ProgramError {
-        String spaceName = colorSpace.get(0).toName().name;
-        if (spaceName.equals("DeviceGray")) {
-            return ColorConvert.grayToHSB(color[0]);
-        } else if (spaceName.equals("DeviceRGB")) {
-            return ColorConvert.RGBtoHSB(color);
-        } else if (spaceName.equals("DeviceCMYK")) {
-            return ColorConvert.CMYKtoHSB(color);
-        } else {
-            throw new ProgramError("You've found a bug. Current colorspace is"
-                    + " invalid. That should not be possible.");
-        }
+        return color.getHSB();
     }
 
     /**
      * Returns the current color in the RGB color space
      */
     public double[] currentrgbcolor() throws PSError, ProgramError {
-        String spaceName = colorSpace.get(0).toName().name;
-        if (spaceName.equals("DeviceGray")) {
-            return ColorConvert.grayToRGB(color[0]);
-        } else if (spaceName.equals("DeviceRGB")) {
-            return color.clone();
-        } else if (spaceName.equals("DeviceCMYK")) {
-            return ColorConvert.CMYKtoRGB(color);
-        } else {
-            throw new ProgramError("You've found a bug. Current colorspace is"
-                    + " invalid. That should not be possible.");
-        }
+        return color.getRGB();
     }
 
     /**
@@ -542,45 +495,24 @@ public class GraphicsState implements Cloneable {
      * Sets the color
      * @param newColor Parameters of new color (defined in current color space)
      */
-    public void setcolor(double[] newColor) throws IOException {
-        int n = Math.min(color.length, newColor.length);
-        for (int i = 0 ; i < n ; i++) {
-            newColor[i] = Math.max(Math.min(newColor[i], 1.0), 0.0);
-        }
-
-        for (int i = 0 ; i < n ; i++) {
-            color[i] = newColor[i];
-        }
+    public void setcolor(double[] newColor) throws IOException, PSError {
+        color.setColor(newColor);
         device.setColor(color);
     }
     
     /**
-     * Sets the current color space
+     * Sets the current color space.
+     * 
      * @param obj Object describing the color space. Should be a literal name or an
      * array starting with a literal name.
+     * @param writeDevice Write new current color to output device?
+     * 
+     * @throws PSError A PostScript error has occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     public void setcolorspace(PSObject obj, boolean writeDevice) throws PSError, IOException {
-        String spaceName;
-        if (obj instanceof PSObjectName) {
-            spaceName = ((PSObjectName)obj).name;
-        } else if (obj instanceof PSObjectArray) {
-            spaceName = ((PSObjectArray)obj).get(0).toName().name;
-        } else {
-            throw new PSErrorTypeCheck();
-        }
-        
-        if (spaceName.equals("DeviceGray")) {
-            color = defaultGray.clone();
-        } else if (spaceName.equals("DeviceRGB")) {
-            color = defaultRgb.clone();
-        } else if (spaceName.equals("DeviceCMYK")) {
-            color = defaultCmyk.clone();
-        } else {
-            throw new PSErrorUndefined();
-        }
-        PSObjectArray newColSpace = new PSObjectArray();
-        newColSpace.addToEnd(new PSObjectName(spaceName, true));
-        colorSpace = newColSpace;
+    	color = ColorUtils.autoSetColorSpace(obj);
+    	
         if (writeDevice) {
             device.setColor(color);
         }

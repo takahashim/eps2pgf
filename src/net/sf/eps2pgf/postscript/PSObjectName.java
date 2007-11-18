@@ -25,7 +25,7 @@ package net.sf.eps2pgf.postscript;
  * @author Paul Wagenaars
  */
 public class PSObjectName extends PSObject {
-    String name;
+    public String name;
     
     /**
      * Creates a new instance of PSObjectName

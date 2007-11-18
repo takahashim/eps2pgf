@@ -25,6 +25,7 @@ import java.text.*;
 import java.util.*;
 
 import net.sf.eps2pgf.postscript.*;
+import net.sf.eps2pgf.postscript.colors.PSColor;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
@@ -391,10 +392,8 @@ public class PGFDevice implements OutputDevice {
      * parameter it is a gray value, if it has three parameters it are RGB values
      * and if it has four parameters it are CMYK values.
      */
-    public void setColor(double[] colorLevels) throws IOException {
-        for (int i = 0 ; i < colorLevels.length ; i++) {
-            colorLevels[i] = Math.max(Math.min(colorLevels[i], 1.0), 0.0);
-        }
+    public void setColor(PSColor color) throws IOException {
+    	double[] colorLevels = color.levels;
         if (colorLevels.length >= 4) {
             out.write("\\definecolor{eps2pgf_color}{cmyk}{"
                     + colorFormat.format(colorLevels[0])
