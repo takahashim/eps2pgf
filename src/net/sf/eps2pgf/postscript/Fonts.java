@@ -31,6 +31,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.postscript.errors.PSError;
 import net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
@@ -43,7 +44,7 @@ import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 public class Fonts {
     static PSObjectDict FontDirectory = new PSObjectDict();
     
-    static String defaultFont = "Times-Roman";
+    static PSObjectName defaultFont = new PSObjectName("Times-Roman", true);
     
     static File resourceDir;
     
@@ -108,27 +109,12 @@ public class Fonts {
     
     /**
      * Search a font and return it's corresponding font dictionary.
-     * @param fontNameObj PostScript object defining the font. The toDictKey method is used to get
-     * the font name from the object.
-     * @return Requested font
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied opject is not the correct type
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont Unable to find the requested font.
-     * @throws net.sf.eps2pgf.ProgramError This should never happen. This error indicates a bug in Eps2pgf.
-     */
-    public static PSObjectFont findFont(PSObject fontNameObj) throws PSErrorTypeCheck, 
-            PSErrorInvalidFont, ProgramError {
-        String fontName = fontNameObj.toDictKey();
-        return findFont(fontName);
-    }
-    
-    /**
-     * Search a font and return it's corresponding font dictionary.
      * @param fontName Name of the font
      * @return Font (dictionary) of the requested font
      * @throws ProgramError Unable to load the requested font and the default font
      */
-    public static PSObjectFont findFont(String fontName) throws ProgramError {
-        String subFontName = findSubstitutionFont(fontName);
+    public static PSObjectFont findFont(PSObject fontName) throws ProgramError, PSError {
+        PSObject subFontName = findSubstitutionFont(fontName);
         if (subFontName != null) {
             log.info("Substituting font " + subFontName + " for " + fontName);
             fontName = subFontName;
@@ -195,12 +181,20 @@ public class Fonts {
      *         found, the requested font itself is returned.
      * @param fontName Name of the font for which a substitute is searched
      */
-    public static String findSubstitutionFont(String fontName) {
+    public static PSObject findSubstitutionFont(PSObject fontNameObj) {
+    	String fontName;
+    	if (fontNameObj instanceof PSObjectName) {
+    		fontName = ((PSObjectName)fontNameObj).name;
+    	} else if (fontNameObj instanceof PSObjectString) {
+    		fontName = ((PSObjectString)fontNameObj).toString();
+    	} else {
+    		fontName = fontNameObj.isis();
+    	}
         String subFont = fontSubstitutions.getProperty(fontName);
         if (subFont == null) {
-            return null;
+        	return null;
         } else {
-            return subFont;
+        	return new PSObjectName(subFont, true);
         }
     }
     
@@ -210,7 +204,8 @@ public class Fonts {
      * @param fontName Name of the font
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont Unable to find requested font.
      */
-    public static PSObjectFont loadFont(String fontName) throws PSErrorInvalidFont {
+    public static PSObjectFont loadFont(PSObject fontKey) throws PSError {
+    	String fontName = fontKey.toName().name;
         log.info("Loading " + fontName + " font from " + resourceDir);
         PSObjectFont font = new PSObjectFont(resourceDir, fontName);
         

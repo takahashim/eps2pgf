@@ -86,11 +86,6 @@ public class PSObjectName extends PSObject {
         }
     }
     
-    /** Convert this object to dictionary key, if possible. */
-    public String toDictKey() {
-        return name;
-    }
-    
     /**
      * Return this object
      * @return This object
@@ -128,11 +123,7 @@ public class PSObjectName extends PSObject {
     
     /** Return a hash code for this object. */
     public int hashCode() {
-        if (isLiteral) {
-            return name.hashCode();
-        } else {
-            return ~(name.hashCode());
-        }
+        return name.hashCode();
     }
 
     /** Creates a copy of this object. */
@@ -146,7 +137,7 @@ public class PSObjectName extends PSObject {
             return this;
         } else {
             PSObject lookedUp;
-            lookedUp = interp.dictStack.lookup(name);
+            lookedUp = interp.dictStack.lookup(this);
             if ( (lookedUp != null) && (lookedUp instanceof PSObjectOperator) ) {
                 return lookedUp;
             }  else {
@@ -167,7 +158,7 @@ public class PSObjectName extends PSObject {
      * Return human readable string representation of this object
      */
     public String toString() {
-        return "Name: " + isis();
+        return this.isis();
     }
 
     /**

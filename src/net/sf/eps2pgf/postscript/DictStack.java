@@ -87,11 +87,6 @@ public class DictStack {
     
     /** Define key->value in current dictionary. */
     public void def(PSObject key, PSObject value) throws PSErrorTypeCheck {
-        def(key.toDictKey(), value);
-    }
-    
-    /** Define key->value in current dictionary. */
-    public void def(String key, PSObject value) throws PSErrorTypeCheck {
         try {
             PSObjectDict dict = dictStack.peek();
             dict.setKey(key, value);
@@ -216,7 +211,7 @@ public class DictStack {
     }
     
     /** Search the dictionary that defines a specific key. */
-    public PSObjectDict where(String key) {
+    public PSObjectDict where(PSObject key) {
         // First look in the non-permanent dictionaries
         for(int i = dictStack.size()-1 ; i >= 0 ; i--) {
             PSObjectDict dict = dictStack.get(i);
@@ -243,14 +238,9 @@ public class DictStack {
         return null;
     }
     
-    /** Search the dictionary that defines a specific key. */
-    public PSObjectDict where(PSObject key) throws PSErrorTypeCheck {
-        return where(key.toDictKey());
-    }
-    
     
     /** Lookup a key in the dictionary stack */
-    public PSObject lookup(String key) {
+    public PSObject lookup(PSObject key) {
         PSObjectDict dict = where(key);
         if (dict == null) {
             return null;
@@ -259,10 +249,13 @@ public class DictStack {
         }
     }
     
-    
+    /** Lookup a key in the dictionary stack */
+    public PSObject lookup(String key) {
+    	return this.lookup(new PSObjectName(key, true));
+    }
     
     /** Implement PostScript operator: store */
-    public void store(String key, PSObject value) throws PSErrorTypeCheck {
+    public void store(PSObject key, PSObject value) throws PSErrorTypeCheck {
         PSObjectDict dict = where(key);
         if (dict == null) {
             // Key is currently not defined in any dictionary. So define it in
@@ -271,11 +264,6 @@ public class DictStack {
         } else {
             dict.setKey(key, value);
         }        
-    }
-    
-    /** Implement PostScript operator: store */
-    public void store(PSObject key, PSObject value) throws PSErrorTypeCheck {
-        store(key.toDictKey(), value);
     }
     
 }

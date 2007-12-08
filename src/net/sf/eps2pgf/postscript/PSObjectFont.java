@@ -275,7 +275,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
         str.append(preCode.toString());
         for (int i = 0 ; i < charNames.size() ; i++) {
             try {
-                String charName = charNames.get(i).toName().toDictKey();
+                PSObjectName charName = charNames.get(i).toName();
                 PSObject code = texStrings.lookup(charName);
                 if (code == null) {
                     throw new PSErrorUnimplemented("TexString for "

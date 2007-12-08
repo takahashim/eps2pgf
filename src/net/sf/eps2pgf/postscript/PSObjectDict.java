@@ -33,7 +33,7 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class PSObjectDict extends PSObject {
-    private HashMap<String, PSObject> map = new HashMap<String, PSObject>();
+    private HashMap<PSObject, PSObject> map = new HashMap<PSObject, PSObject>();
     
     int capacity;
     
@@ -59,8 +59,8 @@ public class PSObjectDict extends PSObject {
     public PSObjectDict clone() {
         PSObjectDict newDict = new PSObjectDict();
         newDict.capacity = capacity;
-        for(String key : map.keySet()) {
-            newDict.map.put(new String(key), map.get(key).clone());
+        for(PSObject key : map.keySet()) {
+            newDict.map.put(key.clone(), map.get(key).clone());
         }
         return newDict;
     }
@@ -73,7 +73,7 @@ public class PSObjectDict extends PSObject {
      */
     public PSObject copy(PSObject obj1) throws PSErrorTypeCheck {
         PSObjectDict dict1 = obj1.toDict();
-        for (Map.Entry<String, PSObject> entry : dict1.map.entrySet()) {
+        for (Map.Entry<PSObject, PSObject> entry : dict1.map.entrySet()) {
             setKey(entry.getKey(), entry.getValue());
         }
         
@@ -86,8 +86,8 @@ public class PSObjectDict extends PSObject {
      * @param preStr String that will be prepended to each line written to output.
      */
     public void dumpFull(String preStr) {
-        Set<String> keys = map.keySet();
-        for (String key: keys) {
+        Set<PSObject> keys = map.keySet();
+        for (PSObject key: keys) {
             System.out.println(preStr + key + " -> " + map.get(key).isis());
         }
     }
@@ -108,7 +108,7 @@ public class PSObjectDict extends PSObject {
      * @param key Key for which the associated value will be returned
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
      */
-    public PSObject get(String key) throws PSErrorUndefined {
+    public PSObject get(PSObject key) throws PSErrorUndefined {
         PSObject value = lookup(key);
         if (value == null) {
             throw new PSErrorUndefined();
@@ -117,15 +117,14 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
-     * PostScript operator: get
-     * Return value associated with key.
+     * Return value associated with key. Same as lookup, except that a
+     * PSErrorRangeCheck is thrown when the item doesn't exist.
      * @return Value associated with key
      * @param key Key for which the associated value will be returned
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied key has invalid type
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
      */
-    public PSObject get(PSObject key) throws PSErrorUndefined, PSErrorTypeCheck {
-        return get(key.toDictKey());
+    public PSObject get(String key) throws PSErrorUndefined {
+        return this.get(new PSObjectName(key, true));
     }
     
     /**
@@ -139,8 +138,8 @@ public class PSObjectDict extends PSObject {
     public List<PSObject> getItemList() {
         List<PSObject> lst = new ArrayList<PSObject>();
         lst.add(new PSObjectInt(2));
-        for (Map.Entry<String, PSObject> entry : map.entrySet()) {
-            lst.add(new PSObjectName(entry.getKey(), true));
+        for (Map.Entry<PSObject, PSObject> entry : map.entrySet()) {
+            lst.add(entry.getKey());
             lst.add(entry.getValue());
         }
         return lst;
@@ -158,11 +157,10 @@ public class PSObjectDict extends PSObject {
     /**
      * PostScript operator 'known'
      * @param key Key of the entry to check
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Key has an invalid type
      * @return Returns true when the key is known, returns false otherwise
      */
-    public boolean known(PSObject key) throws PSErrorTypeCheck {
-        return known(key.toDictKey());
+    public boolean known(PSObject key) {
+        return map.containsKey(key);
     }
     
     /**
@@ -171,7 +169,7 @@ public class PSObjectDict extends PSObject {
      * @return Returns true when the key is known, returns false otherwise
      */
     public boolean known(String key) {
-        return map.containsKey(key);
+        return map.containsKey(new PSObjectName(key, true));
     }
     
     /**
@@ -184,12 +182,11 @@ public class PSObjectDict extends PSObject {
     
     /**
      * Looks up a key in this dictionary
-     * @param key Dictionary key to look up.
-     * @return Value associated with key.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied key is not the correct type
+     * @return Object associated with the key, <code>null</code> if no object is associated with this key.
+     * @param key Key of the entry to look up.
      */
-    public PSObject lookup(PSObject key) throws PSErrorTypeCheck {
-        return lookup(key.toDictKey());
+    public PSObject lookup(PSObject key) {
+        return map.get(key);
     }
     
     /**
@@ -198,7 +195,7 @@ public class PSObjectDict extends PSObject {
      * @param key Key of the entry to look up.
      */
     public PSObject lookup(String key) {
-        return map.get(key);
+        return map.get(new PSObjectName(key, true));
     }
     
     /**
@@ -224,7 +221,7 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied key does not have a valid type
      */
     public void put(PSObject key, PSObject value) throws PSErrorTypeCheck {
-        setKey(key, value);
+        this.setKey(key, value);
     }
 
     /**
@@ -253,7 +250,10 @@ public class PSObjectDict extends PSObject {
      * @param key Key of the new dictionary entry.
      * @param value Value of the new dictionary entry.
      */
-    public void setKey(String key, PSObject value) {
+    public void setKey(PSObject key, PSObject value) {
+    	if (key instanceof PSObjectString) {
+    		key = new PSObjectName(((PSObjectString)key).toString(), true);
+    	}
         map.put(key, value);
     }
     
@@ -261,10 +261,18 @@ public class PSObjectDict extends PSObject {
      * Sets a key in the dictionary
      * @param key Key of the new dictionary entry.
      * @param value Value of the new dictionary entry.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Key has not a valid type
      */
-    public void setKey(PSObject key, PSObject value) throws PSErrorTypeCheck {
-        setKey(key.toDictKey(), value);
+    public void setKey(String key, PSObject value) {
+        map.put(new PSObjectName(key, true), value);
+    }
+    
+    /**
+     * Sets a key in the dictionary
+     * @param key Key of the new dictionary entry.
+     * @param value Value of the new dictionary entry.
+     */
+    public void setKey(String key, String value) {
+        map.put(new PSObjectName(key, true), new PSObjectString(value));
     }
     
     /**
@@ -273,20 +281,10 @@ public class PSObjectDict extends PSObject {
      * @param key Key of the new dictionary entry.
      * @param value Value of the new dictionary item. Will be converted to a PSObjectString.
      */
-    public PSObjectString setKey(String key, String value) {
+    public PSObjectString setKey(PSObject key, String value) {
         PSObjectString psoValue = new PSObjectString(value);
         map.put(key, psoValue);
         return psoValue;
-    }
-    
-    /**
-     * Sets a key in the dictionary
-     * @param key Key of the new dictionary entry.
-     * @param value Value of the new dictionary entry.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Key has an invalid type
-     */
-    public void setKey(PSObject key, String value) throws PSErrorTypeCheck {
-        setKey(key.toDictKey(), value);
     }
     
     /**
@@ -327,8 +325,7 @@ public class PSObjectDict extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Type of key is incorrect
      */
     public void undef(PSObject key) throws PSErrorTypeCheck {
-        String keyStr = key.toDictKey();
-        map.remove(keyStr);
+        map.remove(key);
     }
 
     /**

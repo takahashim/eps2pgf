@@ -186,6 +186,14 @@ public class PSObjectReal extends PSObject {
     }
     
     /**
+     * Returns a hashCode value for this object. This method is supported
+     * for the benefit hashtables, such as used in PSObjectDict.
+     */
+    public int hashCode() {
+    	return (int)(value * 1000000);
+    }
+    
+    /**
      * Multiply this object with another object
      * @param obj Multiplication of this object and passed object
      * @return Multiplication object
