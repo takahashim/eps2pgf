@@ -26,7 +26,7 @@ import subprocess
 # Command run the PostScript interpreter. %outputFile% and %inputFile% are
 # automatically replaced by the real paths.
 if len(sys.argv) > 1 and sys.argv[1] == 'gs':
-    programCmd = "\"C:\\Program Files\\gs\\gs8.57\\bin\\gswin32c.exe\" -sDEVICE=pdfwrite -sOutputFile=\"%outputFile%\" -dBATCH -q \"%inputFile%\""
+    programCmd = "\"C:\\Program Files\\gs\\gs8.60\\bin\\gswin32c.exe\" -sDEVICE=pdfwrite -sOutputFile=\"%outputFile%\" -dBATCH -q \"%inputFile%\""
     nextArg = 2
 else:
     programCmd = "java -jar ..\\dist_root\\eps2pgf.jar \"%inputFile%\" --output \"%outputFile%\""

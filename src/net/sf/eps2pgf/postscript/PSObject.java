@@ -189,6 +189,18 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     */
+    public boolean equals(Object obj) {
+    	if (obj instanceof PSObject) {
+    		return this.eq((PSObject)obj);
+    	} else {
+    		return false;
+    	}
+    }
+    
+    /**
      * PostScript operator 'executeonly'. Set access attribute to executeonly.
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Can not set access attribute of this object type to 'executeonly'
      */
@@ -256,6 +268,14 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      */
     public boolean gt(PSObject obj2) throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Returns a hashCode value for this object. This method is supported
+     * for the benefit hashtables, such as used in PSObjectDict.
+     */
+    public int hashCode() {
+    	return this.isis().hashCode();
     }
     
     /**
@@ -419,15 +439,6 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @return Dictionary representation of this object.
      */
     public PSObjectDict toDict() throws PSErrorTypeCheck {
-        throw new PSErrorTypeCheck();
-    }
-    
-    /**
-     * Convert this object to dictionary key, if possible.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a dict key
-     * @return Dictionary key that represents this object
-     */
-    public String toDictKey() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     

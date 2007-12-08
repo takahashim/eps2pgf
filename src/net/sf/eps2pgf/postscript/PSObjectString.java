@@ -67,9 +67,7 @@ public class PSObjectString extends PSObject {
     
     /**
      * Creates a new instance of PSObjectString
-     * @param str This object is initialized with a copy of this string. The
-     *            string has to be a valid PostScript string enclosed in:
-     *            (..), <..> or <~..~>.
+     * @param str This object is initialized with a copy of this string.
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorIOError The supplied string is invalid
      */
     public PSObjectString(String str) {
@@ -322,6 +320,11 @@ public class PSObjectString extends PSObject {
         return (obj1Str.compareTo(obj2Str) > 0);
     }
     
+    /** Return a hash code for this object. */
+    public int hashCode() {
+        return this.toString().hashCode();
+    }
+
     /** Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      */
@@ -584,11 +587,6 @@ public class PSObjectString extends PSObject {
         return this;
     }
 
-    /** Convert this object to dictionary key, if possible. */
-    public String toDictKey() {
-        return toString();
-    }
-    
     /**
      * Converts this object to a human readable string.
      * @return Human readable string.

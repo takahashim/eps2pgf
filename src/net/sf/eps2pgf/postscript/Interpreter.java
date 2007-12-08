@@ -239,10 +239,10 @@ public class Interpreter {
             } else if (obj instanceof PSObjectFile) {
                 execStack.push(obj);
             } else if (obj instanceof PSObjectName) {
-                String key = obj.toName().name;
+                PSObjectName key = obj.toName();
                 PSObject value = dictStack.lookup(key);
                 if (value == null) {
-                    throw new PSErrorUndefined(key);
+                    throw new PSErrorUndefined(key.name);
                 } else {
                     executeObject(value.dup());
                 }
@@ -1238,7 +1238,7 @@ public class Interpreter {
     
     /** PostScript op: load */
     public void op_load() throws PSError {
-        String key = opStack.pop().toDictKey();
+        PSObject key = opStack.pop();
         PSObjectDict definedInDict = dictStack.where(key);
         definedInDict.checkAccess(false, true, false);
         
@@ -1461,7 +1461,6 @@ public class Interpreter {
         PSObject indexKey = opStack.pop();
         PSObject obj = opStack.pop();
         obj.checkAccess(false, false, true);
-        
         obj.put(indexKey, any);
     }
     

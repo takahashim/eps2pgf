@@ -219,6 +219,14 @@ public class PSObjectInt extends PSObject {
     }
     
     /**
+     * Returns a hashCode value for this object. This method is supported
+     * for the benefit hashtables, such as used in PSObjectDict.
+     */
+    public int hashCode() {
+    	return value * 1000000;
+    }
+    
+    /**
      * Check whether a string is a integer
      * @param str String to check.
      * @return Returns true when str is a valid integer. Returns false otherwise.
@@ -325,6 +333,15 @@ public class PSObjectInt extends PSObject {
         }
     }
 
+    /**
+     * Convert this object to dictionary key, if possible.
+     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to convert this object type to a dict key
+     * @return Dictionary key that represents this object
+     */
+    public String toDictKey() throws PSErrorTypeCheck {
+        return Integer.toString(value);
+    }
+    
     /**
      * Convert this object to a human readable string.
      * @return Human readable string.
