@@ -27,6 +27,7 @@ import java.util.logging.*;
 import org.fontbox.afm.*;
 import org.fontbox.util.BoundingBox;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /**
@@ -103,6 +104,14 @@ public class PSObjectFont extends PSObject implements Cloneable {
     /** The texstrings field name. */
     public static String KEY_TEXSTRINGS = "TexStrings";
     
+    // Field specific for Type 3 fonts
+    /** The BuildGlyph field name */
+    public static String KEY_BUILDGLYPH = "BuildGlyph";
+    
+    /** The BuildChar field name */
+    public static String KEY_BUILDCHAR = "BuildChar";
+    
+
     /**
      * Create a new empty instance. It sets the FID, font type and default matrix.
      */
@@ -195,8 +204,18 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * 
      * @throws PSError A PostScript error occurred.
      */
-    boolean assertValidFont() throws PSError {
+    boolean assertValidFont() throws PSError, ProgramError {
         boolean alreadyValid = true;
+        
+        if (!dict.known(KEY_FONTNAME)) {
+        	String FID;
+        	if (dict.known(KEY_FID)) {
+        		FID = dict.get(KEY_FID).isis();
+        	} else {
+        		FID = Integer.toString(nextFID++);
+        	}
+        	dict.setKey(KEY_FONTNAME, new PSObjectName("UnnamedFont" + FID, true));
+        }
         
         // See if texstrings are defined for this font. If not, copy standard texstrings
         if (!dict.known(KEY_TEXSTRINGS)) {
@@ -222,11 +241,11 @@ public class PSObjectFont extends PSObject implements Cloneable {
             		{"Ital",      "\\textit{", "}"}};
             String pre = "";
             String post = "";
+            String fontname = dict.get(KEY_FONTNAME).toName().name + "A";
             for (int i = 0 ; i < fontTypes.length ; i++) {
             	// Append an "A" to the font name to make sure that
             	// there is at least one [^a-z] character after the
             	// font type string. 
-            	String fontname = dict.get(KEY_FONTNAME).toName().name + "A";
             	String regexp = ".*" + fontTypes[i][0] + "[^a-z].*";
             	if (fontname.matches(regexp)) {
             		pre += fontTypes[i][1];
@@ -240,14 +259,10 @@ public class PSObjectFont extends PSObject implements Cloneable {
         
         // Check for font metrics
         if (!dict.known(KEY_AFM)) {
+        	// Apparently there are no metrics. Try to extract it from the 
+        	// character descriptions.
             alreadyValid = false;
-            if (!dict.known(KEY_CHARSTRINGS)) {
-                throw new PSErrorInvalidFont();
-            }
-            // Extract metrics information from character descriptions
-            PSObjectDict charStrings = dict.get(KEY_CHARSTRINGS).toDict();
-            PSObjectDict privateDict = dict.get(KEY_PRIVATE).toDict();
-            dict.setKey(KEY_AFM, new PSObjectAfm(charStrings, privateDict));
+            dict.setKey(KEY_AFM, new PSObjectAfm(dict));
         }
         
         return alreadyValid;
@@ -264,7 +279,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @throws PSError a PostScript error occurred
      */
     public String charNames2texStrings(PSObjectArray charNames) throws 
-            PSError {
+            PSError, ProgramError {
         assertValidFont();
         
         StringBuilder str = new StringBuilder();

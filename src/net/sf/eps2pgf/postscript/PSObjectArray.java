@@ -175,7 +175,9 @@ public class PSObjectArray extends PSObject {
             objs[i] = obj.clone();
             i++;
         }
-        return new PSObjectArray(objs);
+        PSObjectArray newArray = new PSObjectArray(objs);
+        newArray.copyCommonAttributes(this);
+        return newArray;
     }
 
     /**

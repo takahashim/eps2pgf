@@ -84,6 +84,13 @@ public interface OutputDevice {
     public void eofill(Path path) throws IOException, PSErrorUnimplemented;
     
     /**
+     * Internal Eps2pgf command: eps2pgfgetmetrics
+     * It is meant for the cache device. When this command is issued, it will
+     * return metrics information about the drawn glyph.
+     */
+    public double[] eps2pgfGetMetrics();
+    
+    /**
      * Shading fill (shfill PostScript operator)
      */
     public void shfill(PSObjectDict dict, GraphicsState gstate) throws PSError, IOException;
@@ -104,30 +111,9 @@ public interface OutputDevice {
     public void setlinejoin(int join) throws IOException, PSErrorRangeCheck;
     
     /**
-     * Sets the current color in gray, rgb or cmyk
-     */
-    public void setColor(PSColor color) throws IOException;
-    
-    /**
-     * Sets the miter limit
-     */
-    public void setmiterlimit(double num) throws IOException;
-    
-    /**
-     * Starts a new scope
-     */
-    public void startScope() throws IOException;
-    
-    /**
      * Ends the current scope scope
      */
     public void endScope() throws IOException;
-    
-    /**
-     * Draws text
-     */
-    public void show(String text, double[] position, double angle,
-            double fontsize, String anchor) throws IOException;
     
     /**
      * Draws a red dot (useful for debugging, don't use otherwise)
@@ -138,4 +124,26 @@ public interface OutputDevice {
      * Draws a blue rectangle (useful for debugging, don't use otherwise)
      */
     public void drawRect(double[] lowerLeft, double[] upperRight) throws IOException;
+
+    /**
+     * Sets the current color in gray, rgb or cmyk
+     */
+    public void setColor(PSColor color) throws IOException;
+    
+    /**
+     * Sets the miter limit
+     */
+    public void setmiterlimit(double num) throws IOException;
+    
+    /**
+     * Draws text
+     */
+    public void show(String text, double[] position, double angle,
+            double fontsize, String anchor) throws IOException;    
+
+    /**
+     * Starts a new scope
+     */
+    public void startScope() throws IOException;
+    
 }

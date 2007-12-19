@@ -150,6 +150,7 @@ control  5 - ifelse 1: 1 2 true {add} {sub} ifelse 3 eq  1 2 false {add}{sub} if
 control  6 - for 1: 0 1 1 4 {add} for dup 10 eq exch type /integertype eq
 control  7 - for 2: 1 2 6 {} for 5 eq  3 1 roll 3 eq  3 1 roll type /integertype eq
 control  8 - for 3: 3 -.5 1 {} for 1.0 eq  5 1 roll 1.5 eq  5 1 roll 2.0 eq  5 1 roll 2.5 eq  5 1 roll 3.0 eq
+control  9 - for 4: 1 1 1 {99} for 99 eq exch 1 eq
 control  9 - repeat 1: 4 {(abc)} repeat (abc) eq  4 1 roll (abc) eq  4 1 roll (abc) eq  4 1 roll (abc) eq
 control 10 - repeat 2: 1 2 3 4 3 {pop} repeat 1 eq
 control 11 - repeat 3: mark 0 {(will not happen)} repeat mark eq

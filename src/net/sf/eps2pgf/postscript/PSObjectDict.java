@@ -111,7 +111,7 @@ public class PSObjectDict extends PSObject {
     public PSObject get(PSObject key) throws PSErrorUndefined {
         PSObject value = lookup(key);
         if (value == null) {
-            throw new PSErrorUndefined();
+            throw new PSErrorUndefined("Key (" + key.isis() + ") not defined in dictionary.");
         }
         return value;
     }

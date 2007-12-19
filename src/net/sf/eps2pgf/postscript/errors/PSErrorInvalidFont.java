@@ -26,9 +26,25 @@ package net.sf.eps2pgf.postscript.errors;
  */
 public class PSErrorInvalidFont extends PSError {
 	private static final long serialVersionUID = 1L;
+
+    String operator = "";
     
+
     /** Creates a new instance of PSErrorInvalidFont */
     public PSErrorInvalidFont() {
     }
+	
+    /** Create a new PSErrorInvalidFont exception */
+    public PSErrorInvalidFont(String op) {
+        operator = op;
+    }
     
+    public String getMessage() {
+        if (operator == null) {
+            return super.getMessage();
+        } else {
+            return "Error: Invalid font (" + operator + ")";
+        }
+    }
+
 }

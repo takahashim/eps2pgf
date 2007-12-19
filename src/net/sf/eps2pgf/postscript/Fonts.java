@@ -42,7 +42,11 @@ import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
  * @author Paul Wagenaars
  */
 public class Fonts {
-    static PSObjectDict FontDirectory = new PSObjectDict();
+	// All fields and methods are static. Therefore, we need to initialize it
+	// only once.
+	private static boolean alreadyInitialized = false;
+
+	static PSObjectDict FontDirectory = new PSObjectDict();
     
     static PSObjectName defaultFont = new PSObjectName("Times-Roman", true);
     
@@ -67,6 +71,10 @@ public class Fonts {
      * @throws java.io.FileNotFoundException Unable to find resource dir
      */
     public static void initialize() throws ProgramError {
+    	if (alreadyInitialized) {
+    		return;
+    	}
+    	
         // Make FontDirectory read-only (for the user)
         FontDirectory.readonly();
         
@@ -86,6 +94,8 @@ public class Fonts {
         
         fontSubstitutions = loadFontSubstitutions(new File(resourceDir, "fontSubstitution.xml"));
         allTexStrings = loadAllTexstrings();
+        
+        alreadyInitialized = true;
     }
     
     /**

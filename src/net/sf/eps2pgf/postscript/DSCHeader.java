@@ -46,6 +46,16 @@ public class DSCHeader {
     }
     
     /**
+     * Creates a new instance of DSCHeader. The header is initialized with the
+     * specified bounding box.
+     * 
+     * @param bbox Use this array of four doubles as bounding box
+     */
+    public DSCHeader(double[] bbox) {
+    	boundingBox = bbox;
+    }
+    
+    /**
      * Read and interpret all DSC comments from the header
      * @param in Read header from this reader
      */

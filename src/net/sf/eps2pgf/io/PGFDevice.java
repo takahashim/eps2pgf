@@ -70,6 +70,16 @@ public class PGFDevice implements OutputDevice {
     }
     
     /**
+     * Internal Eps2pgf command: eps2pgfgetmetrics
+     * It is meant for the cache device. When this command is issued, it will
+     * return metrics information about the drawn glyph.
+     */
+    public double[] eps2pgfGetMetrics() {
+    	double[] dummyData = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    	return dummyData;
+    }
+    
+    /**
      * Writes header.
      * @throws java.io.IOException Signals that an I/O exception of some sort has occurred.
      */

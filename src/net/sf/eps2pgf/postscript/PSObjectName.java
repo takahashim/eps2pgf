@@ -158,7 +158,7 @@ public class PSObjectName extends PSObject {
      * Return human readable string representation of this object
      */
     public String toString() {
-        return this.isis();
+        return name;
     }
 
     /**
