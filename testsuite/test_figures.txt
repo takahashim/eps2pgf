@@ -10,6 +10,7 @@ golfer:
 grow:
 illustrator_vw:
 ipe-figure1:
+maple_cubic:
 mathematica2:
 tiger:
 showtext_mathematica1:
