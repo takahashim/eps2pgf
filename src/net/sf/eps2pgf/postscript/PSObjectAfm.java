@@ -20,21 +20,25 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.io.InputStream;
 import java.io.IOException;
-import java.util.List;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
-import org.fontbox.afm.FontMetric;
-import org.fontbox.afm.CharMetric;
-import org.fontbox.util.BoundingBox;
-
-import net.sf.eps2pgf.io.StringInputStream;
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.NullDevice;
-import net.sf.eps2pgf.postscript.filters.EexecDecode;
-import net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont;
+import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
+import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.postscript.filters.EexecDecode;
 import net.sf.eps2pgf.util.ArrayStack;
+
+import org.fontbox.afm.CharMetric;
+import org.fontbox.afm.FontMetric;
+import org.fontbox.util.BoundingBox;
 
 /**
  * Wrapper class to wrap font metric information loaded by FontBox in a
@@ -53,26 +57,35 @@ public class PSObjectAfm extends PSObject implements Cloneable {
     }
     
     /**
-     * Create a new instance of PSObjectAfm by extracting the metrics data from CharStrings
+     * Instantiates a new font metric (AFM) object. First it checks the
+     * FontType entry and then extract the metric data from the
+     * corresponding font dictionary entries.
+     * 
+     * @param fontDict Font dictionary of the font.
+     * 
+     * @throws PSError a PostScript error occurred
      */
-    public PSObjectAfm(PSObjectDict charStrings, PSObjectDict privateDict) throws PSError {
-        // Parse Subrs entry in private dictionary
-        PSObjectArray subrsArray = privateDict.get(PSObjectFont.KEY_PRV_SUBRS).toArray();
-        subrs = parseSubrs(subrsArray);
-        
-        fontMetrics = new FontMetric();
-        List<PSObject> items = charStrings.getItemList();
-        try {
-            for (int i = 1 ; i < items.size() ; i += 2) {
-                PSObjectName charName = items.get(i).toName();
-                PSObjectString charString = items.get(i+1).toPSString();
-                CharMetric charMetric = charString2CharMetric(charName.name, 
-                        charString.toString());
-                fontMetrics.addCharMetric(charMetric);
-            }
-        } catch (PSError e) {
-            throw new PSErrorInvalidFont();
-        }
+    public PSObjectAfm(PSObjectDict fontDict) throws PSError, ProgramError {
+    	int fontType;
+    	try {
+    		fontType = fontDict.get("FontType").toInt();
+    	} catch (PSErrorUndefined e) {
+    		throw new PSErrorInvalidFont("FontType is not defined.");
+    	} catch (PSErrorTypeCheck e) {
+    		throw new PSErrorInvalidFont("FontType is not an integer.");
+    	}
+    	
+    	switch (fontType) {
+    		case 1:
+    			loadType1(fontDict);
+    			break;
+    		case 3:
+    			loadType3(fontDict);
+    			break;
+    		default:
+    			throw new PSErrorUnimplemented("type " + fontType + " fonts");
+    	}
+    		
     }
     
     /**
@@ -217,7 +230,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
     }
     
     /**
-     * Interpret a CharString and builds the path corresponsing the
+     * Interpret a CharString and builds the path corresponding the
      * @param execStack Stack with object that will be executed.
      * @param paramSb Pointer to array with two values. These values are the X- and
      * Y-coordinate of the left side bearing.
@@ -331,6 +344,164 @@ public class PSObjectAfm extends PSObject implements Cloneable {
         
         return gstate.current.path;
     }
+    
+    /**
+     * Load metrics data from CharStrings (Type 1 font).
+     * 
+     * @param fontDict font dictionary describing a type 1 font
+     * 
+     * @throws PSError a PostScript error occurred
+     */
+    void loadType1(PSObjectDict fontDict) throws PSError {
+    	// Extract metrics information from character descriptions
+    	PSObjectDict charStrings;
+    	try {
+    		charStrings = fontDict.get(PSObjectFont.KEY_CHARSTRINGS).toDict();
+    	} catch (PSErrorUndefined e) {
+        	throw new PSErrorInvalidFont("Required entry (" 
+        			+ PSObjectFont.KEY_CHARSTRINGS + ") not defined");
+    	}
+    	PSObjectDict privateDict;
+        try {
+        	privateDict = fontDict.get(PSObjectFont.KEY_PRIVATE).toDict();
+        } catch (PSErrorUndefined e) {
+        	throw new PSErrorInvalidFont("Required entry (" 
+        			+ PSObjectFont.KEY_PRIVATE + ") not defined");
+        }
+
+        // Parse Subrs entry in private dictionary
+        PSObjectArray subrsArray = privateDict.get(PSObjectFont.KEY_PRV_SUBRS).toArray();
+        this.subrs = parseSubrs(subrsArray);
+        
+        this.fontMetrics = new FontMetric();
+        List<PSObject> items = charStrings.getItemList();
+        try {
+            for (int i = 1 ; i < items.size() ; i += 2) {
+                PSObjectName charName = items.get(i).toName();
+                PSObjectString charString = items.get(i+1).toPSString();
+                CharMetric charMetric = charString2CharMetric(charName.name, 
+                        charString.toString());
+                this.fontMetrics.addCharMetric(charMetric);
+            }
+        } catch (PSError e) {
+            throw new PSErrorInvalidFont();
+        }
+    }
+    
+    
+    
+    /**
+     * Load metrics from a Type 3 font.
+     * 
+     * @param fontDict font dictionary describing a Type 3 font
+     * 
+     * @throws PSError a PostScript error occurred.
+     */
+    void loadType3(PSObjectDict fontDict) throws PSError, ProgramError {
+    	PSObjectArray buildGlyph;
+    	try {
+    		buildGlyph = fontDict.get(PSObjectFont.KEY_BUILDGLYPH).toProc();
+    	} catch (PSErrorUndefined e) {
+    		buildGlyph = null;
+    	} catch (PSErrorTypeCheck e) {
+    		throw new PSErrorInvalidFont("Entry " + PSObjectFont.KEY_BUILDGLYPH
+    				+ " is not a procedure");
+    	}
+    	
+    	// Create a temporary in which the characters will be processed
+    	try {
+    		Interpreter fi = new Interpreter();
+    		
+    		// Load some often used procedures to make execution faster
+    		fi.execStack.push(new PSObjectString("systemdict /gsave get " +
+    				"systemdict /grestore get systemdict /eps2pgfgetmetrics get"));
+    		fi.run();
+    		PSObject getmetrics = fi.opStack.pop();
+    		PSObject grestore = fi.opStack.pop();
+    		PSObject gsave = fi.opStack.pop();
+
+    		// Create a list of all unique charNames and their corresponding 
+    		// character codes.
+    		List<PSObject> encoding = fontDict.get(PSObjectFont.KEY_ENCODING).getItemList();
+    		encoding.remove(0);  // remove the first item, for an array it is always 1.
+    		List<PSObject> charNames = new ArrayList<PSObject>();
+    		List<Integer> charCodes = new ArrayList<Integer>();
+    		for (int i = 0 ; i < encoding.size() ; i++) {
+    			PSObject charName = encoding.get(i);
+    			// Check whether this character was processed already
+    			if (charNames.contains(charName)) {
+    				continue;
+    			}
+    			charNames.add(charName);
+    			charCodes.add(i);
+    		}
+
+    		// Next Step: fill the temporary interpreter with code to run the
+    		// buildGlyph/Char procedures.
+	    	if (buildGlyph != null) {
+	    		for (int i = 0 ; i < charNames.size() ; i++) {
+	    			// Fill the execution stack with code
+	    			fi.execStack.push(grestore);
+	    			fi.execStack.push(getmetrics);
+	    			fi.execStack.push(buildGlyph);
+	    			fi.execStack.push(charNames.get(i));
+	    			fi.execStack.push(fontDict);
+	    			fi.execStack.push(gsave);
+	    		}
+	    	} else {
+	    		// BuildGlyph is not defined. Apparently this is an old (version 1) font.
+	    		// Instead we load the BuildChar procedure
+		    	PSObjectArray buildChar;
+		    	try {
+		    		buildChar = fontDict.get(PSObjectFont.KEY_BUILDCHAR).toProc();
+		    	} catch (PSErrorUndefined e) {
+		    		throw new PSErrorInvalidFont("Required entry (" + PSObjectFont.KEY_BUILDCHAR
+		    				+ ") is not defined");
+		    	} catch (PSErrorTypeCheck e) {
+		    		throw new PSErrorInvalidFont("Entry " + PSObjectFont.KEY_BUILDCHAR
+		    				+ " is not an array");
+		    	}
+		    	
+		    	for (int i = 0 ; i < charNames.size() ; i++) {
+	    			// Fill the execution stack with code
+	    			fi.execStack.push(grestore);
+	    			fi.execStack.push(getmetrics);
+	    			fi.execStack.push(buildChar);
+	    			fi.execStack.push(new PSObjectInt(charCodes.get(i)));
+	    			fi.execStack.push(fontDict);
+	    			fi.execStack.push(gsave);
+		    	}
+	    	}
+	    	
+    		fi.run();
+    		
+    		this.fontMetrics = new FontMetric();
+    		for (int i = 0 ; i < charNames.size() ; i++) {
+    			String charName = charNames.get(i).toString();
+    			PSObjectArray metrics = fi.opStack.pop().toArray();
+    			
+    	        CharMetric charMetric = new CharMetric();
+    	        charMetric.setName(charName);
+    	        charMetric.setWx((float)metrics.get(0).toReal());
+    	        charMetric.setWy((float)metrics.get(1).toReal());
+    	        BoundingBox boundingBox = new BoundingBox();
+    	        boundingBox.setLowerLeftX((float)metrics.get(2).toReal());
+    	        boundingBox.setLowerLeftY((float)metrics.get(3).toReal());
+    	        boundingBox.setUpperRightX((float)metrics.get(4).toReal());
+    	        boundingBox.setUpperRightY((float)metrics.get(5).toReal());
+    	        charMetric.setBoundingBox(boundingBox);
+    	        this.fontMetrics.addCharMetric(charMetric);
+    		}
+
+    	} catch (Exception e) {
+    		// Catch all errors produces by the font code
+    		throw new ProgramError("Exception occurred in loadType3, which"
+    				+ " should not be possible.\n(Error generated by font: " + e + ")");
+    	}
+    	
+    	
+    }
+    
     
     /**
      * Returns the FontMetric object of this font

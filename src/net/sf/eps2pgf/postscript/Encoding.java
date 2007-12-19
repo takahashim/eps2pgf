@@ -27,6 +27,10 @@ import java.util.*;
  * @author Paul Wagenaars
  */
 public class Encoding {
+	// All fields and methods are static. Therefore, we need to initialize it
+	// only once.
+	private static boolean alreadyInitialized = false;
+	
     private static Map<String, PSObjectName> names;
     
     private static PSObjectName[] standard = new PSObjectName[256];
@@ -35,10 +39,16 @@ public class Encoding {
     
     /** Initialize encodings. */
     public static void initialize() {
+    	if (alreadyInitialized) {
+    		return;
+    	}
+    	
         initNames();
         initStandardEncoding();
         initISOLatin1Encoding();
         initSymbolEncoding();
+        
+        alreadyInitialized = true;
     }
     
     /**

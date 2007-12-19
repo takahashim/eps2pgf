@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.io.CacheDevice;
 import net.sf.eps2pgf.io.NullDevice;
 import net.sf.eps2pgf.io.OutputDevice;
 import net.sf.eps2pgf.io.PGFDevice;
@@ -80,26 +81,81 @@ public class Interpreter {
     /**
      * Creates a new instance of Interpreter
      * @param out Destination for output code
-     * @throws java.io.FileNotFoundException Unable to find font resources
      */
-    public Interpreter(Writer out, DSCHeader fileHeader) throws ProgramError {
+    public Interpreter(Writer out, DSCHeader fileHeader)
+    		throws ProgramError, PSError, IOException {
+        // Create graphics state stack with output device
+        OutputDevice output = new PGFDevice(out);
+        this.gstate = new GstateStack(output);
+        
+        header = fileHeader;
+        
+        this.initialize();
+    }
+    
+    /**
+     * Creates a new instance of Interpreter with nulldevice as output and 
+     * (virtually) infinite bounding box
+     */
+    public Interpreter() throws ProgramError, PSError, IOException {
+        // Create graphics state stack with output device
+        OutputDevice output = new NullDevice();
+        gstate = new GstateStack(output);
+        
+        // "Infinite" bounding box (square box from (-10m,-10m) to (10m,10m))
+        double[] bbox = {-28346.46, -28346.46, 28346.46, 28346.46};
+        header = new DSCHeader(bbox);
+        
+        this.initialize();
+    }
+    
+    /**
+     * Do some initialization tasks
+     **/
+    void initialize() throws IOException, PSError, ProgramError {
         // Initialize character encodings and fonts
         Encoding.initialize();
         Fonts.initialize();
         
         // Create dictionary stack
-        dictStack = new DictStack(this);
+        this.dictStack = new DictStack(this);
 
-        // Create new output device
-        OutputDevice output = new PGFDevice(out);
-        
-        // Create graphics state stack
-        gstate = new GstateStack(output);
-        
         // Text handler
-        textHandler = new TextHandler(gstate);
+        this.textHandler = new TextHandler(gstate);
         
-        header = fileHeader;
+        gstate.current.device.init(gstate.current);
+        
+        gstate.current.setcolorspace(new PSObjectName("DeviceGray", true), true);
+        
+        // An eps-file defines a bounding box. Set this bounding box as the
+        // default clipping path.
+        double[] bbox = header.boundingBox;
+        double left, right, top, bottom;
+        if (bbox != null) {
+            left = bbox[0];
+            bottom = bbox[1];
+            right = bbox[2];
+            top = bbox[3];
+        } else {
+            // If no bounding box is default we use A4 paper. Note that this
+            // bounding box is not written to the output.
+            left = 0;
+            bottom = 0;
+            right = 595.276;
+            top = 841.890;
+        }
+        gstate.current.moveto(left, bottom);
+        gstate.current.lineto(right, bottom);
+        gstate.current.lineto(right, top);
+        gstate.current.lineto(left, top);
+        gstate.current.path.closepath();
+        this.defaultClippingPath = gstate.current.path;
+        op_newpath();
+        if (bbox != null) {
+            op_initclip();
+        } else {
+            gstate.current.clippingPath = defaultClippingPath.clone();
+        }
     }
     
     /**
@@ -107,8 +163,6 @@ public class Interpreter {
      * @throws java.lang.Exception Something went wrong in the interpretation process
      */
     public void start() throws Exception {
-        initialize();
-        
         try {
             run();
         } catch (PSError e) {
@@ -156,45 +210,6 @@ public class Interpreter {
                 execStack.pop();
             }
             throw e;
-        }
-    }
-    
-    /**
-     * Do some initialization tasks
-     **/
-    void initialize() throws IOException, PSError {
-        gstate.current.device.init(gstate.current);
-        
-        gstate.current.setcolorspace(new PSObjectName("DeviceGray", true), true);
-        
-        // An eps-file defines a bounding box. Set this bounding box as the
-        // default clipping path.
-        double[] bbox = header.boundingBox;
-        double left, right, top, bottom;
-        if (bbox != null) {
-            left = bbox[0];
-            bottom = bbox[1];
-            right = bbox[2];
-            top = bbox[3];
-        } else {
-            // If no bounding box is default we use A4 paper. Note that this
-            // bounding box is not written to the output.
-            left = 0;
-            bottom = 0;
-            right = 595.276;
-            top = 841.890;
-        }
-        gstate.current.moveto(left, bottom);
-        gstate.current.lineto(right, bottom);
-        gstate.current.lineto(right, top);
-        gstate.current.lineto(left, top);
-        gstate.current.path.closepath();
-        defaultClippingPath = gstate.current.path;
-        op_newpath();
-        if (bbox != null) {
-            op_initclip();
-        } else {
-            gstate.current.clippingPath = defaultClippingPath.clone();
         }
     }
     
@@ -365,7 +380,7 @@ public class Interpreter {
     }
     
     /** PostScript op: ashow */
-    public void op_ashow() throws PSError, IOException {
+    public void op_ashow() throws PSError, IOException, ProgramError {
         log.fine("ashow operator encoutered. ashow is not implemented, instead the normal show is used.");
         PSObjectString string = opStack.pop().toPSString();
         string.checkAccess(false, true, false);
@@ -869,6 +884,13 @@ public class Interpreter {
         op_newpath();
     }
     
+    /** Internal Eps2pgf operator: eps2pgfgetmetrics */
+    public void op_eps2pgfgetmetrics() {
+    	double[] metrics = gstate.current.device.eps2pgfGetMetrics();
+    	PSObjectArray array = new PSObjectArray(metrics);
+    	opStack.push(array);
+    }
+    
     /** PostScript op: errordict */
     public void op_errordict() throws PSErrorUnimplemented {
         throw new PSErrorUnimplemented("errordict operator");
@@ -972,9 +994,9 @@ public class Interpreter {
         // Prevent (virtually) infinite loops
         if (inc == 0) {
             return;
-        } else if ( (inc > 0) && (limit <= initial) ) {
+        } else if ( (inc > 0) && (limit < initial) ) {
             return;
-        } else if ( (inc < 0) && (limit >= initial) ) {
+        } else if ( (inc < 0) && (limit > initial) ) {
             return;
         }
         
@@ -1730,6 +1752,34 @@ public class Interpreter {
         }
     }
     
+    /** PostScript op: setcachedevice */
+    public void op_setcachedevice() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    	double ury = opStack.pop().toReal();
+    	double urx = opStack.pop().toReal();
+    	double lly = opStack.pop().toReal();
+    	double llx = opStack.pop().toReal();
+    	double wy = opStack.pop().toReal();
+    	double wx = opStack.pop().toReal();
+    	gstate.current.device = new CacheDevice(wx, wy, llx, lly, urx, ury);
+    	gstate.current.initmatrix();
+    }
+    
+    /** PostScript op: setcachedevice2 */
+    public void op_setcachedevice2() throws PSErrorStackUnderflow, PSErrorTypeCheck {
+    	opStack.pop(); // pop vy
+    	opStack.pop(); // pop vx
+    	opStack.pop(); // pop w1y
+    	opStack.pop(); // pop w1x
+    	double ury = opStack.pop().toReal();
+    	double urx = opStack.pop().toReal();
+    	double lly = opStack.pop().toReal();
+    	double llx = opStack.pop().toReal();
+    	double w0y = opStack.pop().toReal();
+    	double w0x = opStack.pop().toReal();
+    	gstate.current.device = new CacheDevice(w0x, w0y, llx, lly, urx, ury);
+    	gstate.current.initmatrix();
+    }
+    
     /** PostScript op: setcmykcolor */
     public void op_setcmykcolor() throws PSError, IOException {
         double k = opStack.pop().toReal();
@@ -1857,7 +1907,7 @@ public class Interpreter {
     }
     
     /** PostScript op: show */
-    public void op_show() throws PSError, IOException {
+    public void op_show() throws PSError, IOException, ProgramError {
         PSObjectString string = opStack.pop().toPSString();
         double[] dpos = textHandler.showText(gstate.current.device, string);
         gstate.current.rmoveto(dpos[0], dpos[1]);
@@ -1920,7 +1970,7 @@ public class Interpreter {
     }
    
     /** PostScript op: stringwidth */
-    public void op_stringwidth() throws PSError, IOException {
+    public void op_stringwidth() throws PSError, IOException, ProgramError {
         PSObjectString string = opStack.pop().toPSString();
         string.checkAccess(false, true, false);
         

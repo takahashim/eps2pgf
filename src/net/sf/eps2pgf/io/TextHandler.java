@@ -24,6 +24,7 @@ import java.io.IOException;
 
 import org.fontbox.util.BoundingBox;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.postscript.*;
 import net.sf.eps2pgf.postscript.errors.*;
 
@@ -79,7 +80,7 @@ public class TextHandler {
      * @return Displacement vector [dx, dy] in user space coordinates
      */
     public double[] showText(OutputDevice exp, PSObjectString string) 
-            throws PSError, IOException {
+            throws PSError, IOException, ProgramError {
         return showText(exp, string, false);
     }
     
@@ -90,7 +91,7 @@ public class TextHandler {
      * @return Displacement vector [dx, dy] in user space coordinates
      */
     public double[] showText(OutputDevice exp, PSObjectString string, boolean noOutput) 
-            throws PSError, IOException {        
+            throws PSError, IOException, ProgramError {        
         PSObjectFont currentFont = gstate.current.font;
         
         PSObjectArray charNames = string.decode(currentFont.getEncoding());
@@ -110,24 +111,24 @@ public class TextHandler {
             double[] pos = gstate.current.getCurrentPosInDeviceSpace();
             double[] dpos;
 
-//            dpos = getAnchor("tl", bbox, scaling, angle);
-//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//            dpos = getAnchor("bl", bbox, scaling, angle);
-//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//            dpos = getAnchor("tr", bbox, scaling, angle);
-//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//            dpos = getAnchor("br", bbox, scaling, angle);
-//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//            dpos = getAnchor("cc", bbox, scaling, angle);
-//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//            dpos = getAnchor("tc", bbox, scaling, angle);
-//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//            dpos = getAnchor("bc", bbox, scaling, angle);
-//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//            dpos = getAnchor("cl", bbox, scaling, angle);
-//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
-//            dpos = getAnchor("cr", bbox, scaling, angle);
-//            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+            dpos = getAnchor("tl", bbox, scaling, angle);
+            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+            dpos = getAnchor("bl", bbox, scaling, angle);
+            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+            dpos = getAnchor("tr", bbox, scaling, angle);
+            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+            dpos = getAnchor("br", bbox, scaling, angle);
+            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+            dpos = getAnchor("cc", bbox, scaling, angle);
+            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+            dpos = getAnchor("tc", bbox, scaling, angle);
+            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+            dpos = getAnchor("bc", bbox, scaling, angle);
+            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+            dpos = getAnchor("cl", bbox, scaling, angle);
+            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
+            dpos = getAnchor("cr", bbox, scaling, angle);
+            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
 
             dpos = getAnchor("cc", bbox, scaling, angle);
             double textPos[] = new double[2];
