@@ -207,19 +207,10 @@ public class PSObjectFont extends PSObject implements Cloneable {
     boolean assertValidFont() throws PSError, ProgramError {
         boolean alreadyValid = true;
         
-        if (!dict.known(KEY_FONTNAME)) {
-        	String FID;
-        	if (dict.known(KEY_FID)) {
-        		FID = dict.get(KEY_FID).isis();
-        	} else {
-        		FID = Integer.toString(nextFID++);
-        	}
-        	dict.setKey(KEY_FONTNAME, new PSObjectName("UnnamedFont" + FID, true));
-        }
+        String fontname = this.getFontName();
         
         // See if texstrings are defined for this font. If not, copy standard texstrings
         if (!dict.known(KEY_TEXSTRINGS)) {
-        	String fontname = dict.get(KEY_FONTNAME).toName().name;
         	dict.setKey(KEY_TEXSTRINGS, Fonts.getTexStringDictByFontname(fontname));
             alreadyValid = false;
         }
@@ -241,13 +232,13 @@ public class PSObjectFont extends PSObject implements Cloneable {
             		{"Ital",      "\\textit{", "}"}};
             String pre = "";
             String post = "";
-            String fontname = dict.get(KEY_FONTNAME).toName().name + "A";
+        	// Append an "X" to the font name to make sure that
+        	// there is at least one [^a-z] character after the
+        	// font type string.
+            String augmentedFontname = fontname + "X"; 
             for (int i = 0 ; i < fontTypes.length ; i++) {
-            	// Append an "A" to the font name to make sure that
-            	// there is at least one [^a-z] character after the
-            	// font type string. 
             	String regexp = ".*" + fontTypes[i][0] + "[^a-z].*";
-            	if (fontname.matches(regexp)) {
+            	if (augmentedFontname.matches(regexp)) {
             		pre += fontTypes[i][1];
             		post = fontTypes[i][2] + post;
             	}
@@ -489,12 +480,27 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @return Fontname
      */
     String getFontName() {
-        try {
-            return dict.lookup(KEY_FONTNAME).toName().name;
-        } catch (PSErrorTypeCheck e) {
-            // No font name is defined
-            return "";
-        }
+    	if (dict.known(KEY_FONTNAME)) {
+    		PSObject fontNameObj = dict.lookup(KEY_FONTNAME);
+    		if (fontNameObj instanceof PSObjectName) {
+    			return ((PSObjectName)fontNameObj).toName().name;
+    		}
+    	}
+        // No font name is defined in this dictionary. Instead we use the key
+    	// in the FontDirectory that is associated with this font.
+    	List<PSObject> items = Fonts.FontDirectory.getItemList();
+    	int thisFID = this.getFID(); 
+    	try {
+    		for (int i = 1 ; i < items.size() ; i += 2) {
+    			PSObjectFont itemFont = items.get(i + 1).toFont();
+    			if (itemFont.getFID() == thisFID) {
+    				return items.get(i).toString();
+    			}
+    		}
+    	} catch (PSErrorTypeCheck e) {
+    		return "";
+    	}
+    	return "";
     }
     
     /**
