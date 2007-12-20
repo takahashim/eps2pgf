@@ -39,7 +39,7 @@ public class CacheDevice implements OutputDevice {
 	double specifiedLly = 0.0;
 	double specifiedUrx = 0.0;
 	double specifiedUry = 0.0;
-	double[] pathBbox = {0.0, 0.0, 0.0, 0.0};
+	double[] pathBbox = null;
 	
 	/**
 	 * Creates a new cache device and passes glyph width and bounding box
@@ -89,8 +89,11 @@ public class CacheDevice implements OutputDevice {
      * return metrics information about the drawn glyph.
      */
     public double[] eps2pgfGetMetrics() {
-    	double[] dummyData = {specifiedWx, specifiedWy, pathBbox[0],
-    			pathBbox[1], pathBbox[2], pathBbox[3]};
+    	double llx = Math.max(this.specifiedLlx, this.pathBbox[0]);
+    	double lly = Math.max(this.specifiedLly, this.pathBbox[1]);
+    	double urx = Math.min(this.specifiedUrx, this.pathBbox[2]);
+    	double ury = Math.min(this.specifiedUry, this.pathBbox[3]);
+    	double[] dummyData = {specifiedWx, specifiedWy, llx, lly, urx, ury};
     	return dummyData;
     }
     
@@ -106,9 +109,9 @@ public class CacheDevice implements OutputDevice {
      */
     public void fill(Path path) {
     	try {
-    		this.pathBbox = path.boundingBox();
+    		this.mergeBbox(path.boundingBox());
     	} catch (PSErrorNoCurrentPoint e) {
-    		this.pathBbox = new double[4];
+    		// do nothing
     	}
     }
     
@@ -121,9 +124,25 @@ public class CacheDevice implements OutputDevice {
      */
     public void eofill(Path path) {
     	try {
-    		this.pathBbox = path.boundingBox();
+    		this.mergeBbox(path.boundingBox());
     	} catch (PSErrorNoCurrentPoint e) {
-    		this.pathBbox = new double[4];
+    		// do nothing
+    	}
+    }
+    
+    /**
+     * Merge a new bounding box with the current bounding box. Afterwards
+     * this.pathBbox will contain a bounding box that contains both the
+     * previous this.pathBbox and the newBbox.
+     */
+    void mergeBbox(double[] newBbox) {
+    	if (this.pathBbox == null) {
+    		this.pathBbox = newBbox;
+    	} else {
+    		this.pathBbox[0] = Math.min(this.pathBbox[0], newBbox[0]);
+    		this.pathBbox[1] = Math.min(this.pathBbox[1], newBbox[1]);
+    		this.pathBbox[2] = Math.max(this.pathBbox[2], newBbox[2]);
+    		this.pathBbox[3] = Math.max(this.pathBbox[3], newBbox[3]);
     	}
     }
     
@@ -132,9 +151,9 @@ public class CacheDevice implements OutputDevice {
      */
     public void shfill(PSObjectDict dict, GraphicsState gstate) {
     	try {
-    		this.pathBbox = gstate.path.boundingBox();
+    		this.mergeBbox(gstate.path.boundingBox());
     	} catch (PSErrorNoCurrentPoint e) {
-    		this.pathBbox = new double[4];
+    		// do nothing
     	}
     }
 
@@ -143,9 +162,9 @@ public class CacheDevice implements OutputDevice {
      */
     public void stroke(GraphicsState gstate) {
     	try {
-    		this.pathBbox = gstate.path.boundingBox();
+    		this.mergeBbox(gstate.path.boundingBox());
     	} catch (PSErrorNoCurrentPoint e) {
-    		this.pathBbox = new double[4];
+    		// do nothing
     	}
     }
     
