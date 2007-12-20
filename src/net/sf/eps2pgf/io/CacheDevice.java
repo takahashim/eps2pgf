@@ -89,10 +89,16 @@ public class CacheDevice implements OutputDevice {
      * return metrics information about the drawn glyph.
      */
     public double[] eps2pgfGetMetrics() {
-    	double llx = Math.max(this.specifiedLlx, this.pathBbox[0]);
-    	double lly = Math.max(this.specifiedLly, this.pathBbox[1]);
-    	double urx = Math.min(this.specifiedUrx, this.pathBbox[2]);
-    	double ury = Math.min(this.specifiedUry, this.pathBbox[3]);
+    	double llx = 0.0;
+		double lly = 0.0;
+		double urx = 0.0;
+		double ury = 0.0;
+    	if (this.pathBbox != null) {
+    		llx = Math.max(this.specifiedLlx, this.pathBbox[0]);
+    		lly = Math.max(this.specifiedLly, this.pathBbox[1]);
+    		urx = Math.min(this.specifiedUrx, this.pathBbox[2]);
+    		ury = Math.min(this.specifiedUry, this.pathBbox[3]);
+    	}
     	double[] dummyData = {specifiedWx, specifiedWy, llx, lly, urx, ury};
     	return dummyData;
     }
