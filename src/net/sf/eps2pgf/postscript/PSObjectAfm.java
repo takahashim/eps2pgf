@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.io.NullDevice;
 import net.sf.eps2pgf.io.StringInputStream;
+import net.sf.eps2pgf.io.devices.NullDevice;
 import net.sf.eps2pgf.postscript.errors.PSError;
 import net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;

@@ -21,7 +21,7 @@
 package net.sf.eps2pgf.postscript;
 
 import net.sf.eps2pgf.util.ArrayStack;
-import net.sf.eps2pgf.io.OutputDevice;
+import net.sf.eps2pgf.io.devices.OutputDevice;
 import net.sf.eps2pgf.postscript.errors.*;
 
 /** Manages the graphics states (stack, ...)

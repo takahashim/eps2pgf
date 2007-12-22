@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.io;
+package net.sf.eps2pgf.io.devices;
 
 import java.io.*;
 import java.text.*;
@@ -462,8 +462,6 @@ public class PGFDevice implements OutputDevice {
         // Convert fontsize in PostScript pt to TeX pt
         fontsize = fontsize / 72 * 72.27;
         
-        // The angle definition in PostScript is just the other way around
-        // as is pgf.
         String angStr = lengthFormat.format(angle);
         
         text = "\\fontsize{" + fontSizeFormat.format(fontsize) + "}{" 

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.io;
+package net.sf.eps2pgf.io.devices;
 
 import net.sf.eps2pgf.postscript.GraphicsState;
 import net.sf.eps2pgf.postscript.PSObjectDict;
