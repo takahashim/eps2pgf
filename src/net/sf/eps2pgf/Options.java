@@ -26,6 +26,8 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 import com.martiansoftware.jsap.UnflaggedOption;
+import com.martiansoftware.jsap.StringParser;
+import com.martiansoftware.jsap.stringparsers.EnumeratedStringParser;
 
 /**
  * Parses command line arguments and manages settings and options by the user
@@ -37,6 +39,7 @@ public class Options extends JSAP {
     
     String input;
     String output;
+    String outputtype;
     
     /**
      * Creates a new instance of Options
@@ -64,6 +67,16 @@ public class Options extends JSAP {
                                        .setRequired(true);
             opt1.setHelp("Write output to this file");
             registerParameter(opt1);
+            
+            StringParser outputtypeParser = EnumeratedStringParser.getParser("pgf; lol",
+            		false, false); 
+            FlaggedOption opt3 = new FlaggedOption("outputtype")
+            						   .setShortFlag('t')
+            						   .setLongFlag("output-type")
+            						   .setStringParser(outputtypeParser)
+            						   .setDefault("pgf");
+            opt3.setHelp("Type of output file. Accepted values: 'pgf' or 'lol'.");
+            registerParameter(opt3);
             
             sw = new Switch("version")
                                 .setLongFlag("version");
@@ -99,20 +112,23 @@ public class Options extends JSAP {
      */
     private void postParse() {
         input = args.getString("inputfilename", "");
+        outputtype = args.getString("outputtype", "pgf");
         
         if (args.getString("outputfilename").startsWith("<")) {
             String lowerInput = input.toLowerCase();
             if (lowerInput.endsWith(".eps")) {
-                output = input.substring(0, input.length()-4) + ".pgf";
+            	output = input.substring(0, input.length()-4) + "." + outputtype;
             } else if (lowerInput.endsWith(".ps")) {
-                output = input.substring(0, input.length()-3) + ".pgf";
+            	output = input.substring(0, input.length()-3) + "." + outputtype;
             } else {
-                output = input + ".pgf";
+            	output = input + "." + outputtype;
             }
         } else {
             // An output filename was specified on the command-line
             output = args.getString("outputfilename");
         }
+        
+        
     }
     
 }

@@ -29,12 +29,13 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.io.CacheDevice;
-import net.sf.eps2pgf.io.NullDevice;
-import net.sf.eps2pgf.io.OutputDevice;
-import net.sf.eps2pgf.io.PGFDevice;
 import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.TextHandler;
+import net.sf.eps2pgf.io.devices.CacheDevice;
+import net.sf.eps2pgf.io.devices.LOLDevice;
+import net.sf.eps2pgf.io.devices.NullDevice;
+import net.sf.eps2pgf.io.devices.OutputDevice;
+import net.sf.eps2pgf.io.devices.PGFDevice;
 import net.sf.eps2pgf.postscript.colors.RGB;
 import net.sf.eps2pgf.postscript.errors.PSError;
 import net.sf.eps2pgf.postscript.errors.PSErrorDictStackUnderflow;
@@ -79,13 +80,28 @@ public class Interpreter {
     Logger log = Logger.getLogger("global");
     
     /**
-     * Creates a new instance of Interpreter
+     * Creates a new instance of Interpreter that writes to a PGF output device.
      * @param out Destination for output code
      */
     public Interpreter(Writer out, DSCHeader fileHeader)
     		throws ProgramError, PSError, IOException {
+        this(out, fileHeader, "pgf");
+    }
+    
+    /**
+     * Creates a new instance of interpreter
+     */
+    public Interpreter(Writer out, DSCHeader fileHeader, String outputtype)
+    		throws ProgramError, PSError, IOException {
         // Create graphics state stack with output device
-        OutputDevice output = new PGFDevice(out);
+    	OutputDevice output;
+    	if (outputtype.equals("pgf")) {
+    		output = new PGFDevice(out);
+    	} else if (outputtype.equals("lol")) {
+    		output = new LOLDevice(out);
+    	} else {
+    		throw new ProgramError("Invalid output type (" + outputtype + ")");
+    	}
         this.gstate = new GstateStack(output);
         
         header = fileHeader;

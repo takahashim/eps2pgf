@@ -72,8 +72,6 @@ public class Main {
                 System.err.println("Error: " + errs.next());
             }
             
-            printHelp();
-            
             System.exit(1);
         }
         
@@ -83,7 +81,7 @@ public class Main {
             log.setLevel(Level.WARNING);
         }
         
-        Converter cnv = new Converter(opts.input, opts.output);
+        Converter cnv = new Converter(opts);
         cnv.convert();
     }
     

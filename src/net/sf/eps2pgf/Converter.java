@@ -43,14 +43,17 @@ import net.sf.eps2pgf.postscript.Header;
 public class Converter {
     File inFile;
     File outFile;
+    Options opts;
     
     /** Creates a new instance of Converter
      * @param sourceFilename path to target EPS file
      * @param targetFilename path to target PGF file
+     * @param opts command line options passed to the program
      */
-    public Converter(String sourceFilename, String targetFilename) {
-        inFile = new File(sourceFilename);
-        outFile = new File(targetFilename);
+    public Converter(Options opts) {
+        this.inFile = new File(opts.input);
+        this.outFile = new File(opts.output);
+        this.opts = opts;
     }
     
     /**
@@ -76,7 +79,7 @@ public class Converter {
         Writer out = new BufferedWriter(new FileWriter(outFile));
         
         // Create PostScript interpreter and add file to execution stack
-        Interpreter interp = new Interpreter(out, header);
+        Interpreter interp = new Interpreter(out, header, opts.outputtype);
         interp.execStack.push(new PSObjectFile(in));
         
         // Run the interpreter

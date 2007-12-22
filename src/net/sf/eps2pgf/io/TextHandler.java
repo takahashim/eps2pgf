@@ -25,6 +25,7 @@ import java.io.IOException;
 import org.fontbox.util.BoundingBox;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.io.devices.OutputDevice;
 import net.sf.eps2pgf.postscript.*;
 import net.sf.eps2pgf.postscript.errors.*;
 
