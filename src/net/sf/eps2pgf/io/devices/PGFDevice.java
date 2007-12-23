@@ -116,12 +116,12 @@ public class PGFDevice implements OutputDevice {
                 if (i < (path.sections.size()-1)) {
                     String x = coorFormat.format(1e-4*section.params[0]);
                     String y = coorFormat.format(1e-4*section.params[1]);
-                    out.write("\\pgfpathmoveto{\\pgfpoint{" + x + "cm}{" + y + "cm}}");
+                    out.write("\\pgfpathmoveto{\\pgfpoint{" + x + "cm}{" + y + "cm}}\n");
                 }
             } else if (section instanceof Lineto) {
                 String x = coorFormat.format(1e-4*section.params[0]);
                 String y = coorFormat.format(1e-4*section.params[1]);
-                out.write("\\pgfpathlineto{\\pgfpoint{" + x + "cm}{" + y + "cm}}");
+                out.write("\\pgfpathlineto{\\pgfpoint{" + x + "cm}{" + y + "cm}}\n");
             } else if (section instanceof Curveto) {
                 String x1 = coorFormat.format(1e-4*section.params[0]);
                 String y1 = coorFormat.format(1e-4*section.params[1]);
@@ -132,9 +132,9 @@ public class PGFDevice implements OutputDevice {
                 out.write("\\pgfpathcurveto");
                 out.write("{\\pgfpoint{" + x1 + "cm}{" + y1 + "cm}}");
                 out.write("{\\pgfpoint{" + x2 + "cm}{" + y2 + "cm}}");
-                out.write("{\\pgfpoint{" + x3 + "cm}{" + y3 + "cm}}");
+                out.write("{\\pgfpoint{" + x3 + "cm}{" + y3 + "cm}}\n");
             } else if (section instanceof Closepath) {
-                out.write("\\pgfpathclose");
+                out.write("\\pgfpathclose\n");
             } else {
                 throw new PSErrorUnimplemented("Can't handle " + section.getClass().getName());
             }
