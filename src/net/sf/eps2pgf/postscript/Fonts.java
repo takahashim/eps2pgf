@@ -107,13 +107,9 @@ public class Fonts {
      * @throws PSErrorTypeCheck Unable to use the key as dictionary key
      */
     public static PSObjectFont defineFont(PSObject key, PSObjectFont font) 
-            throws PSErrorTypeCheck, PSErrorUnimplemented {
-        if (font.getFID() >= 0) {
-            throw new PSErrorUnimplemented("Associating a font with more than one key.");
-        } else {
-            font.setFID();
-            FontDirectory.setKey(key, font);
-        }
+            throws PSErrorTypeCheck {
+        font.setFID();
+        FontDirectory.setKey(key, font);
         return font;
     }
     
@@ -215,7 +211,7 @@ public class Fonts {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont Unable to find requested font.
      */
     public static PSObjectFont loadFont(PSObject fontKey) throws PSError {
-    	String fontName = fontKey.toName().name;
+    	String fontName = fontKey.toString();
         log.info("Loading " + fontName + " font from " + resourceDir);
         PSObjectFont font = new PSObjectFont(resourceDir, fontName);
         
