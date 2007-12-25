@@ -40,6 +40,7 @@ public class Options extends JSAP {
     String input;
     String output;
     String outputtype;
+    String textreplacefile;
     
     /**
      * Creates a new instance of Options
@@ -51,12 +52,12 @@ public class Options extends JSAP {
             UnflaggedOption opt2 = new UnflaggedOption("inputfilename")
                                           .setStringParser(JSAP.STRING_PARSER)
                                           .setRequired(true);
-            opt2.setHelp("(Encapsulated) PostScript (EPS or PS) input file");
+            opt2.setHelp("(Encapsulated) PostScript (EPS or PS) input file.");
             registerParameter(opt2);
             
             Switch sw = new Switch("verbose")
                         .setLongFlag("verbose");
-            sw.setHelp("Display more information during the conversion process");
+            sw.setHelp("Display more information during the conversion process.");
             registerParameter(sw);
             
             FlaggedOption opt1 = new FlaggedOption("outputfilename")
@@ -65,7 +66,7 @@ public class Options extends JSAP {
                                        .setStringParser(JSAP.STRING_PARSER)
                                        .setDefault("<input file with .pgf extension>")
                                        .setRequired(true);
-            opt1.setHelp("Write output to this file");
+            opt1.setHelp("Write output to this file.");
             registerParameter(opt1);
             
             StringParser outputtypeParser = EnumeratedStringParser.getParser("pgf; lol",
@@ -78,15 +79,22 @@ public class Options extends JSAP {
             opt3.setHelp("Type of output file. Accepted values: 'pgf' or 'lol'.");
             registerParameter(opt3);
             
+            FlaggedOption opt4 = new FlaggedOption("textreplacefile")
+            							.setLongFlag("text-replace")
+            							.setStringParser(JSAP.STRING_PARSER)
+            							.setRequired(false);
+            opt4.setHelp("File containing PSfrag commands describing text replacements.");
+            registerParameter(opt4);
+            
             sw = new Switch("version")
                                 .setLongFlag("version");
-            sw.setHelp("Display version information");
+            sw.setHelp("Display version information.");
             registerParameter(sw);
             
             sw = new Switch("help")
                         .setLongFlag("help")
                         .setShortFlag('h');
-            sw.setHelp("Display program usage");
+            sw.setHelp("Display program usage.");
             registerParameter(sw);
             
         } catch (JSAPException e) {
@@ -128,6 +136,7 @@ public class Options extends JSAP {
             output = args.getString("outputfilename");
         }
         
+        textreplacefile = args.getString("textreplacefile", "");
         
     }
     

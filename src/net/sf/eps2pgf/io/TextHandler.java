@@ -25,6 +25,7 @@ import java.io.IOException;
 import org.fontbox.util.BoundingBox;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.io.TextReplacements.Rule;
 import net.sf.eps2pgf.io.devices.OutputDevice;
 import net.sf.eps2pgf.postscript.*;
 import net.sf.eps2pgf.postscript.errors.*;
@@ -36,9 +37,24 @@ import net.sf.eps2pgf.postscript.errors.*;
 public class TextHandler {
     GstateStack gstate;
     
+    /** Text replacement rules. */
+    private TextReplacements textReplace;
+
     /** Creates a new instance of TextHandler */
-    public TextHandler(GstateStack graphicsStateStack) {
-        gstate = graphicsStateStack;
+    public TextHandler(final GstateStack graphicsStateStack) {
+    	this(graphicsStateStack, null);
+    }
+
+    /** Creates a new instance of TextHandler */
+    public TextHandler(final GstateStack graphicsStateStack,
+    		final TextReplacements pTextReplace) {
+        this.gstate = graphicsStateStack;
+        if (pTextReplace != null) {
+        	this.textReplace = pTextReplace;
+        } else {
+        	this.textReplace = new TextReplacements();
+        }
+         
     }
     
     /**
@@ -95,8 +111,15 @@ public class TextHandler {
             throws PSError, IOException, ProgramError {        
         PSObjectFont currentFont = gstate.current.font;
         
-        PSObjectArray charNames = string.decode(currentFont.getEncoding());
+        Rule replaceRule = textReplace.findReplacement(string.toString());
+        String texRefPoint = "cc";
+        String psRefPoint = "cc";
+        if (replaceRule != null) {
+        	texRefPoint = replaceRule.getTexRefPoint();
+        	psRefPoint = replaceRule.getPsRefPoint();
+        }
         
+        PSObjectArray charNames = string.decode(currentFont.getEncoding());
         String text = currentFont.charNames2texStrings(charNames);
         
         double angle = gstate.current.CTM.getRotation();
@@ -131,11 +154,18 @@ public class TextHandler {
 //            dpos = getAnchor("cr", bbox, scaling, angle);
 //            exp.drawDot(pos[0]+dpos[0], pos[1]+dpos[1]);
 
-            dpos = getAnchor("cc", bbox, scaling, angle);
+            dpos = getAnchor(psRefPoint, bbox, scaling, angle);
             double textPos[] = new double[2];
             textPos[0] = pos[0] + dpos[0];
             textPos[1] = pos[1] + dpos[1];
-            exp.show(text, textPos, angle, fontsize, "cc");
+            
+            if (replaceRule == null) {
+            	exp.show(text, textPos, angle, fontsize, texRefPoint);
+            } else {
+            	exp.show(replaceRule.getTexText(), textPos,
+            			angle + replaceRule.getRotation(), Double.NaN,
+            			texRefPoint);
+            }
         }
 
         // Determine current point shift in user space coordinates

@@ -429,7 +429,8 @@ public class PGFDevice implements OutputDevice {
      * @param text Exact text to draw
      * @param position Text anchor point in [micrometer, micrometer]
      * @param angle Text angle in degrees
-     * @param fontsize in PostScript pt (= 1/72 pt)
+     * @param fontsize in PostScript pt (= 1/72 inch). If fontsize is NaN, the
+     *        font size is not set and completely determined by LaTeX.
      * @param anchor String with two characters:
      *               t - top, c - center, B - baseline b - bottom
      *               l - left, c - center, r - right
@@ -460,14 +461,18 @@ public class PGFDevice implements OutputDevice {
         }
         
         // Convert fontsize in PostScript pt to TeX pt
-        fontsize = fontsize / 72 * 72.27;
+        fontsize = fontsize / 72.0 * 72.27;
         
         String angStr = lengthFormat.format(angle);
         
-        text = "\\fontsize{" + fontSizeFormat.format(fontsize) + "}{" 
-                + fontSizeFormat.format(1.2*fontsize) + "}\\selectfont{" + text + "}";
+        String texText = "";
+        if (!Double.isNaN(fontsize)) {
+        	texText += "\\fontsize{" + fontSizeFormat.format(fontsize) + "}{" 
+            + fontSizeFormat.format(1.2*fontsize) + "}\\selectfont";
+        }
+        texText += "{" + text + "}";
         out.write(String.format("\\pgftext[%sx=%scm,y=%scm,rotate=%s]{%s}\n",
-                posOpts, x, y, angStr, text));
+                posOpts, x, y, angStr, texText));
     }
     
     /**

@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.TextHandler;
+import net.sf.eps2pgf.io.TextReplacements;
 import net.sf.eps2pgf.io.devices.CacheDevice;
 import net.sf.eps2pgf.io.devices.LOLDevice;
 import net.sf.eps2pgf.io.devices.NullDevice;
@@ -80,18 +81,10 @@ public class Interpreter {
     Logger log = Logger.getLogger("global");
     
     /**
-     * Creates a new instance of Interpreter that writes to a PGF output device.
-     * @param out Destination for output code
-     */
-    public Interpreter(Writer out, DSCHeader fileHeader)
-    		throws ProgramError, PSError, IOException {
-        this(out, fileHeader, "pgf");
-    }
-    
-    /**
      * Creates a new instance of interpreter
      */
-    public Interpreter(Writer out, DSCHeader fileHeader, String outputtype)
+    public Interpreter(Writer out, DSCHeader fileHeader, String outputtype,
+    		TextReplacements textReplace)
     		throws ProgramError, PSError, IOException {
         // Create graphics state stack with output device
     	OutputDevice output;
@@ -106,6 +99,9 @@ public class Interpreter {
         
         header = fileHeader;
         
+        // Text handler
+        this.textHandler = new TextHandler(this.gstate, textReplace);
+        
         this.initialize();
     }
     
@@ -116,11 +112,14 @@ public class Interpreter {
     public Interpreter() throws ProgramError, PSError, IOException {
         // Create graphics state stack with output device
         OutputDevice output = new NullDevice();
-        gstate = new GstateStack(output);
+        this.gstate = new GstateStack(output);
         
         // "Infinite" bounding box (square box from (-10m,-10m) to (10m,10m))
         double[] bbox = {-28346.46, -28346.46, 28346.46, 28346.46};
         header = new DSCHeader(bbox);
+
+        // Text handler
+        this.textHandler = new TextHandler(this.gstate);
         
         this.initialize();
     }
@@ -136,9 +135,6 @@ public class Interpreter {
         // Create dictionary stack
         this.dictStack = new DictStack(this);
 
-        // Text handler
-        this.textHandler = new TextHandler(gstate);
-        
         gstate.current.device.init(gstate.current);
         
         gstate.current.setcolorspace(new PSObjectName("DeviceGray", true), true);
@@ -1197,12 +1193,6 @@ public class Interpreter {
         opStack.push(matrix2);
     }
     
-    /** PostScript "op": ISOLatin1Encoding */
-    public void op_ISOLatin1Encoding() {
-        PSObjectName[] encodingVector = Encoding.getISOLatin1Vector();
-        opStack.push(new PSObjectArray(encodingVector));
-    }
-    
     /** PostScript op: initclip */
     public void op_initclip() throws IOException, PSErrorUnimplemented {
         gstate.current.clippingPath = defaultClippingPath.clone();
@@ -1948,12 +1938,6 @@ public class Interpreter {
         opStack.push(new PSObjectReal(x));
     }
    
-    /** PostScript op: StandardEncoding */
-    public void op_StandardEncoding() {
-        PSObjectName[] encodingVector = Encoding.getStandardVector();
-        opStack.push(new PSObjectArray(encodingVector));
-    }
-    
     /** PostScript op: stop */
     public void op_stop() throws PSErrorInvalidStop {
         throw new PSErrorInvalidStop();

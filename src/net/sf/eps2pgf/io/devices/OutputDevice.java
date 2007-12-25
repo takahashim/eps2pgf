@@ -137,6 +137,16 @@ public interface OutputDevice {
     
     /**
      * Draws text
+     * @param text Exact text to draw
+     * @param position Text anchor point in [micrometer, micrometer]
+     * @param angle Text angle in degrees
+     * @param fontsize in PostScript pt (= 1/72 inch). If fontsize is NaN, the
+     *        font size is not set and completely determined by LaTeX.
+     * @param anchor String with two characters:
+     *               t - top, c - center, B - baseline b - bottom
+     *               l - left, c - center, r - right
+     *               e.g. Br = baseline,right
+     * @throws java.io.IOException Unable to write output
      */
     public void show(String text, double[] position, double angle,
             double fontsize, String anchor) throws IOException;    
