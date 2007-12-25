@@ -468,9 +468,12 @@ public class PGFDevice implements OutputDevice {
         String texText = "";
         if (!Double.isNaN(fontsize)) {
         	texText += "\\fontsize{" + fontSizeFormat.format(fontsize) + "}{" 
-            + fontSizeFormat.format(1.2*fontsize) + "}\\selectfont";
+            + fontSizeFormat.format(1.2*fontsize) + "}\\selectfont{";
         }
-        texText += "{" + text + "}";
+        texText += text;
+        if (!Double.isNaN(fontsize)) {
+        	texText += "}";
+        }
         out.write(String.format("\\pgftext[%sx=%scm,y=%scm,rotate=%s]{%s}\n",
                 posOpts, x, y, angStr, texText));
     }
