@@ -35,7 +35,6 @@ import net.sf.eps2pgf.postscript.errors.PSError;
 import net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
-import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /**
  * Manages font resources

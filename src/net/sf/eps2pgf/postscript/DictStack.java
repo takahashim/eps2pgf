@@ -185,6 +185,12 @@ public class DictStack {
         systemdict.setKey("globaldict", globaldict);
         systemdict.setKey("statusdict", new PSObjectDict());
         systemdict.setKey("FontDirectory", Fonts.FontDirectory);
+        
+        // add encoding vectors
+        PSObjectName[] encodingVector = Encoding.getISOLatin1Vector();
+        systemdict.setKey("ISOLatin1Encoding", new PSObjectArray(encodingVector));
+        encodingVector = Encoding.getStandardVector();
+        systemdict.setKey("StandardEncoding", new PSObjectArray(encodingVector));        
     }
 
     /** Push a dictionary onto the stack */

@@ -21,18 +21,22 @@
 package net.sf.eps2pgf;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.Writer;
 
 import net.sf.eps2pgf.io.LimitedSectionInputStream;
+import net.sf.eps2pgf.io.TextReplacements;
 import net.sf.eps2pgf.postscript.DSCHeader;
+import net.sf.eps2pgf.postscript.Header;
 import net.sf.eps2pgf.postscript.Interpreter;
 import net.sf.eps2pgf.postscript.PSObjectFile;
-import net.sf.eps2pgf.postscript.Header;
 
 /**
  * Object that converts Encapsulated PostScript (EPS) to Portable Graphics
@@ -75,11 +79,21 @@ public class Converter {
         // Read info from the DSC header
         DSCHeader header = new DSCHeader(in);
         
+        // Read text replacements file
+        TextReplacements textReplace = null;
+        if (opts.textreplacefile.length() > 0) {
+        	Reader inTextReplace = new BufferedReader(
+        			new FileReader(opts.textreplacefile));
+        	textReplace = new TextReplacements(inTextReplace);
+        	inTextReplace.close();
+        }
+        
         // Open output file
         Writer out = new BufferedWriter(new FileWriter(outFile));
         
         // Create PostScript interpreter and add file to execution stack
-        Interpreter interp = new Interpreter(out, header, opts.outputtype);
+        Interpreter interp = new Interpreter(out, header, opts.outputtype,
+        		textReplace);
         interp.execStack.push(new PSObjectFile(in));
         
         // Run the interpreter
