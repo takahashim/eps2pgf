@@ -186,6 +186,7 @@ path 19 - pathbbox 4: 62 79 moveto 92 74 lineto 100 100 moveto pathbbox 79 sub a
 path 20 - pathbbox 5: 100 100 moveto pathbbox 100 sub abs 1e-3 lt  4 1 roll 100 sub abs 1e-3 lt  4 1 roll 100 sub abs 1e-3 lt  4 1 roll 100 sub abs 1e-3 lt 
 path 21 - pathforall 1: 1 2 moveto 3 4 lineto 1 2 3 4 5 6 curveto 2 2 scale {sub} {add add} {add sub add sub add add} {} pathforall 6.5 exch 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt
 path 22 - pathforall 2: 1 2 moveto 3 4 lineto {exit} {} {} {} pathforall 2 eq exch 1 eq
+path 23 - charpath: [1 0 0 1 0 0] setmatrix /Times-Roman findfont 10 scalefont setfont 0 0 moveto (abc) true charpath pathbbox floor 6 eq 4 1 roll floor 13 eq 4 1 roll floor -1 eq 4 1 roll floor 0 eq
 
 coor  1 - matrix 1: matrix {} forall  0 eq  6 1 roll 0 eq  6 1 roll 1 eq  6 1 roll 0 eq  6 1 roll 0 eq  6 1 roll 1 eq
 coor  2 - matrix 2: matrix dup eq

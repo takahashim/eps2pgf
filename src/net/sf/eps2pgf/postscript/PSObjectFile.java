@@ -20,11 +20,14 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.io.InputStream;
 import java.io.IOException;
-import java.util.*;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorIOError;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
 
 /**
  * PostScript file object

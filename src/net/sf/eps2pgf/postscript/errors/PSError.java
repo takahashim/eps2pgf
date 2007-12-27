@@ -21,6 +21,7 @@
 package net.sf.eps2pgf.postscript.errors;
 
 /**
+ * Indicates that a PostScript error occurred.
  *
  * @author Paul Wagenaars
  */

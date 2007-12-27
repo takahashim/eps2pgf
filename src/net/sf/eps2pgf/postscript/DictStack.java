@@ -20,10 +20,15 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+
+import net.sf.eps2pgf.postscript.errors.PSErrorDictStackUnderflow;
+import net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.util.ArrayStack;
-import net.sf.eps2pgf.postscript.errors.*;
 
 /** PostScript dictionary stack
  * See PostScript manual for more info "3.3.9 Dictionary objects"

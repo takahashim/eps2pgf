@@ -85,7 +85,7 @@ public abstract class PSColor {
 	 * 
 	 * @param components the new color
 	 */
-	public void setColor(double components[]) throws PSErrorRangeCheck {
+	public void setColor(double[] components) throws PSErrorRangeCheck {
 		if (components.length != getNrComponents()) {
 			throw new PSErrorRangeCheck();
 		}

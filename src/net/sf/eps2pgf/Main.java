@@ -20,29 +20,38 @@
 
 package net.sf.eps2pgf;
 
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Main class of Eps2pgf program.
  * 
  * @author Paul Wagenaars
  */
-public class Main {
+public final class Main {
     
-    /** Application name */
-    static final String appName = "Eps2pgf";
+    /** Application name. */
+    static final String APP_NAME = "Eps2pgf";
     
-    /** Application version */
-    static final String appVersion = "@VERSION@";
+    /** Application version. */
+    static final String APP_VERSION = "@VERSION@";
     
-    /** Date application was build */
-    static final String appBuildDate = "@BUILDDATE@";
+    /** Date application was build. */
+    static final String APP_BUILD_DATE = "@BUILDDATE@";
     
-    /** Handles program options */
-    static Options opts = new Options();;
+    /** Handles program options. */
+    private static Options opts = new Options();
     
     /** The log. */
-    static Logger log = Logger.getLogger("global");
+    private static Logger log = Logger.getLogger("global");
+    
+    
+    /**
+     * "Hidden" constructor.
+     */
+    private Main() {
+    	
+    }
     
     /**
      * Main program method.
@@ -51,23 +60,24 @@ public class Main {
      * 
      * @throws Exception the exception
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
         opts.parse(args);
         
-        if (opts.args.getBoolean("version") || opts.args.getBoolean("help")) {
+        if (opts.getArgs().getBoolean("version")
+                || opts.getArgs().getBoolean("help")) {
             printVersionCopyright();
-            if (opts.args.getBoolean("help")) {
+            if (opts.getArgs().getBoolean("help")) {
                 printHelp();
             }
             
             System.exit(0);
         }
         
-        if (!opts.args.success()) {
+        if (!opts.getArgs().success()) {
             
             System.err.println();
 
-            for (java.util.Iterator errs = opts.args.getErrorMessageIterator();
+            for (java.util.Iterator errs = opts.getArgs().getErrorMessageIterator();
                     errs.hasNext();) {
                 System.err.println("Error: " + errs.next());
             }
@@ -75,7 +85,7 @@ public class Main {
             System.exit(1);
         }
         
-        if (opts.args.getBoolean("verbose")) {
+        if (opts.getArgs().getBoolean("verbose")) {
             log.setLevel(Level.INFO);
         } else {
             log.setLevel(Level.WARNING);
@@ -91,7 +101,8 @@ public class Main {
      * @return Application name followed by the version number
      */
     public static String getNameVersion() {
-        return appName + " " + appVersion + " (build on " + appBuildDate + ")";
+        return APP_NAME + " " + APP_VERSION + " (build on " + APP_BUILD_DATE
+        		+ ")";
     }
     
     /**
@@ -100,18 +111,25 @@ public class Main {
     public static void printVersionCopyright() {
         System.out.println(getNameVersion());
         System.out.println("");
-        System.out.println("Copyright 2007 Paul Wagenaars <paul@wagenaars.org>");
+        System.out.println("Copyright 2007 Paul Wagenaars"
+        	+ " <paul@wagenaars.org>");
         System.out.println("");
-        System.out.println("Licensed under the Apache License, Version 2.0 (the \"License\");");
-        System.out.println("you may not use this file except in compliance with the License.");
+        System.out.println("Licensed under the Apache License, Version 2.0 (the"
+        	+ " \"License\");");
+        System.out.println("you may not use this file except in compliance with"
+        	+ " the License.");
         System.out.println("You may obtain a copy of the License at");
         System.out.println("");
         System.out.println("    http://www.apache.org/licenses/LICENSE-2.0");
         System.out.println("");
-        System.out.println("Unless required by applicable law or agreed to in writing, software");
-        System.out.println("distributed under the License is distributed on an \"AS IS\" BASIS,");
-        System.out.println("WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.");
-        System.out.println("See the License for the specific language governing permissions and");
+        System.out.println("Unless required by applicable law or agreed to in "
+        	+ "writing, software");
+        System.out.println("distributed under the License is distributed on an "
+        	+ "\"AS IS\" BASIS,");
+        System.out.println("WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,"
+        	+ " either express or implied.");
+        System.out.println("See the License for the specific language governing"
+        	+ " permissions and");
         System.out.println("limitations under the License.");
     }
 
@@ -120,7 +138,7 @@ public class Main {
      */
     public static void printHelp() {
         System.out.println();
-        System.out.println("Usage: " + appName.toLowerCase() + " "
+        System.out.println("Usage: " + APP_NAME.toLowerCase() + " "
                            + opts.getUsage());
         System.out.println();
         System.out.println(opts.getHelp());        

@@ -11,117 +11,227 @@ import net.sf.eps2pgf.postscript.PSObjectDict;
 import net.sf.eps2pgf.postscript.PSObjectMatrix;
 import net.sf.eps2pgf.postscript.Path;
 import net.sf.eps2pgf.postscript.colors.PSColor;
-import net.sf.eps2pgf.postscript.errors.PSError;
-import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
-import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
+/**
+ * Device that writes only the labels to the output.
+ * 
+ * @author Paul Wagenaars
+ *
+ */
 public class LOLDevice implements OutputDevice {
-    static final DecimalFormat floatFormat = new DecimalFormat("#.###", 
-            new DecimalFormatSymbols(Locale.US));	
-	
-	Writer out;
+    
+    /** Format for floating point number in the output.. */
+    static final DecimalFormat FLOAT_FORMAT = new DecimalFormat("#.###", 
+            new DecimalFormatSymbols(Locale.US));    
+    
+    /** Output is written to this writer. */
+    private Writer out;
 
-	public LOLDevice(Writer out) {
-		this.out = out;
-	}
+    /**
+     * Instantiates a new lOL device.
+     * 
+     * @param pOut Output will be written to this object.
+     */
+    public LOLDevice(final Writer pOut) {
+        this.out = pOut;
+    }
 
-	public void clip(Path clipPath) throws IOException, PSErrorUnimplemented {
-		// TODO Auto-generated method stub
+    /**
+     * Implements PostScript clip operator.
+     * Intersects the area inside the current clipping path with the area
+     * inside the current path to produce a new, smaller clipping path.
+     * 
+     * @param clipPath the clip path
+     */
+    public void clip(final Path clipPath) {
+        
+    }
 
-	}
+    /**
+     * Returns a <b>copy</b> default transformation matrix (converts user space
+     * coordinates to device space).
+     * 
+     * @return Default transformation matrix.
+     */
+    public PSObjectMatrix defaultCTM() {
+        return new PSObjectMatrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    }
 
-	public PSObjectMatrix defaultCTM() {
-		// TODO Auto-generated method stub
-		return new PSObjectMatrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
-	}
+    /**
+     * Draws a red dot (useful for debugging, don't use otherwise).
+     * 
+     * @param x X-coordinate of dot.
+     * @param y Y-coordinate of dot.
+     */
+    public void drawDot(final double x, final double y) {
 
-	public void drawDot(double x, double y) throws IOException {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Draws a blue rectangle (useful for debugging, don't use otherwise).
+     * 
+     * @param lowerLeft Lower-left coordinate.
+     * @param upperRight Upper-right coordinate.
+     */
+    public void drawRect(final double[] lowerLeft,
+            final double[] upperRight) {
 
-	public void drawRect(double[] lowerLeft, double[] upperRight)
-			throws IOException {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Ends the current scope.
+     */
+    public void endScope() {
 
-	public void endScope() throws IOException {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Set the current clipping path in the graphics state as clipping path in
+     * the output document. The even-odd rule is used to determine which point
+     * are inside the path.
+     * 
+     * @param clipPath Path to use for clipping
+     */
+    public void eoclip(final Path clipPath) {
 
-	public void eoclip(Path clipPath) throws IOException, PSErrorUnimplemented {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Fills a path using the even-odd rule.
+     * See the PostScript manual (fill operator) for more info.
+     * 
+     * @param path the path
+     */
+    public void eofill(final Path path) {
 
-	public void eofill(Path path) throws IOException, PSErrorUnimplemented {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Internal Eps2pgf command: eps2pgfgetmetrics
+     * It is meant for the cache device. When this command is issued, it will
+     * return metrics information about the drawn glyph.
+     * 
+     * @return Metrics information about glyph.
+     */
+    public double[] eps2pgfGetMetrics() {
+        return null;
+    }
 
-	public double[] eps2pgfGetMetrics() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * Fills a path using the non-zero rule
+     * See the PostScript manual (fill operator) for more info.
+     * 
+     * @param path the path
+     */
+    public void fill(final Path path) {
 
-	public void fill(Path path) throws IOException, PSErrorUnimplemented {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Finalize writing. Normally, this method writes a footer.
+     */
+    public void finish() {
 
-	public void finish() throws IOException {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Initialize before any other methods are called. Normally, this method
+     * writes a header.
+     * 
+     * @param gstate the gstate
+     */
+    public void init(final GraphicsState gstate) {
 
-	public void init(GraphicsState gstate) throws PSError, IOException {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Sets the current color in gray, rgb or cmyk.
+     * 
+     * @param color The color.
+     */
+    public void setColor(final PSColor color) {
 
-	public void setColor(PSColor color) throws IOException {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Implements PostScript operator setlinecap.
+     * 
+     * @param cap Line cap parameter. 0: butt cap, 1: round cap, or
+     *            2: projecting square cap.
+     */
+    public void setlinecap(final int cap) {
 
-	public void setlinecap(int cap) throws IOException, PSErrorRangeCheck {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Implements PostScript operator setlinejoin.
+     * 
+     * @param join Line join parameter. 0: miter join, 1: round join, or
+     *             2: bevel join.
+     */
+    public void setlinejoin(final int join) {
 
-	public void setlinejoin(int join) throws IOException, PSErrorRangeCheck {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Sets the miter limit.
+     * 
+     * @param num The miter limit.
+     */
+    public void setmiterlimit(final double num) {
 
-	public void setmiterlimit(double num) throws IOException {
-		// TODO Auto-generated method stub
+    }
 
-	}
+    /**
+     * Shading fill (shfill PostScript operator).
+     * 
+     * @param dict Shading to use.
+     * @param gstate Current graphics state.
+     */
+    public void shfill(final PSObjectDict dict, final GraphicsState gstate) {
 
-	public void shfill(PSObjectDict dict, GraphicsState gstate) throws PSError,
-			IOException {
-		// TODO Auto-generated method stub
+    }
 
-	}
-
-	public void show(String text, double[] position, double angle,
-			double fontsize, String anchor) throws IOException {
+    /**
+     * Draws text.
+     * 
+     * @param text Exact text to draw
+     * @param position Text anchor point in [micrometer, micrometer]
+     * @param angle Text angle in degrees
+     * @param fontsize in PostScript pt (= 1/72 inch). If fontsize is NaN, the
+     *        font size is not set and completely determined by LaTeX.
+     * @param anchor String with two characters:
+     *               t - top, c - center, B - baseline b - bottom
+     *               l - left, c - center, r - right
+     *               e.g. Br = baseline,right
+     *               
+     * @throws IOException Unable to write output
+     */
+    public void show(final String text, final double[] position,
+            final double angle, final double fontsize, final String anchor)
+            throws IOException {
         out.write(String.format("\\overlaylabel(%s,%s)[%s][%s]{%s}\n",
-                floatFormat.format(position[0]), floatFormat.format(position[1]),
-                anchor, floatFormat.format(angle), text));
-	}
+                FLOAT_FORMAT.format(position[0]),
+                FLOAT_FORMAT.format(position[1]),
+                anchor,
+                FLOAT_FORMAT.format(angle),
+                text));
+    }
 
-	public void startScope() throws IOException {
-		// TODO Auto-generated method stub
+    /**
+     * Starts a new scope.
+     */
+    public void startScope() {
 
-	}
+    }
 
-	public void stroke(GraphicsState gstate) throws IOException, PSError {
-		// TODO Auto-generated method stub
+    /**
+     * Implements PostScript stroke operator.
+     * 
+     * @param gstate Current graphics state.
+     */
+    public void stroke(final GraphicsState gstate) {
 
-	}
+    }
 
 }

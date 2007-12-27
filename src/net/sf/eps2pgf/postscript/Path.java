@@ -20,10 +20,13 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.util.*;
-import net.sf.eps2pgf.ProgramError;
+import java.util.ArrayList;
 
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorNoCurrentPoint;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 
 /** Represents a PostScript path
  *

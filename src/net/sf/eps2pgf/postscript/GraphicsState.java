@@ -21,13 +21,15 @@
 package net.sf.eps2pgf.postscript;
 
 import java.io.IOException;
-import java.util.logging.*;
-import net.sf.eps2pgf.ProgramError;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.devices.OutputDevice;
 import net.sf.eps2pgf.postscript.colors.ColorUtils;
 import net.sf.eps2pgf.postscript.colors.PSColor;
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorNoCurrentPoint;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 
 /**
  * Structure that holds the graphics state (graphic control parameter).
@@ -36,14 +38,11 @@ import net.sf.eps2pgf.postscript.errors.*;
  * @author Paul Wagenaars
  */
 public class GraphicsState implements Cloneable {
-    Logger log = Logger.getLogger("global");
     
     /**
-     * Current Transformation Matrix (CTM). All coordinates will be transformed by
-     * this matrix.
-     * TeX points are 1/72.27 inch, while PostScript points are 1/72 inch.
-     * That is very annoying. The default CTM converts PostScript pt used
-     * in eps files to micrometers.
+     * Current Transformation Matrix (CTM). All coordinates will be transformed
+     * by this matrix. The default CTM converts PostScript pt used in PostScript
+     * files to micrometers.
      * [a b c d tx ty] -> x' = a*x + b*y + tx ; y' = c*x + d*y * ty
      */
     public PSObjectMatrix CTM = new PSObjectMatrix();
@@ -54,48 +53,48 @@ public class GraphicsState implements Cloneable {
     public double[] position = new double[2];
     
     /**
-     * Current path
+     * Current path.
      */
     public Path path;
     
     /**
-     * Current clipping path
+     * Current clipping path.
      */
     public Path clippingPath;
     
     /**
-     * Current color (meaning of parameters depends on the colorSpace specified above)
+     * Current color.
      */
     public PSColor color;
     
     /**
-     * Parameter describing the accuracy of flattening a path
+     * Parameter describing the accuracy of flattening a path.
      */
     public double flat = 1.0;
     
     /**
-     * Current font
+     * Current font.
      */
     public PSObjectFont font;
     
     /**
-     * Current line width (in user space coordinates)
+     * Current line width (in user space coordinates).
      */
     public double linewidth = 1.0;
     
     /**
-     * Current dash pattern
+     * Current dash pattern.
      */
     public PSObjectArray dashpattern = new PSObjectArray();
     
     /**
-     * Current dash offset
+     * Current dash offset.
      */
     public double dashoffset = 0.0;
     
     
     /**
-     * Current output device
+     * Current output device.
      */
     public OutputDevice device;
     
@@ -106,43 +105,54 @@ public class GraphicsState implements Cloneable {
     public PSObjectDict deviceData = new PSObjectDict();
     
     /**
-     * Link to the parent graphics state stack
+     * Link to the parent graphics state stack.
      */
     GstateStack parentStack;
     
     /**
      * Creates a new default graphics state.
-     * @param parentGraphicsStack Pointer the graphics stack of which this object is part of.
+     * 
+     * @param parentGraphicsStack Pointer the graphics stack of which this
+     *                            object is part of.
+     * @param wDevice Output device.
      */
-    public GraphicsState(GstateStack parentGraphicsStack, OutputDevice wDevice) {
-        parentStack = parentGraphicsStack;
-        device = wDevice;
+    public GraphicsState(final GstateStack parentGraphicsStack,
+    		final OutputDevice wDevice) {
+        this.parentStack = parentGraphicsStack;
+        this.device = wDevice;
                 
         initmatrix();
-        path = new Path(parentStack);
-        clippingPath = new Path(parentStack);
-        font = new PSObjectFont();
+        this.path = new Path(this.parentStack);
+        this.clippingPath = new Path(this.parentStack);
+        this.font = new PSObjectFont();
     }
     
     /**
-     * Adds an arc to the end of the current path
+     * Adds an arc to the end of the current path.
+     * 
      * @param x X-coordinate of center of circle in user space coordinates
      * @param y Y-coordinate of center of circle in user space coordinates
      * @param r Radius of circle
-     * @param angle1 Angle in degrees of starting point
-     * @param angle2 Angle in degrees of end point
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck A value is out of range
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck An object has an incorrect type
+     * @param pAngle1 Angle in degrees of starting point
+     * @param pAngle2 Angle in degrees of end point
+     * @param isPositive Indicates whether arc in positive.
+     * 
+     * @throws PSErrorRangeCheck A value is out of range
+     * @throws PSErrorTypeCheck An object has an incorrect type
      */
-    public void arc(double x, double y, double r, double angle1, double angle2, boolean isPositive)
-            throws PSErrorRangeCheck, PSErrorTypeCheck {
+    public void arc(final double x, final double y, final double r,
+    		final double pAngle1, final double pAngle2,
+    		final boolean isPositive)
+    		throws PSErrorRangeCheck, PSErrorTypeCheck {
+    	double angle1 = pAngle1;
+    	double angle2 = pAngle2;
         double mult = 1;
         if (!isPositive) {
             mult = -1;
         }
         
-        while (mult*angle2 < mult*angle1) {
-            angle2 += mult*360;
+        while (mult * angle2 < mult * angle1) {
+            angle2 += mult * 360;
         }
         
         // convert angles from degrees to radians
@@ -150,110 +160,129 @@ public class GraphicsState implements Cloneable {
         angle2 = Math.toRadians(angle2);
         
         // move to start, if necessary
-        double x0 = x + r*Math.cos(angle1);
-        double y0 = y + r*Math.sin(angle1);
-        if ( (Math.abs(position[0]-x0) > 1e-6) || (Math.abs(position[1]-y0) > 1e-6) ) {
+        double x0 = x + r * Math.cos(angle1);
+        double y0 = y + r * Math.sin(angle1);
+        if ((Math.abs(this.position[0] - x0) > 1e-6)
+        		|| (Math.abs(this.position[1] - y0) > 1e-6)) {
             lineto(x0, y0);
-        } else if (Double.isNaN(position[0]) || Double.isNaN(position[1])) {
+        } else if (Double.isNaN(this.position[0])
+        		|| Double.isNaN(this.position[1])) {
             moveto(x0, y0);
         }
         
         // take step from angle1 to multiples of 90 degrees
         double ang1;
         double ang2 = angle1;
-        double angleStep = mult*Math.PI/2;
-        for (double ang = angle1 ; mult*ang2 < mult*angle2 ; ang += angleStep) {
+        double angleStep = mult * Math.PI / 2;
+        for (double ang = angle1; mult * ang2 < mult * angle2;
+        		ang += angleStep) {
             ang1 = ang2;
-            ang2 = angleStep*Math.floor((ang + angleStep)/angleStep);
-            if (mult*angle2 < mult*ang2) {
+            ang2 = angleStep * Math.floor((ang + angleStep) / angleStep);
+            if (mult * angle2 < mult * ang2) {
                 ang2 = angle2;
             }
 
-            double mang = (ang1+ang2)/2;
+            double mang = (ang1 + ang2) / 2;
             
-            double unitX0 = Math.cos(mult*(ang2-ang1)/2);
-            double unitY0 = Math.sin(mult*(ang2-ang1)/2);
+            double unitX0 = Math.cos(mult * (ang2 - ang1) / 2);
+            double unitY0 = Math.sin(mult * (ang2 - ang1) / 2);
             
-            double xControl = (4-unitX0)/3;
-            double yControl = (1-unitX0)*(3-unitX0)/(3*unitY0);
+            double xControl = (4 - unitX0) / 3;
+            double yControl = (1 - unitX0) * (3 - unitX0) / (3 * unitY0);
             double angControl = Math.atan2(yControl, xControl);
-            double rControl = Math.sqrt(xControl*xControl + yControl*yControl);
+            double rControl = Math.sqrt(xControl * xControl
+            		+ yControl * yControl);
             
-            double x1 = x + r*rControl*Math.cos(mang-mult*angControl);
-            double y1 = y + r*rControl*Math.sin(mang-mult*angControl);
+            double x1 = x + r * rControl * Math.cos(mang - mult * angControl);
+            double y1 = y + r * rControl * Math.sin(mang - mult * angControl);
             
-            double x2 = x + r*rControl*Math.cos(mang+mult*angControl);
-            double y2 = y + r*rControl*Math.sin(mang+mult*angControl);
+            double x2 = x + r * rControl * Math.cos(mang + mult * angControl);
+            double y2 = y + r * rControl * Math.sin(mang + mult * angControl);
             
-            double x3 = x + r*Math.cos(ang2);
-            double y3 = y + r*Math.sin(ang2);
+            double x3 = x + r * Math.cos(ang2);
+            double y3 = y + r * Math.sin(ang2);
             
             curveto(x1, y1, x2, y2, x3, y3);
         }
     }
     
     /**
-     * Implements the 'arcto' PostScript operator
+     * Implements the 'arcto' PostScript operator.
+     * 
+     * @param x1 First x-coordinate
+     * @param y1 First y-coordinate
+     * @param x2 Second x-coordinate
+     * @param y2 Second y-coordinate
+     * @param r Radius
+     * 
+     * @return Coordinates of the two tangent points
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public double[] arcto(double x1, double y1, double x2, double y2, double r) 
-            throws PSError {
-        double x0 = position[0];
-        double y0 = position[1];
+    public double[] arcto(final double x1, final double y1, final double x2,
+    		final double y2, final double r) throws PSError {
+        double x0 = this.position[0];
+        double y0 = this.position[1];
         
         if (Double.isNaN(x0) || Double.isNaN(y0)) {
             throw new PSErrorNoCurrentPoint();
         }
         
         // Calculate some angles
-        double phi1 = Math.atan2(y0-y1, x0-x1);
-        double phi2 = Math.atan2(y2-y1, x2-x1);
+        double phi1 = Math.atan2(y0 - y1, x0 - x1);
+        double phi2 = Math.atan2(y2 - y1, x2 - x1);
         double alpha = phi2 - phi1;
         if (alpha > Math.PI) {
-            alpha = alpha - 2*Math.PI;
+            alpha = alpha - 2 * Math.PI;
         } else if (alpha < -Math.PI) {
-            alpha = alpha + 2*Math.PI;
+            alpha = alpha + 2 * Math.PI;
         }
         
         // Check if angle is -180, 0 or 180 degrees
-        if ( (Math.abs(Math.abs(alpha) - Math.PI) < 1e-3) || (Math.abs(alpha) < 1e-3) ) {
+        if ((Math.abs(Math.abs(alpha) - Math.PI) < 1e-3)
+        		|| (Math.abs(alpha) < 1e-3)) {
             lineto(x1, y1);
             double[] ret = {x1, y1, x1, y1};
             return ret;
         }
         
-        // Calculate lines parallel to the lines (x0,y0)-(x1,y1) and (x1,y1)-(x2,y2)
+        // Calculate lines parallel to the lines (x0,y0)-(x1,y1) and
+        // (x1,y1)-(x2,y2).
         double posorneg;
         if (alpha >= 0) {
             posorneg = 1.0;
         } else {
             posorneg = -1.0;
         }
-        double p1x0 = x0 + r*Math.cos(phi1 + posorneg*Math.PI/2);
-        double p1y0 = y0 + r*Math.sin(phi1 + posorneg*Math.PI/2);
-        double p1x1 = x1 + r*Math.cos(phi1 + posorneg*Math.PI/2);
-        double p1y1 = y1 + r*Math.sin(phi1 + posorneg*Math.PI/2);
+        double p1x0 = x0 + r * Math.cos(phi1 + posorneg * Math.PI / 2);
+        double p1y0 = y0 + r * Math.sin(phi1 + posorneg * Math.PI / 2);
+        double p1x1 = x1 + r * Math.cos(phi1 + posorneg * Math.PI / 2);
+        double p1y1 = y1 + r * Math.sin(phi1 + posorneg * Math.PI / 2);
         
-        double p2x1 = x1 + r*Math.cos(phi2 - posorneg*Math.PI/2);
-        double p2y1 = y1 + r*Math.sin(phi2 - posorneg*Math.PI/2);
-        double p2x2 = x2 + r*Math.cos(phi2 - posorneg*Math.PI/2);
-        double p2y2 = y2 + r*Math.sin(phi2 - posorneg*Math.PI/2);
+        double p2x1 = x1 + r * Math.cos(phi2 - posorneg * Math.PI / 2);
+        double p2y1 = y1 + r * Math.sin(phi2 - posorneg * Math.PI / 2);
+        double p2x2 = x2 + r * Math.cos(phi2 - posorneg * Math.PI / 2);
+        double p2y2 = y2 + r * Math.sin(phi2 - posorneg * Math.PI / 2);
         
         // Calculate intersection, this is the center of the circle
-        // Weisstein, Eric W. "Line-Line Intersection." From MathWorld--A Wolfram Web
-        // Resource. http://mathworld.wolfram.com/Line-LineIntersection.html 
-        double num = det(det(p1x0,p1y0,p1x1,p1y1), p1x0-p1x1, det(p2x1,p2y1,p2x2,p2y2), p2x1-p2x2);
-        double den = det(p1x0-p1x1, p1y0-p1y1, p2x1-p2x2, p2y1-p2y2);
-        double x = num/den;
-        num = det(det(p1x0, p1y0, p1x1, p1y1), p1y0-p1y1, det(p2x1,p2y1,p2x2,p2y2), p2y1-p2y2);
-        double y = num/den;
+        // Weisstein, Eric W. "Line-Line Intersection." From MathWorld--A
+        // Wolfram Web Resource.
+        // http://mathworld.wolfram.com/Line-LineIntersection.html 
+        double num = det(det(p1x0, p1y0, p1x1, p1y1), p1x0 - p1x1,
+        		det(p2x1, p2y1, p2x2, p2y2), p2x1 - p2x2);
+        double den = det(p1x0 - p1x1, p1y0 - p1y1, p2x1 - p2x2, p2y1 - p2y2);
+        double x = num / den;
+        num = det(det(p1x0, p1y0, p1x1, p1y1), p1y0 - p1y1,
+        		det(p2x1, p2y1, p2x2, p2y2), p2y1 - p2y2);
+        double y = num / den;
 
-        double ang1 = Math.PI + phi1 + posorneg*Math.PI/2;
-        double ang2 = Math.PI + phi2 - posorneg*Math.PI/2;
+        double ang1 = Math.PI + phi1 + posorneg * Math.PI / 2;
+        double ang2 = Math.PI + phi2 - posorneg * Math.PI / 2;
 
-        double xt1 = x + r*Math.cos(ang1);
-        double yt1 = y + r*Math.sin(ang1);
-        double xt2 = x + r*Math.cos(ang2);
-        double yt2 = y + r*Math.sin(ang2);
+        double xt1 = x + r * Math.cos(ang1);
+        double yt1 = y + r * Math.sin(ang1);
+        double xt2 = x + r * Math.cos(ang2);
+        double yt2 = y + r * Math.sin(ang2);
 
         arc(x, y, r, ang1, ang2, (ang2 > ang1));
         
@@ -266,119 +295,161 @@ public class GraphicsState implements Cloneable {
      * inside the current path.
      */
     public void clip() {
-        clippingPath = path.clone();
+        this.clippingPath = this.path.clone();
     }
     
     /**
      * Creates a deep copy of this object.
-     * @throws CloneNotSupportedException Indicates that clone is not (fully) supported. This should not happen.
+     * @throws CloneNotSupportedException Indicates that clone is not (fully)
+     *         supported. This should not happen.
      * @return Returns the deep copy.
      */
     public GraphicsState clone() throws CloneNotSupportedException {
-        GraphicsState newState = new GraphicsState(parentStack, device);
-        newState.CTM = CTM.clone();
-        newState.position = position.clone();
-        newState.path = path.clone();
-        newState.clippingPath = clippingPath.clone();
-        newState.font = font.clone();
-        newState.linewidth = linewidth;
-        newState.dashpattern = dashpattern.clone();
-        newState.dashoffset = dashoffset;
-        newState.color = color.clone();
-        newState.deviceData = deviceData.clone();
+        GraphicsState newState =
+        	new GraphicsState(this.parentStack, this.device);
+        newState.CTM = this.CTM.clone();
+        newState.position = this.position.clone();
+        newState.path = this.path.clone();
+        newState.clippingPath = this.clippingPath.clone();
+        newState.font = this.font.clone();
+        newState.linewidth = this.linewidth;
+        newState.dashpattern = this.dashpattern.clone();
+        newState.dashoffset = this.dashoffset;
+        newState.color = this.color.clone();
+        newState.deviceData = this.deviceData.clone();
         return newState;
     }
     
     /**
-     * Returns the current color in the CMYK color space
+     * Returns the current color in the CMYK color space.
+     * 
+     * @return Color in CMYK.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError A program error occurred.
      */
     public double[] currentcmykcolor() throws PSError, ProgramError {
-        return color.getCMYK();
+        return this.color.getCMYK();
     }
 
     /**
-     * Returns the current color in gray scale
+     * Returns the current color in gray scale.
+     * 
+     * @return Color in gray
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError Program can not continue to run.
      */
     public double currentgray() throws PSError, ProgramError {
-        return color.getGray();
+        return this.color.getGray();
     }
     
     /**
-     * Returns the current color in the HSB (also HSV) color space
+     * Returns the current color in the HSB (also HSV) color space.
+     * 
+     * @return Color in HSB.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError Program can not continue to run.
      */
     public double[] currenthsbcolor() throws PSError, ProgramError {
-        return color.getHSB();
+        return this.color.getHSB();
     }
 
     /**
-     * Returns the current color in the RGB color space
+     * Returns the current color in the RGB color space.
+     * 
+     * @return Color in RGB.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError A fatal program error occurred.
      */
     public double[] currentrgbcolor() throws PSError, ProgramError {
-        return color.getRGB();
+        return this.color.getRGB();
     }
 
     /**
-     * Add a curveto section to the current path
+     * Add a curveto section to the current path.
+     * 
      * @param x1 X-coordinate of first control point
      * @param y1 Y-coordinate of first control point
      * @param x2 X-coordinate of second control point
      * @param y2 Y-coordinate of second control point
      * @param x3 X-coordinate of end point
      * @param y3 Y-coordinate of end point
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    public void curveto(double x1, double y1, double x2, double y2, 
-            double x3, double y3) throws PSErrorRangeCheck, PSErrorTypeCheck {
-        position[0] = x3;
-        position[1] = y3;
-        double[] coor1 = CTM.transform(x1, y1);
-        double[] coor2 = CTM.transform(x2, y2);
-        double[] coor3 = CTM.transform(x3, y3);
-        path.curveto(coor1, coor2, coor3);
+    public void curveto(final double x1, final double y1, final double x2,
+    		final double y2, final double x3, final double y3)
+    		throws PSErrorRangeCheck, PSErrorTypeCheck {
+        this.position[0] = x3;
+        this.position[1] = y3;
+        double[] coor1 = this.CTM.transform(x1, y1);
+        double[] coor2 = this.CTM.transform(x2, y2);
+        double[] coor3 = this.CTM.transform(x3, y3);
+        this.path.curveto(coor1, coor2, coor3);
     }
     
     /**
-     * Calculate determinant of the matrix: [a b]
-     *                                      [c d]
+     * Calculate determinant of the matrix.
+     * [a b]
+     * [c d]
+     * 
+     * @param a the a
+     * @param b the b
+     * @param c the c
+     * @param d the d
+     * 
+     * @return Determinant of the matrix.
      */
-    double det(double a, double b, double c, double d) {
-        return a*d - b*c;
+    double det(final double a, final double b, final double c, final double d) {
+        return a * d - b * c;
     }
     
     /**
-     * Replace the current path by a flattened version of the path
-     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred
-     * @throws net.sf.eps2pgf.ProgramError This should never happeb. If it is thrown it indicates a bug in
-     * Eps2pgf.
+     * Replace the current path by a flattened version of the path.
+     * 
+     * @throws PSError A PostScript error occurred
+     * @throws ProgramError This should never happen. If it is thrown it
+     *         indicates a bug in Eps2pgf.
      */
     public void flattenpath() throws PSError, ProgramError {
         // Maximum difference between normal and flattened path. Defined in
         // device space coordinates. Assume a device resolution of 1200 dpi.
-        double deviceScale = device.defaultCTM().getMeanScaling();
-        double maxError = flat * 72.0 / 1200.0 * deviceScale;
+        double deviceScale = this.device.defaultCTM().getMeanScaling();
+        double maxError = this.flat * 72.0 / 1200.0 * deviceScale;
 
-        path = path.flattenpath(maxError);
+        this.path = this.path.flattenpath(maxError);
     }
     
     /**
-     * Retrieves the current position in device space. 
+     * Retrieves the current position in device space.
+     * 
      * @return X- and Y-coordinate in device space (micrometers)
+     * 
+     * @throws PSErrorNoCurrentPoint There is no current point.
      */
     public double[] getCurrentPosInDeviceSpace() throws PSErrorNoCurrentPoint {
-        if (path.sections.size() == 0) {
+        if (this.path.sections.size() == 0) {
             throw new PSErrorNoCurrentPoint();
         }
-        return path.sections.get(path.sections.size() - 1).deviceCoor();
+        return this.path.sections.get(this.path.sections.size() - 1)
+        		.deviceCoor();
     }
     
     /**
      * Gets the mean scaling relative to the default CTM. This is a combination
      * of all transformations applied by the PostScript program.
-     * @return
+     * 
+     * @return The mean scaling applied by the user.
      */
     public double getMeanUserScaling() {
         double scaling = Double.NaN;
         try {
-            scaling = CTM.getMeanScaling() / device.defaultCTM().getMeanScaling();
+            scaling = this.CTM.getMeanScaling()
+            		/ this.device.defaultCTM().getMeanScaling();
         } catch (PSErrorRangeCheck e) {
             // this can never happen, since none of the matrices above are
             // controlled by the is user.
@@ -390,34 +461,44 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
-     * Sets the current transformation matrix (CTM) to its default value
+     * Sets the current transformation matrix (CTM) to its default value.
      */
     public void initmatrix() {
-        CTM = device.defaultCTM();
+        this.CTM = this.device.defaultCTM();
     }
     
     /**
      * Draw a line to a point.
+     * 
      * @param x X-coordinate (before CTM is applied)
      * @param y Y-coordinate (before CTM is applied)
+     * 
+     * @throws PSErrorRangeCheck The PostScript rangecheck error occurred.
+     * @throws PSErrorTypeCheck The PostScript typecheck error occurred.
      */
-    public void lineto(double x, double y) throws PSErrorRangeCheck, PSErrorTypeCheck {
-        position[0] = x;
-        position[1] = y;
-        double[] transformed = CTM.transform(x, y);
-        path.lineto(transformed[0], transformed[1]);
+    public void lineto(final double x, final double y)
+    		throws PSErrorRangeCheck, PSErrorTypeCheck {
+        this.position[0] = x;
+        this.position[1] = y;
+        double[] transformed = this.CTM.transform(x, y);
+        this.path.lineto(transformed[0], transformed[1]);
     }
     
     /**
-     * Move the current position to a new location (PostScript moveto operator)
+     * Move the current position to a new location (PostScript moveto operator).
+     * 
      * @param x X-coordinate (before CTM is applied)
      * @param y Y-coordinate (before CTM is applied)
+     * 
+     * @throws PSErrorRangeCheck The PostScript rangecheck error occurred.
+     * @throws PSErrorTypeCheck The PostScript typecheck error occurred.
      */
-    public void moveto(double x, double y) throws PSErrorRangeCheck, PSErrorTypeCheck {
-        position[0] = x;
-        position[1] = y;
-        double[] transformed = CTM.transform(x, y);
-        path.moveto(transformed[0], transformed[1]);
+    public void moveto(final double x, final double y)
+    		throws PSErrorRangeCheck, PSErrorTypeCheck {
+        this.position[0] = x;
+        this.position[1] = y;
+        double[] transformed = this.CTM.transform(x, y);
+        this.path.moveto(transformed[0], transformed[1]);
     }
     
     /**
@@ -426,14 +507,14 @@ public class GraphicsState implements Cloneable {
      * @return Array with four values {llx lly urx ury}, which are the X- and
      *         Y-coordinates (in user space coordinates) of the lower-left and
      *         upper-right corner.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred.
+     * @throws PSError A PostScript error occurred.
      */
     public double[] pathbbox() throws PSError {
-        double[] deviceCoors = path.boundingBox();
-        double[] ll = CTM.itransform(deviceCoors[0], deviceCoors[1]);
-        double[] lr = CTM.itransform(deviceCoors[2], deviceCoors[1]);
-        double[] ur = CTM.itransform(deviceCoors[2], deviceCoors[3]);
-        double[] ul = CTM.itransform(deviceCoors[0], deviceCoors[3]);
+        double[] deviceCoors = this.path.boundingBox();
+        double[] ll = this.CTM.itransform(deviceCoors[0], deviceCoors[1]);
+        double[] lr = this.CTM.itransform(deviceCoors[2], deviceCoors[1]);
+        double[] ur = this.CTM.itransform(deviceCoors[2], deviceCoors[3]);
+        double[] ul = this.CTM.itransform(deviceCoors[0], deviceCoors[3]);
         double[] bbox = new double[4];
         bbox[0] = Math.min(Math.min(ll[0], lr[0]), Math.min(ur[0], ul[0]));
         bbox[1] = Math.min(Math.min(ll[1], lr[1]), Math.min(ur[1], ul[1]));
@@ -443,78 +524,97 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
-     * Add a curveto section to the current path
+     * Add a curveto section to the current path.
+     * 
      * @param dx1 X-coordinate of first control point
      * @param dy1 Y-coordinate of first control point
      * @param dx2 X-coordinate of second control point
      * @param dy2 Y-coordinate of second control point
      * @param dx3 X-coordinate of end point
      * @param dy3 Y-coordinate of end point
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    public void rcurveto(double dx1, double dy1, double dx2, double dy2, 
-            double dx3, double dy3) throws PSErrorRangeCheck, PSErrorTypeCheck {
-        double[] coor1 = CTM.transform(position[0] + dx1, position[1] + dy1);
-        double[] coor2 = CTM.transform(position[0] + dx2, position[1] + dy2);
-        double[] coor3 = CTM.transform(position[0] + dx3, position[1] + dy3);
-        position[0] = position[0] + dx3;
-        position[1] = position[1] + dy3;
-        path.curveto(coor1, coor2, coor3);
+    public void rcurveto(final double dx1, final double dy1, final double dx2,
+    		final double dy2, final double dx3, final double dy3)
+    		throws PSErrorRangeCheck, PSErrorTypeCheck {
+        double[] coor1 = this.CTM.transform(this.position[0] + dx1,
+        		this.position[1] + dy1);
+        double[] coor2 = this.CTM.transform(this.position[0] + dx2,
+        		this.position[1] + dy2);
+        double[] coor3 = this.CTM.transform(this.position[0] + dx3,
+        		this.position[1] + dy3);
+        this.position[0] = this.position[0] + dx3;
+        this.position[1] = this.position[1] + dy3;
+        this.path.curveto(coor1, coor2, coor3);
     }
     
     /**
      * Draw a line to a relative point.
+     * 
      * @param dx delta X-coordinate (before CTM is applied)
      * @param dy delta Y-coordinate (before CTM is applied)
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public void rlineto(double dx, double dy) throws PSError {
-        if (position[0] == Double.NaN) {
+    public void rlineto(final double dx, final double dy) throws PSError {
+        if (this.position[0] == Double.NaN) {
             throw new PSErrorNoCurrentPoint();
         }
-        position[0] = position[0] + dx;
-        position[1] = position[1] + dy;
-        double[] transformed = CTM.transform(position);
-        path.lineto(transformed[0], transformed[1]);
+        this.position[0] = this.position[0] + dx;
+        this.position[1] = this.position[1] + dy;
+        double[] transformed = this.CTM.transform(this.position);
+        this.path.lineto(transformed[0], transformed[1]);
     }
     
     /**
      * Move to a relative point.
+     * 
      * @param dx delta X-coordinate (before CTM is applied)
      * @param dy delta Y-coordinate (before CTM is applied)
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public void rmoveto(double dx, double dy) throws PSError {
-        if (position[0] == Double.NaN) {
+    public void rmoveto(final double dx, final double dy) throws PSError {
+        if (this.position[0] == Double.NaN) {
             throw new PSErrorNoCurrentPoint();
         }
-        position[0] = position[0] + dx;
-        position[1] = position[1] + dy;
-        double[] transformed = CTM.transform(position);
-        path.moveto(transformed[0], transformed[1]);
+        this.position[0] = this.position[0] + dx;
+        this.position[1] = this.position[1] + dy;
+        double[] transformed = this.CTM.transform(this.position);
+        this.path.moveto(transformed[0], transformed[1]);
     }
     
     /**
-     * Sets the color
+     * Sets the color.
+     * 
      * @param newColor Parameters of new color (defined in current color space)
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    public void setcolor(double[] newColor) throws IOException, PSError {
-        color.setColor(newColor);
-        device.setColor(color);
+    public void setcolor(final double[] newColor) throws IOException, PSError {
+    	this.color.setColor(newColor);
+    	this.device.setColor(this.color);
     }
     
     /**
      * Sets the current color space.
      * 
-     * @param obj Object describing the color space. Should be a literal name or an
-     * array starting with a literal name.
+     * @param obj Object describing the color space. Should be a literal name or
+     *            an array starting with a literal name.
      * @param writeDevice Write new current color to output device?
      * 
      * @throws PSError A PostScript error has occurred.
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void setcolorspace(PSObject obj, boolean writeDevice) throws PSError, IOException {
-    	color = ColorUtils.autoSetColorSpace(obj);
+    public void setcolorspace(final PSObject obj, final boolean writeDevice)
+    		throws PSError, IOException {
+    	this.color = ColorUtils.autoSetColorSpace(obj);
     	
         if (writeDevice) {
-            device.setColor(color);
+        	this.device.setColor(this.color);
         }
     }
     
@@ -522,15 +622,18 @@ public class GraphicsState implements Cloneable {
      * Updates the field current position by retrieving the last coordinate
      * of the current path and transforming it back to user space
      * coordinates. This is usually done after the CTM has been altered.
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
     public void updatePosition() throws PSErrorRangeCheck, PSErrorTypeCheck {
         try {
             double[] posd = getCurrentPosInDeviceSpace();
-            position = CTM.itransform(posd);
+            this.position = this.CTM.itransform(posd);
         } catch (PSErrorNoCurrentPoint e) {
             // Apparently there is no current point
-            position[0] = Double.NaN;
-            position[1] = Double.NaN;
+        	this.position[0] = Double.NaN;
+        	this.position[1] = Double.NaN;
         }
     }
     

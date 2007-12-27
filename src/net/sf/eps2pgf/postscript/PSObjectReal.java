@@ -20,42 +20,53 @@
 
 package net.sf.eps2pgf.postscript;
 
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 
-/** PostScript object: real
+/** PostScript object: real.
  *
  * @author Paul Wagenaars
  */
 public class PSObjectReal extends PSObject {
-    double value;
+	/** Value of this real object. */
+    private double value;
     
     /**
-     * Creates a new instance of PSObjectReal
+     * Creates a new instance of PSObjectReal.
+     * 
      * @param str String with valid real.
      */
-    public PSObjectReal(String str) {
-        value = Double.parseDouble(str);
+    public PSObjectReal(final String str) {
+        this.value = Double.parseDouble(str);
     }
     
-    /** Create a new real object. */
-    public PSObjectReal(double dbl) {
-        value = dbl;
+    /**
+     * Create a new real object.
+     *
+     * @param dbl Value of new real object.
+     */
+    public PSObjectReal(final double dbl) {
+        this.value = dbl;
     }
     
     /**
      * Creates a new real object.
+     * 
+     * @param obj New object is exact copy of this object.
      */
-    public PSObjectReal(PSObjectReal obj) {
-        value = obj.value;
+    public PSObjectReal(final PSObjectReal obj) {
+        this.value = obj.value;
         copyCommonAttributes(obj);
     }
     
     /**
-     * Check whether a string is a real
+     * Check whether a string is a real.
+     * 
      * @param str String to check.
+     * 
      * @return Returns true when str is a valid real. Returns false otherwise.
      */
-    public static boolean isType(String str) {
+    public static boolean isType(final String str) {
         try {
             Double.parseDouble(str);            
         } catch (NumberFormatException e) {
@@ -64,46 +75,56 @@ public class PSObjectReal extends PSObject {
         return true;
     }
     
-    /** Return PostScript text representation of this object. See the
+    /**
+     * Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
+     * 
+     * @return String representation of this object.
      */
-    public String isis() {
-        return String.valueOf(value);
+    public final String isis() {
+        return String.valueOf(this.value);
     }
 
     /**
-     * Returns the absolute value of this integer
+     * Returns the absolute value of this integer.
      * @return Absolute value of this object
      */
-    public PSObjectReal abs() {
-        return new PSObjectReal(Math.abs(value));
+    public final PSObjectReal abs() {
+        return new PSObjectReal(Math.abs(this.value));
     }
 
     /**
-     * Returns the sum of this object and the passed object, if both are numeric
+     * Returns the sum of this object and the passed object, if both are
+     * numeric.
+     * 
      * @param obj Object that will be added to this object
+     * 
      * @return Sum of this object and passed object
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
+     * 
+     * @throws PSErrorTypeCheck Object is not numeric
      */
-    public PSObject add(PSObject obj) throws PSErrorTypeCheck {
+    public final PSObject add(final PSObject obj) throws PSErrorTypeCheck {
         double num2 = obj.toReal();
-        return new PSObjectReal(value + num2);
+        return new PSObjectReal(this.value + num2);
     }
 
     /**
-     * Return this value rounded upwards
+     * Return this value rounded upwards.
+     * 
      * @return Value of this object rounded upwards
      */
-    public PSObject ceiling() {
-        return new PSObjectReal(Math.ceil(value));
+    public final PSObject ceiling() {
+        return new PSObjectReal(Math.ceil(this.value));
     }
     
     /**
-     * PostScript operator 'cvi'. Convert this object to an integer
+     * PostScript operator 'cvi'. Convert this object to an integer.
+     * 
+     * @return Integer representation of this object.
      */
-    public int cvi() {
+    public final int cvi() {
         try {
-            return (int)truncate().toReal();
+            return (int) truncate().toReal();
         } catch (PSErrorTypeCheck e) {
             // this can never happen, because this object is a real
             return 0;
@@ -111,21 +132,31 @@ public class PSObjectReal extends PSObject {
     }
     
     /**
-     * PostScript operator 'cvr'. Convert this object to a real
+     * PostScript operator 'cvr'. Convert this object to a real.
+     * 
+     * @return Value of this object.
      */
-    public double cvr() throws PSErrorTypeCheck {
-        return value;
+    public final double cvr() {
+        return this.value;
     }
     
     /**
-     * PostScript operator 'cvrs'
+     * PostScript operator 'cvrs'.
+     * 
+     * @param radix Radix of integer
+     * 
+     * @return Integer string representation of this object with radix.
+     * 
+     * @throws PSErrorTypeCheck PostScript typecheck error
+     * @throws PSErrorRangeCheck PostScript rangecheck error
      */
-    public String cvrs(int radix) throws PSErrorTypeCheck, PSErrorRangeCheck {
+    public final String cvrs(final int radix)
+    		throws PSErrorTypeCheck, PSErrorRangeCheck {
         if (radix < 2) {
             throw new PSErrorRangeCheck();
         }
         if (radix == 10) {
-            return Double.toString(value);
+            return Double.toString(this.value);
         } else {
             PSObjectInt valueInt = new PSObjectInt(cvi());
             return valueInt.cvrs(radix);
@@ -134,31 +165,36 @@ public class PSObjectReal extends PSObject {
 
     /**
      * Produce a text representation of this object (see PostScript
-     * operator 'cvs' for more info)
+     * operator 'cvs' for more info).
+     * 
      * @return Text representation
      */
-    public String cvs() {
-        return String.valueOf(value);
+    public final String cvs() {
+        return String.valueOf(this.value);
     }
 
     /**
-     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
-     * of composite object is not copied, but shared.
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The
+     * values of composite object is not copied, but shared.
+     * 
+     * @return Exact copy of this object.
      */
-    public PSObjectReal dup() {
+    public final PSObjectReal dup() {
         return new PSObjectReal(this);
     }
     
     /**
-     * Compare this object with another object and return true if they are equal.
-     * See PostScript manual on what's equal and what's not.
+     * Compare this object with another object and return true if they are
+     * equal. See PostScript manual on what's equal and what's not.
+     * 
      * @param obj Object to compare this object with
+     * 
      * @return True if objects are equal, false otherwise
      */
-    public boolean eq(PSObject obj) {
+    public final boolean eq(final PSObject obj) {
         try {
             if ((obj instanceof PSObjectReal) || (obj instanceof PSObjectInt)) {
-                return (value == obj.toReal());
+                return (this.value == obj.toReal());
             }
         } catch (PSErrorTypeCheck e) {
             // This can never happen because of the typecheck with instanceof
@@ -167,89 +203,106 @@ public class PSObjectReal extends PSObject {
     }
 
     /**
-     * Return this value rounded downwards
+     * Return this value rounded downwards.
+     * 
      * @return Value of this object rounded downwards
      */
-    public PSObject floor() {
-        return new PSObjectReal(Math.floor(value));
+    public final PSObject floor() {
+        return new PSObjectReal(Math.floor(this.value));
     }
 
     /**
-     * PostScript operator 'gt'
-     * @param obj2 Object to compare this object to
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Unable to compare the type of this object and/or obj2
+     * PostScript operator 'gt'.
+     * 
+     * @param obj2 Object to compare this object to.
+     * 
+     * @throws PSErrorTypeCheck Unable to compare the type of this object
+     *                          and/or obj2.
+     * 
      * @return Returns true when this object is greater than obj2, return false
-     * otherwise.
+     *         otherwise.
      */
-    public boolean gt(PSObject obj2) throws PSErrorTypeCheck {
+    public final boolean gt(final PSObject obj2) throws PSErrorTypeCheck {
         return (toReal() > obj2.toReal());
     }
     
     /**
      * Returns a hashCode value for this object. This method is supported
      * for the benefit hashtables, such as used in PSObjectDict.
+     * 
+     * @return Hash value of this object.
      */
-    public int hashCode() {
-    	return (int)(value * 1000000);
+    public final int hashCode() {
+    	return (int) (this.value * 1000000);
     }
     
     /**
-     * Multiply this object with another object
+     * Multiply this object with another object.
+     * 
      * @param obj Multiplication of this object and passed object
+     * 
      * @return Multiplication object
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object(s) are not numeric
+     * 
+     * @throws PSErrorTypeCheck Object(s) are not numeric
      */
-    public PSObject mul(PSObject obj) throws PSErrorTypeCheck {
+    public final PSObject mul(final PSObject obj) throws PSErrorTypeCheck {
         double num2 = obj.toReal();
-        return new PSObjectReal(value * num2);
+        return new PSObjectReal(this.value * num2);
     }
 
     /**
-     * Returns the negative value of this double
+     * Returns the negative value of this double.
+     * 
      * @return Absolute value of this double
      */
-    public PSObjectReal neg() {
-        return new PSObjectReal(-value);
+    public final PSObjectReal neg() {
+        return new PSObjectReal(-this.value);
     }
 
     /**
-     * Return this value rounded to the nearest integer
+     * Return this value rounded to the nearest integer.
+     * 
      * @return Value of this object rounded to the nearest integer
      */
-    public PSObject round() {
-        return new PSObjectReal(Math.round(value));
+    public final PSObject round() {
+        return new PSObjectReal(Math.round(this.value));
     }
 
     /**
-     * Subtract an object from this object
+     * Subtract an object from this object.
      * @param obj Object that will be subtracted from this object
      * @return Passed object subtracted from this object
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
+     * @throws PSErrorTypeCheck Object is not numeric
      */
-    public PSObject sub(PSObject obj) throws PSErrorTypeCheck {
+    public final PSObject sub(final PSObject obj) throws PSErrorTypeCheck {
         double num2 = obj.toReal();
-        return new PSObjectReal(value - num2);
+        return new PSObjectReal(this.value - num2);
     }
 
     /**
      * Convert this object to a human readable string.
      * @return Human readable string.
      */
-    public String toString() {
-        return "Real: " + value;
-    }
-    
-    /** Convert this object to a real number, if possible. */
-    public double toReal() {
-        return value;
+    public final String toString() {
+        return "Real: " + this.value;
     }
     
     /**
-     * Return this value rounded towards zero
+     * Convert this object to a real number, if possible.
+     * 
+     * @return Real/floating point representation of this object.
+     */
+    public final double toReal() {
+        return this.value;
+    }
+    
+    /**
+     * Return this value rounded towards zero.
+     * 
      * @return Value of this object rounded towards zero
      */
-    public PSObject truncate() {
-        if (value > 0) {
+    public final PSObject truncate() {
+        if (this.value > 0) {
             return floor();
         } else {
             return ceiling();
@@ -257,10 +310,11 @@ public class PSObjectReal extends PSObject {
     }
 
     /**
-     * Returns the type of this object
+     * Returns the type of this object.
+     * 
      * @return Type of this object (see PostScript manual for possible values)
      */
-    public String type() {
+    public final String type() {
         return "realtype";
     }
 }

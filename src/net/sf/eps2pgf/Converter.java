@@ -45,33 +45,40 @@ import net.sf.eps2pgf.postscript.PSObjectFile;
  * @author Paul Wagenaars
  */
 public class Converter {
-    File inFile;
-    File outFile;
-    Options opts;
     
-    /** Creates a new instance of Converter
-     * @param sourceFilename path to target EPS file
-     * @param targetFilename path to target PGF file
-     * @param opts command line options passed to the program
+    /** Input file. */
+    private File inFile;
+    
+    /** Output file. */
+    private File outFile;
+    
+    /** Options describing behavior of program. */
+    private Options opts;
+    
+    /**
+     * Creates a new instance of Converter.
+     * 
+     * @param pOpts command line options passed to the program
      */
-    public Converter(Options opts) {
-        this.inFile = new File(opts.input);
-        this.outFile = new File(opts.output);
-        this.opts = opts;
+    public Converter(final Options pOpts) {
+        this.inFile = new File(pOpts.getInput());
+        this.outFile = new File(pOpts.getOutput());
+        this.opts = pOpts;
     }
     
     /**
      * Starts the actual conversion.
      * @throws java.lang.Exception Something went wrong
      */
-    public void convert() throws Exception {
+    public final void convert() throws Exception {
         // Check for a binary header
         int[] dim = Header.getPostScriptSection(inFile);
         
         // Open the file for reading the postscript code
         InputStream in = new BufferedInputStream(new FileInputStream(inFile));
         
-        // If it has a binary header, read only the postscript code and skip binary data
+        // If it has a binary header, read only the postscript code and skip
+        // binary data.
         if (dim != null) {
             in = new LimitedSectionInputStream(in, dim[0], dim[1]);
         }
@@ -81,19 +88,19 @@ public class Converter {
         
         // Read text replacements file
         TextReplacements textReplace = null;
-        if (opts.textreplacefile.length() > 0) {
-        	Reader inTextReplace = new BufferedReader(
-        			new FileReader(opts.textreplacefile));
-        	textReplace = new TextReplacements(inTextReplace);
-        	inTextReplace.close();
+        if (opts.getTextreplacefile().length() > 0) {
+            Reader inTextReplace = new BufferedReader(
+                    new FileReader(opts.getTextreplacefile()));
+            textReplace = new TextReplacements(inTextReplace);
+            inTextReplace.close();
         }
         
         // Open output file
         Writer out = new BufferedWriter(new FileWriter(outFile));
         
         // Create PostScript interpreter and add file to execution stack
-        Interpreter interp = new Interpreter(out, header, opts.outputtype,
-        		textReplace);
+        Interpreter interp = new Interpreter(out, header, opts.getOutputtype(),
+                textReplace);
         interp.execStack.push(new PSObjectFile(in));
         
         // Run the interpreter
