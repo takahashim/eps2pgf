@@ -20,9 +20,10 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-/** Some tools to work with character encoding in PostScript documents
+/** Some tools to work with character encoding in PostScript documents.
  *
  * @author Paul Wagenaars
  */

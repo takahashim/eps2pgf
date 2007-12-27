@@ -20,9 +20,13 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /**
  * Base class for shading 

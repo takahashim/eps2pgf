@@ -20,15 +20,26 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-
-import org.fontbox.afm.*;
-import org.fontbox.util.BoundingBox;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
+import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
+
+import org.fontbox.afm.AFMParser;
+import org.fontbox.afm.CharMetric;
+import org.fontbox.afm.FontMetric;
+import org.fontbox.util.BoundingBox;
 
 /**
  * Wrapper around a font dictionary. This class provides methods to handle the

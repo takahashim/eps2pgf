@@ -248,7 +248,7 @@ public class TextReplacements {
 		int c;
 		do {
 			c = in.read();
-			if (!inComment && (c == '%') && (lastChar != '\\')) {
+			if (!inComment && (c == '%') && (this.lastChar != '\\')) {
 				inComment = true;
 			} else if (inComment && (c == '\n')) {
 				inComment = false;
@@ -265,7 +265,7 @@ public class TextReplacements {
 				consumeNext = false;
 			}
 		} while (inComment || consumeNext);
-		lastChar = c;
+		this.lastChar = c;
 		return c;
 	}
 	
@@ -286,7 +286,8 @@ public class TextReplacements {
 		
 		// First, check for invalid characters
 		for (int i = 0; i < refPoint.length(); i++) {
-			if (ALL_ALLOWED.indexOf(refPoint.charAt(i)) == -1) {
+			if (TextReplacements.ALL_ALLOWED.indexOf(refPoint.charAt(i))
+					== -1) {
 				throw new ParseException("Invalid character(s) in reference "
 						+ "point (" + refPoint + ") in text replacement rule."
 						, -1);
@@ -436,10 +437,10 @@ public class TextReplacements {
 		 * @see java.lang.Object#toString()
 		 */
 		public String toString() {
-			return "\\psfrag{" + tag + "}[" + texRefPoint + "][" + psRefPoint
-					+ "][" + scale + "][" + rotation + "]{" + texText + "}";
+			return "\\psfrag{" + this.tag + "}[" + this.texRefPoint + "]["
+					+ this.psRefPoint + "][" + this.scale + "][" + this.rotation
+					+ "]{" + this.texText + "}";
 		}
-			
 		
 	}
 

@@ -102,10 +102,10 @@ public class PSObjectAfm extends PSObject implements Cloneable {
         StringInputStream strInStream = new StringInputStream(charString);
         InputStream decodedCharString = new EexecDecode(strInStream, 4330, true);
         List<PSObject> tokens = decodeCharString(decodedCharString);
-        int sb[] = new int[2];
-        int w[] = new int[2];
+        int[] sb = new int[2];
+        int[] w = new int[2];
         Path charPath = interpretCharString(tokens, sb, w);
-        double bbox[];
+        double[] bbox;
         if (charPath.sections.size() > 1) {
             bbox = charPath.boundingBox();
         } else {

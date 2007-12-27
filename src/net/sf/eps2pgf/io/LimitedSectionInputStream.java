@@ -30,7 +30,7 @@ import java.io.InputStream;
  */
 public class LimitedSectionInputStream extends InputStream {
     /**
-     * Reader from which characters are read
+     * Reader from which characters are read.
      */
     private InputStream rdr;
     
@@ -38,24 +38,30 @@ public class LimitedSectionInputStream extends InputStream {
      * Maximum number of characters that will be read. EOF is returned if more
      * characters are requested.
      */
-    int length;
+    private int length;
     
     /**
      * Number of characters that have been read so far.
      */
-    int charsRead = 0;
+    private int charsRead = 0;
     
     /**
      * Number of characters read at time of last mark() operation.
      */
-    int lastMark = -1;
+    private int lastMark = -1;
     
     /**
-     * Creates a new instance of LimitedLengthReader
+     * Creates a new instance of LimitedLengthReader.
+     * 
      * @param rdrIn Reader from which characters will be read.
-     * @param maxLength Maximum number of characters to read from the supplied Reader.
+     * @param maxLength Maximum number of characters to read from the supplied
+     * Reader.
+     * @param offset Skip this number of characters
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public LimitedSectionInputStream(InputStream rdrIn, int offset, int maxLength) throws IOException {
+    public LimitedSectionInputStream(final InputStream rdrIn, final int offset,
+            final int maxLength) throws IOException {
         length = maxLength;
         rdr = rdrIn;
         rdr.skip(offset);
@@ -75,12 +81,12 @@ public class LimitedSectionInputStream extends InputStream {
      * Mark the present position in the stream. Subsequent calls to reset()
      * will attempt to reposition the stream to this point. Not all
      * character-input streams support the mark() operation.
-     * @param readAheadLimit Limit on the number of characters that may be read while still
-     * preserving the mark. After reading this many characters,
+     * 
+     * @param readAheadLimit Limit on the number of characters that may be read
+     * while still preserving the mark. After reading this many characters,
      * attempting to reset the stream may fail.
-     * @throws java.io.IOException If an I/O error occurs
      */
-    public void mark(int readAheadLimit) {
+    public void mark(final int readAheadLimit) {
         rdr.mark(readAheadLimit);
         lastMark = charsRead;
     }
@@ -112,13 +118,16 @@ public class LimitedSectionInputStream extends InputStream {
     /**
      * Read characters into an array. This method will block until some input
      * is available, an I/O error occurs, or the end of the stream is reached.
+     * 
      * @param cbuf Destination buffer
-     * @throws java.io.IOException If an I/O error occurs
+     * 
      * @return The number of characters read, or -1 if the end of the stream has
      * been reached
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public int read(byte[] cbuf) throws IOException {
-        int len = Math.min(length-charsRead, cbuf.length);
+    public int read(final byte[] cbuf) throws IOException {
+        int len = Math.min(length - charsRead, cbuf.length);
         int n = rdr.read(cbuf, 0, len);
         if (n > 0) {
             charsRead += n;
@@ -132,16 +141,20 @@ public class LimitedSectionInputStream extends InputStream {
      * Read characters into a portion of an array. This method will block until
      * some input is available, an I/O error occurs, or the end of the stream
      * is reached.
+     * 
      * @param cbuf Destination buffer
      * @param off Offset at which to start storing characters
-     * @param len The number of characters read, or -1 if the end of the stream has
-     * been reached
-     * @throws java.io.IOException If an I/O error occurs
+     * @param len The number of characters read, or -1 if the end of the stream
+     * has been reached.
+     * 
      * @return The number of characters read, or -1 if the end of the stream has
      * been reached
+     * 
+     * @throws IOException If an I/O error occurs
      */
-    public int read(byte[] cbuf, int off, int len) throws IOException {
-        int maxLength = Math.min(length-charsRead, len);
+    public int read(final byte[] cbuf, final int off, final int len)
+            throws IOException {
+        int maxLength = Math.min(length - charsRead, len);
         int n = rdr.read(cbuf, 0, maxLength);
         if (n > 0) {
             charsRead += n;
@@ -168,12 +181,15 @@ public class LimitedSectionInputStream extends InputStream {
     /**
      * Skip characters. This method will block until some characters are
      * available, an I/O error occurs, or the end of the stream is reached.
-     * @param n The number of characters to skip
-     * @throws java.io.IOException If an I/O error occurs
+     * 
+     * @param pN The number of characters to skip
+     * 
      * @return The number of characters actually skipped
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public long skip(long n) throws IOException {
-        n = rdr.skip(n);
+    public long skip(final long pN) throws IOException {
+        long n = rdr.skip(pN);
         charsRead += n;
         return n;
     }

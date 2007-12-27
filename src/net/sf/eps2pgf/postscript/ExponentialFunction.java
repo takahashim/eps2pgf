@@ -20,7 +20,9 @@
 
 package net.sf.eps2pgf.postscript;
 
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /**
  * Represent a PostScript function of type 2 (exponential interpolation function)

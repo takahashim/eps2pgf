@@ -27,12 +27,13 @@ import net.sf.eps2pgf.postscript.PSObjectString;
 import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
 
 /**
- * Create an InputStream from a PSObjectString
+ * Create an InputStream from a PSObjectString.
+ * 
  * @author Paul Wagenaars
  */
 public class PSStringInputStream extends InputStream {
     /**
-     * PostScript string from which characters are read
+     * PostScript string from which characters are read.
      */
     private PSObjectString string;
     
@@ -41,13 +42,15 @@ public class PSStringInputStream extends InputStream {
      */
     private int ptr;
     
+    /** Position the last this mark() was called. */
     private int lastMark;
     
     /**
-     * Creates a new instance of PSStringInputStream
+     * Creates a new instance of PSStringInputStream.
+     * 
      * @param psString PostScript string from which the character will be read
      */
-    public PSStringInputStream(PSObjectString psString) {
+    public PSStringInputStream(final PSObjectString psString) {
         string = psString;
         ptr = 0;
         lastMark = -1;
@@ -57,9 +60,10 @@ public class PSStringInputStream extends InputStream {
      * Marks the current position in this input stream. A subsequent call to
      * the reset method repositions this stream at the last marked position so
      * that subsequent reads re-read the same bytes.
+     * 
      * @param readlimit This parameter has no meaning for PSStringInputStream
      */
-    public void mark(int readlimit) {
+    public void mark(final int readlimit) {
         lastMark = ptr;
     }
     
@@ -76,13 +80,16 @@ public class PSStringInputStream extends InputStream {
     
     /**
      * Reads the next character from the PostScript string.
-     * @throws java.io.IOException A character in the PostScript string is not in the 0-255 range
+     * 
      * @return Integer value of the next character (in the range 0-255)
+     * 
+     * @throws IOException A character in the PostScript string is not in the
+     * 0-255 range.
      */
     public int read() throws IOException {
         try {
             int chr = string.get(ptr);
-            if ( (chr < 0) || (chr > 255) ) {
+            if ((chr < 0) || (chr > 255)) {
                 throw new IOException();
             }
             ptr++;
@@ -95,7 +102,7 @@ public class PSStringInputStream extends InputStream {
     /**
      * Repositions this stream to the position at the time the mark method was
      * last called on this input stream.
-     * @throws java.io.IOException When this stream has not yet been <code>mark</code>ed.
+     * @throws IOException This stream has not yet been <code>mark</code>ed.
      */
     public void reset() throws IOException {
         if (lastMark < 0) {

@@ -20,13 +20,20 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.sf.eps2pgf.io.PSStringInputStream;
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
 
-/** PostScript object: array
+/**
+ * PostScript object: array.
  *
  * @author Paul Wagenaars
  */
@@ -36,51 +43,57 @@ public class PSObjectArray extends PSObject {
     int count;
     
     /**
-     * Create a new empty PostScript array
+     * Create a new empty PostScript array.
      */
     public PSObjectArray() {
-        array = new ArrayList<PSObject>();
-        offset = 0;
-        count = Integer.MAX_VALUE;
+        this.array = new ArrayList<PSObject>();
+        this.offset = 0;
+        this.count = Integer.MAX_VALUE;
     }
 
     /**
-     * Creates a new instance of PSObjectArray
+     * Creates a new instance of PSObjectArray.
      * 
      * @param dblArray Array of doubles
      */
-    public PSObjectArray(double[] dblArray) {
-        array = new ArrayList<PSObject>(dblArray.length);
-        for (int i = 0 ; i < dblArray.length ; i++) {
-            array.add(new PSObjectReal(dblArray[i]));
+    public PSObjectArray(final double[] dblArray) {
+        this.array = new ArrayList<PSObject>(dblArray.length);
+        for (int i = 0; i < dblArray.length; i++) {
+            this.array.add(new PSObjectReal(dblArray[i]));
         }
         
         // Use the entire array
-        offset = 0;
-        count = dblArray.length;
+        this.offset = 0;
+        this.count = dblArray.length;
     }
     
     /**
-     * Creates a new instance of PSObjectArray
+     * Creates a new instance of PSObjectArray.
+     * 
      * @param objs Objects that will be stored in the new array.
      */
-    public PSObjectArray(PSObject[] objs) {
-        array = new ArrayList<PSObject>(objs.length);
-        for (int i = 0 ; i < objs.length ; i++) {
-            array.add(objs[i]);
+    public PSObjectArray(final PSObject[] objs) {
+        this.array = new ArrayList<PSObject>(objs.length);
+        for (int i = 0; i < objs.length; i++) {
+            this.array.add(objs[i]);
         }
         
         // Use the entire array
-        offset = 0;
-        count = objs.length;
+        this.offset = 0;
+        this.count = objs.length;
     }
     
     /**
-     * Creates a new executable array object
-     * @param str String representing a valid procedure (executable array)
-     * @throws java.io.IOException Unable to read the string
+     * Creates a new executable array object.
+     * 
+     * @param pStr String representing a valid procedure (executable array)
+     * 
+     * @throws IOException Unable to read the string
+     * @throws PSError PostScript error occurred.
      */
-    public PSObjectArray(String str) throws IOException, PSError {
+    public PSObjectArray(final String pStr) throws IOException, PSError {
+    	String str = pStr;
+    	
         // quick check whether it is a literal or executable array
         if (str.charAt(0) == '{') {
             isLiteral = false;
@@ -88,71 +101,79 @@ public class PSObjectArray extends PSObject {
             isLiteral = true;
         }
         
-        str = str.substring(1,str.length()-1);
+        str = str.substring(1, str.length() - 1);
         
         InputStream inStream = new PSStringInputStream(new PSObjectString(str));
         
-        array = Parser.convertAll(inStream);
-        count = array.size();
-        offset = 0;
+        this.array = Parser.convertAll(inStream);
+        this.count = this.array.size();
+        this.offset = 0;
     }
     
     /**
      * Creates a new instance of PSObjectArray. The new array is a subset
-     * of the supplied array. Thery share the data (changing a value is one
+     * of the supplied array. They share the data (changing a value is one
      * also changes the value in the other.
+     * 
      * @param obj Complete array from which this new PSObjectArray is a subset.
      * @param index Index of the first element of the subarray in the obj array.
      * @param newCount Number of items in the subarray.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Indices out of range.
+     * 
+     * @throws PSErrorRangeCheck Indices out of range.
      */
-    public PSObjectArray(PSObjectArray obj, int index, int newCount) throws PSErrorRangeCheck {
+    public PSObjectArray(final PSObjectArray obj, final int index,
+    		final int newCount) throws PSErrorRangeCheck {
         int n = obj.size();
-        if ( (newCount != 0) || (index != 0) ) {
+        if ((newCount != 0) || (index != 0)) {
             if (index >= n) {
                 throw new PSErrorRangeCheck();
             }
-            if ( (index + count - 1) >= n ) {
+            if ((index + this.count - 1) >= n) {
                 throw new PSErrorRangeCheck();
             }
         }
 
-        array = obj.array;
-        offset = obj.offset+index;
-        count = newCount;
+        this.array = obj.array;
+        this.offset = obj.offset + index;
+        this.count = newCount;
         copyCommonAttributes(obj);
     }
     
     /**
      * Insert an element at the specified position in this array.
+     * 
      * @param index Index at which the new element will be inserted.
      * @param value Value of the new element
      */
-    public void addAt(int index, PSObject value) {
-        array.add(index+offset, value);
+    public final void addAt(final int index, final PSObject value) {
+        this.array.add(index + this.offset, value);
     }
     
     /**
      * Add an element to the end to this array.
      * @param value Value of the new element
      */
-    public void addToEnd(PSObject value) {
-        array.add(value);
+    public final void addToEnd(final PSObject value) {
+        this.array.add(value);
     }
     
     /**
-     * Replace executable name objects with their values
+     * Replace executable name objects with their values.
+     * 
      * @param interp Interpreter to which the operators must be bound.
+     * 
      * @return This array.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Something went wrong.
+     * 
+     * @throws PSErrorTypeCheck PostScript typecheck error.
      */
-    public PSObjectArray bind(Interpreter interp) throws PSErrorTypeCheck {
+    public final PSObjectArray bind(final Interpreter interp)
+    		throws PSErrorTypeCheck {
         try {
-            for (int i = 0 ; i < size() ; i++) {
+            for (int i = 0; i < size(); i++) {
                 PSObject obj = get(i);
                 set(i, obj.bind(interp));
                 if (obj instanceof PSObjectArray) {
-                    if ( !((PSObjectArray)obj).isLiteral ) {
+                    if (!((PSObjectArray) obj).isLiteral) {
                         obj.readonly();
                     }
                 }
@@ -165,7 +186,7 @@ public class PSObjectArray extends PSObject {
     
     /**
      * Creates a deep copy of this array.
-     * @throws java.lang.CloneNotSupportedException Unable to clone this object or one of its sub-objects
+     * 
      * @return Deep copy of this array
      */
     public PSObjectArray clone() {
@@ -185,32 +206,35 @@ public class PSObjectArray extends PSObject {
      * @param obj1 Copy values from obj1
      * @return Returns subsequence of this object
      */
-    public PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
+    public final PSObject copy(PSObject obj1) throws PSErrorRangeCheck, PSErrorTypeCheck {
         PSObjectArray array = obj1.toArray();
         putinterval(0, array);
         return getinterval(0, array.length());
     }
     
     /**
-     * Convert this object to a literal object
+     * Convert this object to a literal object.
+     * 
      * @return This object converted to a literal object
      */
-    public PSObject cvlit() {
+    public final PSObject cvlit() {
         isLiteral = true;
         return this;
     }
 
     /**
      * PostScript operator 'cvx'. Makes this object executable
+     * 
+     * @return This object after it has been made executable.
      */
-    public PSObject cvx() {
+    public final PSObject cvx() {
         isLiteral = false;
         return this;
     }
 
     /**
-     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
-     * of composite object is not copied, but shared.
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The
+     * values of composite object is not copied, but shared.
      */
     public PSObjectArray dup() {
         try {
@@ -222,18 +246,21 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
-     * Compare this object with another object and return true if they are equal.
-     * See PostScript manual on what's equal and what's not.
+     * Compare this object with another object and return true if they are
+     * equal. See PostScript manual on what's equal and what's not.
+     * 
      * @param obj Object to compare this object with
+     * 
      * @return True if objects are equal, false otherwise
      */
     public boolean eq(PSObject obj) {
         try {
             PSObjectArray objArr = obj.toArray();
-            if ( (count != objArr.count) || (offset != objArr.offset) ) {
+            if ((this.count != objArr.count)
+            		|| (this.offset != objArr.offset)) {
                 return false;
             }
-            return (array == objArr.array);
+            return (this.array == objArr.array);
         } catch (PSErrorTypeCheck e) {
             return false;
         }
@@ -486,7 +513,7 @@ public class PSObjectArray extends PSObject {
      * Convert this PostScript array to a double[] array.
      */
     public double[] toDoubleArray() throws PSErrorTypeCheck {
-        double newArray[] = new double[size()];
+        double[] newArray = new double[size()];
         try {
             for (int i = 0 ; i < size() ; i++) {
                 newArray[i] = get(i).toReal();
@@ -522,23 +549,27 @@ public class PSObjectArray extends PSObject {
      * code, until it has scanned and constructed an entire object.
      * Please note that this method does not perform a type check following the
      * offical 'token' operator. This method will always return a result.
+     * 
      * @return List with one or more objects. The following are possible:
-     *         1 object : { <false boolean> }
-     *         2 objects: { <next token>, <true boolean> }
-     *         3 objects: { <remainder of this object>, <next token>, <true boolean> }
+     *         1 object : { "false boolean" }
+     *         2 objects: { "next token", "true boolean" }
+     *         3 objects: { "remainder of this object", "next token",
+     *                      "true boolean" }
+     *         
+     * @throws PSError A PostScript error occurred.
      */
     public List<PSObject> token() throws PSError {
         List<PSObject> list;
-        int N = size();
-        if (N == 0) {
+        int nr = size();
+        if (nr == 0) {
             list = new ArrayList<PSObject>(1);
             list.add(0, new PSObjectBool(false));
         } else {
             list = new ArrayList<PSObject>(3);
-            if (N == 1) {
+            if (nr == 1) {
                 list.add(0, new PSObjectArray());
             } else {
-                list.add(0, new PSObjectArray(this, 1, N-1));
+                list.add(0, new PSObjectArray(this, 1, nr - 1));
             }
             list.add(1, get(0));
             list.add(2, new PSObjectBool(true));
@@ -547,7 +578,8 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
-     * Returns the type of this object
+     * Returns the type of this object.
+     * 
      * @return Type of this object (see PostScript manual for possible values)
      */
     public String type() {

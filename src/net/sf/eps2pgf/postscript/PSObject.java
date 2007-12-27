@@ -20,48 +20,60 @@
 
 package net.sf.eps2pgf.postscript;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.fontbox.afm.*;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
+import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
-import net.sf.eps2pgf.postscript.errors.*;
+import org.fontbox.afm.FontMetric;
 
 /** Base class for PostScript objects.
  *
  * @author Paul Wagenaars
  */
 public class PSObject implements Cloneable, Iterable<PSObject> {
-    /** Unlimited access */
+    /** Unlimited access. */
     static final int ACCESS_UNLIMITED = 0;
     
-    /** Only reading and executing is allowed */
+    /** Only reading and executing is allowed. */
     static final int ACCESS_READONLY = 1;
     
-    /** Only executing is allowed */
+    /** Only executing is allowed. */
     static final int ACCESS_EXECUTEONLY = 2;
     
-    /** Nothing is allowed */
+    /** Nothing is allowed. */
     static final int ACCESS_NONE = 3;
     
+    /** Indicates whether this object is literal or executable. */
     Boolean isLiteral = true;
+    
+    /** Current access level of object. */
     int access = ACCESS_UNLIMITED;
 
     /**
-     * Returns the absolute value of this object, if possible
+     * Returns the absolute value of this object, if possible.
      * @return Absolute value of this object
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object is not numeric
+     * @throws PSErrorTypeCheck Object is not numeric
      */
     public PSObject abs() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
     /**
-     * Returns the sum of this object and the passed object, if both are numeric
+     * Returns the sum of this object and the passed object, if both are
+     * numeric.
      * @param obj Object that will be added to this object
+     * 
      * @return Sum of this object and passed object
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object(s) are not numeric
+     * 
+     * @throws PSErrorTypeCheck Object(s) are not numeric
      */
-    public PSObject add(PSObject obj) throws PSErrorTypeCheck {
+    public PSObject add(final PSObject obj) throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
@@ -480,6 +492,10 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     
     /**
      * PostScript operator 'cvi'. Convert this object to an integer
+     * 
+     * @return Integer representation of this object.
+     * 
+     * @throws PSErrorTypeCheck This object has no integer representation.
      */
     public int cvi() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
@@ -631,13 +647,16 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
-     * PostScript operator 'xor'
-     * @param obj2 Object to 'xor' with this object
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One or both objects does not have the correct type for the xor
-     * operation
-     * @return Exclusive or of both values
+     * PostScript operator 'xor'.
+     * 
+     * @param obj2 Object to 'xor' with this object.
+     * 
+     * @throws PSErrorTypeCheck One or both objects does not have the correct
+     *         type for the xor operation.
+     *         
+     * @return Exclusive or of both values.
      */
-    public PSObject xor(PSObject obj2) throws PSErrorTypeCheck {
+    public PSObject xor(final PSObject obj2) throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     

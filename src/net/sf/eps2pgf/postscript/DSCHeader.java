@@ -22,7 +22,8 @@ package net.sf.eps2pgf.postscript;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Reads DSC header and holds header info

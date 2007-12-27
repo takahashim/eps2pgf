@@ -53,38 +53,40 @@ import net.sf.eps2pgf.postscript.filters.EexecDecode;
 import net.sf.eps2pgf.util.ArrayStack;
 
 /**
- * Interprets a PostScript document and produces output
+ * Interprets a PostScript document and produces output.
+ * 
  * @author Paul Wagenaars
  */
 public class Interpreter {
-    // Operand stack (see PostScript manual for more info)
+    /** Operand stack (see PostScript manual for more info). */
     ArrayStack<PSObject> opStack = new ArrayStack<PSObject>();
     
-    // Dictionary stack
+    /** Dictionary stack. */
     DictStack dictStack;
     
-    // Execution stack
+    /** Execution stack. */
     public ExecStack execStack = new ExecStack();
     
-    // Graphics state
+    /** Graphics state. */
     GstateStack gstate;
     
-    // Text handler, handles text in the postscript code
+    /** Text handler, handles text in the postscript code. */
     TextHandler textHandler;
     
-    // Header information of the file being interpreted
+    /** Header information of the file being interpreted. */
     DSCHeader header;
     
-    // Default clipping path
+    /** Default clipping path. */
     Path defaultClippingPath;
     
+    /** Log information. */
     Logger log = Logger.getLogger("global");
     
     /**
-     * Creates a new instance of interpreter
+     * Creates a new instance of interpreter.
      */
-    public Interpreter(Writer out, DSCHeader fileHeader, String outputtype,
-    		TextReplacements textReplace)
+    public Interpreter(final Writer out, final DSCHeader fileHeader,
+    		final String outputtype, final TextReplacements textReplace)
     		throws ProgramError, PSError, IOException {
         // Create graphics state stack with output device
     	OutputDevice output;
@@ -97,7 +99,7 @@ public class Interpreter {
     	}
         this.gstate = new GstateStack(output);
         
-        header = fileHeader;
+        this.header = fileHeader;
         
         // Text handler
         this.textHandler = new TextHandler(this.gstate, textReplace);
@@ -107,7 +109,7 @@ public class Interpreter {
     
     /**
      * Creates a new instance of Interpreter with nulldevice as output and 
-     * (virtually) infinite bounding box
+     * (virtually) infinite bounding box.
      */
     public Interpreter() throws ProgramError, PSError, IOException {
         // Create graphics state stack with output device
@@ -116,7 +118,7 @@ public class Interpreter {
         
         // "Infinite" bounding box (square box from (-10m,-10m) to (10m,10m))
         double[] bbox = {-28346.46, -28346.46, 28346.46, 28346.46};
-        header = new DSCHeader(bbox);
+        this.header = new DSCHeader(bbox);
 
         // Text handler
         this.textHandler = new TextHandler(this.gstate);
@@ -125,8 +127,12 @@ public class Interpreter {
     }
     
     /**
-     * Do some initialization tasks
-     **/
+     * Do some initialization tasks.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError the program error
+     */
     void initialize() throws IOException, PSError, ProgramError {
         // Initialize character encodings and fonts
         Encoding.initialize();
@@ -135,13 +141,14 @@ public class Interpreter {
         // Create dictionary stack
         this.dictStack = new DictStack(this);
 
-        gstate.current.device.init(gstate.current);
+        this.gstate.current.device.init(this.gstate.current);
         
-        gstate.current.setcolorspace(new PSObjectName("DeviceGray", true), true);
+        this.gstate.current.setcolorspace(
+        		new PSObjectName("DeviceGray", true), true);
         
         // An eps-file defines a bounding box. Set this bounding box as the
         // default clipping path.
-        double[] bbox = header.boundingBox;
+        double[] bbox = this.header.boundingBox;
         double left, right, top, bottom;
         if (bbox != null) {
             left = bbox[0];
@@ -156,23 +163,24 @@ public class Interpreter {
             right = 595.276;
             top = 841.890;
         }
-        gstate.current.moveto(left, bottom);
-        gstate.current.lineto(right, bottom);
-        gstate.current.lineto(right, top);
-        gstate.current.lineto(left, top);
-        gstate.current.path.closepath();
-        this.defaultClippingPath = gstate.current.path;
+        this.gstate.current.moveto(left, bottom);
+        this.gstate.current.lineto(right, bottom);
+        this.gstate.current.lineto(right, top);
+        this.gstate.current.lineto(left, top);
+        this.gstate.current.path.closepath();
+        this.defaultClippingPath = this.gstate.current.path;
         op_newpath();
         if (bbox != null) {
             op_initclip();
         } else {
-            gstate.current.clippingPath = defaultClippingPath.clone();
+            this.gstate.current.clippingPath = this.defaultClippingPath.clone();
         }
     }
     
     /**
-     * Start interpreting PostScript document
-     * @throws java.lang.Exception Something went wrong in the interpretation process
+     * Start interpreting PostScript document.
+     * 
+     * @throws Exception Something went wrong in the interpretation process
      */
     public void start() throws Exception {
         try {
@@ -181,19 +189,21 @@ public class Interpreter {
             System.out.println("----- Start of stack");
             op_pstack();
             System.out.println("----- End of stack");
-            dictStack.dumpFull();
-            gstate.current.device.finish();
+            this.dictStack.dumpFull();
+            this.gstate.current.device.finish();
             throw e;
         }
-        gstate.current.device.finish();
+        this.gstate.current.device.finish();
     }
     
     /**
-     * Execute all objects on the execution stack one by one
+     * Execute all objects on the execution stack one by one.
+     * 
+     * @throws Exception Something went wrong in the interpretation process
      */
     public void run() throws Exception {
-        while ( execStack.size() > 0 ) {
-            PSObject obj = execStack.getNextToken();
+        while (this.execStack.size() > 0) {
+            PSObject obj = this.execStack.getNextToken();
             if (obj != null) {
                 executeObject(obj, false);
             }
@@ -291,25 +301,25 @@ public class Interpreter {
     
     /** PostScript op: abs */
     public void op_abs() throws PSErrorStackUnderflow, PSErrorTypeCheck {
-        PSObject obj = opStack.pop();
-        opStack.push(obj.abs());
+        PSObject obj = this.opStack.pop();
+        this.opStack.push(obj.abs());
     }
     
     /** PostScript op: add */
     public void op_add() throws PSErrorStackUnderflow, PSErrorTypeCheck {
-        PSObject num2 = opStack.pop();
-        PSObject num1 = opStack.pop();
-        opStack.push(num1.add(num2));
+        PSObject num2 = this.opStack.pop();
+        PSObject num1 = this.opStack.pop();
+        this.opStack.push(num1.add(num2));
     }
     
     /** PostScript op: aload */
     public void op_aload() throws PSError {
-        PSObject array = opStack.pop();
+        PSObject array = this.opStack.pop();
         array.checkAccess(false, true, false);
         for (PSObject obj : array.toArray()) {
-            opStack.push(obj);
+            this.opStack.push(obj);
         }
-        opStack.push(array);
+        this.opStack.push(array);
     }
     
     /** PostScript op: anchorsearch */
@@ -355,24 +365,24 @@ public class Interpreter {
     
     /** PostScript op: acrt */
     public void op_arct() throws PSError {
-        double r = opStack.pop().toNonNegReal();
-        double y2 = opStack.pop().toReal();
-        double x2 = opStack.pop().toReal();
-        double y1 = opStack.pop().toReal();
-        double x1 = opStack.pop().toReal();
-        gstate.current.arcto(x1, y1, x2, y2, r);
+        double r = this.opStack.pop().toNonNegReal();
+        double y2 = this.opStack.pop().toReal();
+        double x2 = this.opStack.pop().toReal();
+        double y1 = this.opStack.pop().toReal();
+        double x1 = this.opStack.pop().toReal();
+        this.gstate.current.arcto(x1, y1, x2, y2, r);
     }
     
     /** PostScript op: acrto */
     public void op_arcto() throws PSError {
-        double r = opStack.pop().toNonNegReal();
-        double y2 = opStack.pop().toReal();
-        double x2 = opStack.pop().toReal();
-        double y1 = opStack.pop().toReal();
-        double x1 = opStack.pop().toReal();
-        double[] t1t2 = gstate.current.arcto(x1, y1, x2, y2, r);
-        for (int i = 0 ; i < t1t2.length ; i++) {
-            opStack.push(new PSObjectReal(t1t2[i]));
+        double r = this.opStack.pop().toNonNegReal();
+        double y2 = this.opStack.pop().toReal();
+        double x2 = this.opStack.pop().toReal();
+        double y1 = this.opStack.pop().toReal();
+        double x1 = this.opStack.pop().toReal();
+        double[] t1t2 = this.gstate.current.arcto(x1, y1, x2, y2, r);
+        for (int i = 0; i < t1t2.length; i++) {
+        	this.opStack.push(new PSObjectReal(t1t2[i]));
         }
     }
     
@@ -590,7 +600,7 @@ public class Interpreter {
     
     /** PostScript op: currentcmykcolor */
     public void op_currentcmykcolor() throws PSError, ProgramError {
-        double cmyk[] = gstate.current.currentcmykcolor();
+        double[] cmyk = gstate.current.currentcmykcolor();
         for (int i = 0 ; i < cmyk.length ; i++) {
             opStack.push(new PSObjectReal(cmyk[i]));
         }
@@ -638,7 +648,7 @@ public class Interpreter {
     
     /** PostScript op: currenthsbcolor */
     public void op_currenthsbcolor() throws PSError, ProgramError {
-        double hsb[] = gstate.current.currenthsbcolor();
+        double[] hsb = gstate.current.currenthsbcolor();
         for (int i = 0 ; i < hsb.length ; i++) {
             opStack.push(new PSObjectReal(hsb[i]));
         }
@@ -666,7 +676,7 @@ public class Interpreter {
     
     /** PostScript op: currentrgbcolor */
     public void op_currentrgbcolor() throws PSError, ProgramError {
-        double rgb[] = gstate.current.currentrgbcolor();
+        double[] rgb = gstate.current.currentrgbcolor();
         for (int i = 0 ; i < rgb.length ; i++) {
             opStack.push(new PSObjectReal(rgb[i]));
         }
@@ -830,14 +840,14 @@ public class Interpreter {
         opStack.push(new PSObjectReal( num1 / num2 ));
     }
     
-    /** PostScript op: dtransform */
+    /** PostScript op: dtransform. */
     public void op_dtransform() throws PSError {
         PSObject obj = opStack.pop();
         PSObjectMatrix matrix = null;
         try {
             matrix = obj.toMatrix();
         } catch (PSErrorTypeCheck e) {
-            
+            //
         }
         double dy;
         if (matrix == null) {
@@ -847,17 +857,17 @@ public class Interpreter {
             dy = opStack.pop().toReal();
         }
         double dx = opStack.pop().toReal();
-        double transformed[] = matrix.dtransform(dx, dy);
+        double[] transformed = matrix.dtransform(dx, dy);
         opStack.push(new PSObjectReal(transformed[0]));
         opStack.push(new PSObjectReal(transformed[1]));
     }
     
-    /** PostScript op: dup */
+    /** PostScript op: dup. */
     public void op_dup() throws PSErrorStackUnderflow {
         opStack.push(opStack.peek().dup());
     }
     
-    /** PostScript op: eexec */
+    /** PostScript op: eexec. */
     public void op_eexec() throws PSError, Exception {
         PSObject obj = opStack.pop();
         obj.checkAccess(true, false, false);
@@ -1144,7 +1154,7 @@ public class Interpreter {
             dy = opStack.pop().toReal();
         }
         double dx = opStack.pop().toReal();
-        double transformed[] = matrix.idtransform(dx, dy);
+        double[] transformed = matrix.idtransform(dx, dy);
         opStack.push(new PSObjectReal(transformed[0]));
         opStack.push(new PSObjectReal(transformed[1]));
     }
@@ -1358,14 +1368,22 @@ public class Interpreter {
         gstate.current.moveto(x, y);
     }
     
-    /** PostScript op: mul */
+    /**
+     * PostScript op: mul.
+     * 
+     * @throws PSError PostScript error occurred.
+     */
     public void op_mul() throws PSError {
         PSObject num2 = opStack.pop();
         PSObject num1 = opStack.pop();
-        opStack.push(num1.mul(num2));;
+        opStack.push(num1.mul(num2));
     }
     
-    /** PostScript op: ne */
+    /**
+     * PostScript op: ne.
+     * 
+     * @throws PSError PostScript error occurred.
+     */
     public void op_ne() throws PSError {
         op_eq();
         op_not();
@@ -2054,7 +2072,7 @@ public class Interpreter {
             y = opStack.pop().toReal();
         }
         double x = opStack.pop().toReal();
-        double transformed[] = matrix.transform(x, y);
+        double[] transformed = matrix.transform(x, y);
         opStack.push(new PSObjectReal(transformed[0]));
         opStack.push(new PSObjectReal(transformed[1]));
     }

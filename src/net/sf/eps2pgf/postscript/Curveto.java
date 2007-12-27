@@ -20,7 +20,7 @@
 
 package net.sf.eps2pgf.postscript;
 
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.errors.PSError;
 
 /**
  * cubic Bezier curve path section

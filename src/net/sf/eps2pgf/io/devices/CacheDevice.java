@@ -33,74 +33,97 @@ import net.sf.eps2pgf.postscript.errors.PSErrorNoCurrentPoint;
  * @author Paul Wagenaars
  */
 public class CacheDevice implements OutputDevice {
-	double specifiedWx = 0.0;
-	double specifiedWy = 0.0;
-	double specifiedLlx = 0.0;
-	double specifiedLly = 0.0;
-	double specifiedUrx = 0.0;
-	double specifiedUry = 0.0;
-	double[] pathBbox = null;
-	
-	/**
-	 * Creates a new cache device and passes glyph width and bounding box
-	 * information about the glyph that will be created in this device.
-	 * @param wx
-	 * @param wy
-	 * @param llx
-	 * @param lly
-	 * @param urx
-	 * @param ury
-	 */
-	public CacheDevice(double wx, double wy, double llx, double lly, double urx, double ury) {
-		specifiedWx = wx;
-		specifiedWy = wy;
-		specifiedLlx = llx;
-		specifiedLly = lly;
-		specifiedUrx = urx;
-		specifiedUry = ury;
-	}
+    
+    /** The user specified wx. */
+    private double specifiedWx = 0.0;
+    
+    /** The user specified wy. */
+    private double specifiedWy = 0.0;
+    
+    /** The user specified llx. */
+    private double specifiedLlx = 0.0;
+    
+    /** The user specified lly. */
+    private double specifiedLly = 0.0;
+    
+    /** The user specified urx. */
+    private double specifiedUrx = 0.0;
+    
+    /** The user specified ury. */
+    private double specifiedUry = 0.0;
+    
+    /** The bounding box of all paths so far. */
+    private double[] pathBbox = null;
     
     /**
-     * Implements PostScript clip operator
+     * Creates a new cache device and passes glyph width and bounding box
+     * information about the glyph that will be created in this device.
+     * @param wx wx parameter
+     * @param wy wy parameter
+     * @param llx llx parameter
+     * @param lly lly parameter
+     * @param urx urx parameter
+     * @param ury ury parameter
+     */
+    public CacheDevice(final double wx, final double wy, final double llx,
+            final double lly, final double urx, final double ury) {
+        specifiedWx = wx;
+        specifiedWy = wy;
+        specifiedLlx = llx;
+        specifiedLly = lly;
+        specifiedUrx = urx;
+        specifiedUry = ury;
+    }
+    
+    /**
+     * Implements PostScript clip operator.
      * Intersects the area inside the current clipping path with the area
      * inside the current path to produce a new, smaller clipping path.
+     * 
+     * @param clipPath the clip path
      */
-    public void clip(Path clipPath) {
+    public void clip(final Path clipPath) {
     }
     
     /**
      * Returns a <b>copy</b> default transformation matrix (converts user space
      * coordinates to device space).
+     * 
+     * @return Default transformation matrix.
      */
     public PSObjectMatrix defaultCTM() {
-        return new PSObjectMatrix(1, 0 ,0, 1, 0, 0);
+        return new PSObjectMatrix(1, 0 , 0, 1, 0, 0);
     }
     
     /**
      * Initialize before any other methods are called. Normally, this method
      * writes a header.
+     * 
+     * @param gstate The current graphics state.
      */
-    public void init(GraphicsState gstate) {
+    public void init(final GraphicsState gstate) {
     }
     
     /**
      * Internal Eps2pgf command: eps2pgfgetmetrics
      * It is meant for the cache device. When this command is issued, it will
      * return metrics information about the drawn glyph.
+     * 
+     * @return Metrics information about glyph.
      */
     public double[] eps2pgfGetMetrics() {
-    	double llx = 0.0;
-		double lly = 0.0;
-		double urx = 0.0;
-		double ury = 0.0;
-    	if (this.pathBbox != null) {
-    		llx = Math.max(this.specifiedLlx, this.pathBbox[0]);
-    		lly = Math.max(this.specifiedLly, this.pathBbox[1]);
-    		urx = Math.min(this.specifiedUrx, this.pathBbox[2]);
-    		ury = Math.min(this.specifiedUry, this.pathBbox[3]);
-    	}
-    	double[] dummyData = {specifiedWx, specifiedWy, llx, lly, urx, ury};
-    	return dummyData;
+        double llx = 0.0;
+        double lly = 0.0;
+        double urx = 0.0;
+        double ury = 0.0;
+        if (this.pathBbox != null) {
+            llx = Math.max(this.specifiedLlx, this.pathBbox[0]);
+            lly = Math.max(this.specifiedLly, this.pathBbox[1]);
+            urx = Math.min(this.specifiedUrx, this.pathBbox[2]);
+            ury = Math.min(this.specifiedUry, this.pathBbox[3]);
+        }
+        double[] dummyData = {specifiedWx, specifiedWy, llx, lly, urx, ury};
+        return dummyData;
     }
     
     /**
@@ -110,123 +133,166 @@ public class CacheDevice implements OutputDevice {
     }
     
     /**
-     * Fills a path using the non-zero rule
+     * Fills a path using the non-zero rule.
      * See the PostScript manual (fill operator) for more info.
+     * 
+     * @param path the path
      */
-    public void fill(Path path) {
-    	try {
-    		this.mergeBbox(path.boundingBox());
-    	} catch (PSErrorNoCurrentPoint e) {
-    		// do nothing
-    	}
+    public void fill(final Path path) {
+        try {
+            this.mergeBbox(path.boundingBox());
+        } catch (PSErrorNoCurrentPoint e) {
+            // do nothing
+        }
     }
     
-    public void eoclip(Path clipPath) {
+    /**
+     * Set the current clipping path in the graphics state as clipping path in
+     * the output document. The even-odd rule is used to determine which point
+     * are inside the path.
+     * 
+     * @param clipPath Path to use for clipping
+     */
+    public void eoclip(final Path clipPath) {
     }
 
     /**
-     * Fills a path using the even-odd rule
+     * Fills a path using the even-odd rule.
      * See the PostScript manual (fill operator) for more info.
+     * 
+     * @param path the path
      */
-    public void eofill(Path path) {
-    	try {
-    		this.mergeBbox(path.boundingBox());
-    	} catch (PSErrorNoCurrentPoint e) {
-    		// do nothing
-    	}
+    public void eofill(final Path path) {
+        try {
+            this.mergeBbox(path.boundingBox());
+        } catch (PSErrorNoCurrentPoint e) {
+            // do nothing
+        }
     }
     
     /**
      * Merge a new bounding box with the current bounding box. Afterwards
      * this.pathBbox will contain a bounding box that contains both the
      * previous this.pathBbox and the newBbox.
+     * 
+     * @param newBbox Bounding box to merge with current bounding box.
      */
-    void mergeBbox(double[] newBbox) {
-    	if (this.pathBbox == null) {
-    		this.pathBbox = newBbox;
-    	} else {
-    		this.pathBbox[0] = Math.min(this.pathBbox[0], newBbox[0]);
-    		this.pathBbox[1] = Math.min(this.pathBbox[1], newBbox[1]);
-    		this.pathBbox[2] = Math.max(this.pathBbox[2], newBbox[2]);
-    		this.pathBbox[3] = Math.max(this.pathBbox[3], newBbox[3]);
-    	}
+    void mergeBbox(final double[] newBbox) {
+        if (this.pathBbox == null) {
+            this.pathBbox = newBbox;
+        } else {
+            this.pathBbox[0] = Math.min(this.pathBbox[0], newBbox[0]);
+            this.pathBbox[1] = Math.min(this.pathBbox[1], newBbox[1]);
+            this.pathBbox[2] = Math.max(this.pathBbox[2], newBbox[2]);
+            this.pathBbox[3] = Math.max(this.pathBbox[3], newBbox[3]);
+        }
     }
     
     /**
-     * Shading fill (shfill PostScript operator)
+     * Shading fill (shfill PostScript operator).
+     * 
+     * @param dict Shading to use.
+     * @param gstate Current graphics state.
      */
-    public void shfill(PSObjectDict dict, GraphicsState gstate) {
-    	try {
-    		this.mergeBbox(gstate.path.boundingBox());
-    	} catch (PSErrorNoCurrentPoint e) {
-    		// do nothing
-    	}
+    public void shfill(final PSObjectDict dict, final GraphicsState gstate) {
+        try {
+            this.mergeBbox(gstate.path.boundingBox());
+        } catch (PSErrorNoCurrentPoint e) {
+            // do nothing
+        }
     }
 
     /**
-     * Implements PostScript stroke operator
+     * Implements PostScript stroke operator.
+     * 
+     * @param gstate Current graphics state.
      */
-    public void stroke(GraphicsState gstate) {
-    	try {
-    		this.mergeBbox(gstate.path.boundingBox());
-    	} catch (PSErrorNoCurrentPoint e) {
-    		// do nothing
-    	}
+    public void stroke(final GraphicsState gstate) {
+        try {
+            this.mergeBbox(gstate.path.boundingBox());
+        } catch (PSErrorNoCurrentPoint e) {
+            // do nothing
+        }
     }
     
     /**
-     * Implements PostScript operator setlinecap
+     * Implements PostScript operator setlinecap.
+     * 
+     * @param cap Line cap parameter. 0: butt cap, 1: round cap, or
+     *            2: projecting square cap.
      */
-    public void setlinecap(int cap) {
+    public void setlinecap(final int cap) {
     }
     
     /**
-     * Implements PostScript operator setlinejoin
+     * Implements PostScript operator setlinejoin.
+     * 
+     * @param join Line join parameter. 0: miter join, 1: round join, or
+     *             2: bevel join.
      */
-    public void setlinejoin(int join) {
+    public void setlinejoin(final int join) {
     }
     
     /**
-     * Sets the current color in gray, rgb or cmyk
+     * Sets the current color in gray, rgb or cmyk.
+     * 
+     * @param color The color.
      */
-    public void setColor(PSColor color) {
+    public void setColor(final PSColor color) {
     }
     
     /**
-     * Sets the miter limit
+     * Sets the miter limit.
+     * 
+     * @param num The miter limit.
      */
-    public void setmiterlimit(double num) {
+    public void setmiterlimit(final double num) {
     }
     
     /**
-     * Starts a new scope
+     * Starts a new scope.
      */
     public void startScope() {
     }
     
     /**
-     * Ends the current scope scope
+     * Ends the current scope.
      */
     public void endScope() {
     }
     
     /**
-     * Draws text
+     * Draws text.
+     * @param text Exact text to draw
+     * @param position Text anchor point in [micrometer, micrometer]
+     * @param angle Text angle in degrees
+     * @param fontsize in PostScript pt (= 1/72 inch). If fontsize is NaN, the
+     *        font size is not set and completely determined by LaTeX.
+     * @param anchor String with two characters:
+     *               t - top, c - center, B - baseline b - bottom
+     *               l - left, c - center, r - right
+     *               e.g. Br = baseline,right
      */
-    public void show(String text, double[] position, double angle,
-            double fontsize, String anchor) {
+    public void show(final String text, final double[] position,
+            final double angle, final double fontsize, final String anchor) {
     }
     
     /**
-     * Draws a red dot (usefull for debugging, don't use otherwise)
+     * Draws a red dot (useful for debugging, don't use otherwise).
+     * 
+     * @param x X-coordinate of dot.
+     * @param y Y-coordinate of dot.
      */
-    public void drawDot(double x, double y) {
+    public void drawDot(final double x, final double y) {
     }
     
     /**
-     * Draws a blue rectangle (usefull for debugging, don't use otherwise)
+     * Draws a blue rectangle (useful for debugging, don't use otherwise).
+     * 
+     * @param lowerLeft Lower-left coordinate.
+     * @param upperRight Upper-right coordinate.
      */
-    public void drawRect(double[] lowerLeft, double[] upperRight) {
+    public void drawRect(final double[] lowerLeft, final double[] upperRight) {
     }
     
 }

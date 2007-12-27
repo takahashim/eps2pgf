@@ -20,9 +20,10 @@
 
 package net.sf.eps2pgf.postscript;
 
-import net.sf.eps2pgf.util.ArrayStack;
 import net.sf.eps2pgf.io.devices.OutputDevice;
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow;
+import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.util.ArrayStack;
 
 /** Manages the graphics states (stack, ...)
  *

@@ -38,105 +38,183 @@ import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 public interface OutputDevice {
     
     /**
-     * Implements PostScript clip operator
+     * Implements PostScript clip operator.
      * Intersects the area inside the current clipping path with the area
      * inside the current path to produce a new, smaller clipping path.
+     * 
+     * @param clipPath the clip path
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     *                              (yet) implemented.
      */
-    public void clip(Path clipPath) throws IOException, PSErrorUnimplemented;
+    void clip(Path clipPath)
+    		throws IOException, PSErrorUnimplemented;
     
     /**
      * Returns a <b>copy</b> default transformation matrix (converts user space
      * coordinates to device space).
+     * 
+     * @return Default transformation matrix.
      */
-    public PSObjectMatrix defaultCTM();
+    PSObjectMatrix defaultCTM();
     
     /**
      * Initialize before any other methods are called. Normally, this method
      * writes a header.
+     * 
+     * @param gstate the gstate
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void init(GraphicsState gstate) throws PSError, IOException;
+    void init(GraphicsState gstate) throws PSError, IOException;
     
     /**
      * Finalize writing. Normally, this method writes a footer.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void finish() throws IOException;
+    void finish() throws IOException;
     
     /**
-     * Fills a path using the non-zero rule
+     * Fills a path using the non-zero rule.
      * See the PostScript manual (fill operator) for more info.
+     * 
+     * @param path the path
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     *                              (yet) implemented.
      */
-    public void fill(Path path) throws IOException, PSErrorUnimplemented;
+    void fill(Path path) throws IOException, PSErrorUnimplemented;
 
     /**
-     * Set the current clipping path in the graphics state as clipping path
-     * in the output document. The even-odd rule is used to determine which point
+     * Set the current clipping path in the graphics state as clipping path in
+     * the output document. The even-odd rule is used to determine which point
      * are inside the path.
+     * 
      * @param clipPath Path to use for clipping
-     * @throws java.io.IOException Unable to write output
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Encountered an unimplemented path element
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     *                              (yet) implemented.
      */
-    public void eoclip(Path clipPath) throws IOException, PSErrorUnimplemented;
+    void eoclip(Path clipPath) throws IOException, PSErrorUnimplemented;
     
     /**
-     * Fills a path using the even-odd rule
+     * Fills a path using the even-odd rule.
      * See the PostScript manual (fill operator) for more info.
+     * 
+     * @param path the path
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * (yet) implemented.
      */
-    public void eofill(Path path) throws IOException, PSErrorUnimplemented;
+    void eofill(Path path) throws IOException, PSErrorUnimplemented;
     
     /**
      * Internal Eps2pgf command: eps2pgfgetmetrics
      * It is meant for the cache device. When this command is issued, it will
      * return metrics information about the drawn glyph.
+     * 
+     * @return Metrics information about glyph.
      */
-    public double[] eps2pgfGetMetrics();
+    double[] eps2pgfGetMetrics();
     
     /**
-     * Shading fill (shfill PostScript operator)
+     * Shading fill (shfill PostScript operator).
+     * 
+     * @param dict Shading to use.
+     * @param gstate Current graphics state.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void shfill(PSObjectDict dict, GraphicsState gstate) throws PSError, IOException;
+    void shfill(PSObjectDict dict, GraphicsState gstate)
+    		throws PSError, IOException;
 
     /**
-     * Implements PostScript stroke operator
+     * Implements PostScript stroke operator.
+     * 
+     * @param gstate Current graphics state.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    public void stroke(GraphicsState gstate) throws IOException, PSError;
+    void stroke(GraphicsState gstate) throws IOException, PSError;
     
     /**
-     * Implements PostScript operator setlinecap
+     * Implements PostScript operator setlinecap.
+     * 
+     * @param cap Line cap parameter. 0: butt cap, 1: round cap, or
+     *            2: projecting square cap.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
-    public void setlinecap(int cap) throws IOException, PSErrorRangeCheck;
+    void setlinecap(int cap) throws IOException, PSErrorRangeCheck;
     
     /**
-     * Implements PostScript operator setlinejoin
+     * Implements PostScript operator setlinejoin.
+     * 
+     * @param join Line join parameter. 0: miter join, 1: round join, or
+     *             2: bevel join.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
-    public void setlinejoin(int join) throws IOException, PSErrorRangeCheck;
+    void setlinejoin(int join) throws IOException, PSErrorRangeCheck;
     
     /**
-     * Ends the current scope scope
+     * Ends the current scope.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void endScope() throws IOException;
+    void endScope() throws IOException;
     
     /**
-     * Draws a red dot (useful for debugging, don't use otherwise)
+     * Draws a red dot (useful for debugging, don't use otherwise).
+     * 
+     * @param x X-coordinate of dot.
+     * @param y Y-coordinate of dot.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void drawDot(double x, double y) throws IOException;
+    void drawDot(double x, double y) throws IOException;
     
     /**
-     * Draws a blue rectangle (useful for debugging, don't use otherwise)
+     * Draws a blue rectangle (useful for debugging, don't use otherwise).
+     * 
+     * @param lowerLeft Lower-left coordinate.
+     * @param upperRight Upper-right coordinate.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void drawRect(double[] lowerLeft, double[] upperRight) throws IOException;
+    void drawRect(double[] lowerLeft, double[] upperRight) throws IOException;
 
     /**
-     * Sets the current color in gray, rgb or cmyk
+     * Sets the current color in gray, rgb or cmyk.
+     * 
+     * @param color The color.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void setColor(PSColor color) throws IOException;
+    void setColor(PSColor color) throws IOException;
     
     /**
-     * Sets the miter limit
+     * Sets the miter limit.
+     * 
+     * @param num The miter limit.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void setmiterlimit(double num) throws IOException;
+    void setmiterlimit(double num) throws IOException;
     
     /**
-     * Draws text
+     * Draws text.
+     * 
      * @param text Exact text to draw
      * @param position Text anchor point in [micrometer, micrometer]
      * @param angle Text angle in degrees
@@ -146,14 +224,17 @@ public interface OutputDevice {
      *               t - top, c - center, B - baseline b - bottom
      *               l - left, c - center, r - right
      *               e.g. Br = baseline,right
-     * @throws java.io.IOException Unable to write output
+     *               
+     * @throws IOException Unable to write output
      */
-    public void show(String text, double[] position, double angle,
+    void show(String text, double[] position, double angle,
             double fontsize, String anchor) throws IOException;    
 
     /**
-     * Starts a new scope
+     * Starts a new scope.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void startScope() throws IOException;
+    void startScope() throws IOException;
     
 }

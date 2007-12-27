@@ -23,7 +23,8 @@ package net.sf.eps2pgf.postscript;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import net.sf.eps2pgf.postscript.errors.*;
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 
 /**
  *
