@@ -26,27 +26,33 @@ package net.sf.eps2pgf.postscript.errors;
  * @author Paul Wagenaars
  */
 public class PSError extends Exception {
-	private static final long serialVersionUID = 1L;
-	
-    String methodName = "";
+    /** Serial version UID field. */
+    private static final long serialVersionUID = 1L;
     
-    /** Creates a new instance of PSError */
+    /**
+     * Creates a new instance of PSError.
+     */
     public PSError() {
     }
     
+    /**
+     * Get a the message describing the error.
+     * 
+     * @return Message describing the error.
+     */
     public String getMessage() {
         // Get the error type from the class name
         String error = this.getClass().getName();
-        error = error.substring(error.lastIndexOf('.')+1);
+        error = error.substring(error.lastIndexOf('.') + 1);
         if (error.startsWith("PSError")) {
             error = error.substring(7);
         }
         error = error.toLowerCase();
         
-        // Get the object where the error occured from
+        // Get the object where the error occurred from
         StackTraceElement[] trace = this.getStackTrace();
-        String methodName = new String();
-        for (int i = 0 ; i < trace.length ; i++) {
+        String methodName = "";
+        for (int i = 0; i < trace.length; i++) {
             String mName = trace[i].getMethodName();
             if (mName.startsWith("op_")) {
                 methodName = mName.substring(3);
@@ -57,7 +63,7 @@ public class PSError extends Exception {
             methodName = trace[0].getMethodName();
         }
         
-        return "Error: /" + error + " in " + methodName;
+        return "/" + error + " in " + methodName;
     }
     
 }

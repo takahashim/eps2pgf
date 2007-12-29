@@ -188,12 +188,13 @@ public class Options extends JSAP {
             String inputPath = getInputFile().getPath();
             if (inputPath.toLowerCase().endsWith(".eps")) {
                 outputPath = inputPath.substring(0, inputPath.length() - 4)
-                                + "." + getOutputType();
+                               + "." + getOutputType().toString().toLowerCase();
             } else if (inputPath.toLowerCase().endsWith(".ps")) {
                 outputPath = inputPath.substring(0, inputPath.length() - 3)
-                                + "." + getOutputType();
+                               + "." + getOutputType().toString().toLowerCase();
             } else {
-                outputPath = inputPath + "." + getOutputType();
+                outputPath = inputPath + "."
+                        + getOutputType().toString().toLowerCase();
             }
         } else {
             // An output filename was specified on the command-line

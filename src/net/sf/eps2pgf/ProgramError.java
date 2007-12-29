@@ -25,9 +25,9 @@ package net.sf.eps2pgf;
  * @author Paul Wagenaars
  */
 public class ProgramError extends Exception {
-	
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = 1L;
+    
+    /** The Constant serialVersionUID. */
+    private static final long serialVersionUID = 1L;
     
     /**
      * Creates a new instance of ProgramError.
