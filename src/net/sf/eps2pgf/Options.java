@@ -20,6 +20,8 @@
 
 package net.sf.eps2pgf;
 
+import java.io.File;
+
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
@@ -28,6 +30,8 @@ import com.martiansoftware.jsap.StringParser;
 import com.martiansoftware.jsap.Switch;
 import com.martiansoftware.jsap.UnflaggedOption;
 import com.martiansoftware.jsap.stringparsers.EnumeratedStringParser;
+import com.martiansoftware.jsap.stringparsers.FileStringParser;
+
 
 /**
  * Parses command line arguments and manages settings and options by the user.
@@ -36,20 +40,35 @@ import com.martiansoftware.jsap.stringparsers.EnumeratedStringParser;
  */
 public class Options extends JSAP {
     
-    /** Result of parsed command line arguments. */
-    private JSAPResult args;
-    
     /** The input file. */
-    private String input;
+    private File inputFile;
     
     /** The output file. */
-    private String output;
+    private File outputFile;
+    
+    /** The Enum for different text modes. */
+    public enum TextMode { EXACT, DIRECT_COPY };
+    
+    /** Text handling: exact or directcopy. */
+    private TextMode textMode;
+    
+    /** The enum for different output types. */
+    public enum OutputType { PGF, LOL };
     
     /** The type of output. */
-    private String outputtype;
+    private OutputType outputType;
     
     /** The PSfrag compatible file describing text replacements. */
-    private String textreplacefile;
+    private File textreplacefile;
+    
+    /** Indicates whether version flag is set. */
+    private boolean versionFlagSet;
+    
+    /** Indicates whether help flag is set. */
+    private boolean helpFlagSet;
+    
+    /** Indicates whether verbose flag is set. */
+    private boolean verboseFlagSet;
     
     /**
      * Creates a new instance of Options.
@@ -58,54 +77,67 @@ public class Options extends JSAP {
         super();
         
         try {
-            UnflaggedOption opt2 = new UnflaggedOption("inputfilename")
-                                          .setStringParser(JSAP.STRING_PARSER)
+            FileStringParser fileParser = FileStringParser.getParser()
+                                            .setMustExist(true)
+                                            .setMustBeFile(true);
+            UnflaggedOption optInput = new UnflaggedOption("inputfile")
+                                          .setStringParser(fileParser)
                                           .setRequired(true);
-            opt2.setHelp("(Encapsulated) PostScript (EPS or PS) input file.");
-            registerParameter(opt2);
+            optInput.setHelp("(Encapsulated) PostScript (EPS or PS) input "
+                    + "file.");
+            registerParameter(optInput);
             
-            Switch sw = new Switch("verbose")
-                        .setLongFlag("verbose");
-            sw.setHelp("Display more information during the conversion.");
-            registerParameter(sw);
-            
-            FlaggedOption opt1 = new FlaggedOption("outputfilename")
+            FlaggedOption optOutput = new FlaggedOption("outputfilename")
                                        .setShortFlag('o')
                                        .setLongFlag("output")
                                        .setStringParser(JSAP.STRING_PARSER)
                                        .setDefault("<input file with .pgf"
                                                + " extension>")
                                        .setRequired(true);
-            opt1.setHelp("Write output to this file.");
-            registerParameter(opt1);
+            optOutput.setHelp("Write output to this file.");
+            registerParameter(optOutput);
             
+            StringParser textmodeParser = EnumeratedStringParser
+                    .getParser("exact; directcopy", false, false);
+            FlaggedOption optTextmode = new FlaggedOption("textmode")
+                                        .setShortFlag('m')
+                                        .setLongFlag("text-mode")
+                                        .setStringParser(textmodeParser)
+                                        .setDefault("exact");
+            optTextmode.setHelp("Text label handling. Accepted values: 'exact' "
+                    + "(text is reproduced as closely as possible), or "
+                    + "'directcopy' (text is directly copied to the output and "
+                    + "scanned for embedded PSfrag text replacement rules).");
+            registerParameter(optTextmode);
+            
+            FlaggedOption optPsfrag = new FlaggedOption("textreplacefile")
+                                  .setLongFlag("text-replace")
+                                  .setStringParser(fileParser)
+                                  .setRequired(false);
+            optPsfrag.setHelp("File containing PSfrag commands describing text "
+                    + "replacements.");
+            registerParameter(optPsfrag);
+
             StringParser outputtypeParser =
                 EnumeratedStringParser.getParser("pgf; lol", false, false); 
-            FlaggedOption opt3 = new FlaggedOption("outputtype")
-            						   .setShortFlag('t')
-            						   .setLongFlag("output-type")
-            						   .setStringParser(outputtypeParser)
-            						   .setDefault("pgf");
-            opt3.setHelp("Type of output file. Accepted values: 'pgf' or"
-                    + " 'lol'.");
-            registerParameter(opt3);
+            FlaggedOption optOutputType = new FlaggedOption("outputtype")
+                                       .setShortFlag('t')
+                                       .setLongFlag("output-type")
+                                       .setStringParser(outputtypeParser)
+                                       .setDefault("pgf");
+            optOutputType.setHelp("Type of output file. Accepted values: 'pgf' "
+                    + "or 'lol'.");
+            registerParameter(optOutputType);
             
-            FlaggedOption opt4 = new FlaggedOption("textreplacefile")
-            							.setLongFlag("text-replace")
-            							.setStringParser(JSAP.STRING_PARSER)
-            							.setRequired(false);
-            opt4.setHelp("File containing PSfrag commands describing text "
-                    + "replacements.");
-            registerParameter(opt4);
+            Switch sw = new Switch("verbose").setLongFlag("verbose");
+            sw.setHelp("Display more information during the conversion.");
+            registerParameter(sw);
             
-            sw = new Switch("version")
-                                .setLongFlag("version");
+            sw = new Switch("version").setLongFlag("version");
             sw.setHelp("Display version information.");
             registerParameter(sw);
             
-            sw = new Switch("help")
-                        .setLongFlag("help")
-                        .setShortFlag('h');
+            sw = new Switch("help").setLongFlag("help").setShortFlag('h');
             sw.setHelp("Display program usage.");
             registerParameter(sw);
             
@@ -123,109 +155,179 @@ public class Options extends JSAP {
      * @return Processed arguments
      */
     public JSAPResult parse(final String[] arguments) {
-        setArgs(super.parse(arguments));
+        JSAPResult args = super.parse(arguments);
         
-        postParse();
+        postParse(args);
         
-        return getArgs();
+        return args;
     }
     
     /**
      * Post-process parsing results. Copy settings to this object, check
      * validity, etc...
+     * 
+     * @param args Parsed command line arguments.
      */
-    private void postParse() {
-        setInput(getArgs().getString("inputfilename", ""));
-        setOutputtype(getArgs().getString("outputtype", "pgf"));
+    private void postParse(final JSAPResult args) {
+        setInputFile(args.getFile("inputfile"));
         
-        if (getArgs().getString("outputfilename").startsWith("<")) {
-            String lowerInput = getInput().toLowerCase();
-            if (lowerInput.endsWith(".eps")) {
-            	setOutput(getInput().substring(0, getInput().length() - 4) + "."
-            	        + getOutputtype());
-            } else if (lowerInput.endsWith(".ps")) {
-            	setOutput(getInput().substring(0, getInput().length() - 3) + "."
-            	        + getOutputtype());
+        if (args.getString("outputtype").equals("pgf")) {
+            setOutputType(OutputType.PGF);
+        } else {
+            setOutputType(OutputType.LOL);
+        }
+        
+        if (args.getString("textmode", "exact").equals("exact")) {
+            setTextmode(TextMode.EXACT);
+        } else {
+            setTextmode(TextMode.DIRECT_COPY);
+        }
+        
+        String outputPath;
+        if (args.getString("outputfilename").startsWith("<")) {
+            String inputPath = getInputFile().getPath();
+            if (inputPath.toLowerCase().endsWith(".eps")) {
+                outputPath = inputPath.substring(0, inputPath.length() - 4)
+                                + "." + getOutputType();
+            } else if (inputPath.toLowerCase().endsWith(".ps")) {
+                outputPath = inputPath.substring(0, inputPath.length() - 3)
+                                + "." + getOutputType();
             } else {
-            	setOutput(getInput() + "." + getOutputtype());
+                outputPath = inputPath + "." + getOutputType();
             }
         } else {
             // An output filename was specified on the command-line
-            setOutput(getArgs().getString("outputfilename"));
+            outputPath = args.getString("outputfilename");
         }
+        setOutputFile(new File(outputPath));
         
-        setTextreplacefile(getArgs().getString("textreplacefile", ""));
+        setTextreplacefile(args.getFile("textreplacefile"));
         
+        setHelpFlag(args.getBoolean("help"));
+        
+        setVersionFlag(args.getBoolean("version"));
+        
+        setVerboseFlag(args.getBoolean("verbose"));
     }
 
     /**
      * @param pTextreplacefile the textreplacefile to set
      */
-    public void setTextreplacefile(final String pTextreplacefile) {
+    public void setTextreplacefile(final File pTextreplacefile) {
         textreplacefile = pTextreplacefile;
     }
 
     /**
      * @return the textreplacefile
      */
-    public String getTextreplacefile() {
+    public File getTextreplacefile() {
         return textreplacefile;
     }
 
     /**
      * @param pOutputtype the outputtype to set
      */
-    public void setOutputtype(final String pOutputtype) {
-        outputtype = pOutputtype;
+    public void setOutputType(final OutputType pOutputtype) {
+        outputType = pOutputtype;
     }
 
     /**
      * @return the outputtype
      */
-    public String getOutputtype() {
-        return outputtype;
+    public OutputType getOutputType() {
+        return outputType;
     }
 
     /**
      * @param pOutput the output to set
      */
-    void setOutput(final String pOutput) {
-        this.output = pOutput;
+    public void setOutputFile(final File pOutput) {
+        if (pOutput != null) {
+            outputFile = pOutput;
+        } else {
+            outputFile = new File("");
+        }
     }
 
     /**
      * @return the output
      */
-    String getOutput() {
-        return output;
+    public File getOutputFile() {
+        return outputFile;
     }
 
     /**
      * @param pInput the input to set
      */
-    void setInput(final String pInput) {
-        this.input = pInput;
+    public void setInputFile(final File pInput) {
+        if (pInput != null) {
+            inputFile = pInput;
+        } else {
+            inputFile = new File("");
+        }
     }
 
     /**
      * @return the input
      */
-    String getInput() {
-        return input;
+    public File getInputFile() {
+        return inputFile;
     }
 
     /**
-     * @param pArgs the args to set
+     * @param pTextmode the textmode to set
      */
-    void setArgs(final JSAPResult pArgs) {
-        this.args = pArgs;
+    public void setTextmode(final TextMode pTextmode) {
+        textMode = pTextmode;
     }
 
     /**
-     * @return the args
+     * @return the textmode
      */
-    JSAPResult getArgs() {
-        return args;
+    public TextMode getTextmode() {
+        return textMode;
+    }
+
+    /**
+     * @param pVersionFlag the versionFlag to set
+     */
+    public void setVersionFlag(final boolean pVersionFlag) {
+        versionFlagSet = pVersionFlag;
+    }
+
+    /**
+     * @return the versionFlag
+     */
+    public boolean isVersionFlagSet() {
+        return versionFlagSet;
+    }
+
+    /**
+     * @param pHelpFlag the helpFlag to set
+     */
+    public void setHelpFlag(final boolean pHelpFlag) {
+        helpFlagSet = pHelpFlag;
+    }
+
+    /**
+     * @return the helpFlag
+     */
+    public boolean isHelpFlagSet() {
+        return helpFlagSet;
+    }
+
+    /**
+     * @param pVerboseFlagSet the verboseFlagSet to set
+     */
+    public void setVerboseFlag(final boolean pVerboseFlagSet) {
+        verboseFlagSet = pVerboseFlagSet;
+    }
+
+    /**
+     * @return the verboseFlagSet
+     */
+    public boolean isVerboseFlagSet() {
+        return verboseFlagSet;
     }
     
 }

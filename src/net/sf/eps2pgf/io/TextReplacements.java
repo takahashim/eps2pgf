@@ -1,5 +1,5 @@
 /*
-// * TextReplacements.java
+ * TextReplacements.java
  *
  * This file is part of Eps2pgf.
  *
@@ -20,8 +20,12 @@
 
 package net.sf.eps2pgf.io;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.text.ParseException;
 import java.util.HashMap;
 
@@ -41,22 +45,34 @@ public class TextReplacements {
 	/** List with all text replacement rules. */
 	private HashMap<String, Rule> rules = new HashMap<String, Rule>();
 	
-	/** Last read character. */
-	private int lastChar;
 	
-	/**
-	 * Instantiates a new text replacements instance.
-	 * 
-	 * @param in Read PSfrag replacement rules from this input stream.
-	 * 
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 * @throws ParseException Invalid replacement rule
-	 */
-	public TextReplacements(final Reader in)
-			throws IOException, ParseException {
-		readRules(in);
-	}
-	
+    /**
+     * Instantiates a new text replacements instance.
+     * 
+     * @param in Read PSfrag replacement rules from this input stream.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ParseException Invalid replacement rule
+     */
+    public TextReplacements(final Reader in)
+            throws IOException, ParseException {
+        Reader texReader = new SkipTexCommentsReader(in);
+        readRules(texReader);
+    }
+    
+    /**
+     * Instantiates a new text replacements instance.
+     * 
+     * @param in Read PSfrag replacement rules from this input stream.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ParseException Invalid replacement rule
+     */
+    public TextReplacements(final File in)
+            throws IOException, ParseException {
+        this(new BufferedReader(new FileReader(in)));
+    }
+    
 	/**
 	 * Instantiates a new empty list with text replacements.
 	 */
@@ -86,7 +102,7 @@ public class TextReplacements {
 	 * @throws ParseException Invalid replacement rule
 	 */
 	private int readRules(final Reader in) throws IOException, ParseException {
-		while (readToPsfrag(in)) {
+		while (readToString(in, "\\psfrag")) {
 			// Check for starred version of \psfrag
 			in.mark(1);
 			if (in.read() != '*') {
@@ -115,25 +131,64 @@ public class TextReplacements {
 	}
 	
 	/**
-	 * Read characters from the input stream until \psfrag is encountered.
+	 * Read embedded rule.
 	 * 
-	 * @param in Input stream
+	 * @param text The text.
 	 * 
-	 * @return True, if \psfrag was encountered. False, if end-of-file was
-	 *         reached. 
+	 * @return Rule found in the text, null if no rule was found.
+	 */
+	public static Rule readEmbeddedRule(final String text) {
+	    if (!text.matches("^\\s*\\\\tex.*")) {
+	        return null;
+	    }
+	    
+	    Reader reader = new StringReader(text);
+	    try {
+	        // First, check if string starts with \tex
+	        consumeWhitespace(reader);
+	        if (!readToString(reader, "\\tex")) {
+	            return null;
+	        }
+            String texRefPoint = readSquareArgument(reader, "Bl");
+            String psRefPoint = readSquareArgument(reader, "Bl");
+            String texText = readCurlyArgument(reader);
+            if (texText == null) {
+                texText = "";
+            }
+            
+            Rule rule = new Rule(text, texRefPoint, psRefPoint, 1.0, 0.0,
+                    texText);
+            
+            return rule;
+	    } catch (IOException e) {
+	        return null;
+	    } catch (ParseException e) {
+	        return null;
+	    }
+	}
+	
+	/**
+	 * Read characters from the input stream until specified string is
+	 * encountered. The string itself is consumed too.
+	 * 
+	 * @param in Input stream from which characters are read.
+	 * @param string Search for this string.
+	 * 
+	 * @return True, if string was encountered. False, if end-of-file was
+	 * reached.
 	 * 
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	private boolean readToPsfrag(final Reader in) throws IOException {
-		final String psfrag = "\\psfrag";
+	private static boolean readToString(final Reader in, final String string)
+	        throws IOException {
 		StringBuilder lastChars = new StringBuilder();
 		int c;
-		while ((c = readNonCommentChar(in)) != -1) {
+		while ((c = in.read()) != -1) {
 			lastChars.append((char) c);
-			if (lastChars.length() > psfrag.length()) {
+			if (lastChars.length() > string.length()) {
 				lastChars.deleteCharAt(0);
 			}
-			if (lastChars.indexOf(psfrag) == 0) {
+			if (lastChars.indexOf(string) == 0) {
 				return true;
 			}
 		}
@@ -150,13 +205,14 @@ public class TextReplacements {
 	 * 
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	private String readCurlyArgument(final Reader in) throws IOException {
+	private static String readCurlyArgument(final Reader in)
+	        throws IOException {
 		// Skip whitespace
 		consumeWhitespace(in);
 		
 		// Check whether there are curly braces at all
 		in.mark(1);
-		if (readNonCommentChar(in) != '{') {
+		if (in.read() != '{') {
 			in.reset();
 			return null;
 		}
@@ -164,7 +220,7 @@ public class TextReplacements {
 		int c;
 		StringBuilder str = new StringBuilder();
 		int depth = 1;
-		while ((c = readNonCommentChar(in)) != -1) {
+		while ((c = in.read()) != -1) {
 			if ((c == '{') && (str.charAt(str.length() - 1) != '\\')) {
 				depth++;
 			} else if ((c == '}') && (str.charAt(str.length() - 1) != '\\')) {
@@ -189,21 +245,21 @@ public class TextReplacements {
 	 * 
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	private String readSquareArgument(final Reader in, final String defaultArg)
-						throws IOException {
+	private static String readSquareArgument(final Reader in,
+	        final String defaultArg) throws IOException {
 		// Skip whitespace
 		consumeWhitespace(in);
 		
 		// Check whether there are some square brackets at all
 		in.mark(1);
-		if (readNonCommentChar(in) != '[') {
+		if (in.read() != '[') {
 			in.reset();
 			return defaultArg;
 		}
 		
 		int c;
 		StringBuilder str = new StringBuilder();
-		while ((c = readNonCommentChar(in)) != -1) {
+		while ((c = in.read()) != -1) {
 			if (c == ']') {
 				break;
 			}
@@ -219,11 +275,11 @@ public class TextReplacements {
 	 * 
 	 * @throws IOException Signals that an I/O exception has occurred.
 	 */
-	private void consumeWhitespace(final Reader in) throws IOException {
+	private static void consumeWhitespace(final Reader in) throws IOException {
 		int c;
 		do {
 			in.mark(1);
-			c = readNonCommentChar(in);
+			c = in.read();
 		} while (Character.isWhitespace(c));
 		if (c != -1) {
 			in.reset();
@@ -231,43 +287,6 @@ public class TextReplacements {
 		return;
 	}
 	
-	
-	/**
-	 * Read next non-comment char.
-	 * 
-	 * @param in the in
-	 * 
-	 * @return The next non-comment character, or -1 if the end of the stream
-	 *         was reached.
-	 * 
-	 * @throws IOException Signals that an I/O exception has occurred.
-	 */
-	private int readNonCommentChar(final Reader in) throws IOException {
-		boolean inComment = false;
-		boolean consumeNext = false;
-		int c;
-		do {
-			c = in.read();
-			if (!inComment && (c == '%') && (this.lastChar != '\\')) {
-				inComment = true;
-			} else if (inComment && (c == '\n')) {
-				inComment = false;
-				consumeNext = true;
-			} else if (inComment && (c == '\r')) {
-				// On windows newline are formed by \r\n, we consume the \n too
-				in.mark(1);
-				if (in.read() != '\n') {
-					in.reset();
-				}
-				inComment = false;
-				consumeNext = true;
-			} else {
-				consumeNext = false;
-			}
-		} while (inComment || consumeNext);
-		this.lastChar = c;
-		return c;
-	}
 	
 	/**
 	 * Assert that a reference point (as passed in a text replacement rule) is
@@ -339,7 +358,7 @@ public class TextReplacements {
 	/**
 	 * Single text replacement rule.
 	 */
-	final class Rule {
+	static final class Rule {
 		
 		/** Text as in eps file. */
 		private String tag;

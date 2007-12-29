@@ -21,15 +21,13 @@
 package net.sf.eps2pgf;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
 import java.io.Writer;
+import java.text.ParseException;
 
 import net.sf.eps2pgf.io.LimitedSectionInputStream;
 import net.sf.eps2pgf.io.TextReplacements;
@@ -37,6 +35,7 @@ import net.sf.eps2pgf.postscript.DSCHeader;
 import net.sf.eps2pgf.postscript.Header;
 import net.sf.eps2pgf.postscript.Interpreter;
 import net.sf.eps2pgf.postscript.PSObjectFile;
+import net.sf.eps2pgf.postscript.errors.PSError;
 
 /**
  * Object that converts Encapsulated PostScript (EPS) to Portable Graphics
@@ -45,12 +44,6 @@ import net.sf.eps2pgf.postscript.PSObjectFile;
  * @author Paul Wagenaars
  */
 public class Converter {
-    
-    /** Input file. */
-    private File inFile;
-    
-    /** Output file. */
-    private File outFile;
     
     /** Options describing behavior of program. */
     private Options opts;
@@ -61,21 +54,25 @@ public class Converter {
      * @param pOpts command line options passed to the program
      */
     public Converter(final Options pOpts) {
-        this.inFile = new File(pOpts.getInput());
-        this.outFile = new File(pOpts.getOutput());
         this.opts = pOpts;
     }
     
     /**
      * Starts the actual conversion.
-     * @throws java.lang.Exception Something went wrong
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws ParseException There was an error parsing a file.
      */
-    public final void convert() throws Exception {
+    public final void convert() throws IOException, PSError, ProgramError,
+            ParseException {
         // Check for a binary header
-        int[] dim = Header.getPostScriptSection(inFile);
+        int[] dim = Header.getPostScriptSection(opts.getInputFile());
         
         // Open the file for reading the postscript code
-        InputStream in = new BufferedInputStream(new FileInputStream(inFile));
+        InputStream in = new BufferedInputStream(
+                new FileInputStream(opts.getInputFile()));
         
         // If it has a binary header, read only the postscript code and skip
         // binary data.
@@ -88,25 +85,29 @@ public class Converter {
         
         // Read text replacements file
         TextReplacements textReplace = null;
-        if (opts.getTextreplacefile().length() > 0) {
-            Reader inTextReplace = new BufferedReader(
-                    new FileReader(opts.getTextreplacefile()));
-            textReplace = new TextReplacements(inTextReplace);
-            inTextReplace.close();
+        if (opts.getTextreplacefile() != null) {
+            textReplace = new TextReplacements(opts.getTextreplacefile());
         }
         
-        // Open output file
-        Writer out = new BufferedWriter(new FileWriter(outFile));
+        Writer out = new BufferedWriter(
+                new FileWriter(opts.getOutputFile()));
         
         // Create PostScript interpreter and add file to execution stack
-        Interpreter interp = new Interpreter(out, header, opts.getOutputtype(),
-                textReplace);
+        Interpreter interp = new Interpreter(out, opts, header, textReplace);
         interp.execStack.push(new PSObjectFile(in));
         
         // Run the interpreter
         try {
             interp.start();
-        } catch (Exception e) {
+        } catch (PSError e) {
+            in.close();
+            out.close();
+            throw e;
+        } catch (ProgramError e) {
+            in.close();
+            out.close();
+            throw e;
+        } catch (IOException e) {
             in.close();
             out.close();
             throw e;
