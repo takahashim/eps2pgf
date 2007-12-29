@@ -56,7 +56,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
     PSObjectDict dict;
     
     /** The log. */
-    Logger log = Logger.getLogger("global");
+    Logger log = Logger.getLogger("net.sourceforge.eps2pgf");
     
     // Standard fields in font dictionary
     /** The fontinfo field name. */

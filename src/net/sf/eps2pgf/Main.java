@@ -20,11 +20,18 @@
 
 package net.sf.eps2pgf;
 
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.Iterator;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.martiansoftware.jsap.JSAPResult;
+
+import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.util.Eps2pgfFormatter;
+import net.sf.eps2pgf.util.Eps2pgfHandler;
 
 /**
  * Main class of Eps2pgf program.
@@ -46,24 +53,32 @@ public final class Main {
     private static Options opts = new Options();
     
     /** The log. */
-    private static final Logger LOGGER = Logger.getLogger("global");
+    private static final Logger LOG
+                                  = Logger.getLogger("net.sourceforge.eps2pgf");
     
     
     /**
      * "Hidden" constructor.
      */
     private Main() {
-    	
+        /* empty block */
     }
     
     /**
      * Main program method.
      * 
      * @param args the command line arguments
-     * 
-     * @throws Exception the exception
      */
-    public static void main(final String[] args) throws Exception {
+    public static void main(final String[] args) {
+        // Remove the ConsoleHandler from the root logger
+        Logger rootLogger = LOG.getParent();
+        Handler[] rootHandlers = rootLogger.getHandlers();
+        rootLogger.removeHandler(rootHandlers[0]);
+        
+        Handler handler = new Eps2pgfHandler();
+        handler.setFormatter(new Eps2pgfFormatter());
+        LOG.addHandler(handler);
+        
         JSAPResult parseResult = opts.parse(args);
         
         if (opts.isHelpFlagSet()) {
@@ -89,13 +104,27 @@ public final class Main {
         }
         
         if (opts.isVerboseFlagSet()) {
-            LOGGER.setLevel(Level.INFO);
+            LOG.setLevel(Level.INFO);
         } else {
-            LOGGER.setLevel(Level.WARNING);
+            LOG.setLevel(Level.WARNING);
         }
         
         Converter cnv = new Converter(opts);
-        cnv.convert();
+        try {
+            cnv.convert();
+        } catch (IOException e) {
+            LOG.severe("Execution failed due to an error while reading "
+                    + "from or writing to a file.");
+        } catch (ParseException e) {
+            LOG.severe("Execution failed due to an error while parsing the text"
+                    + " replacements file.");
+        } catch (PSError e) {
+            LOG.severe("Execution failed due to a PostScript error in the input"
+                    + " file.");
+        } catch (ProgramError e) {
+            LOG.severe("Execution failed due to an error in the program. Please"
+                    + " report this to the author.");
+        }
     }
     
     /**
@@ -105,7 +134,7 @@ public final class Main {
      */
     public static String getNameVersion() {
         return APP_NAME + " " + APP_VERSION + " (build on " + APP_BUILD_DATE
-        		+ ")";
+                + ")";
     }
     
     /**
@@ -115,25 +144,28 @@ public final class Main {
         System.out.println(getNameVersion());
         System.out.println("");
         System.out.println("Copyright 2007 Paul Wagenaars"
-        	+ " <paul@wagenaars.org>");
+                + " <paul@wagenaars.org>");
         System.out.println("");
         System.out.println("Licensed under the Apache License, Version 2.0 (the"
-        	+ " \"License\");");
+                + " \"License\");");
         System.out.println("you may not use this file except in compliance with"
-        	+ " the License.");
+                + " the License.");
         System.out.println("You may obtain a copy of the License at");
         System.out.println("");
         System.out.println("    http://www.apache.org/licenses/LICENSE-2.0");
         System.out.println("");
         System.out.println("Unless required by applicable law or agreed to in "
-        	+ "writing, software");
+                + "writing, software");
         System.out.println("distributed under the License is distributed on an "
-        	+ "\"AS IS\" BASIS,");
+                + "\"AS IS\" BASIS,");
         System.out.println("WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,"
-        	+ " either express or implied.");
+                + " either express or implied.");
         System.out.println("See the License for the specific language governing"
-        	+ " permissions and");
+                + " permissions and");
         System.out.println("limitations under the License.");
+        System.out.println("");
+        System.out.println("See NOTICE.txt for more information and LICENSE.txt"
+                + " for the complete license.");
     }
 
     /**

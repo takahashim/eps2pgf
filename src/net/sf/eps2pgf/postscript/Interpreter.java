@@ -81,7 +81,7 @@ public class Interpreter {
     Path defaultClippingPath;
     
     /** Log information. */
-    private Logger log = Logger.getLogger("global");
+    private final Logger log = Logger.getLogger("net.sourceforge.eps2pgf");
     
     /**
      * Creates a new instance of interpreter.
@@ -97,22 +97,22 @@ public class Interpreter {
      */
     public Interpreter(final Writer outputWriter, final Options opts,
             final DSCHeader fileHeader,
-    		final TextReplacements textReplace)
-    		throws ProgramError, PSError, IOException {
+            final TextReplacements textReplace)
+            throws ProgramError, PSError, IOException {
         
         // Create graphics state stack with output device
-    	OutputDevice output;
-    	switch (opts.getOutputType()) {
-    	    case PGF:
-    	        output = new PGFDevice(outputWriter);
-    	        break;
-    	    case LOL:
-    	        output = new LOLDevice(outputWriter);
-    	        break;
-    	    default:
-    	        throw new ProgramError("Unknown output device ("
-    	                + opts.getOutputType() + ").");
-    	}
+        OutputDevice output;
+        switch (opts.getOutputType()) {
+            case PGF:
+                output = new PGFDevice(outputWriter);
+                break;
+            case LOL:
+                output = new LOLDevice(outputWriter);
+                break;
+            default:
+                throw new ProgramError("Unknown output device ("
+                        + opts.getOutputType() + ").");
+        }
         this.gstate = new GstateStack(output);
         
         this.header = fileHeader;
@@ -165,7 +165,7 @@ public class Interpreter {
         this.gstate.current.device.init(this.gstate.current);
         
         this.gstate.current.setcolorspace(
-        		new PSObjectName("DeviceGray", true), true);
+                new PSObjectName("DeviceGray", true), true);
         
         // An eps-file defines a bounding box. Set this bounding box as the
         // default clipping path.
@@ -209,10 +209,21 @@ public class Interpreter {
         try {
             run();
         } catch (PSError e) {
-            System.out.println("----- Start of stack");
-            op_pstack();
-            System.out.println("----- End of stack");
-            this.dictStack.dumpFull();
+            log.severe("A PostScript error occurred.");
+            log.severe("    Type: " + e.getMessage());
+            
+            int n = Math.min(opStack.size(), 10);
+            log.severe("    Operand stack (max top 10 items):");
+            if (n == 0) {
+                log.severe("      (empty)");
+            } else {
+                for (int i = 0; i < n; i++) {
+                    log.severe("      |- " + opStack.peek(i).isis());
+                }
+                if (n < opStack.size()) {
+                    log.severe("      (rest of stack suppressed)");
+                }
+            }
             this.gstate.current.device.finish();
             throw e;
         }
@@ -335,18 +346,18 @@ public class Interpreter {
                     except = e;
                 } finally {
                     if (except != null) {
-                        String msg = "An unexpected exception ";
-                        msg += "occurred during execution.\n";
-                        msg += "----- start of exception\n";
-                        msg += "    Type: " + except + "\n";
-                        msg += "    Message: " + except.getMessage() + "\n";
-                        msg += "    Cause: " + except.getCause() + "\n";
-                        msg += "    Stack trace: \n";
+                        log.severe("An unexpected exception occurred during "
+                                + "execution of an operator.");
+                        log.severe("    Type: " + except);
+                        log.severe("    Message: " + except.getMessage());
+                        log.severe("    Cause: " + except.getCause());
+                        log.severe("    Stack trace:");
                         for (StackTraceElement elem : except.getStackTrace()) {
-                            msg += "      |- " + elem + "\n";
+                            log.severe("      |- " + elem);
                         }
-                        msg += "----- end of exception";
-                        throw new ProgramError(msg);
+                        
+                        throw new ProgramError("Unexpected exception during in"
+                                + " operator call.");
                     }
                 }
             } else if (obj instanceof PSObjectNull) {
@@ -355,20 +366,34 @@ public class Interpreter {
         }  // end of check whether object is literal
     }
     
-    /** PostScript op: abs */
+    /**
+     * PostScript op: abs.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
     public void op_abs() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = this.opStack.pop();
         this.opStack.push(obj.abs());
     }
     
-    /** PostScript op: add */
+    /**
+     * PostScript op: add.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
     public void op_add() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject num2 = this.opStack.pop();
         PSObject num1 = this.opStack.pop();
         this.opStack.push(num1.add(num2));
     }
     
-    /** PostScript op: aload */
+    /**
+     * PostScript op: aload.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_aload() throws PSError {
         PSObject array = this.opStack.pop();
         array.checkAccess(false, true, false);
@@ -378,7 +403,11 @@ public class Interpreter {
         this.opStack.push(array);
     }
     
-    /** PostScript op: anchorsearch */
+    /**
+     * PostScript op: anchorsearch.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_anchorsearch() throws PSError {
         PSObjectString seekObj = opStack.pop().toPSString();
         seekObj.checkAccess(false, true, false);
@@ -392,14 +421,23 @@ public class Interpreter {
         }
     }
     
-    /** PostScript op: and */
+    /**
+     * PostScript op: and.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
     public void op_and() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj2 = opStack.pop();
         PSObject obj1 = opStack.pop();
         opStack.push(obj1.and(obj2));
     }
     
-    /** PostScript op: arc */
+    /**
+     * PostScript op: arc.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_arc() throws PSError {
         double angle2 = opStack.pop().toReal();
         double angle1 = opStack.pop().toReal();
@@ -409,7 +447,11 @@ public class Interpreter {
         gstate.current.arc(x, y, r, angle1, angle2, true);
     }
     
-    /** PostScript op: arcn */
+    /**
+     * PostScript op: arcn.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_arcn() throws PSError {
         double angle2 = opStack.pop().toReal();
         double angle1 = opStack.pop().toReal();
@@ -419,7 +461,11 @@ public class Interpreter {
         gstate.current.arc(x, y, r, angle1, angle2, false);
     }
     
-    /** PostScript op: acrt */
+    /**
+     * PostScript op: acrt.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_arct() throws PSError {
         double r = this.opStack.pop().toNonNegReal();
         double y2 = this.opStack.pop().toReal();
@@ -429,7 +475,11 @@ public class Interpreter {
         this.gstate.current.arcto(x1, y1, x2, y2, r);
     }
     
-    /** PostScript op: acrto */
+    /**
+     * PostScript op: acrto.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_arcto() throws PSError {
         double r = this.opStack.pop().toNonNegReal();
         double y2 = this.opStack.pop().toReal();
@@ -438,28 +488,43 @@ public class Interpreter {
         double x1 = this.opStack.pop().toReal();
         double[] t1t2 = this.gstate.current.arcto(x1, y1, x2, y2, r);
         for (int i = 0; i < t1t2.length; i++) {
-        	this.opStack.push(new PSObjectReal(t1t2[i]));
+            this.opStack.push(new PSObjectReal(t1t2[i]));
         }
     }
     
-    /** PostScript op: array */
-    public void op_array() throws PSErrorStackUnderflow, PSErrorTypeCheck, PSErrorRangeCheck {
+    /**
+     * PostScript op: array.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     */
+    public void op_array() throws PSErrorStackUnderflow, PSErrorTypeCheck,
+            PSErrorRangeCheck {
         int n = opStack.pop().toNonNegInt();
         op_sqBrackLeft();
         PSObjectNull nullObj = new PSObjectNull();
-        for (int i = 0 ; i < n ; i++) {
+        for (int i = 0; i < n; i++) {
             opStack.push(nullObj);
         }
         try {
             op_sqBrackRight();
         } catch (PSErrorUnmatchedMark e) {
-            // Since the op_sqBrackLeft call is a few lines up this error can never happen
+            // Since the op_sqBrackLeft call is a few lines up this error can
+            // never happen.
         }
     }
     
-    /** PostScript op: ashow */
+    /**
+     * PostScript op: ashow.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
     public void op_ashow() throws PSError, IOException, ProgramError {
-        log.fine("ashow operator encoutered. ashow is not implemented, instead the normal show is used.");
+        log.warning("ashow operator encoutered. ashow is not implemented, "
+                + "instead the normal show is used.");
         PSObjectString string = opStack.pop().toPSString();
         string.checkAccess(false, true, false);
         opStack.pop().toReal(); // read ay
@@ -469,13 +534,17 @@ public class Interpreter {
     }
     
     
-    /** PostScript op: astore */
+    /**
+     * PostScript op: astore.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_astore() throws PSError {
         PSObjectArray array = opStack.pop().toArray();
         array.checkAccess(false, true, true);
         int n = array.size();
         try {
-            for (int i = (n-1) ; i >= 0 ; i--) {
+            for (int i = (n - 1); i >= 0; i--) {
                 array.set(i, opStack.pop());
             }
         } catch (PSErrorRangeCheck e) {
@@ -484,7 +553,12 @@ public class Interpreter {
         opStack.push(array);
     }
     
-    /** PostScript op: atan */
+    /**
+     * PostScript op: atan.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
     public void op_atan() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         double den = opStack.pop().toReal();
         double num = opStack.pop().toReal();
@@ -495,7 +569,11 @@ public class Interpreter {
         opStack.push(new PSObjectReal(result));
     }
     
-    /** PostScript op: begin */
+    /**
+     * PostScript op: begin.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_begin() throws PSError {
         PSObjectDict dict = opStack.pop().toDict();
         dict.checkAccess(true, true, false);
@@ -964,9 +1042,9 @@ public class Interpreter {
     
     /** Internal Eps2pgf operator: eps2pgfgetmetrics */
     public void op_eps2pgfgetmetrics() {
-    	double[] metrics = gstate.current.device.eps2pgfGetMetrics();
-    	PSObjectArray array = new PSObjectArray(metrics);
-    	opStack.push(array);
+        double[] metrics = gstate.current.device.eps2pgfGetMetrics();
+        PSObjectArray array = new PSObjectArray(metrics);
+        opStack.push(array);
     }
     
     /** PostScript op: errordict */
@@ -1834,30 +1912,30 @@ public class Interpreter {
     
     /** PostScript op: setcachedevice */
     public void op_setcachedevice() throws PSErrorStackUnderflow, PSErrorTypeCheck {
-    	double ury = opStack.pop().toReal();
-    	double urx = opStack.pop().toReal();
-    	double lly = opStack.pop().toReal();
-    	double llx = opStack.pop().toReal();
-    	double wy = opStack.pop().toReal();
-    	double wx = opStack.pop().toReal();
-    	gstate.current.device = new CacheDevice(wx, wy, llx, lly, urx, ury);
-    	gstate.current.initmatrix();
+        double ury = opStack.pop().toReal();
+        double urx = opStack.pop().toReal();
+        double lly = opStack.pop().toReal();
+        double llx = opStack.pop().toReal();
+        double wy = opStack.pop().toReal();
+        double wx = opStack.pop().toReal();
+        gstate.current.device = new CacheDevice(wx, wy, llx, lly, urx, ury);
+        gstate.current.initmatrix();
     }
     
     /** PostScript op: setcachedevice2 */
     public void op_setcachedevice2() throws PSErrorStackUnderflow, PSErrorTypeCheck {
-    	opStack.pop(); // pop vy
-    	opStack.pop(); // pop vx
-    	opStack.pop(); // pop w1y
-    	opStack.pop(); // pop w1x
-    	double ury = opStack.pop().toReal();
-    	double urx = opStack.pop().toReal();
-    	double lly = opStack.pop().toReal();
-    	double llx = opStack.pop().toReal();
-    	double w0y = opStack.pop().toReal();
-    	double w0x = opStack.pop().toReal();
-    	gstate.current.device = new CacheDevice(w0x, w0y, llx, lly, urx, ury);
-    	gstate.current.initmatrix();
+        opStack.pop(); // pop vy
+        opStack.pop(); // pop vx
+        opStack.pop(); // pop w1y
+        opStack.pop(); // pop w1x
+        double ury = opStack.pop().toReal();
+        double urx = opStack.pop().toReal();
+        double lly = opStack.pop().toReal();
+        double llx = opStack.pop().toReal();
+        double w0y = opStack.pop().toReal();
+        double w0x = opStack.pop().toReal();
+        gstate.current.device = new CacheDevice(w0x, w0y, llx, lly, urx, ury);
+        gstate.current.initmatrix();
     }
     
     /** PostScript op: setcmykcolor */
@@ -2012,13 +2090,25 @@ public class Interpreter {
         opStack.push(new PSObjectReal(x));
     }
    
-    /** PostScript op: stop */
+    /**
+     * PostScript op: stop.
+     * 
+     * @throws PSErrorInvalidStop Stop operator is not allowed here.
+     */
     public void op_stop() throws PSErrorInvalidStop {
         throw new PSErrorInvalidStop();
     }
     
-    /** PostScript op: stopped */
-    public void op_stopped() throws PSErrorStackUnderflow, PSErrorUnimplemented, Exception {
+    /**
+     * PostScript op: stopped.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * (yet) implemented.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_stopped() throws PSErrorStackUnderflow, PSErrorUnimplemented,
+            ProgramError {
         PSObject any = opStack.pop();
         try {
             runObject(any);
@@ -2030,46 +2120,71 @@ public class Interpreter {
         } catch (PSError e) {
             opStack.push(new PSObjectBool(true));
             return;
-        } catch (Exception e) {
-            throw e;
         }
         opStack.push(new PSObjectBool(false));
     }
     
-    /** PostScript op: string */
+    /**
+     * PostScript op: string.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     */
     public void op_string() throws PSErrorStackUnderflow, PSErrorTypeCheck,
             PSErrorRangeCheck {
         int n = opStack.pop().toNonNegInt();
         opStack.push(new PSObjectString(n));
     }
    
-    /** PostScript op: stringwidth */
+    /**
+     * PostScript op: stringwidth.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
     public void op_stringwidth() throws PSError, IOException, ProgramError {
         PSObjectString string = opStack.pop().toPSString();
         string.checkAccess(false, true, false);
         
-        double[] dpos = textHandler.showText(gstate.current.device, string, true);
+        double[] dpos = textHandler.showText(gstate.current.device,
+                                             string, true);
         opStack.push(new PSObjectReal(dpos[0]));
         opStack.push(new PSObjectReal(dpos[1]));
     }
 
-    /** PostScript op: stroke */
+    /**
+     * PostScript op: stroke.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public void op_stroke() throws PSError, IOException {
         gstate.current.device.stroke(gstate.current);
         op_newpath();
     }
    
-    /** PostScript op: [ */
+    /**
+     * PostScript op: [.
+     */
     public void op_sqBrackLeft() {
         opStack.push(new PSObjectMark());
     }
     
-    /** PostScript op: ] */
-    public void op_sqBrackRight() throws PSErrorStackUnderflow, PSErrorTypeCheck, PSErrorUnmatchedMark {
+    /**
+     * PostScript op: ].
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorUnmatchedMark Expected mark not found.
+     */
+    public void op_sqBrackRight() throws PSErrorStackUnderflow,
+            PSErrorTypeCheck, PSErrorUnmatchedMark {
         op_counttomark();
         int n = opStack.pop().toInt();
         PSObject[] objs = new PSObject[n];
-        for (int i = n-1 ; i >= 0 ; i--) {
+        for (int i = n - 1; i >= 0; i--) {
             objs[i] = opStack.pop();
         }
         opStack.pop();  // clear mark
@@ -2078,7 +2193,11 @@ public class Interpreter {
         
     }
     
-    /** PostScript op: store */
+    /**
+     * PostScript op: store.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_store() throws PSError {
         PSObject value = opStack.pop();
         PSObject key = opStack.pop();
@@ -2091,19 +2210,28 @@ public class Interpreter {
         dictStack.store(key, value);
     }
 
-    /** PostScript op: sub */
+    /**
+     * PostScript op: sub.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_sub() throws PSError {
         PSObject num2 = opStack.pop();
         PSObject num1 = opStack.pop();
         opStack.push(num1.sub(num2));
     }
     
-    /** PostScript op: token */
+    /**
+     * PostScript op: token.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_token() throws PSError {
         PSObject obj = opStack.pop();
         obj.checkAccess(false, true, false);
         
-        if ( !(obj instanceof PSObjectString) && !(obj instanceof PSObjectFile) ) {
+        if (!(obj instanceof PSObjectString)
+                && !(obj instanceof PSObjectFile)) {
             throw new PSErrorTypeCheck();
         }
         for (PSObject item : obj.token()) {
@@ -2111,7 +2239,11 @@ public class Interpreter {
         }
     }
     
-    /** PostScript op: transform */
+    /**
+     * PostScript op: transform.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_transform() throws PSError {
         PSObject obj = opStack.pop();
         PSObjectMatrix matrix = null;
@@ -2133,11 +2265,15 @@ public class Interpreter {
         opStack.push(new PSObjectReal(transformed[1]));
     }
     
-    /** PostScript op: translate */
+    /**
+     * PostScript op: translate.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_translate() throws PSError {
         PSObject obj = opStack.pop();
         double tx, ty;
-        if ( obj instanceof PSObjectArray ) {
+        if (obj instanceof PSObjectArray) {
             PSObjectMatrix matrix = obj.toMatrix();
             ty = opStack.pop().toReal();
             tx = opStack.pop().toReal();
@@ -2151,24 +2287,39 @@ public class Interpreter {
         }
     }
     
-    /** PostScript op: true */
+    /**
+     * PostScript op: true.
+     */
     public void op_true() {
         opStack.push(new PSObjectBool(true));
     }
     
-    /** PostScript op: truncate */
+    /**
+     * PostScript op: truncate.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
     public void op_truncate() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.pop();
         opStack.push(obj.truncate());
     }
     
-    /** PostScript op: type */
+    /**
+     * PostScript op: type.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     */
     public void op_type() throws PSErrorStackUnderflow {
         PSObject any = opStack.pop();
         opStack.push(new PSObjectName(any.type(), false));
     }
     
-    /** PostScript op: undef */
+    /**
+     * PostScript op: undef.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
     public void op_undef() throws PSError {
         PSObject key = opStack.pop();
         PSObjectDict dict = opStack.pop().toDict();
@@ -2177,14 +2328,24 @@ public class Interpreter {
         dict.undef(key);
     }
     
-    /** PostScript op: wcheck */
+    /**
+     * PostScript op: wcheck.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
     public void op_wcheck() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = opStack.pop();
         boolean chk = obj.wcheck();
         opStack.push(new PSObjectBool(chk));
     }
     
-    /** PostScript op: where */
+    /**
+     * PostScript op: where.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
     public void op_where() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject key = opStack.pop();
         PSObjectDict dict = dictStack.where(key);
@@ -2196,14 +2357,23 @@ public class Interpreter {
         }
     }
    
-    /** PostScript op: xcheck */
+    /**
+     * PostScript op: xcheck.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     */
     public void op_xcheck() throws PSErrorStackUnderflow {
         PSObject any = opStack.pop();
         PSObjectBool check = new PSObjectBool(any.xcheck());
         opStack.push(check);
     }
     
-    /** PostScript op: xor */
+    /**
+     * PostScript op: xor.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
     public void op_xor() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj2 = opStack.pop();
         PSObject obj1 = opStack.pop();
