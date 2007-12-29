@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import net.sf.eps2pgf.Options;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.TextHandler;
@@ -74,42 +75,62 @@ public class Interpreter {
     TextHandler textHandler;
     
     /** Header information of the file being interpreted. */
-    DSCHeader header;
+    private DSCHeader header;
     
     /** Default clipping path. */
     Path defaultClippingPath;
     
     /** Log information. */
-    Logger log = Logger.getLogger("global");
+    private Logger log = Logger.getLogger("global");
     
     /**
      * Creates a new instance of interpreter.
+     * 
+     * @param opts Configuration options.
+     * @param fileHeader The file header.
+     * @param textReplace The text replacements.
+     * @param outputWriter Output is written to this device.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSError A PostScript error occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public Interpreter(final Writer out, final DSCHeader fileHeader,
-    		final String outputtype, final TextReplacements textReplace)
+    public Interpreter(final Writer outputWriter, final Options opts,
+            final DSCHeader fileHeader,
+    		final TextReplacements textReplace)
     		throws ProgramError, PSError, IOException {
+        
         // Create graphics state stack with output device
     	OutputDevice output;
-    	if (outputtype.equals("pgf")) {
-    		output = new PGFDevice(out);
-    	} else if (outputtype.equals("lol")) {
-    		output = new LOLDevice(out);
-    	} else {
-    		throw new ProgramError("Invalid output type (" + outputtype + ")");
+    	switch (opts.getOutputType()) {
+    	    case PGF:
+    	        output = new PGFDevice(outputWriter);
+    	        break;
+    	    case LOL:
+    	        output = new LOLDevice(outputWriter);
+    	        break;
+    	    default:
+    	        throw new ProgramError("Unknown output device ("
+    	                + opts.getOutputType() + ").");
     	}
         this.gstate = new GstateStack(output);
         
         this.header = fileHeader;
         
         // Text handler
-        this.textHandler = new TextHandler(this.gstate, textReplace);
+        this.textHandler = new TextHandler(this.gstate, textReplace,
+                opts.getTextmode());
         
         this.initialize();
     }
     
     /**
-     * Creates a new instance of Interpreter with nulldevice as output and 
+     * Creates a new instance of Interpreter with nulldevice as output and
      * (virtually) infinite bounding box.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSError A PostScript error occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     public Interpreter() throws ProgramError, PSError, IOException {
         // Create graphics state stack with output device
@@ -180,9 +201,11 @@ public class Interpreter {
     /**
      * Start interpreting PostScript document.
      * 
-     * @throws Exception Something went wrong in the interpretation process
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSError A PostScript error occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void start() throws Exception {
+    public void start() throws ProgramError, PSError, IOException {
         try {
             run();
         } catch (PSError e) {
@@ -199,9 +222,10 @@ public class Interpreter {
     /**
      * Execute all objects on the execution stack one by one.
      * 
-     * @throws Exception Something went wrong in the interpretation process
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void run() throws Exception {
+    public void run() throws PSError, ProgramError {
         while (this.execStack.size() > 0) {
             PSObject obj = this.execStack.getNextToken();
             if (obj != null) {
@@ -214,8 +238,14 @@ public class Interpreter {
      * Look at the current element at the top of the execution stack, then
      * execute the supplied object and start running until the same object is
      * again on top of the execution stack.
+     * 
+     * @param objectToRun The object to run.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void runObject(PSObject objectToRun) throws Exception {
+    public void runObject(final PSObject objectToRun)
+            throws PSError, ProgramError {
         PSObject topAtStart = execStack.top;
         executeObject(objectToRun);
         try {
@@ -241,9 +271,13 @@ public class Interpreter {
      * executed indirectly (executed as a result of executing another object).
      * See section "3.5.5 Execution of specific types" of the PostScript manual
      * for more info.
+     * 
      * @param obj Object that is to be executed
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void executeObject(PSObject obj) throws Exception {
+    public void executeObject(final PSObject obj) throws PSError, ProgramError {
         executeObject(obj, true);
     }
     
@@ -252,13 +286,17 @@ public class Interpreter {
      * executed depends on the object type and properties.
      * See section "3.5.5 Execution of specific types" of the PostScript manual
      * for more info.
+     * 
      * @param obj Object that is to be executed
      * @param indirect Indicates how the object was encoutered: directly
-     *                 (encountered by the interpreter) or indirect (as a
-     *                 result of executing some other object)
+     * (encountered by the interpreter) or indirect (as a
+     * result of executing some other object)
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void executeObject(PSObject obj, boolean indirect) throws Exception {
-        //System.out.println("-=-=- " + obj.isis());
+    public void executeObject(final PSObject obj, final boolean indirect)
+            throws PSError, ProgramError {
         if (obj.isLiteral) {
             // Object is literal
             opStack.push(obj);
@@ -284,13 +322,31 @@ public class Interpreter {
                     executeObject(value.dup());
                 }
             } else if (obj instanceof PSObjectOperator) {
+                Throwable except = null;
                 try {
-                    ((PSObjectOperator)obj).opMethod.invoke(this);
+                    ((PSObjectOperator) obj).opMethod.invoke(this);
                 } catch (InvocationTargetException e) {
                     if (e.getCause() instanceof PSError) {
-                        throw (PSError)e.getCause();
+                        throw (PSError) e.getCause();
                     } else {
-                        throw e;
+                        except = e.getCause();
+                    }
+                } catch (IllegalAccessException e) {
+                    except = e;
+                } finally {
+                    if (except != null) {
+                        String msg = "An unexpected exception ";
+                        msg += "occurred during execution.\n";
+                        msg += "----- start of exception\n";
+                        msg += "    Type: " + except + "\n";
+                        msg += "    Message: " + except.getMessage() + "\n";
+                        msg += "    Cause: " + except.getCause() + "\n";
+                        msg += "    Stack trace: \n";
+                        for (StackTraceElement elem : except.getStackTrace()) {
+                            msg += "      |- " + elem + "\n";
+                        }
+                        msg += "----- end of exception";
+                        throw new ProgramError(msg);
                     }
                 }
             } else if (obj instanceof PSObjectNull) {

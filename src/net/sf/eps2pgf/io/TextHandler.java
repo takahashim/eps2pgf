@@ -22,6 +22,10 @@ package net.sf.eps2pgf.io;
 
 import java.io.IOException;
 
+import org.fontbox.util.BoundingBox;
+
+import net.sf.eps2pgf.Options;
+import net.sf.eps2pgf.Options.TextMode;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.TextReplacements.Rule;
 import net.sf.eps2pgf.io.devices.OutputDevice;
@@ -30,8 +34,6 @@ import net.sf.eps2pgf.postscript.PSObjectArray;
 import net.sf.eps2pgf.postscript.PSObjectFont;
 import net.sf.eps2pgf.postscript.PSObjectString;
 import net.sf.eps2pgf.postscript.errors.PSError;
-
-import org.fontbox.util.BoundingBox;
 
 /**
  *
@@ -44,6 +46,9 @@ public class TextHandler {
     
     /** Text replacement rules. */
     private TextReplacements textReplace;
+    
+    /** Text label handling. */
+    private Options.TextMode textMode;
 
     /**
      * Creates a new instance of TextHandler.
@@ -51,7 +56,7 @@ public class TextHandler {
      * @param graphicsStateStack Link to graphics state.
      */
     public TextHandler(final GstateStack graphicsStateStack) {
-    	this(graphicsStateStack, null);
+        this(graphicsStateStack, null, Options.TextMode.EXACT);
     }
 
     /**
@@ -61,14 +66,28 @@ public class TextHandler {
      * @param pTextReplace Text replacements.
      */
     public TextHandler(final GstateStack graphicsStateStack,
-    		final TextReplacements pTextReplace) {
+            final TextReplacements pTextReplace) {
+        this(graphicsStateStack, pTextReplace, Options.TextMode.EXACT);
+    }
+    
+    /**
+     * Creates a new instance of TextHandler.
+     * 
+     * @param graphicsStateStack Link to graphics state.
+     * @param pTextReplace Text replacements.
+     * @param pTextMode Indicates how text labels are handled.
+     */
+    public TextHandler(final GstateStack graphicsStateStack,
+            final TextReplacements pTextReplace,
+            final Options.TextMode pTextMode) {
         this.gstate = graphicsStateStack;
         if (pTextReplace != null) {
-        	this.textReplace = pTextReplace;
+            this.textReplace = pTextReplace;
         } else {
-        	this.textReplace = new TextReplacements();
+            this.textReplace = new TextReplacements();
         }
-         
+        
+        textMode = pTextMode;
     }
     
     /**
@@ -105,9 +124,59 @@ public class TextHandler {
 
         // Determine current point shift in user space coordinates
         double[] showShift = shiftPos(currentFont.getWidth(charNames), 0,
-        		scaling, angle);
+                scaling, angle);
         showShift = gstate.current.CTM.idtransform(showShift);
         gstate.current.rmoveto(showShift[0], showShift[1]);
+    }
+    
+    /**
+     * Determine the position of an anchor relative to the current position.
+     * @param pAnchor Follows psfrag. A combination of two characters that
+     *                describe vertical and horizontal alignment. Vertical
+     *                alignment: t - top, c - center, B - baselinem b - bottom
+     *                and horizontal alignment: l - left, c - center, r - right
+     *                If either letter is omitted then c is assumed. If anchor
+     *                is completely empty, then "Bl" is assumed.
+     * @param unitBbox Text bounding box normalized to 1pt.
+     * @param scaling Scaling factor for bounding box. E.g. for 12pt font size,
+     *                scaling = 12
+     * @param angle Text rotation in degrees
+     * 
+     * @return Coordinates of anchor.
+     */
+    public final double[] getAnchor(final String pAnchor,
+            final BoundingBox unitBbox, final double scaling,
+            final double angle) {
+        String anchor;
+        if (pAnchor.length() == 0) {
+            anchor = "Bl";
+        } else {
+            anchor = pAnchor;
+        }
+        
+        double x, y;
+        
+        // Vertical alignment
+        if (anchor.contains("t")) {
+            y = unitBbox.getUpperRightY();
+        } else if (anchor.contains("B")) {
+            y = 0;
+        } else if (anchor.contains("b")) {
+            y = unitBbox.getLowerLeftY();
+        } else {
+            y = (unitBbox.getUpperRightY() + unitBbox.getLowerLeftY()) / 2.0;
+        }
+        
+        // Horizontal alignment
+        if (anchor.contains("l")) {
+            x = unitBbox.getLowerLeftX();
+        } else if (anchor.contains("r")) {
+            x = unitBbox.getUpperRightX();
+        } else {
+            x = (unitBbox.getLowerLeftX() + unitBbox.getUpperRightX()) / 2.0;
+        }
+        
+        return shiftPos(x, y, scaling, angle);
     }
     
     /**
@@ -123,8 +192,8 @@ public class TextHandler {
      * @throws PSError A PostScript error occurred.
      */
     public final double[] showText(final OutputDevice exp,
-    		final PSObjectString string)
-    		throws PSError, IOException, ProgramError {
+            final PSObjectString string)
+            throws PSError, IOException, ProgramError {
         return showText(exp, string, false);
     }
     
@@ -143,27 +212,40 @@ public class TextHandler {
      * @throws PSError A PostScript error occurred.
      */
     public final double[] showText(final OutputDevice exp,
-    		final PSObjectString string, final boolean noOutput) 
-            throws PSError, IOException, ProgramError {        
+            final PSObjectString string, final boolean noOutput) 
+            throws PSError, IOException, ProgramError {     
+        
         PSObjectFont currentFont = gstate.current.font;
         
         Rule replaceRule = textReplace.findReplacement(string.toString());
         String texRefPoint = "cc";
         String psRefPoint = "cc";
         if (replaceRule != null) {
-        	texRefPoint = replaceRule.getTexRefPoint();
-        	psRefPoint = replaceRule.getPsRefPoint();
+            texRefPoint = replaceRule.getTexRefPoint();
+            psRefPoint = replaceRule.getPsRefPoint();
+        } else if (textMode == TextMode.DIRECT_COPY) {
+            replaceRule = TextReplacements.readEmbeddedRule(string.toString());
+            if (replaceRule != null) {
+                texRefPoint = replaceRule.getTexRefPoint();
+                psRefPoint = replaceRule.getPsRefPoint();
+            }
         }
         
         PSObjectArray charNames = string.decode(currentFont.getEncoding());
-        String text = currentFont.charNames2texStrings(charNames);
+        
+        String text;
+        if ((replaceRule == null) && (textMode == TextMode.DIRECT_COPY)) {
+            text = string.toString();
+        } else {
+            text = currentFont.charNames2texStrings(charNames);            
+        }
         
         double angle = gstate.current.CTM.getRotation();
         
         // Calculate scaling and font size in points (= 1/72 inch)
         double scaling = gstate.current.CTM.getMeanScaling();
         double fontsize = currentFont.getFontSize()
-        					* gstate.current.getMeanUserScaling();
+                            * gstate.current.getMeanUserScaling();
 
         // Draw text
         if (!noOutput) {
@@ -199,71 +281,24 @@ public class TextHandler {
             textPos[0] = pos[0] + dpos[0];
             textPos[1] = pos[1] + dpos[1];
             
-            if (replaceRule == null) {
-            	exp.show(text, textPos, angle, fontsize, texRefPoint);
+            if ((replaceRule == null) && (textMode == TextMode.EXACT)) {
+                exp.show(text, textPos, angle, fontsize, texRefPoint);
+            } else if ((replaceRule == null)
+                    && (textMode == TextMode.DIRECT_COPY)) {
+                exp.show(text, textPos, angle, Double.NaN, texRefPoint);
             } else {
-            	exp.show(replaceRule.getTexText(), textPos,
-            			angle + replaceRule.getRotation(), Double.NaN,
-            			texRefPoint);
+                exp.show(replaceRule.getTexText(), textPos,
+                        angle + replaceRule.getRotation(), Double.NaN,
+                        texRefPoint);
             }
         }
 
         // Determine current point shift in user space coordinates
         double[] showShift = shiftPos(currentFont.getWidth(charNames), 0,
-        		scaling, angle);
+                scaling, angle);
         showShift = gstate.current.CTM.idtransform(showShift);
         
         return showShift;
-    }
-    
-    /**
-     * Determine the position of an anchor relative to the current position.
-     * @param pAnchor Follows psfrag. A combination of two characters that
-     *                describe vertical and horizontal alignment. Vertical
-     *                alignment: t - top, c - center, B - baselinem b - bottom
-     *                and horizontal alignment: l - left, c - center, r - right
-     *                If either letter is omitted then c is assumed. If anchor
-     *                is completely empty, then "Bl" is assumed.
-     * @param unitBbox Text bounding box normalized to 1pt.
-     * @param scaling Scaling factor for bounding box. E.g. for 12pt font size,
-     *                scaling = 12
-     * @param angle Text rotation in degrees
-     * 
-     * @return Coordinates of anchor.
-     */
-    public final double[] getAnchor(final String pAnchor,
-    		final BoundingBox unitBbox, final double scaling,
-    		final double angle) {
-    	String anchor;
-    	if (pAnchor.length() == 0) {
-    		anchor = "Bl";
-    	} else {
-    		anchor = pAnchor;
-    	}
-        
-        double x, y;
-        
-        // Vertical alignment
-        if (anchor.contains("t")) {
-            y = unitBbox.getUpperRightY();
-        } else if (anchor.contains("B")) {
-            y = 0;
-        } else if (anchor.contains("b")) {
-            y = unitBbox.getLowerLeftY();
-        } else {
-            y = (unitBbox.getUpperRightY() + unitBbox.getLowerLeftY()) / 2.0;
-        }
-        
-        // Horizontal alignment
-        if (anchor.contains("l")) {
-            x = unitBbox.getLowerLeftX();
-        } else if (anchor.contains("r")) {
-            x = unitBbox.getUpperRightX();
-        } else {
-            x = (unitBbox.getLowerLeftX() + unitBbox.getUpperRightX()) / 2.0;
-        }
-        
-        return shiftPos(x, y, scaling, angle);
     }
     
     /**
@@ -275,8 +310,8 @@ public class TextHandler {
      * @return New translation vector
      */
     final double[] shiftPos(final double dx, final double dy,
-    		final double scaling, final double pAngle) {
-    	double angle = Math.toRadians(pAngle);
+            final double scaling, final double pAngle) {
+        double angle = Math.toRadians(pAngle);
         double[] newPos = new double[2];
         newPos[0] = scaling * (dx * Math.cos(angle) - dy * Math.sin(angle));
         newPos[1] = scaling * (dx * Math.sin(angle) + dy * Math.cos(angle));

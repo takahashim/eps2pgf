@@ -20,8 +20,11 @@
 
 package net.sf.eps2pgf;
 
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.martiansoftware.jsap.JSAPResult;
 
 /**
  * Main class of Eps2pgf program.
@@ -31,19 +34,19 @@ import java.util.logging.Logger;
 public final class Main {
     
     /** Application name. */
-    static final String APP_NAME = "Eps2pgf";
+    private static final String APP_NAME = "Eps2pgf";
     
     /** Application version. */
-    static final String APP_VERSION = "@VERSION@";
+    private static final String APP_VERSION = "@VERSION@";
     
     /** Date application was build. */
-    static final String APP_BUILD_DATE = "@BUILDDATE@";
+    private static final String APP_BUILD_DATE = "@BUILDDATE@";
     
     /** Handles program options. */
     private static Options opts = new Options();
     
     /** The log. */
-    private static Logger log = Logger.getLogger("global");
+    private static final Logger LOGGER = Logger.getLogger("global");
     
     
     /**
@@ -61,23 +64,23 @@ public final class Main {
      * @throws Exception the exception
      */
     public static void main(final String[] args) throws Exception {
-        opts.parse(args);
+        JSAPResult parseResult = opts.parse(args);
         
-        if (opts.getArgs().getBoolean("version")
-                || opts.getArgs().getBoolean("help")) {
+        if (opts.isHelpFlagSet()) {
             printVersionCopyright();
-            if (opts.getArgs().getBoolean("help")) {
-                printHelp();
-            }
-            
+            printHelp();
             System.exit(0);
         }
         
-        if (!opts.getArgs().success()) {
-            
+        if (opts.isVersionFlagSet()) {
+            printVersionCopyright();
+            System.exit(0);
+        }
+        
+        if (!parseResult.success()) {
             System.err.println();
 
-            for (java.util.Iterator errs = opts.getArgs().getErrorMessageIterator();
+            for (Iterator errs = parseResult.getErrorMessageIterator();
                     errs.hasNext();) {
                 System.err.println("Error: " + errs.next());
             }
@@ -85,10 +88,10 @@ public final class Main {
             System.exit(1);
         }
         
-        if (opts.getArgs().getBoolean("verbose")) {
-            log.setLevel(Level.INFO);
+        if (opts.isVerboseFlagSet()) {
+            LOGGER.setLevel(Level.INFO);
         } else {
-            log.setLevel(Level.WARNING);
+            LOGGER.setLevel(Level.WARNING);
         }
         
         Converter cnv = new Converter(opts);
