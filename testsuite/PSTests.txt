@@ -29,6 +29,7 @@ type  5 - type 5: /burp type /nametype eq  1 type type /nametype eq
 type  6 - cvlit: {1 2 add} dup cvlit exch bind exch 2 get type /operatortype eq  1 cvlit 
 type  7 - cvx 1: [1 2 3] dup cvx exec count 4 eq 5 -1 roll exec count 5 eq
 type  8 - cvx 2: [1 2 3] dup cvx 2 /x put 2 get /x eq  [1 2 3] dup cvx eq
+type  9 - cvx 3: /proc {{1} {2} /gt cvx} bind def proc /proc load 2 get xcheck false eq
 type  9 - xcheck 1: /koe xcheck false eq  [1 2 3] xcheck false eq  {1 2 3} xcheck true eq
 type 10 - xcheck 2: /add cvx load xcheck true eq  /koe cvx xcheck true eq
 type 11 - executeonly: (123) executeonly rcheck false eq
