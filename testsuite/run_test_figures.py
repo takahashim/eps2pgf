@@ -24,7 +24,7 @@ import sys
 import subprocess
 import time
 
-eps2pgfCmd = "java -jar ..\\dist_root\\eps2pgf.jar \"%epsFile%\" --output \"%pgfFile%\""
+eps2pgfCmd = "java -jar ..\\dist_root\\eps2pgf.jar \"%epsFile%\" --output \"%pgfFile%\" %args%"
 latexCmd = "pdflatex --interaction=errorstopmode -output-directory=\"%outputDir%\" \"%texFile%\""
 
 nextArg = 1
@@ -68,12 +68,14 @@ def main():
         
         # Determine output filenames
         pgfFile = os.path.join(workDir, basename+'.pgf')
-        texFile = os.path.join(workDir, basename+'.tex')
+        texFile = os.path.join(workDir, 'doc_'+basename+'.tex')
         
         # Prepare program command
         global eps2pgfCmd
         thisCmd = eps2pgfCmd.replace('%epsFile%', epsFile)
         thisCmd = thisCmd.replace('%pgfFile%', pgfFile)
+        thisCmd = thisCmd.replace('%args%', args)
+        thisCmd = thisCmd.replace('%testFigDir%', testFigDir)
         
         # Execute the interpreter
         procObj = subprocess.Popen(thisCmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

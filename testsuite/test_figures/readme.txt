@@ -18,6 +18,7 @@ grow.ps                  - ???
 illustrator_vw.ps        - ???
 maple_cubic.eps          - Send in by Gernot Hassenpflug, with some small
                            changes.
+MathPSfrag_ex_auto-psfrag.eps - From MathPSfrag by Johannes Große
 mathematica2.eps         - Figure exported from Mathematica
 showtext_mathematica1    - show all symbols in the Mathematica1 font (font is embedded)
 tiger.eps                - GhostScript <www.ghostscript.com>, with some small
