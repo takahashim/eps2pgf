@@ -432,10 +432,10 @@ public class GraphicsState implements Cloneable {
      * @throws PSErrorNoCurrentPoint There is no current point.
      */
     public double[] getCurrentPosInDeviceSpace() throws PSErrorNoCurrentPoint {
-        if (this.path.sections.size() == 0) {
+        if (this.path.getSections().size() == 0) {
             throw new PSErrorNoCurrentPoint();
         }
-        return this.path.sections.get(this.path.sections.size() - 1)
+        return this.path.getSections().get(this.path.getSections().size() - 1)
         		.deviceCoor();
     }
     

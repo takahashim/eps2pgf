@@ -20,21 +20,35 @@
 
 package net.sf.eps2pgf.postscript;
 
+import java.util.logging.Logger;
+
 /**
  * Represent a part of a PostScript path (i.e. lineto, curveto, moveto, ...)
  * @author Paul Wagenaars
  */
 public class PathSection implements Cloneable {
-    public double[] params = new double[6];
+    
+    /** Coordinates associated with this path section. */
+    private double[] params = new double[6];
+    
+    /** The logger. */
+    private static final Logger LOG
+                                  = Logger.getLogger("net.sourceforge.eps2pgf");
     
     /**
      * Create a clone of this object.
      * @return Returns clone of this object.
      */
     public PathSection clone() {
-        PathSection newSection = new PathSection();
-        newSection.params = params.clone();
-        return newSection;
+        LOG.finest("PathSection clone() called.");
+        PathSection copy;
+        try {
+            copy = (PathSection) super.clone();
+        } catch (CloneNotSupportedException e) {
+            copy = new PathSection();
+        }
+        copy.params = params.clone();
+        return copy;
     }
     
     /**
@@ -44,8 +58,40 @@ public class PathSection implements Cloneable {
      */
     public double[] deviceCoor() {
         double[] coor = new double[2];
-        coor[0] = params[0];
-        coor[1] = params[1];
+        coor[0] = getParam(0);
+        coor[1] = getParam(1);
         return coor;
     }
+    
+    /**
+     * Gets the parameter with the specified index.
+     * 
+     * @param index Index of the value to get. 
+     * 
+     * @return the param
+     */
+    public double getParam(final int index) {
+        return params[index];
+    }
+    
+    /**
+     * Returns the maximum number of parameters that can be defined.
+     * 
+     * @return Maximum number of parameters.
+     */
+    public int nrParams() {
+        return params.length;
+    }
+    
+    /**
+     * Sets the parameter with the specified index.
+     * 
+     * @param index Index of the value to set.
+     * @param newValue The new value. 
+     */
+    public void setParam(final int index, final double newValue) {
+        params[index] = newValue;
+    }
+    
+    
 }

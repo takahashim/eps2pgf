@@ -20,49 +20,52 @@
 
 package net.sf.eps2pgf.postscript;
 
-/** Represents a path section formed by the lineto operator
+/**
+ * Represents a path section formed by the lineto operator.
  *
  * @author Paul Wagenaars
  */
 public class Lineto extends PathSection implements Cloneable {
     
     /**
-     * Create a new Lineto instance
+     * Create a new Lineto instance.
      */
     public Lineto() {
-        for (int i = 0 ; i < params.length ; i++) {
-            params[i] = Double.NaN;
+        for (int i = 0; i < nrParams(); i++) {
+            setParam(i, Double.NaN);
         }
     }
     
     /**
-     * Create a new Lineto instance
+     * Create a new Lineto instance.
+     * 
      * @param x X-coordinate
      * @param y Y-coordinate
      */
-    public Lineto(double x, double y) {
-        params[0] = x;
-        params[1] = y;
-        for (int i = 2 ; i < params.length ; i++) {
-            params[i] = Double.NaN;
+    public Lineto(final double x, final double y) {
+        setParam(0, x);
+        setParam(1, y);
+        for (int i = 2; i < nrParams(); i++) {
+            setParam(i, Double.NaN);
         }
     }
     
     /**
      * Create a string representation of this object.
+     * 
+     * @return String representation of this object.
      */
     public String toString() {
-        return String.format("lineto (%.4g, %.4g)", params[0], params[1]);
+        return String.format("lineto (%.4g, %.4g)", getParam(0), getParam(1));
     }
     
     /**
      * Create a clone of this object.
+     * 
      * @return Returns clone of this object.
      */
     public Lineto clone() {
-        Lineto newSection = new Lineto();
-        newSection.params = params.clone();
-        return newSection;
+        return (Lineto) super.clone();
     }
 
 }

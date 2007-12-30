@@ -222,7 +222,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
         
         // See if texstrings are defined for this font. If not, copy standard texstrings
         if (!dict.known(KEY_TEXSTRINGS)) {
-        	dict.setKey(KEY_TEXSTRINGS, Fonts.getTexStringDictByFontname(fontname));
+            dict.setKey(KEY_TEXSTRINGS, Fonts.getTexStringDictByFontname(fontname));
             alreadyValid = false;
         }
         
@@ -230,39 +230,39 @@ public class PSObjectFont extends PSObject implements Cloneable {
         // them from the font name.
         if (!dict.known(KEY_LATEXPRECODE) || !dict.known(KEY_LATEXPOSTCODE)) {
             String[][] fontTypes = {
-            		{"Serif",     "\\textrm{", "}"},
-            		{"Roman",     "\\textrm{", "}"},
-            		{"Sans",      "\\textsf{", "}"},
-            		{"Mono",      "\\texttt{", "}"},
-            		{"Monospace", "\\texttt{", "}"},
-            		{"Bold",      "\\textbf{", "}"},
-            		{"Oblique",   "\\textsl{", "}"},
-            		{"Obli",      "\\textsl{", "}"},
-            		{"Slanted",   "\\textsl{", "}"},
-            		{"Italic",    "\\textit{", "}"},
-            		{"Ital",      "\\textit{", "}"}};
+                    {"Serif",     "\\textrm{", "}"},
+                    {"Roman",     "\\textrm{", "}"},
+                    {"Sans",      "\\textsf{", "}"},
+                    {"Mono",      "\\texttt{", "}"},
+                    {"Monospace", "\\texttt{", "}"},
+                    {"Bold",      "\\textbf{", "}"},
+                    {"Oblique",   "\\textsl{", "}"},
+                    {"Obli",      "\\textsl{", "}"},
+                    {"Slanted",   "\\textsl{", "}"},
+                    {"Italic",    "\\textit{", "}"},
+                    {"Ital",      "\\textit{", "}"}};
             String pre = "";
             String post = "";
-        	// Append an "X" to the font name to make sure that
-        	// there is at least one [^a-z] character after the
-        	// font type string.
+            // Append an "X" to the font name to make sure that
+            // there is at least one [^a-z] character after the
+            // font type string.
             String augmentedFontname = fontname + "X"; 
             for (int i = 0 ; i < fontTypes.length ; i++) {
-            	String regexp = ".*" + fontTypes[i][0] + "[^a-z].*";
-            	if (augmentedFontname.matches(regexp)) {
-            		pre += fontTypes[i][1];
-            		post = fontTypes[i][2] + post;
-            	}
+                String regexp = ".*" + fontTypes[i][0] + "[^a-z].*";
+                if (augmentedFontname.matches(regexp)) {
+                    pre += fontTypes[i][1];
+                    post = fontTypes[i][2] + post;
+                }
             }
-        	dict.setKey(KEY_LATEXPRECODE, pre);
-        	dict.setKey(KEY_LATEXPOSTCODE, post);
+            dict.setKey(KEY_LATEXPRECODE, pre);
+            dict.setKey(KEY_LATEXPOSTCODE, post);
             alreadyValid = false;
         }
         
         // Check for font metrics
         if (!dict.known(KEY_AFM)) {
-        	// Apparently there are no metrics. Try to extract it from the 
-        	// character descriptions.
+            // Apparently there are no metrics. Try to extract it from the 
+            // character descriptions.
             alreadyValid = false;
             dict.setKey(KEY_AFM, new PSObjectAfm(dict));
         }
@@ -354,8 +354,10 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @return Bounding box
      * 
      * @throws PSError a PostScript error occurred
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public BoundingBox getBBox(PSObjectArray charNames) throws PSError {
+    public BoundingBox getBBox(final PSObjectArray charNames)
+            throws PSError, ProgramError {
         //charNames = replaceLigatures(charNames);
         
         BoundingBox bbox = new BoundingBox();
@@ -365,7 +367,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
         double maxY = Double.NEGATIVE_INFINITY;
         CharMetric cmFirstChar = new CharMetric();
         CharMetric cmLastChar = new CharMetric();
-        for (int i = 0 ; i < charNames.size() ; i++) {
+        for (int i = 0; i < charNames.size(); i++) {
             try {
                 String charName = charNames.get(i).toName().name;
                 CharMetric cm = getCharMetric(charName);
@@ -378,7 +380,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
                 if (i == 0) {
                     cmFirstChar = cm;
                 }
-                if (i == (charNames.size()-1)) {
+                if (i == (charNames.size() - 1)) {
                     cmLastChar = cm;
                 }
             } catch (PSErrorRangeCheck e) {
@@ -406,17 +408,18 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * 
      * @return the char metric
      * 
-     * @throws PSErrorTypeCheck the PS error type check
-     * @throws PSErrorUndefined the PS error undefined
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    CharMetric getCharMetric(String charName) throws PSErrorTypeCheck, PSErrorUndefined {
+    CharMetric getCharMetric(final String charName)
+            throws PSError, ProgramError {
         FontMetric fm = getFontMetric();
         List charMetrics = fm.getCharMetrics();
         for (Object obj : charMetrics) {
             if (!(obj instanceof CharMetric)) {
                 throw new PSErrorTypeCheck();
             }
-            CharMetric cm = (CharMetric)obj;
+            CharMetric cm = (CharMetric) obj;
             if (charName.equals(cm.getName())) {
                 return cm;
             }
@@ -481,7 +484,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * 
      * @throws PSErrorTypeCheck the PS error type check
      */
-    public FontMetric getFontMetric() throws PSErrorTypeCheck {
+    public FontMetric getFontMetric() throws PSError, ProgramError {
+        assertValidFont();
         return dict.lookup(KEY_AFM).toFontMetric();
     }
     
@@ -491,27 +495,27 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @return Fontname
      */
     String getFontName() {
-    	if (dict.known(KEY_FONTNAME)) {
-    		PSObject fontNameObj = dict.lookup(KEY_FONTNAME);
-    		if (fontNameObj instanceof PSObjectName) {
-    			return ((PSObjectName)fontNameObj).toName().name;
-    		}
-    	}
+        if (dict.known(KEY_FONTNAME)) {
+            PSObject fontNameObj = dict.lookup(KEY_FONTNAME);
+            if (fontNameObj instanceof PSObjectName) {
+                return ((PSObjectName) fontNameObj).toName().name;
+            }
+        }
         // No font name is defined in this dictionary. Instead we use the key
-    	// in the FontDirectory that is associated with this font.
-    	List<PSObject> items = Fonts.FontDirectory.getItemList();
-    	int thisFID = this.getFID(); 
-    	try {
-    		for (int i = 1 ; i < items.size() ; i += 2) {
-    			PSObjectFont itemFont = items.get(i + 1).toFont();
-    			if (itemFont.getFID() == thisFID) {
-    				return items.get(i).toString();
-    			}
-    		}
-    	} catch (PSErrorTypeCheck e) {
-    		return "";
-    	}
-    	return "";
+        // in the FontDirectory that is associated with this font.
+        List<PSObject> items = Fonts.FontDirectory.getItemList();
+        int thisFID = this.getFID(); 
+        try {
+            for (int i = 1; i < items.size(); i += 2) {
+                PSObjectFont itemFont = items.get(i + 1).toFont();
+                if (itemFont.getFID() == thisFID) {
+                    return items.get(i).toString();
+                }
+            }
+        } catch (PSErrorTypeCheck e) {
+            return "";
+        }
+        return "";
     }
     
     /**
@@ -547,16 +551,18 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @return Width of the string in pt (= 1/72 inch)
      * 
      * @throws PSError the PS error
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public double getWidth(PSObjectArray charNames) throws PSError {
+    public double getWidth(final PSObjectArray charNames)
+            throws PSError, ProgramError {
         //charNames = replaceLigatures(charNames);
         double width = 0;
-        for (int i = 0 ; i < charNames.size() ; i++) {
+        for (int i = 0; i < charNames.size(); i++) {
             try {
                 String charName = charNames.get(i).toName().name;
                 CharMetric cm = getCharMetric(charName);
                 double scaling = getFontMatrix().getMeanScaling();
-                width += cm.getWx()*scaling;
+                width += cm.getWx() * scaling;
             } catch (PSErrorRangeCheck e) {
                     // This can never happen inside the for loop
             }

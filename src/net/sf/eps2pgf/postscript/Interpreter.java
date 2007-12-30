@@ -661,8 +661,9 @@ public class Interpreter {
      * bounding box is added.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_charpath() throws PSError {
+    public void op_charpath() throws PSError, ProgramError {
         getOpStack().pop().toBool();  // bool
         PSObjectString string = getOpStack().pop().toPSString();
         textHandler.charpath(string);
@@ -2074,7 +2075,7 @@ public class Interpreter {
         PSObjectArray line = getOpStack().pop().toProc();
         PSObjectArray move = getOpStack().pop().toProc();
         
-        ArrayList<PathSection> path = gstate.current.path.sections;
+        ArrayList<PathSection> path = gstate.current.path.getSections();
         PSObjectMatrix ctm = gstate.current.CTM;
         
         try {
@@ -2093,8 +2094,8 @@ public class Interpreter {
                     proc = curve;
                 }
                 for (int j = 0; j < nrCoors; j++) {
-                    double x = section.params[2 * j];
-                    double y = section.params[2 * j + 1];
+                    double x = section.getParam(2 * j);
+                    double y = section.getParam(2 * j + 1);
                     double[] coor = ctm.itransform(x, y);
                     getOpStack().push(new PSObjectReal(coor[0]));
                     getOpStack().push(new PSObjectReal(coor[1]));

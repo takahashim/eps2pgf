@@ -96,8 +96,10 @@ public class TextHandler {
      * @param string Determine character path of this text.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public final void charpath(final PSObjectString string) throws PSError {
+    public final void charpath(final PSObjectString string)
+            throws PSError, ProgramError {
         PSObjectFont currentFont = gstate.current.font;
         
         PSObjectArray charNames = string.decode(currentFont.getEncoding());

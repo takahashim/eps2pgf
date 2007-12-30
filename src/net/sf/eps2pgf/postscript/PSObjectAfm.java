@@ -106,7 +106,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
         int[] w = new int[2];
         Path charPath = interpretCharString(tokens, sb, w);
         double[] bbox;
-        if (charPath.sections.size() > 1) {
+        if (charPath.getSections().size() > 1) {
             bbox = charPath.boundingBox();
         } else {
             bbox = new double[4]; 

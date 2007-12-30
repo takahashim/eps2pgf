@@ -32,8 +32,9 @@ public class Closepath extends PathSection implements Cloneable {
      * @param position Coordinate to where this closepath returns.
      */
     public Closepath(final double[] position) {
-        for(int i = 0; i < params.length; i++) {
-            params[i] = Double.NaN;
+        int nr = nrParams();
+        for (int i = 0; i < nr; i++) {
+            setParam(i, Double.NaN);
         }
     }
     
@@ -42,9 +43,8 @@ public class Closepath extends PathSection implements Cloneable {
      * @return Returns clone of this object.
      */
     public Closepath clone() {
-        Closepath newSection = new Closepath(params);
-        newSection.params = params.clone();
-        return newSection;
+        Closepath copy = (Closepath) super.clone();
+        return copy;
     }
 
 }

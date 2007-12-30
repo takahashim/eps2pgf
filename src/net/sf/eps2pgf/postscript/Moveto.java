@@ -27,32 +27,37 @@ package net.sf.eps2pgf.postscript;
 public class Moveto extends PathSection implements Cloneable {
     
     /**
-     * Create a new Movoto instance
+     * Create a new Movoto instance.
      */
     public Moveto() {
-        for (int i = 0 ; i < params.length ; i++) {
-            params[i] = Double.NaN;
+        int nr = nrParams();
+        for (int i = 0; i < nr; i++) {
+            setParam(i, Double.NaN);
         }        
     }
     
     /**
-     * Create a new Moveto instance
+     * Create a new Moveto instance.
+     * 
      * @param x X-coordinate (in device coordinates, micrometer)
      * @param y Y-coordinate (in device coordinates, micrometer)
      */
-    public Moveto(double x, double y) {
-        params[0] = x;
-        params[1] = y;
-        for (int i = 2 ; i < params.length ; i++) {
-            params[i] = Double.NaN;
+    public Moveto(final double x, final double y) {
+        setParam(0, x);
+        setParam(1, y);
+        int nr = nrParams();
+        for (int i = 2; i < nr; i++) {
+            setParam(i, Double.NaN);
         }
     }
 
     /**
      * Create a string representation of this object.
+     * 
+     * @return String representation of this object.
      */
     public String toString() {
-        return String.format("moveto (%.4g, %.4g)", params[0], params[1]);
+        return String.format("moveto (%.4g, %.4g)", getParam(0), getParam(1));
     }
     
     /**
@@ -60,9 +65,7 @@ public class Moveto extends PathSection implements Cloneable {
      * @return Returns clone of this object.
      */
     public Moveto clone() {
-        Moveto newSection = new Moveto();
-        newSection.params = params.clone();
-        return newSection;
+        return (Moveto) super.clone();
     }
 
 }
