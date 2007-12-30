@@ -30,7 +30,8 @@ import net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow;
 import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.util.ArrayStack;
 
-/** PostScript dictionary stack
+/**
+ * PostScript dictionary stack.
  * See PostScript manual for more info "3.3.9 Dictionary objects"
  *
  * @author Paul Wagenaars
@@ -147,8 +148,9 @@ public class DictStack {
         replaceNames.put("sqBrackRight", "]");
         replaceNames.put("dblLessBrackets", "<<");
         replaceNames.put("dblGreaterBrackets", ">>");
+        replaceNames.put("isis", "==");
         
-        for (int i = 0 ; i < mthds.length ; i++) {
+        for (int i = 0; i < mthds.length; i++) {
             Method mthd = mthds[i];
             String name = mthd.getName();
             

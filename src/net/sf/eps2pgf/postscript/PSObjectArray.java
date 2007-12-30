@@ -213,26 +213,6 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
-     * Convert this object to a literal object.
-     * 
-     * @return This object converted to a literal object
-     */
-    public final PSObject cvlit() {
-        isLiteral = true;
-        return this;
-    }
-
-    /**
-     * PostScript operator 'cvx'. Makes this object executable
-     * 
-     * @return This object after it has been made executable.
-     */
-    public final PSObject cvx() {
-        isLiteral = false;
-        return this;
-    }
-
-    /**
      * PostScript operator 'dup'. Create a (shallow) copy of this object. The
      * values of composite object is not copied, but shared.
      */
