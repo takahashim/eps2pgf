@@ -21,6 +21,7 @@
 package net.sf.eps2pgf.postscript;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.postscript.errors.PSError;
@@ -28,53 +29,62 @@ import net.sf.eps2pgf.postscript.errors.PSErrorNoCurrentPoint;
 import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 
-/** Represents a PostScript path
+/**
+ * Represents a PostScript path.
  *
  * @author Paul Wagenaars
  */
 public class Path implements Cloneable {
-    /**
-     * List with sections of this path
-     */
-    public ArrayList<PathSection> sections;
-    GstateStack gStateStack;
+    /** List with sections of this path. */
+    private ArrayList<PathSection> sections = new ArrayList<PathSection>();
+    
+    /** Reference to the graphics state stack this path is part of. */
+    private GstateStack gStateStack;
+    
+    /** The logger. */
+    private static final Logger LOG =
+                                    Logger.getLogger("net.sourceforge.eps2pgf");
     
     /**
-     * Creates a new instance of Path
-     * @param graphicsStateStack Pointer to the graphics state to which this path is linked
+     * Creates a new instance of Path.
+     * 
+     * @param graphicsStateStack Pointer to the graphics state to which this
+     * path is linked.
      */
-    public Path(GstateStack graphicsStateStack) {
-        sections = new ArrayList<PathSection>();
+    public Path(final GstateStack graphicsStateStack) {
         gStateStack = graphicsStateStack;
     }
     
     /**
-     * Return the bounding box (in device coordinates) of the current path
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorNoCurrentPoint The path is empty
+     * Return the bounding box (in device coordinates) of the current path.
+     * 
+     * @throws PSErrorNoCurrentPoint The path is empty.
+     * 
      * @return Array with X- and Y-coordinates of lower-left and upper-right
      * corners of the smallest rectangle that encloses this path.
      */
     public double[] boundingBox() throws PSErrorNoCurrentPoint {
-        int N = sections.size();
-        if (N < 1) {
+        int nr = getSections().size();
+        if (nr < 1) {
             throw new PSErrorNoCurrentPoint();
         }
         
         double[] bbox = {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
                 Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY};
-        for (int i = 0 ; i < N ; i++) {
-            PathSection sec = sections.get(i);
-            if ((N > 1) && (i == (N-1)) && (sec instanceof Moveto)) {
+        for (int i = 0; i < nr; i++) {
+            PathSection sec = getSections().get(i);
+            if ((nr > 1) && (i == (nr - 1)) && (sec instanceof Moveto)) {
                 break;
             }
-            for (int j = 0 ; j < sec.params.length ; j += 2) {
-                if (Double.isNaN(sec.params[j]) || Double.isNaN(sec.params[j+1])) {
+            for (int j = 0; j < sec.nrParams(); j += 2) {
+                if (Double.isNaN(sec.getParam(j))
+                        || Double.isNaN(sec.getParam(j + 1))) {
                     break;
                 }
-                bbox[0] = Math.min(bbox[0], sec.params[j]);
-                bbox[1] = Math.min(bbox[1], sec.params[j+1]);
-                bbox[2] = Math.max(bbox[2], sec.params[j]);
-                bbox[3] = Math.max(bbox[3], sec.params[j+1]);
+                bbox[0] = Math.min(bbox[0], sec.getParam(j));
+                bbox[1] = Math.min(bbox[1], sec.getParam(j + 1));
+                bbox[2] = Math.max(bbox[2], sec.getParam(j));
+                bbox[3] = Math.max(bbox[3], sec.getParam(j + 1));
             }
         }
         
@@ -86,46 +96,55 @@ public class Path implements Cloneable {
      * @return Returns a clone of this object. 
      */
     public Path clone() {
-        Path clonedPath = new Path(gStateStack);
-        for (int i = 0 ; i < sections.size() ; i++) {
-            clonedPath.sections.add(sections.get(i).clone());
+        LOG.finest("Path clone() called.");
+        Path copy;
+        try {
+            copy = (Path) super.clone();
+            copy.sections = new ArrayList<PathSection>();
+            copy.gStateStack = gStateStack;
+        } catch (CloneNotSupportedException e) {
+            copy =  new Path(gStateStack);
         }
-        return clonedPath;
+        for (int i = 0; i < getSections().size(); i++) {
+            copy.getSections().add(getSections().get(i).clone());
+        }
+        return copy;
     }
     
     /**
-     * Add a straight line to the beginning of this subpath and start a 
+     * Add a straight line to the beginning of this subpath and start a
      * new subpath.
+     * 
      * @return Returns the starting coordinate of this path. (in document
      * coordinates, before CTM, in pt)
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidAccess Insufficient access rights
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck Value out of range
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Object of invalid type
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
     public double[] closepath() throws PSErrorRangeCheck, PSErrorTypeCheck {
-        int len = sections.size();
+        int len = getSections().size();
         // If the path is empty closepath does nothing
         if (len == 0) {
             return null;
         }
         // If the subpath is already closed closepath does nothing
-        if (sections.get(len-1) instanceof Moveto) {
+        if (getSections().get(len - 1) instanceof Moveto) {
             return null;
         }
 
         // Search the start of the subpath
         double[] position = {Double.NaN, Double.NaN};
-        for (int i = len-1 ; i >= 0 ; i--) {
-            PathSection section = sections.get(i);
+        for (int i = len - 1; i >= 0; i--) {
+            PathSection section = getSections().get(i);
             if (section instanceof Moveto) {
-                position = gStateStack.current.CTM.itransform(section.params[0], 
-                        section.params[1]);
+                position = gStateStack.current.CTM.itransform(
+                        section.getParam(0), section.getParam(1));
                 break;
             }
         }
         
         Closepath closepath = new Closepath(position);
-        sections.add(closepath);
+        getSections().add(closepath);
 
         return position;
     }
@@ -133,24 +152,29 @@ public class Path implements Cloneable {
     /**
      * Returns a flattened version of the path. This path itself it not changed,
      * a new path is created with the flattened version of this path.
+     * 
      * @param maxError Maximum distance between flattened path and real curve.
-     *                 Expressed in terms of actual device coordinates.
+     * Expressed in terms of actual device coordinates.
+     * 
      * @return Flattened version of this path
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Something went wrong during the "flattening" of the path
-     * @throws net.sf.eps2pgf.ProgramError If this happens there's a bug in Eps2pgf
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public Path flattenpath(double maxError) throws PSError, ProgramError {
+    public Path flattenpath(final double maxError)
+            throws PSError, ProgramError {
         Path flatPath = new Path(gStateStack);
         PathSection lastSec = new PathSection();
-        for (PathSection sec : sections) {
+        for (PathSection sec : getSections()) {
             if (sec instanceof Moveto) {
-                flatPath.moveto(sec.params[0], sec.params[1]);
+                flatPath.moveto(sec.getParam(0), sec.getParam(1));
             } else if (sec instanceof Lineto) {
-                flatPath.lineto(sec.params[0], sec.params[1]);
+                flatPath.lineto(sec.getParam(0), sec.getParam(1));
             } else if (sec instanceof Closepath) {
                 flatPath.closepath();
             } else if (sec instanceof Curveto) {
-                ((Curveto)sec).flatten(flatPath, lastSec.deviceCoor(), maxError);
+                ((Curveto) sec).flatten(flatPath, lastSec.deviceCoor(),
+                                                                      maxError);
             } else {
                 throw new ProgramError("You've found a bug. Flattening this ("
                         + sec + ") type is not implemented.");
@@ -162,37 +186,41 @@ public class Path implements Cloneable {
     
     /**
      * Adds a moveto to this path.
+     * 
      * @param x X-coordinate in device coordinates
      * @param y Y-coordinate in device coordinates
      */
-    public void moveto(double x, double y) {
-        int len = sections.size();
+    public void moveto(final double x, final double y) {
+        int len = getSections().size();
         if (len > 0) {
-            PathSection lastElem = sections.get(len - 1);
+            PathSection lastElem = getSections().get(len - 1);
             if (lastElem instanceof Moveto) {
-                sections.remove(len - 1);
+                getSections().remove(len - 1);
             }
         }
-        sections.add(new Moveto(x, y));
+        getSections().add(new Moveto(x, y));
     }
     
     /**
      * Adds a lineto to this path.
+     * 
      * @param x X-coordinate in device coordinates
      * @param y Y-coordinate in device coordinates
      */
-    public void lineto(double x, double y) {
-        sections.add(new Lineto(x, y));
+    public void lineto(final double x, final double y) {
+        getSections().add(new Lineto(x, y));
     }
     
     /**
-     * Adds a curveto to this path
+     * Adds a curveto to this path.
+     * 
      * @param control1 First Bezier control point
      * @param control2 Second Bezier control point
      * @param end Endpoint
      */
-    public void curveto(double[] control1, double[] control2, double[] end) {
-        sections.add(new Curveto(control1, control2, end));
+    public void curveto(final double[] control1, final double[] control2,
+            final double[] end) {
+        getSections().add(new Curveto(control1, control2, end));
     }
     
     /**
@@ -201,11 +229,18 @@ public class Path implements Cloneable {
      */
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append("Path (" + sections.size() + " items)\n");
-        for(int i = 0 ; i < sections.size() ; i++) {
-            str.append(sections.get(i).toString() + "\n");
+        str.append("Path (" + getSections().size() + " items)\n");
+        for (int i = 0; i < getSections().size(); i++) {
+            str.append(getSections().get(i).toString() + "\n");
         }
         return str.toString();
+    }
+
+    /**
+     * @return the sections
+     */
+    public ArrayList<PathSection> getSections() {
+        return sections;
     }
     
 }

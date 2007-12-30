@@ -63,7 +63,7 @@ public class PGFDevice implements OutputDevice {
             new DecimalFormatSymbols(Locale.US));
     
     /**
-     * Colors (in range from 0.0 to 1.0) has at least 16-bit per channel
+     * Colors (in range from 0.0 to 1.0) have at least 16-bit per channel
      * accuracy.
      */
     static final DecimalFormat COLOR_FORMAT = new DecimalFormat("#.######",
@@ -116,8 +116,9 @@ public class PGFDevice implements OutputDevice {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void init(final GraphicsState gstate) throws PSError, IOException {
-        gstate.deviceData.setKey("pgf_last_linewidth",
-                new PSObjectReal(Double.NaN));
+        // Force setting the line width by setting the last width to an
+        // impossible/negative value.
+        gstate.deviceData.setKey("pgf_last_linewidth", new PSObjectReal(-1.0));
         gstate.deviceData.setKey("pgf_last_dashpattern", new PSObjectArray());
         gstate.deviceData.setKey("pgf_last_dashoffset", new PSObjectReal(0.0));
         
@@ -149,28 +150,28 @@ public class PGFDevice implements OutputDevice {
      * (yet) implemented.
      */
     void writePath(final Path path) throws IOException, PSErrorUnimplemented {
-        for (int i = 0; i < path.sections.size(); i++) {
-            PathSection section = path.sections.get(i);
+        for (int i = 0; i < path.getSections().size(); i++) {
+            PathSection section = path.getSections().get(i);
             if (section instanceof Moveto) {
                 // If the path ends with a moveto, the moveto is ignored.
-                if (i < (path.sections.size() - 1)) {
-                    String x = COOR_FORMAT.format(1e-4 * section.params[0]);
-                    String y = COOR_FORMAT.format(1e-4 * section.params[1]);
+                if (i < (path.getSections().size() - 1)) {
+                    String x = COOR_FORMAT.format(1e-4 * section.getParam(0));
+                    String y = COOR_FORMAT.format(1e-4 * section.getParam(1));
                     out.write("\\pgfpathmoveto{\\pgfpoint{" + x + "cm}{" + y
                             + "cm}}\n");
                 }
             } else if (section instanceof Lineto) {
-                String x = COOR_FORMAT.format(1e-4 * section.params[0]);
-                String y = COOR_FORMAT.format(1e-4 * section.params[1]);
+                String x = COOR_FORMAT.format(1e-4 * section.getParam(0));
+                String y = COOR_FORMAT.format(1e-4 * section.getParam(1));
                 out.write("\\pgfpathlineto{\\pgfpoint{" + x + "cm}{" + y
                         + "cm}}\n");
             } else if (section instanceof Curveto) {
-                String x1 = COOR_FORMAT.format(1e-4 * section.params[0]);
-                String y1 = COOR_FORMAT.format(1e-4 * section.params[1]);
-                String x2 = COOR_FORMAT.format(1e-4 * section.params[2]);
-                String y2 = COOR_FORMAT.format(1e-4 * section.params[3]);
-                String x3 = COOR_FORMAT.format(1e-4 * section.params[4]);
-                String y3 = COOR_FORMAT.format(1e-4 * section.params[5]);
+                String x1 = COOR_FORMAT.format(1e-4 * section.getParam(0));
+                String y1 = COOR_FORMAT.format(1e-4 * section.getParam(1));
+                String x2 = COOR_FORMAT.format(1e-4 * section.getParam(2));
+                String y2 = COOR_FORMAT.format(1e-4 * section.getParam(3));
+                String x3 = COOR_FORMAT.format(1e-4 * section.getParam(4));
+                String y3 = COOR_FORMAT.format(1e-4 * section.getParam(5));
                 out.write("\\pgfpathcurveto");
                 out.write("{\\pgfpoint{" + x1 + "cm}{" + y1 + "cm}}");
                 out.write("{\\pgfpoint{" + x2 + "cm}{" + y2 + "cm}}");
@@ -344,14 +345,14 @@ public class PGFDevice implements OutputDevice {
         out.write("\\pgftransformshift{\\pgfpoint{");
         out.write(LENGTH_FORMAT.format(1e-4 * coor1[0]) + "cm}{");
         out.write(LENGTH_FORMAT.format(1e-4 * coor1[1]) + "cm}}");
-        if (angle != 0) {
+        if (Math.abs(angle) > 1e-10) {
             out.write("\\pgftransformrotate{" + COOR_FORMAT.format(angle)
                     + "}");
         }
-        if (xScale != 1) {
+        if (Math.abs(xScale - 1.0) > 1e-10) {
             out.write("\\pgftransformxscale{" + xScale + "}");
         }
-        if (yScale != 1) {
+        if (Math.abs(yScale - 1.0) > 1e-10) {
             out.write("\\pgftransformyscale{" + yScale + "}");
         }
         out.write("}{\\pgfuseshading{eps2pgfshading}}");
@@ -432,7 +433,7 @@ public class PGFDevice implements OutputDevice {
         double currentOffset = gstate.dashoffset * scaling;
         
         if (!currentPattern.equals(lastPattern)
-                || (lastOffset != currentOffset)) {
+                || (Math.abs(lastOffset - currentOffset) > 1e-10)) {
             out.write("\\pgfsetdash{");
             try {
                 int i = 0;
@@ -465,7 +466,7 @@ public class PGFDevice implements OutputDevice {
             throws PSError, IOException {
         double lastWidth = gstate.deviceData.get("pgf_last_linewidth").toReal();
         double currentWidth = gstate.linewidth * gstate.CTM.getMeanScaling();
-        if (currentWidth != lastWidth) {
+        if (Math.abs(currentWidth - lastWidth) > 1e-10) {
             out.write("\\pgfsetlinewidth{"
                     + LENGTH_FORMAT.format(1e-3 * currentWidth) + "mm}\n");
             gstate.deviceData.setKey("pgf_last_linewidth",
