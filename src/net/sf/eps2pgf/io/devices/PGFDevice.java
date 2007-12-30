@@ -73,7 +73,7 @@ public class PGFDevice implements OutputDevice {
     private static int scopeDepth = 0;
     
     /** Output file. */
-    private static Writer out;
+    private Writer out;
     
     /**
      * Creates a new instance of PGFExport.
