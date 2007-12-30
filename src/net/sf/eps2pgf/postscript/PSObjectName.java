@@ -137,7 +137,7 @@ public class PSObjectName extends PSObject {
             return this;
         } else {
             PSObject lookedUp;
-            lookedUp = interp.dictStack.lookup(this);
+            lookedUp = interp.getDictStack().lookup(this);
             if ( (lookedUp != null) && (lookedUp instanceof PSObjectOperator) ) {
                 return lookedUp;
             }  else {
