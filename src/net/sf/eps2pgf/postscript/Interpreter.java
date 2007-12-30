@@ -881,6 +881,14 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: currentdash.
+     */
+    public void op_currentdash() {
+        opStack.push(gstate.current.dashpattern.clone());
+        opStack.push(new PSObjectReal(gstate.current.dashoffset));
+    }
+    
+    /**
      * PostScript op: currentfile.
      * 
      * @throws PSError A PostScript error occurred.
