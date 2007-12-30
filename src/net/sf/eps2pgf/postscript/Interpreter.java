@@ -1737,6 +1737,16 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: ==.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     */
+    public void op_isis() throws PSErrorStackUnderflow {
+        PSObject obj = opStack.pop();
+        System.out.println(obj.isis());
+    }
+    
+    /**
      * PostScript op: itransform.
      * 
      * @throws PSError A PostScript error occurred.

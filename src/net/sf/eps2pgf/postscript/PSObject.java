@@ -178,8 +178,9 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @return Exectable version of this object
      */
     public PSObject cvx() {
-        isLiteral = false;
-        return this;
+        PSObject dup = dup();
+        dup.isLiteral = false;
+        return dup;
     }
     
     /**
@@ -507,8 +508,9 @@ public class PSObject implements Cloneable, Iterable<PSObject> {
      * @return This object converted to a literal object
      */
     public PSObject cvlit() throws PSErrorUnimplemented {
-        isLiteral = true;
-        return this;
+        PSObject dup = dup();
+        dup.isLiteral = true;
+        return dup;
     }
     
     /**
