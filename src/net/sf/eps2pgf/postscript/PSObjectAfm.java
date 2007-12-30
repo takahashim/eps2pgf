@@ -413,12 +413,12 @@ public class PSObjectAfm extends PSObject implements Cloneable {
     		Interpreter fi = new Interpreter();
     		
     		// Load some often used procedures to make execution faster
-    		fi.execStack.push(new PSObjectString("systemdict /gsave get " +
+    		fi.getExecStack().push(new PSObjectString("systemdict /gsave get " +
     				"systemdict /grestore get systemdict /eps2pgfgetmetrics get"));
     		fi.run();
-    		PSObject getmetrics = fi.opStack.pop();
-    		PSObject grestore = fi.opStack.pop();
-    		PSObject gsave = fi.opStack.pop();
+    		PSObject getmetrics = fi.getOpStack().pop();
+    		PSObject grestore = fi.getOpStack().pop();
+    		PSObject gsave = fi.getOpStack().pop();
 
     		// Create a list of all unique charNames and their corresponding 
     		// character codes.
@@ -441,12 +441,12 @@ public class PSObjectAfm extends PSObject implements Cloneable {
 	    	if (buildGlyph != null) {
 	    		for (int i = 0 ; i < charNames.size() ; i++) {
 	    			// Fill the execution stack with code
-	    			fi.execStack.push(grestore);
-	    			fi.execStack.push(getmetrics);
-	    			fi.execStack.push(buildGlyph);
-	    			fi.execStack.push(charNames.get(i));
-	    			fi.execStack.push(fontDict);
-	    			fi.execStack.push(gsave);
+	    			fi.getExecStack().push(grestore);
+	    			fi.getExecStack().push(getmetrics);
+	    			fi.getExecStack().push(buildGlyph);
+	    			fi.getExecStack().push(charNames.get(i));
+	    			fi.getExecStack().push(fontDict);
+	    			fi.getExecStack().push(gsave);
 	    		}
 	    	} else {
 	    		// BuildGlyph is not defined. Apparently this is an old (version 1) font.
@@ -464,12 +464,12 @@ public class PSObjectAfm extends PSObject implements Cloneable {
 		    	
 		    	for (int i = 0 ; i < charNames.size() ; i++) {
 	    			// Fill the execution stack with code
-	    			fi.execStack.push(grestore);
-	    			fi.execStack.push(getmetrics);
-	    			fi.execStack.push(buildChar);
-	    			fi.execStack.push(new PSObjectInt(charCodes.get(i)));
-	    			fi.execStack.push(fontDict);
-	    			fi.execStack.push(gsave);
+	    			fi.getExecStack().push(grestore);
+	    			fi.getExecStack().push(getmetrics);
+	    			fi.getExecStack().push(buildChar);
+	    			fi.getExecStack().push(new PSObjectInt(charCodes.get(i)));
+	    			fi.getExecStack().push(fontDict);
+	    			fi.getExecStack().push(gsave);
 		    	}
 	    	}
 	    	
@@ -478,7 +478,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
     		this.fontMetrics = new FontMetric();
     		for (int i = 0 ; i < charNames.size() ; i++) {
     			String charName = charNames.get(i).toString();
-    			PSObjectArray metrics = fi.opStack.pop().toArray();
+    			PSObjectArray metrics = fi.getOpStack().pop().toArray();
     			
     	        CharMetric charMetric = new CharMetric();
     	        charMetric.setName(charName);
