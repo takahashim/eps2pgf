@@ -49,7 +49,7 @@ public interface OutputDevice {
      *                              (yet) implemented.
      */
     void clip(Path clipPath)
-    		throws IOException, PSErrorUnimplemented;
+            throws IOException, PSErrorUnimplemented;
     
     /**
      * Returns a <b>copy</b> default transformation matrix (converts user space
@@ -133,7 +133,7 @@ public interface OutputDevice {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     void shfill(PSObjectDict dict, GraphicsState gstate)
-    		throws PSError, IOException;
+            throws PSError, IOException;
 
     /**
      * Implements PostScript stroke operator.

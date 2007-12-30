@@ -25,12 +25,14 @@ package net.sf.eps2pgf.postscript;
  * @author Paul Wagenaars
  */
 public class Closepath extends PathSection implements Cloneable {
+    
     /**
-     * Create a new Closepath object
+     * Create a new Closepath object.
+     * 
      * @param position Coordinate to where this closepath returns.
      */
-    public Closepath(double[] position) {
-        for( int i = 0 ; i < params.length ; i++) {
+    public Closepath(final double[] position) {
+        for(int i = 0; i < params.length; i++) {
             params[i] = Double.NaN;
         }
     }
