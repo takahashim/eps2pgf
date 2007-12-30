@@ -94,7 +94,7 @@ public class Converter {
         
         // Create PostScript interpreter and add file to execution stack
         Interpreter interp = new Interpreter(out, opts, header, textReplace);
-        interp.execStack.push(new PSObjectFile(in));
+        interp.getExecStack().push(new PSObjectFile(in));
         
         // Run the interpreter
         try {
