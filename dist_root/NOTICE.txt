@@ -1,0 +1,54 @@
+   =========================================================================
+   ==  NOTICE file corresponding to the section 4 d of                    ==
+   ==  the Apache License, Version 2.0,                                   ==
+   ==  in this case for Eps2pgf.                                          ==
+   =========================================================================
+
+Eps2pgf
+Copyright 2007, 2008 Paul Wagenaars <paul@wagenaars.org>
+
+This product contains code from the following projects:
+
+  - Apache Harmony class library
+    Copyright 2006, 2007 The Apache Software Foundation
+    Website: http://harmony.apache.org/
+    License: Apache License, Version 2.0 (see LICENSE.txt)
+    Notice: see below
+  
+This product is comes with the following third-party components:
+
+  - 14 Core PostScript AFM files
+    License: see resources\afm\MustRead.html
+  
+  - FontBox
+    Copyright (c) 2003-2007, www.fontbox.org. All rights reserved.
+    Website: http://www.fontbox.org/
+    License: see lib\LICENSE_FontBox.txt
+  
+  - JSAP - Java Simple Argument Parser
+    Copyright (c) 2002-2004, Martian Software, Inc.
+    Website: http://www.martiansoftware.com/jsap/
+    License: see lib\LICENSE_JSAP.txt
+
+
+
+===== NOTICE from Apache Harmony class library =============================
+
+   =========================================================================
+   ==  NOTICE file corresponding to the section 4 d of                    ==
+   ==  the Apache License, Version 2.0,                                   ==
+   ==  in this case for the Apache Harmony distribution.                  ==
+   =========================================================================
+
+Apache Harmony
+Copyright 2006, 2007 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+Portions of Harmony were originally developed by
+Intel Corporation and are licensed to the Apache Software
+Foundation under the "Software Grant and Corporate Contribution
+License Agreement", informally known as the "Intel Harmony CLA".
+
+============================================================================
