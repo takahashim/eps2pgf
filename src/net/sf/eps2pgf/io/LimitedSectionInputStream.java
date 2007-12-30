@@ -64,7 +64,11 @@ public class LimitedSectionInputStream extends InputStream {
             final int maxLength) throws IOException {
         length = maxLength;
         rdr = rdrIn;
-        rdr.skip(offset);
+        long skipped = rdr.skip(offset);
+        if (skipped != offset) {
+            throw new IOException("Unable to skip the requested number of "
+                    + "characters (" + offset + ").");
+        }
     }
     
     /**
