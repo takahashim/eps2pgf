@@ -2,7 +2,7 @@ alphabet:
 autocad_columbia: 
 autocad_nozzle:
 colorcir:
-coreldraw_Graphic1:
+coreldraw_Graphic1: --text-mode directcopy
 creohn_Sheep_in_gray:
 doretree:
 dvips1:
@@ -14,3 +14,4 @@ maple_cubic:
 mathematica2:
 tiger:
 showtext_mathematica1:
+MathPSfrag_ex_auto-psfrag: --text-replace %testFigDir%/MathPSfrag_ex_auto-psfrag.tex
