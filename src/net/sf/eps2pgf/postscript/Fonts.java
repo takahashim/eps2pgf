@@ -110,8 +110,6 @@ public final class Fonts {
         // In the dist_root directory in the current directory.
         File distRoot = new File(userDir, "dist_root");
 
-        System.out.println("=== classPath: " + classPath);
-        System.out.println("=== userdir: " + userDir);
         resourceDir = findResourceDirInPath(classPath);
         if (resourceDir == null) {
             resourceDir = findResourceDirInPath(userDir);
