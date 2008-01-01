@@ -277,7 +277,12 @@ public class GraphicsPSTest {
             + " 0 sub abs 1e-4 lt"
             + " 4 1 roll 0.5 sub abs 1e-4 lt"
             + " 4 1 roll 0 sub abs 1e-4 lt"
-            + " 4 1 roll 0.75 sub abs 1e-4 lt";
+            + " 4 1 roll 0.75 sub abs 1e-4 lt"
+            + " 0.1 0.2 0.3 setrgbcolor currentcmykcolor"
+            + " 0.7 sub abs 1e-4 lt"
+            + " 4 1 roll 0.0 sub abs 1e-4 lt"
+            + " 4 1 roll 0.33333 sub abs 1e-4 lt"
+            + " 4 1 roll 0.66666 sub abs 1e-4 lt";
         assertTrue(Common.testString(interp, cmd));
     }
 
