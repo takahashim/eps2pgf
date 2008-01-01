@@ -76,7 +76,9 @@ public class FilePSTest {
     /** Test. @throws Exception the exception */
     @Test
     public void fileTest3Readstring() throws Exception {
-        String cmd = "{currentfile () readstring} stopped";
+        String cmd = "{currentfile () readstring} stopped"
+            + " count 1 roll"
+            + " 1 1 count 3 sub {pop pop} for";
         assertTrue(Common.testString(interp, cmd));
     }
 

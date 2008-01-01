@@ -20,10 +20,11 @@
 
 package net.sf.eps2pgf.testsuite.pstests;
 
+import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.postscript.Interpreter;
 import net.sf.eps2pgf.postscript.PSObject;
 import net.sf.eps2pgf.postscript.PSObjectBool;
-import net.sf.eps2pgf.postscript.PSObjectString;
+import net.sf.eps2pgf.postscript.PSObjectFile;
 import net.sf.eps2pgf.util.ArrayStack;
 
 /**
@@ -51,7 +52,10 @@ public final class Common {
      */
     public static boolean testString(final Interpreter interp,
             final String postscriptCommands) throws Exception {
-        PSObjectString cmds = new PSObjectString(postscriptCommands);
+        
+        PSObjectFile cmds = new PSObjectFile(
+                new StringInputStream(postscriptCommands));
+        
         interp.getExecStack().push(cmds);
         interp.start();
         
