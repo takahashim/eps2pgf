@@ -27,74 +27,113 @@ import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
  * The Interface PSColor.
  */
 public abstract class PSColor {
-	/** Color levels of this color. Exact meaning depends of color space. */
-	public double[] levels;
-	
-	/**
-	 * Creates an exact deep copy of this object.
-	 * 
-	 * @return an exact deep copy of this object.
-	 */
-	public abstract PSColor clone();
-	
-	/**
-	 * Gets the equivalent CMYK levels of this color.
-	 * 
-	 * @return the CMYK
-	 */
-	public abstract double[] getCMYK();
-	
-	/**
-	 * Gets a PostScript array describing the color space of this color.
-	 * 
-	 * @return array describing color space.
-	 */
-	public abstract PSObjectArray getColorSpace();
+    
+    /** Color levels of this color. Exact meaning depends of color space. */
+    private double[] levels;
+    
+    /**
+     * Creates an exact deep copy of this object.
+     * 
+     * @return an exact deep copy of this object.
+     */
+    public PSColor clone() {
+        PSColor copy;
+        try {
+            copy = (PSColor) super.clone();
+        } catch (CloneNotSupportedException e) {
+            copy = new Gray();
+        }
+        copy.levels = this.levels.clone();
+        return copy;
+    }
+    
+    /**
+     * Gets the equivalent CMYK levels of this color.
+     * 
+     * @return the CMYK
+     */
+    public abstract double[] getCMYK();
+    
+    /**
+     * Gets a PostScript array describing the color space of this color.
+     * 
+     * @return array describing color space.
+     */
+    public abstract PSObjectArray getColorSpace();
 
-	/**
-	 * Gets the gray level equivalent of this color.
-	 * 
-	 * @return the gray level
-	 */
-	public abstract double getGray();
-	
-	/**
-	 * Gets the equivalent HSB levels of this color.
-	 * 
-	 * @return the HSB
-	 */
-	public abstract double[] getHSB();
-	
-	/**
-	 * Gets the number of color components required to specify this color.
-	 * E.g. RGB has three and CMYK has four components.
-	 * 
-	 * @return the number of components for this color
-	 */
-	public abstract int getNrComponents();
-	
-	/**
-	 * Gets the equivalent RGB levels of this color.
-	 * 
-	 * @return the RGB
-	 */
-	public abstract double[] getRGB();
-	
-	/**
-	 * Changes the current color to another color in the same color space.
-	 * 
-	 * @param components the new color
-	 */
-	public void setColor(double[] components) throws PSErrorRangeCheck {
-		if (components.length != getNrComponents()) {
-			throw new PSErrorRangeCheck();
-		}
-		
-		levels = components.clone();
-		for (int i = 0 ; i < levels.length ; i++) {
-			levels[i] = Math.min(levels[i], 1.0);
-			levels[i] = Math.max(levels[i], 0.0);
-		}
-	}
-	
+    /**
+     * Gets the gray level equivalent of this color.
+     * 
+     * @return the gray level
+     */
+    public abstract double getGray();
+    
+    /**
+     * Gets the equivalent HSB levels of this color.
+     * 
+     * @return the HSB
+     */
+    public abstract double[] getHSB();
+    
+    /**
+     * Gets the number of color components required to specify this color.
+     * E.g. RGB has three and CMYK has four components.
+     * 
+     * @return the number of components for this color
+     */
+    public abstract int getNrComponents();
+    
+    /**
+     * Gets the equivalent RGB levels of this color.
+     * 
+     * @return the RGB
+     */
+    public abstract double[] getRGB();
+    
+    /**
+     * Changes the current color to another color in the same color space.
+     * 
+     * @param components the new color
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     */
+    public void setColor(final double[] components) throws PSErrorRangeCheck {
+        int nrComponents = getNrComponents();
+        if (components.length != nrComponents) {
+            throw new PSErrorRangeCheck();
+        }
+        
+        for (int i = 0; i < nrComponents; i++) {
+            double level = components[i];
+            level = Math.min(level, 1.0);
+            level = Math.max(level, 0.0);
+            setLevel(i, level);
+        }
+    }
+
+    /**
+     * Set a single color component.
+     * 
+     * @param i Index of color component to set.
+     * @param componentLevel the levels to set
+     */
+    public void setLevel(final int i, final double componentLevel) {
+        if (levels == null) {
+            levels = new double[getNrComponents()];
+        }
+        
+        levels[i] = componentLevel;
+    }
+    
+    /**
+     * Gets a single color level.
+     * 
+     * @param i Index of color component to get.
+     * 
+     * @return The color level.
+     */
+    public double getLevel(final int i) {
+        return levels[i];
+    }
+    
 }

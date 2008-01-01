@@ -22,54 +22,101 @@ package net.sf.eps2pgf.postscript.colors;
 
 import net.sf.eps2pgf.postscript.PSObjectArray;
 import net.sf.eps2pgf.postscript.PSObjectName;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
 
+/**
+ * CMYK color.
+ * 
+ * @author Wagenaars
+ *
+ */
 public class CMYK extends PSColor {
-	// Default color is black.
-	static double[] defaultLevels = {0.0, 0.0, 0.0, 1.0};
-	
-	/**
-	 * Instantiates a new CMYK color.
-	 */
-	public CMYK() {
-		levels = defaultLevels.clone();
-	}
+    
+    /** Default color is black. */
+    private static final double[] DEFAULT_LEVELS = {0.0, 0.0, 0.0, 1.0};
+    
+    /**
+     * Instantiates a new CMYK color.
+     */
+    public CMYK() {
+        try {
+            setColor(DEFAULT_LEVELS);
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen
+        }
+    }
 
-	public CMYK clone() {
-		CMYK newCMYK = new CMYK();
-		newCMYK.levels = levels.clone();
-		return newCMYK;
-	}
+    /**
+     * Creates an exact deep copy of this object.
+     * 
+     * @return an exact deep copy of this object.
+     */
+    public CMYK clone() {
+        return (CMYK) super.clone();
+    }
 
-	public double[] getCMYK() {
-		return levels;
-	}
+    /**
+     * Gets the equivalent CMYK levels of this color.
+     * 
+     * @return the CMYK
+     */
+    public double[] getCMYK() {
+        double[] cmyk = {getLevel(0), getLevel(1), getLevel(2), getLevel(3)};
+        return cmyk;
+    }
 
-	public PSObjectArray getColorSpace() {
-		PSObjectArray array = new PSObjectArray();
-		array.addToEnd(new PSObjectName("DeviceCMYK", true));
-		return array;
-	}
+    /**
+     * Gets a PostScript array describing the color space of this color.
+     * 
+     * @return array describing color space.
+     */
+    public PSObjectArray getColorSpace() {
+        PSObjectArray array = new PSObjectArray();
+        array.addToEnd(new PSObjectName("DeviceCMYK", true));
+        return array;
+    }
 
-	public double getGray() {
-		return (1.0 - Math.min(1.0, 0.3*levels[0] + 0.59*levels[1]
-		       + 0.11*levels[2] + levels[3]));
-	}
+    /**
+     * Gets the gray level equivalent of this color.
+     * 
+     * @return the gray level
+     */
+    public double getGray() {
+        return (1.0 - Math.min(1.0, 0.3 * getLevel(0) + 0.59 * getLevel(1)
+               + 0.11 * getLevel(2) + getLevel(3)));
+    }
 
-	public double[] getHSB() {
-		double[] rgb = getRGB();
-		return RGB.RGBtoHSB(rgb[0], rgb[1], rgb[2]);
-	}
+    /**
+     * Gets the equivalent HSB levels of this color.
+     * 
+     * @return the HSB
+     */
+    public double[] getHSB() {
+        double[] rgb = getRGB();
+        return RGB.convertRGBtoHSB(rgb[0], rgb[1], rgb[2]);
+    }
 
-	public int getNrComponents() {
-		return 4;
-	}
+    /**
+     * Gets the number of color components required to specify this color.
+     * E.g. RGB has three and CMYK has four components.
+     * 
+     * @return the number of components for this color
+     */
+    public int getNrComponents() {
+        return 4;
+    }
 
-	public double[] getRGB() {
-        double r = 1.0 - Math.min(1.0, levels[0] + levels[3]);
-        double g = 1.0 - Math.min(1.0, levels[1] + levels[3]);
-        double b = 1.0 - Math.min(1.0, levels[2] + levels[3]);
+    /**
+     * Gets the equivalent RGB levels of this color.
+     * 
+     * @return the RGB
+     */
+    public double[] getRGB() {
+        double r = 1.0 - Math.min(1.0, getLevel(0) + getLevel(3));
+        double g = 1.0 - Math.min(1.0, getLevel(1) + getLevel(3));
+        double b = 1.0 - Math.min(1.0, getLevel(2) + getLevel(3));
         double[] rgb = {r, g, b};
         return rgb;
-	}
+    }
 
 }
