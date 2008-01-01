@@ -28,22 +28,27 @@ import java.io.IOException;
  * @author Paul Wagenaars
  */
 public class HexDecode extends InputStream {
+    
+    /** Encoded characters are read from this stream. */
     private InputStream in;
     
     
     /**
-     * Creates a new instance of HexDecode
-     * @param in <code>InputStream</code> from which hex data will be read.
+     * Creates a new instance of HexDecode.
+     * 
+     * @param pIn <code>InputStream</code> from which hex data will be read.
      */
-    public HexDecode(InputStream in) {
-        this.in = in;
+    public HexDecode(final InputStream pIn) {
+        in = pIn;
     }
     
     /**
      * Returns the number of bytes that can be read (or skipped over) from this
-     * input stream without blocking by the next caller of a method for this input
-     * stream.
-     * @throws java.io.IOException An I/O error occurred.
+     * input stream without blocking by the next caller of a method for this
+     * input stream.
+     * 
+     * @throws IOException An I/O error occurred.
+     * 
      * @return The number of bytes that can be read from this input stream
      * without blocking.
      */
@@ -54,12 +59,12 @@ public class HexDecode extends InputStream {
     }
     
     /**
-     * Closes this input stream and releases any system resources associated with
-     * the stream.
-     * @throws java.io.IOException An I/O error occurred.
+     * Closes this input stream and releases any system resources associated
+     * with the stream.
+     * @throws IOException An I/O error occurred.
      */
     public void close() throws IOException {
-        in = null;
+        in.close();
     }
     
     /**
@@ -67,26 +72,28 @@ public class HexDecode extends InputStream {
      * reset method repositions this stream at the last marked position so that
      * subsequent reads re-read the same bytes.
      * 
-     * The readlimit arguments tells this input stream to allow that many bytes to
-     * be read before the mark position gets invalidated.
+     * The readlimit arguments tells this input stream to allow that many bytes
+     * to be read before the mark position gets invalidated.
      * 
      * The general contract of mark is that, if the method markSupported returns
-     * true, the stream somehow remembers all the bytes read after the call to mark
-     * and stands ready to supply those same bytes again if and whenever the
-     * method reset is called. However, the stream is not required to remember any
-     * data at all if more than readlimit bytes are read from the stream before
-     * reset is called.
-     * @param readlimit The maximum limit of bytes that can be read before the mark
-     * position becomes invalid.
+     * true, the stream somehow remembers all the bytes read after the call to
+     * mark and stands ready to supply those same bytes again if and whenever
+     * the method reset is called. However, the stream is not required to
+     * remember any data at all if more than readlimit bytes are read from the
+     * stream before reset is called.
+     * 
+     * @param readlimit The maximum limit of bytes that can be read before the
+     * mark position becomes invalid.
      */
-    public void mark(int readlimit) {
+    public void mark(final int readlimit) {
         in.mark(readlimit);
     }
     
     /**
-     * Tests if this input stream supports the mark and reset methods. Whether or
-     * not mark and reset are supported is an invariant property of a particular
-     * input stream instance.
+     * Tests if this input stream supports the mark and reset methods. Whether
+     * or not mark and reset are supported is an invariant property of a
+     * particular input stream instance.
+     * 
      * @return <code>true</code> if this stream instance supports the mark and
      * reset methods; <code>false</code> otherwise.
      */
@@ -100,7 +107,9 @@ public class HexDecode extends InputStream {
      * the end of the stream has been reached, the value -1 is returned. This
      * method blocks until input data is available, the end of the stream is
      * detected, or an exception is thrown.
-     * @throws java.io.IOException An I/O exception occurred.
+     * 
+     * @throws IOException An I/O exception occurred.
+     * 
      * @return The next byte of data, or -1 if the end of the stream is reached.
      */
     public int read() throws IOException {
@@ -116,27 +125,31 @@ public class HexDecode extends InputStream {
         if (c2 == -1) {
             c2 = 0;
         }
-        return (16*c1 + c2);
+        return (16 * c1 + c2);
     }
     
     /**
      * Read the next hex value from the InputStream <code>in</code>. Whitespace
      * charcters are automatically skipped.
+     * 
      * @return Value of next hex value ranging from 0-15. Returns -1 at
-     *         end-of-file.
+     * end-of-file.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     private int readNextHexChar() throws IOException {
         int c;
-        while ( true ) {
+        while (true) {
             c = in.read();
             // See if it is a valid hex value
-            if ( (c >= 48) && (c <= 57) ) {
+            if ((c >= 48) && (c <= 57)) {
                 c -= 48;
-            } else if ( (c >= 65) && (c <= 70) ) {
+            } else if ((c >= 65) && (c <= 70)) {
                 c -= 55;
-            } else if ( (c >= 97) && (c <= 102) ) {
+            } else if ((c >= 97) && (c <= 102)) {
                 c -= 87;
-            } else if ( (c == 0) || (c == 9) || (c == 10) || (c == 12) || (c == 13) || (c == 32) ) {
+            } else if ((c == 0) || (c == 9) || (c == 10) || (c == 12)
+                    || (c == 13) || (c == 32)) {
                 continue;
             } else if (c == -1) {
                 // nothing to to
@@ -150,9 +163,10 @@ public class HexDecode extends InputStream {
     }
     
     /**
-     * Repositions this stream to the position at the time the mark method was last
-     * called on this input stream.
-     * @throws java.io.IOException An I/O exception occurred.
+     * Repositions this stream to the position at the time the mark method was
+     * last called on this input stream.
+     * 
+     * @throws IOException An I/O exception occurred.
      */
     public void reset() throws IOException {
         if (in == null) {
@@ -165,14 +179,17 @@ public class HexDecode extends InputStream {
      * Skips over and discards n bytes of data from this input stream. The skip
      * method may, for a variety of reasons, end up skipping over some smaller
      * number of bytes, possibly 0. This may result from any of a number of
-     * conditions; reaching end of file before n bytes have been skipped is only one
-     * possibility. The actual number of bytes skipped is returned. If n is
+     * conditions; reaching end of file before n bytes have been skipped is only
+     * one possibility. The actual number of bytes skipped is returned. If n is
      * negative, no bytes are skipped.
+     * 
      * @param n The number of bytes to be skipped.
-     * @throws java.io.IOException An I/O exception occurred.
+     * 
+     * @throws IOException An I/O exception occurred.
+     * 
      * @return The actual number of bytes skipped.
      */
-    public long skip(long n) throws IOException {
+    public long skip(final long n) throws IOException {
         return in.skip(2 * n);
     }
 }

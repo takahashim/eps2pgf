@@ -31,26 +31,33 @@ import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
  * This class offers several static methods to handle different aspect
  * of colors.
  */
-public class ColorUtils {
-	
-	/**
-	 * Automatically detects the color space and returns the default
-	 * color in this color space.
-	 * 
-	 * @param obj PostScript object describing the color space. See
-	 *            the PostScript manual on the possible types and
-	 *            values of this object.
-	 * 
-	 * @return the default color for the specified color space.
-	 * 
-	 * @throws PSError a PostScript error occurred.
-	 */
-	public static PSColor autoSetColorSpace(PSObject obj) throws PSError {
+public final class ColorUtils {
+    
+    /**
+     * "Hidden" constructor.
+     */
+    private ColorUtils() {
+        /* empty block */
+    }
+    
+    /**
+     * Automatically detects the color space and returns the default
+     * color in this color space.
+     * 
+     * @param obj PostScript object describing the color space. See
+     *            the PostScript manual on the possible types and
+     *            values of this object.
+     * 
+     * @return the default color for the specified color space.
+     * 
+     * @throws PSError a PostScript error occurred.
+     */
+    public static PSColor autoSetColorSpace(final PSObject obj) throws PSError {
         String spaceName;
         if (obj instanceof PSObjectName) {
-            spaceName = ((PSObjectName)obj).name;
+            spaceName = ((PSObjectName) obj).name;
         } else if (obj instanceof PSObjectArray) {
-            spaceName = ((PSObjectArray)obj).get(0).toName().name;
+            spaceName = ((PSObjectArray) obj).get(0).toName().name;
         } else {
             throw new PSErrorTypeCheck();
         }
@@ -65,5 +72,5 @@ public class ColorUtils {
             throw new PSErrorUndefined();
         }
 
-	}
+    }
 }

@@ -24,31 +24,51 @@ import java.util.ArrayList;
 
 import net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow;
 
-/** Stack implementation using an ArrayList
- *
+/**
+ * Stack implementation using an ArrayList.
+ * 
+ * @param <E> Type of objects stored in this stack.
+ * 
  * @author Paul Wagenaars
  */
 public class ArrayStack<E> extends ArrayList<E> {
-	private static final long serialVersionUID = 1L;
-	
-    /** Creates a new instance of ArrayStack */
+    
+    /** Serial version UID field. */
+    private static final long serialVersionUID = 1L;
+    
+    /**
+     * Creates a new instance of ArrayStack.
+     */
     public ArrayStack() {
         super();
     }
     
-    /** Creates a new ArrayStack with initial capacity */
-    public ArrayStack(int initialCapacity) {
+    /**
+     * Creates a new ArrayStack with initial capacity.
+     * 
+     * @param initialCapacity The initial capacity.
+     */
+    public ArrayStack(final int initialCapacity) {
         super(initialCapacity);
     }
     
-    /** Tests if the stack is empty */
+    /**
+     * Tests if the stack is empty.
+     * 
+     * @return True, if stack is empty.
+     */
     public boolean empty() {
         return isEmpty();
     }
     
-    /** Pushes an object on top of the stack.
+    /**
+     * Pushes an object on top of the stack.
+     * 
+     * @param item The item to add.
+     * 
+     * @return The added item.
      */
-    public E push(E item) {
+    public E push(final E item) {
         add(item);
         return item;
     }
@@ -69,10 +89,17 @@ public class ArrayStack<E> extends ArrayList<E> {
         }
     }
     
-    /** Looks at the n'th item from the top of the stack without removing
+    /**
+     * Looks at the n'th item from the top of the stack without removing
      * it. n = 0 corresponds to the top of the stack.
+     * 
+     * @param n Index (starting from top) of element to peek.
+     * 
+     * @return Element with index n.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
      */
-    public E peek(int n) throws PSErrorStackUnderflow {
+    public E peek(final int n) throws PSErrorStackUnderflow {
         int index = size() - 1 - n;
         if (index < 0) {
             throw new PSErrorStackUnderflow();
@@ -81,8 +108,13 @@ public class ArrayStack<E> extends ArrayList<E> {
         }
     }
     
-    /**  Looks at the object at the top of this stack without removing it
+    /**
+     * Looks at the object at the top of this stack without removing it
      * from the stack.
+     * 
+     * @return The top-most element.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
      */
     public E peek() throws PSErrorStackUnderflow {
         return peek(0);
