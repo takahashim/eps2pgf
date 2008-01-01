@@ -38,6 +38,7 @@ import net.sf.eps2pgf.io.devices.LOLDevice;
 import net.sf.eps2pgf.io.devices.NullDevice;
 import net.sf.eps2pgf.io.devices.OutputDevice;
 import net.sf.eps2pgf.io.devices.PGFDevice;
+import net.sf.eps2pgf.postscript.colors.PSColor;
 import net.sf.eps2pgf.postscript.colors.RGB;
 import net.sf.eps2pgf.postscript.errors.PSError;
 import net.sf.eps2pgf.postscript.errors.PSErrorDictStackUnderflow;
@@ -860,9 +861,9 @@ public class Interpreter {
      * PostScript op: currentcolor.
      */
     public void op_currentcolor() {
-        double[] values = gstate.current.color.levels;
-        for (int i = 0; i < values.length; i++) {
-            getOpStack().push(new PSObjectReal(values[i]));
+        PSColor color = gstate.current.color;
+        for (int i = 0; i < color.getNrComponents(); i++) {
+            getOpStack().push(new PSObjectReal(color.getLevel(i)));
         }
     }
     
@@ -2587,7 +2588,7 @@ public class Interpreter {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void op_setcolor() throws PSError, IOException {
-        int n = gstate.current.color.levels.length;
+        int n = gstate.current.color.getNrComponents();
         double[] newColor = new double[n];
         for (int i = 0; i < n; i++) {
             newColor[n - i - 1] = getOpStack().pop().toReal();
@@ -2667,7 +2668,7 @@ public class Interpreter {
         double brightness = getOpStack().pop().toReal();
         double saturaration = getOpStack().pop().toReal();
         double hue = getOpStack().pop().toReal();
-        double[] rgbValues = RGB.HSBtoRGB(hue, saturaration, brightness);
+        double[] rgbValues = RGB.convertHSBtoRGB(hue, saturaration, brightness);
         gstate.current.setcolorspace(new PSObjectName("DeviceRGB", true),
                                                                          false);
         gstate.current.setcolor(rgbValues);

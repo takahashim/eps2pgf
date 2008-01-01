@@ -22,87 +22,137 @@ package net.sf.eps2pgf.postscript.colors;
 
 import net.sf.eps2pgf.postscript.PSObjectArray;
 import net.sf.eps2pgf.postscript.PSObjectName;
+import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
 
+/**
+ * RGB color.
+ * 
+ * @author Wagenaars
+ *
+ */
 public class RGB extends PSColor {
-	// Default color is black.
-	static double[] defaultLevels = {0.0, 0.0, 0.0};
-	
-	/**
-	 * Instantiates a new RGB color.
-	 */
-	public RGB() {
-		levels = defaultLevels.clone();
-	}
 
-	public RGB clone() {
-		RGB newRGB = new RGB();
-		newRGB.levels = levels.clone();
-		return newRGB;
-	}
+    /** Default color is black. */
+    private static final double[] DEFAULT_LEVELS = {0.0, 0.0, 0.0};
+    
+    /**
+     * Instantiates a new RGB color.
+     */
+    public RGB() {
+        try {
+            setColor(DEFAULT_LEVELS);
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen
+        }
+    }
 
-	public double[] getCMYK() {
+    /**
+     * Creates an exact deep copy of this object.
+     * 
+     * @return an exact deep copy of this object.
+     */
+    public RGB clone() {
+        return (RGB) super.clone();
+    }
+
+    /**
+     * Gets the equivalent CMYK levels of this color.
+     * 
+     * @return the CMYK
+     */
+    public double[] getCMYK() {
         // First step: convert RGB to CMY
-        double c = 1.0 - levels[0];
-        double m = 1.0 - levels[1];
-        double y = 1.0 - levels[2];
+        double c = 1.0 - getLevel(0);
+        double m = 1.0 - getLevel(1);
+        double y = 1.0 - getLevel(2);
         
         // Second step: generate black component and alter the other components
         // to produce a better approximation of the original color.
         // See http://en.wikipedia.org/wiki/CMYK_color_model#Mapping_RGB_to_CMYK
         // And http://www.easyrgb.com/math.html
         double k = Math.min(c, Math.min(m, y));
-        if (k == 0) {
+        if (Math.abs(k - 1.0) < 1e-10) {
             c = 0;  m = 0;  y = 0;
         } else {
-            c = (c-k)/(1-k);
-            m = (m-k)/(1-k);
-            y = (y-k)/(1-k);
+            c = (c - k) / (1 - k);
+            m = (m - k) / (1 - k);
+            y = (y - k) / (1 - k);
         }
         
         double[] cmyk = {c, m, y, k};
         return cmyk;
-	}
-	
-	public PSObjectArray getColorSpace() {
-		PSObjectArray array = new PSObjectArray();
-		array.addToEnd(new PSObjectName("DeviceRGB", true));
-		return array;
-	}
-
-	public double getGray() {
-		return (0.3*levels[0] + 0.59*levels[1] + 0.11*levels[2]);
-	}
-
-	public double[] getHSB() {
-		return RGBtoHSB(levels[0], levels[1], levels[2]);
-	}
-
-	public int getNrComponents() {
-		return 3;
-	}
-
-	public double[] getRGB() {
-		return levels;
-	}
-	
+    }
+    
     /**
-     * Convert a color specified in HSB to RGB
-     * @param h Hue (ranging from 0 to 1)
+     * Gets a PostScript array describing the color space of this color.
+     * 
+     * @return array describing color space.
+     */
+    public PSObjectArray getColorSpace() {
+        PSObjectArray array = new PSObjectArray();
+        array.addToEnd(new PSObjectName("DeviceRGB", true));
+        return array;
+    }
+
+    /**
+     * Gets the gray level equivalent of this color.
+     * 
+     * @return the gray level
+     */
+    public double getGray() {
+        return (0.3 * getLevel(0) + 0.59 * getLevel(1) + 0.11 * getLevel(2));
+    }
+
+    /**
+     * Gets the equivalent HSB levels of this color.
+     * 
+     * @return the HSB
+     */
+    public double[] getHSB() {
+        return convertRGBtoHSB(getLevel(0), getLevel(1), getLevel(2));
+    }
+
+    /**
+     * Gets the number of color components required to specify this color.
+     * E.g. RGB has three and CMYK has four components.
+     * 
+     * @return the number of components for this color
+     */
+    public int getNrComponents() {
+        return 3;
+    }
+
+    /**
+     * Gets the equivalent RGB levels of this color.
+     * 
+     * @return the RGB
+     */
+    public double[] getRGB() {
+        double[] rgb = {getLevel(0), getLevel(1), getLevel(2)};
+        return rgb;
+    }
+    
+    /**
+     * Convert a color specified in HSB to RGB.
+     * 
+     * @param pH Hue (ranging from 0 to 1)
      * @param s Saturation (ranging from 0 to 1)
      * @param b Brightness (ranging from 0 to 1)
+     * 
      * @return Same color in RGB color space. Array with R, G, and B value.
      */
-    public static double[] HSBtoRGB(double h, double s, double b) {
+    public static double[] convertHSBtoRGB(final double pH, final double s,
+            final double b) {
         // See http://en.wikipedia.org/wiki/HSV_color_space
-        h = h % 1.0;
-        double Hi = Math.floor(h*6);
-        double f = h*6 - Hi;
+        double h = pH % 1.0;
+        double hi = Math.floor(h * 6);
+        double f = h * 6 - hi;
         double p = b * (1 - s);
-        double q = b * (1 - f*s);
-        double t = b * (1 - (1 - f)*s);
+        double q = b * (1 - f * s);
+        double t = b * (1 - (1 - f) * s);
         
         double[] rgb = new double[3];
-        switch ((int)Hi) {
+        switch ((int) hi) {
             case 0:
                 rgb[0] = b;  rgb[1] = t;  rgb[2] = p;
                 break;
@@ -119,6 +169,7 @@ public class RGB extends PSColor {
                 rgb[0] = t;  rgb[1] = p;  rgb[2] = b;
                 break;
             case 5:
+            default:
                 rgb[0] = b;  rgb[1] = p;  rgb[2] = q;
                 break;
                 
@@ -126,16 +177,17 @@ public class RGB extends PSColor {
         return rgb;
     }
     
-	/**
-	 * Convert an color in RGB to HSB (also called HSV)
-	 * 
-	 * @param r red value
-	 * @param g green value
-	 * @param b blue value
-	 * 
-	 * @return array with h, s, and v levels.
-	 */
-	public static double[] RGBtoHSB(double r, double g, double b) {
+    /**
+     * Convert an color in RGB to HSB (also called HSV).
+     * 
+     * @param r red value
+     * @param g green value
+     * @param b blue value
+     * 
+     * @return array with h, s, and v levels.
+     */
+    public static double[] convertRGBtoHSB(final double r, final double g,
+            final double b) {
         // See http://en.wikipedia.org/wiki/HSV_color_space
         double max = Math.max(r, Math.max(g, b));
         double min = Math.min(r, Math.min(g, b));
@@ -143,26 +195,26 @@ public class RGB extends PSColor {
         
         if (max == min) {
             h = 0.0;
-        } else if ( (max == r) && (g >= b) ) {
-            h = 1.0/6.0 * (g-b) / (max-min);
-        } else if ( (max == r) && (g < b) ) {
-            h = 1.0/6.0 * (g-b) / (max-min) + 1.0;
+        } else if ((max == r) && (g >= b)) {
+            h = 1.0 / 6.0 * (g - b) / (max - min);
+        } else if ((max == r) && (g < b)) {
+            h = 1.0 / 6.0 * (g - b) / (max - min) + 1.0;
         } else if (max == g) {
-            h = 1.0/6.0 * (b-r) / (max-min) + 1.0/3.0;
+            h = 1.0 / 6.0 * (b - r) / (max - min) + 1.0 / 3.0;
         } else {
-            h = 1.0/6.0 * (r-g) / (max-min) + 2.0/3.0;
+            h = 1.0 / 6.0 * (r - g) / (max - min) + 2.0 / 3.0;
         }
         
         if (max == 0.0) {
             s = 0.0;
         } else {
-            s = 1 - min/max;
+            s = 1 - min / max;
         }
         
         v = max;
         
         double[] hsb = {h, s, v};
         return hsb;
-	}
+    }
 
 }

@@ -517,21 +517,20 @@ public class PGFDevice implements OutputDevice {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void setColor(final PSColor color) throws IOException {
-        double[] colorLevels = color.levels;
-        if (colorLevels.length >= 4) {
+        if (color.getNrComponents() >= 4) {
             out.write("\\definecolor{eps2pgf_color}{cmyk}{"
-                    + COLOR_FORMAT.format(colorLevels[0])
-                    + "," + COLOR_FORMAT.format(colorLevels[1])
-                    + "," + COLOR_FORMAT.format(colorLevels[2])
-                    + "," + COLOR_FORMAT.format(colorLevels[3]) + "}");
-        } else if (colorLevels.length == 3) {
+                    + COLOR_FORMAT.format(color.getLevel(0))
+                    + "," + COLOR_FORMAT.format(color.getLevel(1))
+                    + "," + COLOR_FORMAT.format(color.getLevel(2))
+                    + "," + COLOR_FORMAT.format(color.getLevel(3)) + "}");
+        } else if (color.getNrComponents() == 3) {
             out.write("\\definecolor{eps2pgf_color}{rgb}{"
-                    + COLOR_FORMAT.format(colorLevels[0])
-                    + "," + COLOR_FORMAT.format(colorLevels[1])
-                    + "," + COLOR_FORMAT.format(colorLevels[2]) + "}");
+                    + COLOR_FORMAT.format(color.getLevel(0))
+                    + "," + COLOR_FORMAT.format(color.getLevel(1))
+                    + "," + COLOR_FORMAT.format(color.getLevel(2)) + "}");
         } else {
             out.write("\\definecolor{eps2pgf_color}{gray}{"
-                    + COLOR_FORMAT.format(colorLevels[0]) + "}");
+                    + COLOR_FORMAT.format(color.getLevel(0)) + "}");
         }
         
         out.write("\\pgfsetstrokecolor{eps2pgf_color}");
