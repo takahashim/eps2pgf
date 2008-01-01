@@ -3,7 +3,7 @@
 #
 # run_test_figures.py (part of Eps2pgf)
 #
-# Copyright 2007 Paul Wagenaars <pwagenaars@fastmail.fm>
+# Copyright 2007, 2008 Paul Wagenaars <pwagenaars@fastmail.fm>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
