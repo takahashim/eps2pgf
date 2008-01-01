@@ -29,74 +29,130 @@ import java.io.IOException;
  * @author Paul Wagenaars
  */
 public class EexecDecode extends InputStream {
-    /**
-     * <code>InputStream</code> from which encrypted data is read.
-     */
+    /** <code>InputStream</code> from which encrypted data is read. */
     private InputStream in;
     
-    /**
-     * Number of random bytes at start of encrypted data
-     */
+    /** Number of random bytes at start of encrypted data. */
     private int n;
     
-    /*
-     * Random variables used for decryption
-     */
-    private int R;
+    /** Random variable used for decryption. */
+    private int r;
+    
+    /** Random variable used for decryption. */
     private int c1;
+    
+    /** Random variable used for decryption. */
     private int c2;
     
-    /**
-     * Value of R at the time of the last <code>mark()</code>
-     */
+    /** Value of R at the time of the last <code>mark()</code>. */
     private int markedR;
     
     
     /**
-     * Wrap a eexec decryption layer around and input stream
-     * @param in Stream from which encrypted data will be read
+     * Wrap a eexec decryption layer around and input stream.
+     * 
+     * @param pIn Stream from which encrypted data will be read
      */
-    public EexecDecode (InputStream in) {
-        this.in = new HexDecode(in);
+    public EexecDecode(final InputStream pIn) {
+        in = new HexDecode(pIn);
         n = 4;
-        R = 55665;
+        r = 55665;
         c1 = 52845;
         c2 = 22719;
     }
     
     /**
-     * Wrap a eexec decryption layer around and input stream
-     * @param in Stream from which encrypted data will be read
+     * Wrap a eexec decryption layer around and input stream.
+     * 
+     * @param pIn Stream from which encrypted data will be read
      */
-    public EexecDecode (InputStream in, int password, boolean binaryInput) {
+    /**
+     * @param pIn Input stream.
+     * @param password Password used from decryption.
+     * @param binaryInput Is the input binary.
+     */
+    public EexecDecode(final InputStream pIn, final int password,
+            final boolean binaryInput) {
+        
         if (binaryInput) {
-            this.in = in;
+            this.in = pIn;
         } else {
-            this.in = new HexDecode(in);
+            this.in = new HexDecode(pIn);
         }
         n = 4;
-        R = password;
+        r = password;
         c1 = 52845;
         c2 = 22719;
     }
     
+    /**
+     * Estimate number of available characters.
+     * 
+     * @return Estimated number of available characters.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public int available() throws IOException {
         return (in.available() - n);
     }
     
+    /**
+     * Closes this input stream and releases any system resources associated
+     * with the stream.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     public void close() throws IOException {
-        in = null;
+        in.close();
     }
     
-    public void mark(int readlimit) {
+    /**
+     * Marks the current position in this input stream. A subsequent call to the
+     * reset method repositions this stream at the last marked position so that
+     * subsequent reads re-read the same bytes.
+     * 
+     * The readlimit arguments tells this input stream to allow that many bytes
+     * to be read before the mark position gets invalidated.
+     * 
+     * The general contract of mark is that, if the method markSupported returns
+     * true, the stream somehow remembers all the bytes read after the call to
+     * mark and stands ready to supply those same bytes again if and whenever
+     * the method reset is called. However, the stream is not required to
+     * remember any data at all if more than readlimit bytes are read from the
+     * stream before reset is called.
+     * 
+     * @param readlimit The maximum limit of bytes that can be read before the
+     * mark position becomes invalid.
+     */
+    public void mark(final int readlimit) {
         in.mark(readlimit + n);
-        markedR = R;
+        markedR = r;
     }
     
+    /**
+     * Tests if this input stream supports the mark and reset methods. Whether
+     * or not mark and reset are supported is an invariant property of a
+     * particular input stream instance.
+     * 
+     * @return <code>true</code> if this stream instance supports the mark and
+     * reset methods; <code>false</code> otherwise.
+     */
     public boolean markSupported() {
         return in.markSupported();
     }
     
+    /**
+     * Reads the next byte of data from the input stream. The value byte is
+     * returned as an int in the range 0 to 255. If no byte is available because
+     * the end of the stream has been reached, the value -1 is returned. This
+     * method blocks until input data is available, the end of the stream is
+     * detected, or an exception is thrown.
+     * 
+     * @throws IOException One or more invalid characters in input stream or an
+     * I/O error occurred.
+     * 
+     * @return The next byte of data, or -1 if the end of the stream is reached.
+     */
     public int read() throws IOException {
         if (in == null) {
             return -1;
@@ -109,26 +165,30 @@ public class EexecDecode extends InputStream {
             throw new IOException();
         }
         
-        int T = R >>> 8;
-        int P = (c ^ T);
-        R = ((c + R)*c1 + c2) & 0x0000FFFF;
+        int t = r >>> 8;
+        int p = (c ^ t);
+        r = ((c + r) * c1 + c2) & 0x0000FFFF;
         
         if (n > 0) {
             n--;
-            P = this.read();
-        } //else {
-            //System.out.print((char)P);
-        //}
+            p = this.read();
+        }
         
-        return P;
+        return p;
     }
     
+    /**
+     * Repositions this stream to the position at the time the mark method was
+     * last called on this input stream.
+     * 
+     * @throws IOException An I/O exception occurred.
+     */
     public void reset() throws IOException {
         if (in == null) {
             throw new IOException();
         }
         in.reset();
-        R = markedR;
+        r = markedR;
     }
     
 }
