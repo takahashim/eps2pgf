@@ -25,48 +25,57 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.postscript.errors.PSError;
 import net.sf.eps2pgf.postscript.errors.PSErrorIOError;
 import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
 
 /**
- * PostScript file object
+ * PostScript file object.
+ * 
  * @author Paul Wagenaars
  */
 public class PSObjectFile extends PSObject {
-    /**
-     * Input stream from which data is read
-     */
-    InputStream inStr;
+    
+    /** Input stream from which data is read. */
+    private InputStream inStr;
     
     /**
-     * Creates a new instance of PSObjectFile
-     * @param fileReader Reader to access the file
+     * Creates a new instance of PSObjectFile.
+     * 
+     * @param fileInputStream Reader to access the file
      */
-    public PSObjectFile(InputStream fileInputStream) {
-        this.inStr = fileInputStream;
-        this.isLiteral = false;
+    public PSObjectFile(final InputStream fileInputStream) {
+        if (fileInputStream != null) {
+            setStream(fileInputStream);
+        } else {
+            setStream(new StringInputStream(""));
+        }
+        isLiteral = false;
     }
     
     /**
      * PostScript operator 'closefile'. Breaks connection between this file
      * object and the <code>InputStream</code>.
+     * 
+     * @throws PSErrorIOError the PS error io error
      */
     public void closefile() throws PSErrorIOError {
         try {
-            inStr.close();
+            getStream().close();
         } catch (IOException e) {
             throw new PSErrorIOError();
         }
     }
     
     /**
-     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
-     * of composite object is not copied, but shared.
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The
+     * values of composite object is not copied, but shared.
+     * 
      * @return Shallow copy of this object.
      */
     public PSObjectFile dup() {
-        PSObjectFile dupFile = new PSObjectFile(inStr);
+        PSObjectFile dupFile = new PSObjectFile(getStream());
         dupFile.copyCommonAttributes(this);
         return dupFile;
     }
@@ -88,7 +97,7 @@ public class PSObjectFile extends PSObject {
     }
     
     /**
-     * PostScript operator: 'noaccess'
+     * PostScript operator: 'noaccess'.
      */
     public void noaccess() {
         access = ACCESS_NONE;
@@ -97,21 +106,27 @@ public class PSObjectFile extends PSObject {
     /**
      * Reads characters from this file and stores them in the supplied string
      * until the string is full or the end-of-file is encountered.
-     * @returns (Sub)string of the supplied string with the new characters. If
-     *          this string is shorter than the supplied string that indicates
-     *          that the end-of-file was reached before the string was full.
+     * 
+     * @param string The string.
+     * 
+     * @return (Sub)string of the supplied string with the new characters. If
+     * this string is shorter than the supplied string that indicates
+     * that the end-of-file was reached before the string was full.
+     * 
+     * @throws PSErrorIOError the PS error io error
      */
-    public PSObjectString readstring(PSObjectString string) throws PSErrorIOError {
+    public PSObjectString readstring(final PSObjectString string)
+            throws PSErrorIOError {
         int n = string.length();
         int length = n;
         try {
-            for (int i = 0 ; i < n ; i++) {
-                int chr = inStr.read();
+            for (int i = 0; i < n; i++) {
+                int chr = getStream().read();
                 if (chr == -1) {
                     length = i;
                     break;
                 }
-                string.set(i, (char)chr);
+                string.set(i, (char) chr);
             }
             return string.getinterval(0, length);
         } catch (IOException e) {
@@ -123,7 +138,8 @@ public class PSObjectFile extends PSObject {
     }
     
     /**
-     * Returns this object
+     * Returns this object.
+     * 
      * @return File object representation of this object
      */
     public PSObjectFile toFile() {
@@ -133,14 +149,16 @@ public class PSObjectFile extends PSObject {
     /**
      * Reads characters from this object, interpreting them as PostScript
      * code, until it has scanned and constructed an entire object.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError Unable to read a token from this object
+     * 
+     * @throws PSError Unable to read a token from this object.
+     * 
      * @return List with one or more objects. See PostScript manual under the
      * 'token' operator for more info.
      */
     public List<PSObject> token() throws PSError {
         PSObject any;
         try {
-            any = Parser.convertSingle(inStr);
+            any = Parser.convertSingle(getStream());
         } catch (IOException e) {
             throw new PSErrorIOError();
         }
@@ -155,11 +173,28 @@ public class PSObjectFile extends PSObject {
     }
 
     /**
-     * Returns the type of this object
+     * Returns the type of this object.
+     * 
      * @return Type of this object (see PostScript manual for possible values)
      */
     public String type() {
         return "filetype";
+    }
+
+    /**
+     * Sets the stream.
+     * 
+     * @param inputStream The input stream.
+     */
+    void setStream(final InputStream inputStream) {
+        inStr = inputStream;
+    }
+
+    /**
+     * @return the inStr
+     */
+    InputStream getStream() {
+        return inStr;
     }
 
 }

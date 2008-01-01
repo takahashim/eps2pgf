@@ -894,9 +894,11 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_currentfile() throws PSError {
-        PSObjectFile file = getExecStack().getTopmostFile().dup();
+        PSObjectFile file = getExecStack().getTopmostFile();
         if (file == null) {
             file = new PSObjectFile(null);
+        } else {
+            file = file.dup();
         }
         file.cvlit();
         getOpStack().push(file);
@@ -1252,7 +1254,7 @@ public class Interpreter {
         
         InputStream rawInStream;
         if (obj instanceof PSObjectFile) {
-            rawInStream = ((PSObjectFile) obj).inStr;
+            rawInStream = ((PSObjectFile) obj).getStream();
         } else if (obj instanceof PSObjectString) {
             rawInStream = new PSStringInputStream(((PSObjectString) obj));
         } else {
