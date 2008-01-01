@@ -125,7 +125,7 @@ public class CoordinatesPSTest {
     /** Test. @throws Exception the exception */
     @Test
     public void coordinatesTest8Currentmatrix() throws Exception {
-        String cmd = "matrix currentmatrix true";
+        String cmd = "matrix currentmatrix length 6 eq";
         assertTrue(Common.testString(interp, cmd));
     }
 

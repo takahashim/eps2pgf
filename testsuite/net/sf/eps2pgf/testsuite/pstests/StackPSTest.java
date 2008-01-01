@@ -76,7 +76,8 @@ public class StackPSTest {
     /** Type test. @throws Exception the exception */
     @Test
     public void stackTest3Dup() throws Exception {
-        String cmd = "(abcde) dup count 2 eq  /foo dup cvx xcheck true eq"
+        String cmd = "(abcde) dup count 2 eq 3 1 roll pop pop"
+            + " /foo dup cvx xcheck true eq"
             + " exch xcheck false eq";
         assertTrue(Common.testString(interp, cmd));
     }
@@ -115,7 +116,7 @@ public class StackPSTest {
     @Test
     public void stackTest8Index() throws Exception {
         String cmd = "(a)(b) (c) (d) 0 index (d) eq 5 1 roll (d)"
-            + " eq 5 1 roll (c) eq 5 1 roll (b) eq 5 1 roll (a)";
+            + " eq 5 1 roll (c) eq 5 1 roll (b) eq 5 1 roll (a) eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
@@ -158,7 +159,8 @@ public class StackPSTest {
     /** Type test. @throws Exception the exception */
     @Test
     public void stackTest14Count() throws Exception {
-        String cmd = "1 (b) 3 (d) 5 (f) count 6 eq";
+        String cmd = "1 (b) 3 (d) 5 (f) count 6 eq"
+            + " 7 1 roll pop pop pop pop pop pop";
         assertTrue(Common.testString(interp, cmd));
     }
 

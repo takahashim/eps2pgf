@@ -63,7 +63,7 @@ public class ArrayPSTest {
     @Test
     public void arrayTest1Array() throws Exception {
         String cmd = "3 array dup type /arraytype eq exch dup 0 get null eq"
-            + " exch dup 1 get null eq exch dup 2 get null eq";
+            + " exch dup 1 get null eq exch 2 get null eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
@@ -101,7 +101,7 @@ public class ArrayPSTest {
     @Test
     public void arrayTest6Put() throws Exception {
         String cmd = "/ar [5 17 3 8] def ar 2 (abcd) put ar 2 get (abcd) eq"
-            + " ar length 4";
+            + " ar length 4 eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
