@@ -230,7 +230,7 @@ public class Interpreter {
      * 
      * @return The current operand stack.
      */
-    ArrayStack<PSObject> getOpStack() {
+    public ArrayStack<PSObject> getOpStack() {
         return opStack;
     }
 
