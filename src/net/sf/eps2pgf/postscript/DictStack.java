@@ -37,20 +37,22 @@ import net.sf.eps2pgf.util.ArrayStack;
  * @author Paul Wagenaars
  */
 public class DictStack {
-    // Dictionary stack (except for the permanent dictionaries)
+    /** Dictionary stack (except for the permanent dictionaries). */
     private ArrayStack<PSObjectDict> dictStack = new ArrayStack<PSObjectDict>();
     
-    // User dictionary
+    /** User dictionary. */
     private PSObjectDict userdict = new PSObjectDict();
     
-    // Global dictionary
+    /** Global dictionary. */
     private PSObjectDict globaldict = new PSObjectDict();
     
-    // System dictionary
+    /** System dictionary. */
     private PSObjectDict systemdict = new PSObjectDict();
     
     
-    /** Create a new dictionary stack */
+    /**
+     *  Create a new dictionary stack.
+     */
     public DictStack(Interpreter interp) {
         fillSystemDict(interp);
         systemdict.readonly();

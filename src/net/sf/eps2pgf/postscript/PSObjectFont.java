@@ -60,67 +60,67 @@ public class PSObjectFont extends PSObject implements Cloneable {
     
     // Standard fields in font dictionary
     /** The fontinfo field name. */
-    public static String KEY_FONTINFO = "FontInfo";
+    public static final String KEY_FONTINFO = "FontInfo";
     
     /** The fontname field name. */
-    public static String KEY_FONTNAME = "FontName";
+    public static final String KEY_FONTNAME = "FontName";
     
     /** The encoding field name. */
-    public static String KEY_ENCODING = "Encoding";
+    public static final String KEY_ENCODING = "Encoding";
     
     /** The painttype field name. */
-    public static String KEY_PAINTTYPE = "PaintType";
+    public static final String KEY_PAINTTYPE = "PaintType";
     
     /** The fonttype field name. */
-    public static String KEY_FONTTYPE = "FontType";
+    public static final String KEY_FONTTYPE = "FontType";
     
     /** The fontmatrix field name. */
-    public static String KEY_FONTMATRIX = "FontMatrix";
+    public static final String KEY_FONTMATRIX = "FontMatrix";
     
     /** The fontbbox field name. */
-    public static String KEY_FONTBBOX = "FontBBox";
+    public static final String KEY_FONTBBOX = "FontBBox";
     
     /** The uniqueid field name. */
-    public static String KEY_UNIQUEID = "UniqueID";
+    public static final String KEY_UNIQUEID = "UniqueID";
     
     /** The metrics field name. */
-    public static String KEY_METRICS = "Metrics";
+    public static final String KEY_METRICS = "Metrics";
     
     /** The strokewidth field name. */
-    public static String KEY_STROKEWIDTH = "StrokeWidth";
+    public static final String KEY_STROKEWIDTH = "StrokeWidth";
     
     /** The private field name. */
-    public static String KEY_PRIVATE = "Private";
+    public static final String KEY_PRIVATE = "Private";
     
     /** The charstrings field name. */
-    public static String KEY_CHARSTRINGS = "CharStrings";
+    public static final String KEY_CHARSTRINGS = "CharStrings";
     
     /** The fid field name. */
-    public static String KEY_FID = "FID";
+    public static final String KEY_FID = "FID";
     
     // Standard fields in Private Dictionary
     /** The subrs field name. */
-    public static String KEY_PRV_SUBRS = "Subrs";
+    public static final String KEY_PRV_SUBRS = "Subrs";
     
     // Eps2pgf specific fields in font dictionary
     /** The latexprecode field name. */
-    public static String KEY_LATEXPRECODE = "LatexPreCode";
+    public static final String KEY_LATEXPRECODE = "LatexPreCode";
     
     /** The latexpostcode field name. */
-    public static String KEY_LATEXPOSTCODE = "LatexPostCode";
+    public static final String KEY_LATEXPOSTCODE = "LatexPostCode";
     
     /** The afm field name. */
-    public static String KEY_AFM = "AFM";
+    public static final String KEY_AFM = "AFM";
     
     /** The texstrings field name. */
-    public static String KEY_TEXSTRINGS = "TexStrings";
+    public static final String KEY_TEXSTRINGS = "TexStrings";
     
     // Field specific for Type 3 fonts
-    /** The BuildGlyph field name */
-    public static String KEY_BUILDGLYPH = "BuildGlyph";
+    /** The BuildGlyph field name. */
+    public static final String KEY_BUILDGLYPH = "BuildGlyph";
     
-    /** The BuildChar field name */
-    public static String KEY_BUILDCHAR = "BuildChar";
+    /** The BuildChar field name. */
+    public static final String KEY_BUILDCHAR = "BuildChar";
     
 
     /**

@@ -53,7 +53,12 @@ public class ArrayStack<E> extends ArrayList<E> {
         return item;
     }
     
-    /** Pops an object from the top of the stack.
+    /**
+     * Pops an object from the top of the stack.
+     * 
+     * @return The top-most element.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
      */
     public E pop() throws PSErrorStackUnderflow {
         int sz = size();
