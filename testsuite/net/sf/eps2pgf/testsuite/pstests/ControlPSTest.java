@@ -166,7 +166,8 @@ public class ControlPSTest {
     /** Test. @throws Exception the exception */
     @Test
     public void controlTest15Exit() throws Exception {
-        String cmd = "[1 2 3] {exit} forall  99 {exit} repeat true";
+        String cmd = "[1 2 3] {exit} forall 1 eq"
+            + " 99 {exit} repeat count 1 eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
@@ -187,14 +188,16 @@ public class ControlPSTest {
     /** Test. @throws Exception the exception */
     @Test
     public void controlTest18Stopped() throws Exception {
-        String cmd = "{add} stopped  {1 2} stopped false eq";
+        String cmd = "{add} stopped  {1 2} stopped false eq"
+            + " 3 1 roll 2 eq 3 1 roll 1 eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
     public void controlTest19Execstack() throws Exception {
-        String cmd = "{1 2 100 array execstack 3 4} exec pop pop dup length 1"
+        String cmd = "{1 2 100 array execstack 3 4} exec pop pop"
+            + " 3 1 roll pop pop dup length 1"
             + " sub get dup 0 get 3 eq  exch 1 get 4 eq";
         assertTrue(Common.testString(interp, cmd));
     }

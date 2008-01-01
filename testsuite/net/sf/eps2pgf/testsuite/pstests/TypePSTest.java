@@ -101,15 +101,18 @@ public class TypePSTest {
     /** Type test. @throws Exception the exception */
     @Test
     public void typeTest6Cvlit() throws Exception {
-        String cmd = "{1 2 add} dup cvlit exch bind exch 2 get type"
-            + " /operatortype eq  1 cvlit";
+        String cmd = "{1 2 add} dup cvlit exch bind pop 2 get type"
+            + " /operatortype eq  1 cvlit pop";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
     public void typeTest7Cvx() throws Exception {
-        String cmd = "[1 2 3]dup cvx exec count 4 eq 5 -1 roll exec count 5 eq";
+        String cmd = "[1 2 3]dup cvx exec count 4 eq"
+            + " 5 -1 roll exec count 5 eq"
+            + " exch pop 5 -1 roll 1 eq"
+            + " 5 -1 roll 2 eq 5 -1 roll 3 eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
@@ -145,7 +148,7 @@ public class TypePSTest {
     /** Type test. @throws Exception the exception */
     @Test
     public void typeTest12Noaccess() throws Exception {
-        String cmd = "[1 2] noaccess {/abc noaccess rcheck} stopped true eq"
+        String cmd = "[1 2] noaccess pop {/abc noaccess rcheck} stopped true eq"
             + " {9 dict executeonly noaccess} stopped true eq";
         assertTrue(Common.testString(interp, cmd));
     }
@@ -231,8 +234,8 @@ public class TypePSTest {
     /** Type test. @throws Exception the exception */
     @Test
     public void typeTest23Cvx() throws Exception {
-        String cmd = "/proc {{1} {2} /gt cvx} bind def proc";
-        cmd += " /proc load 2 get xcheck false eq";
+        String cmd = "/proc {{1} {2} /gt cvx} bind def proc xcheck";
+        cmd += " 3 1 roll pop pop /proc load 2 get xcheck false eq";
         assertTrue(Common.testString(interp, cmd));
     }
 

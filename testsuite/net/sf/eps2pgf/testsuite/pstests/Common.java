@@ -65,6 +65,9 @@ public final class Common {
                 if (!((PSObjectBool) obj).toBool()) {
                     return false;
                 }
+            } else {
+                // All objects must be booleans
+                return false;
             }
         }
         // If we found a boolean, it must have been true.

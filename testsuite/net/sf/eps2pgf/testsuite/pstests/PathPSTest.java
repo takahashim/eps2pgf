@@ -158,8 +158,12 @@ public class PathPSTest {
     /** Test. @throws Exception the exception */
     @Test
     public void pathTest14Flattenpath() throws Exception {
-        String cmd = "100 100 moveto 110 110 100 0 120 arc flattenpath {} {}"
-            + " {notgood} {} pathforall true";
+        String cmd = "100 100 moveto 110 110 100 0 120 arc flattenpath"
+            + " {} {} {notgood} {} pathforall"
+            + " 196.6 sub abs 0.1 lt" 
+            + " count 1 roll"
+            + " 1 1 count 4 sub {pop pop} for"
+            + " 100 sub abs 0.1 lt";
         assertTrue(Common.testString(interp, cmd));
     }
 

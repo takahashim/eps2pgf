@@ -69,7 +69,8 @@ public class DictPSTest {
     /** Test. @throws Exception the exception */
     @Test
     public void dictTest2Lessless() throws Exception {
-        String cmd = "<< 1 2 3 counttomark 3 eq";
+        String cmd = "<< 1 2 3 counttomark 3 eq"
+            + " 5 1 roll pop pop pop pop";
         assertTrue(Common.testString(interp, cmd));
     }
 
@@ -112,7 +113,8 @@ public class DictPSTest {
     /** Test. @throws Exception the exception */
     @Test
     public void dictTest8Def() throws Exception {
-        String cmd = "/str (abcdefghi) def (123) str cvs  str (123defghi) eq";
+        String cmd = "/str (abcdefghi) def (123) str cvs (123) eq"
+            + " str (123defghi) eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
@@ -219,14 +221,14 @@ public class DictPSTest {
     /** Test. @throws Exception the exception */
     @Test
     public void dictTest22Errordict() throws Exception {
-        String cmd = "errordict true";
+        String cmd = "errordict type /dicttype eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
     public void dictTest23Error() throws Exception {
-        String cmd = "$error true";
+        String cmd = "$error type /dicttype eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
