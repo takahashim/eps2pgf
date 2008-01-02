@@ -306,7 +306,7 @@ public class PGFDevice implements OutputDevice {
         double[] coor1 = gstate.CTM.transform(shading.getCoord(1.0));
 
         double maxS = 1.0;
-        if (shading.extend1) {
+        if (shading.getExtend1()) {
             // Find the s value for which the radius is big (0.3 meters ~
             // a4 paper).
             maxS = shading.getSForDistance(0.3 * 1e6 / scaling, 1,
