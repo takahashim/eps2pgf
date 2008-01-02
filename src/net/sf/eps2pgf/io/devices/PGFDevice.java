@@ -298,12 +298,12 @@ public class PGFDevice implements OutputDevice {
         // Convert coordinates and radii from user space to coordinate space
         // PGF does not support the Extend parameters for shadings. So we
         // try to emulate the effect.
-        double scaling = gstate.CTM.getMeanScaling();
-        double xScale = gstate.CTM.getXScaling() / scaling;
-        double yScale = gstate.CTM.getYScaling() / scaling;
-        double angle = gstate.CTM.getRotation();
-        double[] coor0 = gstate.CTM.transform(shading.getCoord(0.0));
-        double[] coor1 = gstate.CTM.transform(shading.getCoord(1.0));
+        double scaling = gstate.ctm.getMeanScaling();
+        double xScale = gstate.ctm.getXScaling() / scaling;
+        double yScale = gstate.ctm.getYScaling() / scaling;
+        double angle = gstate.ctm.getRotation();
+        double[] coor0 = gstate.ctm.transform(shading.getCoord(0.0));
+        double[] coor1 = gstate.ctm.transform(shading.getCoord(1.0));
 
         double maxS = 1.0;
         if (shading.getExtend1()) {
@@ -311,7 +311,7 @@ public class PGFDevice implements OutputDevice {
             // a4 paper).
             maxS = shading.getSForDistance(0.3 * 1e6 / scaling, 1,
                     Double.POSITIVE_INFINITY);
-            coor1 = gstate.CTM.transform(shading.getCoord(maxS));
+            coor1 = gstate.ctm.transform(shading.getCoord(maxS));
         }
         
         startScope();
@@ -423,14 +423,14 @@ public class PGFDevice implements OutputDevice {
         double lastOffset = gstate.deviceData.get("pgf_last_dashoffset")
                                 .toReal();
         
-        double scaling = gstate.CTM.getMeanScaling();
+        double scaling = gstate.ctm.getMeanScaling();
         PSObjectArray currentArray = new PSObjectArray();
-        for (int i = 0; i < gstate.dashpattern.size(); i++) {
-            currentArray.addToEnd(new PSObjectReal(gstate.dashpattern.get(i)
+        for (int i = 0; i < gstate.dashPattern.size(); i++) {
+            currentArray.addToEnd(new PSObjectReal(gstate.dashPattern.get(i)
                     .toReal() * scaling));
         }
         String currentPattern = currentArray.isis();
-        double currentOffset = gstate.dashoffset * scaling;
+        double currentOffset = gstate.dashOffset * scaling;
         
         if (!currentPattern.equals(lastPattern)
                 || (Math.abs(lastOffset - currentOffset) > 1e-10)) {
@@ -465,7 +465,7 @@ public class PGFDevice implements OutputDevice {
     void updateLinewidth(final GraphicsState gstate)
             throws PSError, IOException {
         double lastWidth = gstate.deviceData.get("pgf_last_linewidth").toReal();
-        double currentWidth = gstate.linewidth * gstate.CTM.getMeanScaling();
+        double currentWidth = gstate.lineWidth * gstate.ctm.getMeanScaling();
         if (Math.abs(currentWidth - lastWidth) > 1e-10) {
             out.write("\\pgfsetlinewidth{"
                     + LENGTH_FORMAT.format(1e-3 * currentWidth) + "mm}\n");

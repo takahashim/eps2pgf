@@ -45,7 +45,7 @@ public class GraphicsState implements Cloneable {
      * files to micrometers.
      * [a b c d tx ty] -> x' = a*x + b*y + tx ; y' = c*x + d*y * ty
      */
-    public PSObjectMatrix CTM = new PSObjectMatrix();
+    public PSObjectMatrix ctm = new PSObjectMatrix();
     
     /**
      * Current position in pt (before CTM is applied).
@@ -80,34 +80,29 @@ public class GraphicsState implements Cloneable {
     /**
      * Current line width (in user space coordinates).
      */
-    public double linewidth = 1.0;
+    public double lineWidth = 1.0;
     
     /**
      * Current dash pattern.
      */
-    public PSObjectArray dashpattern = new PSObjectArray();
+    public PSObjectArray dashPattern = new PSObjectArray();
     
     /**
      * Current dash offset.
      */
-    public double dashoffset = 0.0;
+    public double dashOffset = 0.0;
     
     
     /**
-     * Current output device.
+     * Reference to current output device.
      */
-    public OutputDevice device;
+    public OutputDevice deviceRef;
     
     /**
      * Dictionary that can be used by the output device to store information.
      * The contents of this dictionary is output device specific.
      */
     public PSObjectDict deviceData = new PSObjectDict();
-    
-    /**
-     * Link to the parent graphics state stack.
-     */
-    GstateStack parentStack;
     
     /**
      * Creates a new default graphics state.
@@ -117,14 +112,14 @@ public class GraphicsState implements Cloneable {
      * @param wDevice Output device.
      */
     public GraphicsState(final GstateStack parentGraphicsStack,
-    		final OutputDevice wDevice) {
-        this.parentStack = parentGraphicsStack;
-        this.device = wDevice;
+            final OutputDevice wDevice) {
+
+        deviceRef = wDevice;
                 
         initmatrix();
-        this.path = new Path(this.parentStack);
-        this.clippingPath = new Path(this.parentStack);
-        this.font = new PSObjectFont();
+        path = new Path(parentGraphicsStack);
+        clippingPath = new Path(parentGraphicsStack);
+        font = new PSObjectFont();
     }
     
     /**
@@ -141,11 +136,11 @@ public class GraphicsState implements Cloneable {
      * @throws PSErrorTypeCheck An object has an incorrect type
      */
     public void arc(final double x, final double y, final double r,
-    		final double pAngle1, final double pAngle2,
-    		final boolean isPositive)
-    		throws PSErrorRangeCheck, PSErrorTypeCheck {
-    	double angle1 = pAngle1;
-    	double angle2 = pAngle2;
+            final double pAngle1, final double pAngle2,
+            final boolean isPositive)
+            throws PSErrorRangeCheck, PSErrorTypeCheck {
+        double angle1 = pAngle1;
+        double angle2 = pAngle2;
         double mult = 1;
         if (!isPositive) {
             mult = -1;
@@ -163,10 +158,10 @@ public class GraphicsState implements Cloneable {
         double x0 = x + r * Math.cos(angle1);
         double y0 = y + r * Math.sin(angle1);
         if ((Math.abs(this.position[0] - x0) > 1e-6)
-        		|| (Math.abs(this.position[1] - y0) > 1e-6)) {
+                || (Math.abs(this.position[1] - y0) > 1e-6)) {
             lineto(x0, y0);
         } else if (Double.isNaN(this.position[0])
-        		|| Double.isNaN(this.position[1])) {
+                || Double.isNaN(this.position[1])) {
             moveto(x0, y0);
         }
         
@@ -175,7 +170,7 @@ public class GraphicsState implements Cloneable {
         double ang2 = angle1;
         double angleStep = mult * Math.PI / 2;
         for (double ang = angle1; mult * ang2 < mult * angle2;
-        		ang += angleStep) {
+                ang += angleStep) {
             ang1 = ang2;
             ang2 = angleStep * Math.floor((ang + angleStep) / angleStep);
             if (mult * angle2 < mult * ang2) {
@@ -191,7 +186,7 @@ public class GraphicsState implements Cloneable {
             double yControl = (1 - unitX0) * (3 - unitX0) / (3 * unitY0);
             double angControl = Math.atan2(yControl, xControl);
             double rControl = Math.sqrt(xControl * xControl
-            		+ yControl * yControl);
+                    + yControl * yControl);
             
             double x1 = x + r * rControl * Math.cos(mang - mult * angControl);
             double y1 = y + r * rControl * Math.sin(mang - mult * angControl);
@@ -220,7 +215,7 @@ public class GraphicsState implements Cloneable {
      * @throws PSError A PostScript error occurred.
      */
     public double[] arcto(final double x1, final double y1, final double x2,
-    		final double y2, final double r) throws PSError {
+            final double y2, final double r) throws PSError {
         double x0 = this.position[0];
         double y0 = this.position[1];
         
@@ -240,7 +235,7 @@ public class GraphicsState implements Cloneable {
         
         // Check if angle is -180, 0 or 180 degrees
         if ((Math.abs(Math.abs(alpha) - Math.PI) < 1e-3)
-        		|| (Math.abs(alpha) < 1e-3)) {
+                || (Math.abs(alpha) < 1e-3)) {
             lineto(x1, y1);
             double[] ret = {x1, y1, x1, y1};
             return ret;
@@ -269,11 +264,11 @@ public class GraphicsState implements Cloneable {
         // Wolfram Web Resource.
         // http://mathworld.wolfram.com/Line-LineIntersection.html 
         double num = det(det(p1x0, p1y0, p1x1, p1y1), p1x0 - p1x1,
-        		det(p2x1, p2y1, p2x2, p2y2), p2x1 - p2x2);
+                det(p2x1, p2y1, p2x2, p2y2), p2x1 - p2x2);
         double den = det(p1x0 - p1x1, p1y0 - p1y1, p2x1 - p2x2, p2y1 - p2y2);
         double x = num / den;
         num = det(det(p1x0, p1y0, p1x1, p1y1), p1y0 - p1y1,
-        		det(p2x1, p2y1, p2x2, p2y2), p2y1 - p2y2);
+                det(p2x1, p2y1, p2x2, p2y2), p2y1 - p2y2);
         double y = num / den;
 
         double ang1 = Math.PI + phi1 + posorneg * Math.PI / 2;
@@ -305,19 +300,22 @@ public class GraphicsState implements Cloneable {
      * @return Returns the deep copy.
      */
     public GraphicsState clone() throws CloneNotSupportedException {
-        GraphicsState newState =
-        	new GraphicsState(this.parentStack, this.device);
-        newState.CTM = this.CTM.clone();
-        newState.position = this.position.clone();
-        newState.path = this.path.clone();
-        newState.clippingPath = this.clippingPath.clone();
-        newState.font = this.font.clone();
-        newState.linewidth = this.linewidth;
-        newState.dashpattern = this.dashpattern.clone();
-        newState.dashoffset = this.dashoffset;
-        newState.color = this.color.clone();
-        newState.deviceData = this.deviceData.clone();
-        return newState;
+        
+        GraphicsState copy = (GraphicsState) super.clone();
+        copy.clippingPath = clippingPath.clone();
+        copy.color = color.clone();
+        copy.ctm = ctm.clone();
+        // dashoffset is primitive, it doesn't need to be cloned explicitly.
+        copy.dashPattern = dashPattern.clone();
+        // deviceRef is not cloned explicitly because it's a reference.
+        copy.deviceData = deviceData.clone();
+        // flat is primitive, it doesn't need to be cloned explicitly.
+        copy.font = font.clone();
+        // linewidth is primitive, it doesn't need to be cloned explicitly.
+        copy.path = path.clone();
+        copy.position = position.clone();
+        
+        return copy;
     }
     
     /**
@@ -382,13 +380,13 @@ public class GraphicsState implements Cloneable {
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
     public void curveto(final double x1, final double y1, final double x2,
-    		final double y2, final double x3, final double y3)
-    		throws PSErrorRangeCheck, PSErrorTypeCheck {
+            final double y2, final double x3, final double y3)
+            throws PSErrorRangeCheck, PSErrorTypeCheck {
         this.position[0] = x3;
         this.position[1] = y3;
-        double[] coor1 = this.CTM.transform(x1, y1);
-        double[] coor2 = this.CTM.transform(x2, y2);
-        double[] coor3 = this.CTM.transform(x3, y3);
+        double[] coor1 = this.ctm.transform(x1, y1);
+        double[] coor2 = this.ctm.transform(x2, y2);
+        double[] coor3 = this.ctm.transform(x3, y3);
         this.path.curveto(coor1, coor2, coor3);
     }
     
@@ -418,7 +416,7 @@ public class GraphicsState implements Cloneable {
     public void flattenpath() throws PSError, ProgramError {
         // Maximum difference between normal and flattened path. Defined in
         // device space coordinates. Assume a device resolution of 1200 dpi.
-        double deviceScale = this.device.defaultCTM().getMeanScaling();
+        double deviceScale = this.deviceRef.defaultCTM().getMeanScaling();
         double maxError = this.flat * 72.0 / 1200.0 * deviceScale;
 
         this.path = this.path.flattenpath(maxError);
@@ -436,7 +434,7 @@ public class GraphicsState implements Cloneable {
             throw new PSErrorNoCurrentPoint();
         }
         return this.path.getSections().get(this.path.getSections().size() - 1)
-        		.deviceCoor();
+                .deviceCoor();
     }
     
     /**
@@ -448,8 +446,8 @@ public class GraphicsState implements Cloneable {
     public double getMeanUserScaling() {
         double scaling = Double.NaN;
         try {
-            scaling = this.CTM.getMeanScaling()
-            		/ this.device.defaultCTM().getMeanScaling();
+            scaling = this.ctm.getMeanScaling()
+                    / this.deviceRef.defaultCTM().getMeanScaling();
         } catch (PSErrorRangeCheck e) {
             // this can never happen, since none of the matrices above are
             // controlled by the is user.
@@ -464,7 +462,7 @@ public class GraphicsState implements Cloneable {
      * Sets the current transformation matrix (CTM) to its default value.
      */
     public void initmatrix() {
-        this.CTM = this.device.defaultCTM();
+        this.ctm = this.deviceRef.defaultCTM();
     }
     
     /**
@@ -477,10 +475,10 @@ public class GraphicsState implements Cloneable {
      * @throws PSErrorTypeCheck The PostScript typecheck error occurred.
      */
     public void lineto(final double x, final double y)
-    		throws PSErrorRangeCheck, PSErrorTypeCheck {
+            throws PSErrorRangeCheck, PSErrorTypeCheck {
         this.position[0] = x;
         this.position[1] = y;
-        double[] transformed = this.CTM.transform(x, y);
+        double[] transformed = this.ctm.transform(x, y);
         this.path.lineto(transformed[0], transformed[1]);
     }
     
@@ -494,10 +492,10 @@ public class GraphicsState implements Cloneable {
      * @throws PSErrorTypeCheck The PostScript typecheck error occurred.
      */
     public void moveto(final double x, final double y)
-    		throws PSErrorRangeCheck, PSErrorTypeCheck {
+            throws PSErrorRangeCheck, PSErrorTypeCheck {
         this.position[0] = x;
         this.position[1] = y;
-        double[] transformed = this.CTM.transform(x, y);
+        double[] transformed = this.ctm.transform(x, y);
         this.path.moveto(transformed[0], transformed[1]);
     }
     
@@ -511,10 +509,10 @@ public class GraphicsState implements Cloneable {
      */
     public double[] pathbbox() throws PSError {
         double[] deviceCoors = this.path.boundingBox();
-        double[] ll = this.CTM.itransform(deviceCoors[0], deviceCoors[1]);
-        double[] lr = this.CTM.itransform(deviceCoors[2], deviceCoors[1]);
-        double[] ur = this.CTM.itransform(deviceCoors[2], deviceCoors[3]);
-        double[] ul = this.CTM.itransform(deviceCoors[0], deviceCoors[3]);
+        double[] ll = this.ctm.itransform(deviceCoors[0], deviceCoors[1]);
+        double[] lr = this.ctm.itransform(deviceCoors[2], deviceCoors[1]);
+        double[] ur = this.ctm.itransform(deviceCoors[2], deviceCoors[3]);
+        double[] ul = this.ctm.itransform(deviceCoors[0], deviceCoors[3]);
         double[] bbox = new double[4];
         bbox[0] = Math.min(Math.min(ll[0], lr[0]), Math.min(ur[0], ul[0]));
         bbox[1] = Math.min(Math.min(ll[1], lr[1]), Math.min(ur[1], ul[1]));
@@ -537,14 +535,14 @@ public class GraphicsState implements Cloneable {
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
     public void rcurveto(final double dx1, final double dy1, final double dx2,
-    		final double dy2, final double dx3, final double dy3)
-    		throws PSErrorRangeCheck, PSErrorTypeCheck {
-        double[] coor1 = this.CTM.transform(this.position[0] + dx1,
-        		this.position[1] + dy1);
-        double[] coor2 = this.CTM.transform(this.position[0] + dx2,
-        		this.position[1] + dy2);
-        double[] coor3 = this.CTM.transform(this.position[0] + dx3,
-        		this.position[1] + dy3);
+            final double dy2, final double dx3, final double dy3)
+            throws PSErrorRangeCheck, PSErrorTypeCheck {
+        double[] coor1 = this.ctm.transform(this.position[0] + dx1,
+                this.position[1] + dy1);
+        double[] coor2 = this.ctm.transform(this.position[0] + dx2,
+                this.position[1] + dy2);
+        double[] coor3 = this.ctm.transform(this.position[0] + dx3,
+                this.position[1] + dy3);
         this.position[0] = this.position[0] + dx3;
         this.position[1] = this.position[1] + dy3;
         this.path.curveto(coor1, coor2, coor3);
@@ -559,12 +557,12 @@ public class GraphicsState implements Cloneable {
      * @throws PSError A PostScript error occurred.
      */
     public void rlineto(final double dx, final double dy) throws PSError {
-        if (this.position[0] == Double.NaN) {
+        if (Double.isNaN(position[0])) {
             throw new PSErrorNoCurrentPoint();
         }
         this.position[0] = this.position[0] + dx;
         this.position[1] = this.position[1] + dy;
-        double[] transformed = this.CTM.transform(this.position);
+        double[] transformed = this.ctm.transform(this.position);
         this.path.lineto(transformed[0], transformed[1]);
     }
     
@@ -577,12 +575,12 @@ public class GraphicsState implements Cloneable {
      * @throws PSError A PostScript error occurred.
      */
     public void rmoveto(final double dx, final double dy) throws PSError {
-        if (this.position[0] == Double.NaN) {
+        if (Double.isNaN(position[0])) {
             throw new PSErrorNoCurrentPoint();
         }
         this.position[0] = this.position[0] + dx;
         this.position[1] = this.position[1] + dy;
-        double[] transformed = this.CTM.transform(this.position);
+        double[] transformed = this.ctm.transform(this.position);
         this.path.moveto(transformed[0], transformed[1]);
     }
     
@@ -595,8 +593,8 @@ public class GraphicsState implements Cloneable {
      * @throws PSError A PostScript error occurred.
      */
     public void setcolor(final double[] newColor) throws IOException, PSError {
-    	this.color.setColor(newColor);
-    	this.device.setColor(this.color);
+        this.color.setColor(newColor);
+        this.deviceRef.setColor(this.color);
     }
     
     /**
@@ -610,11 +608,11 @@ public class GraphicsState implements Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void setcolorspace(final PSObject obj, final boolean writeDevice)
-    		throws PSError, IOException {
-    	this.color = ColorUtils.autoSetColorSpace(obj);
-    	
+            throws PSError, IOException {
+        this.color = ColorUtils.autoSetColorSpace(obj);
+        
         if (writeDevice) {
-        	this.device.setColor(this.color);
+            this.deviceRef.setColor(this.color);
         }
     }
     
@@ -629,11 +627,11 @@ public class GraphicsState implements Cloneable {
     public void updatePosition() throws PSErrorRangeCheck, PSErrorTypeCheck {
         try {
             double[] posd = getCurrentPosInDeviceSpace();
-            this.position = this.CTM.itransform(posd);
+            this.position = this.ctm.itransform(posd);
         } catch (PSErrorNoCurrentPoint e) {
             // Apparently there is no current point
-        	this.position[0] = Double.NaN;
-        	this.position[1] = Double.NaN;
+            this.position[0] = Double.NaN;
+            this.position[1] = Double.NaN;
         }
     }
     

@@ -163,7 +163,7 @@ public class Interpreter {
         // Create dictionary stack
         this.setDictStack(new DictStack(this));
 
-        this.gstate.current.device.init(this.gstate.current);
+        this.gstate.current.deviceRef.init(this.gstate.current);
         
         this.gstate.current.setcolorspace(
                 new PSObjectName("DeviceGray", true), true);
@@ -261,10 +261,10 @@ public class Interpreter {
                     log.severe("      (rest of stack suppressed)");
                 }
             }
-            this.gstate.current.device.finish();
+            this.gstate.current.deviceRef.finish();
             throw e;
         }
-        this.gstate.current.device.finish();
+        this.gstate.current.deviceRef.finish();
     }
     
     /**
@@ -713,7 +713,7 @@ public class Interpreter {
      */
     public void op_clip() throws PSErrorUnimplemented, IOException {
         gstate.current.clip();
-        gstate.current.device.clip(gstate.current.clippingPath);
+        gstate.current.deviceRef.clip(gstate.current.clippingPath);
     }
     
     /**
@@ -753,7 +753,7 @@ public class Interpreter {
      */
     public void op_concat() throws PSError {
         PSObjectMatrix matrix = getOpStack().pop().toMatrix();
-        gstate.current.CTM.concat(matrix);
+        gstate.current.ctm.concat(matrix);
         gstate.current.updatePosition();
     }
     
@@ -887,8 +887,8 @@ public class Interpreter {
      * PostScript op: currentdash.
      */
     public void op_currentdash() {
-        opStack.push(gstate.current.dashpattern.clone());
-        opStack.push(new PSObjectReal(gstate.current.dashoffset));
+        opStack.push(gstate.current.dashPattern.clone());
+        opStack.push(new PSObjectReal(gstate.current.dashOffset));
     }
     
     /**
@@ -943,7 +943,7 @@ public class Interpreter {
      * PostScript op: currentlinewidth.
      */
     public void op_currentlinewidth() {
-        getOpStack().push(new PSObjectReal(gstate.current.linewidth));
+        getOpStack().push(new PSObjectReal(gstate.current.lineWidth));
     }
     
     /**
@@ -953,7 +953,7 @@ public class Interpreter {
      */
     public void op_currentmatrix() throws PSError {
         PSObjectMatrix matrix = getOpStack().pop().toMatrix();
-        matrix.copy(gstate.current.CTM);
+        matrix.copy(gstate.current.ctm);
         getOpStack().push(matrix);
     }
     
@@ -964,7 +964,7 @@ public class Interpreter {
      */
     public void op_currentpoint() throws PSError {
         double[] currentDevice = gstate.current.getCurrentPosInDeviceSpace();
-        double[] currentUser = gstate.current.CTM.itransform(currentDevice);
+        double[] currentUser = gstate.current.ctm.itransform(currentDevice);
         getOpStack().push(new PSObjectReal(currentUser[0]));
         getOpStack().push(new PSObjectReal(currentUser[1]));
     }
@@ -1160,7 +1160,7 @@ public class Interpreter {
      */
     public void op_defaultmatrix() throws PSError {
         PSObjectMatrix matrix = getOpStack().pop().toMatrix();
-        matrix.copy(gstate.current.device.defaultCTM());
+        matrix.copy(gstate.current.deviceRef.defaultCTM());
         getOpStack().push(matrix);
     }
     
@@ -1225,7 +1225,7 @@ public class Interpreter {
         }
         double dy;
         if (matrix == null) {
-            matrix = gstate.current.CTM;
+            matrix = gstate.current.ctm;
             dy = obj.toReal();
         } else {
             dy = getOpStack().pop().toReal();
@@ -1290,7 +1290,7 @@ public class Interpreter {
      */
     public void op_eoclip() throws PSErrorUnimplemented, IOException {
         gstate.current.clip();
-        gstate.current.device.eoclip(gstate.current.clippingPath);
+        gstate.current.deviceRef.eoclip(gstate.current.clippingPath);
     }
     
     /**
@@ -1300,7 +1300,7 @@ public class Interpreter {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void op_eofill() throws PSError, IOException {
-        gstate.current.device.eofill(gstate.current.path);
+        gstate.current.deviceRef.eofill(gstate.current.path);
         op_newpath();
     }
     
@@ -1308,7 +1308,7 @@ public class Interpreter {
      * Internal Eps2pgf operator: eps2pgfgetmetrics.
      */
     public void op_eps2pgfgetmetrics() {
-        double[] metrics = gstate.current.device.eps2pgfGetMetrics();
+        double[] metrics = gstate.current.deviceRef.eps2pgfGetMetrics();
         PSObjectArray array = new PSObjectArray(metrics);
         getOpStack().push(array);
     }
@@ -1419,7 +1419,7 @@ public class Interpreter {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void op_fill() throws PSError, IOException {
-        gstate.current.device.fill(gstate.current.path);
+        gstate.current.deviceRef.fill(gstate.current.path);
         op_newpath();
     }
     
@@ -1585,7 +1585,7 @@ public class Interpreter {
      */
     public void op_grestore() throws PSError, IOException {
         gstate.restoreGstate();
-        gstate.current.device.endScope();
+        gstate.current.deviceRef.endScope();
     }
     
     /**
@@ -1596,7 +1596,7 @@ public class Interpreter {
      */
     public void op_gsave() throws PSError, IOException {
         gstate.saveGstate();
-        gstate.current.device.startScope();
+        gstate.current.deviceRef.startScope();
     }
     
     /**
@@ -1653,7 +1653,7 @@ public class Interpreter {
         }
         double dy;
         if (matrix == null) {
-            matrix = gstate.current.CTM;
+            matrix = gstate.current.ctm;
             dy = obj.toReal();
         } else {
             dy = getOpStack().pop().toReal();
@@ -1739,7 +1739,7 @@ public class Interpreter {
      */
     public void op_initclip() throws IOException, PSErrorUnimplemented {
         gstate.current.clippingPath = defaultClippingPath.clone();
-        gstate.current.device.clip(gstate.current.clippingPath);
+        gstate.current.deviceRef.clip(gstate.current.clippingPath);
     }
     
     /**
@@ -1774,7 +1774,7 @@ public class Interpreter {
         }
         double y;
         if (matrix == null) {
-            matrix = gstate.current.CTM;
+            matrix = gstate.current.ctm;
             y = obj.toReal();
         } else {
             y = getOpStack().pop().toReal();
@@ -1920,7 +1920,7 @@ public class Interpreter {
         font.setKey("FontMatrix", fontMatrix);
         
         // Calculate the fontsize in LaTeX points
-        PSObjectMatrix ctm = gstate.current.CTM.clone();
+        PSObjectMatrix ctm = gstate.current.ctm.clone();
         ctm.concat(fontMatrix);
         double fontSize = ctm.getMeanScaling() / 2.54 * 72.27;
         font.setKey("FontSize", new PSObjectReal(fontSize));
@@ -2058,7 +2058,7 @@ public class Interpreter {
      */
     public void op_nulldevice() {
         OutputDevice nullDevice = new NullDevice();
-        gstate.current.device = nullDevice;
+        gstate.current.deviceRef = nullDevice;
         gstate.current.initmatrix();
     }
 
@@ -2099,7 +2099,7 @@ public class Interpreter {
         PSObjectArray move = getOpStack().pop().toProc();
         
         ArrayList<PathSection> path = gstate.current.path.getSections();
-        PSObjectMatrix ctm = gstate.current.CTM;
+        PSObjectMatrix ctm = gstate.current.ctm;
         
         try {
             for (int i = 0; i < path.size(); i++) {
@@ -2427,7 +2427,7 @@ public class Interpreter {
             getOpStack().push(matrix);
         } else {
             angle = obj.toReal();
-            gstate.current.CTM.rotate(angle);
+            gstate.current.ctm.rotate(angle);
             gstate.current.updatePosition();
         }
     }
@@ -2473,7 +2473,7 @@ public class Interpreter {
         } else {
             sy = obj.toReal();
             sx = getOpStack().pop().toReal();
-            gstate.current.CTM.scale(sx, sy);
+            gstate.current.ctm.scale(sx, sy);
             gstate.current.updatePosition();
         }
     }
@@ -2540,7 +2540,7 @@ public class Interpreter {
         double llx = getOpStack().pop().toReal();
         double wy = getOpStack().pop().toReal();
         double wx = getOpStack().pop().toReal();
-        gstate.current.device = new CacheDevice(wx, wy, llx, lly, urx, ury);
+        gstate.current.deviceRef = new CacheDevice(wx, wy, llx, lly, urx, ury);
         gstate.current.initmatrix();
     }
     
@@ -2562,7 +2562,7 @@ public class Interpreter {
         double llx = getOpStack().pop().toReal();
         double w0y = getOpStack().pop().toReal();
         double w0x = getOpStack().pop().toReal();
-        gstate.current.device = new CacheDevice(w0x, w0y, llx, lly, urx, ury);
+        gstate.current.deviceRef = new CacheDevice(w0x, w0y, llx, lly, urx, ury);
         gstate.current.initmatrix();
     }
     
@@ -2619,8 +2619,8 @@ public class Interpreter {
         double offset = getOpStack().pop().toReal();
         PSObjectArray array = getOpStack().pop().toArray();
         
-        gstate.current.dashpattern = array;
-        gstate.current.dashoffset = offset;
+        gstate.current.dashPattern = array;
+        gstate.current.dashOffset = offset;
     }
     
     /**
@@ -2684,7 +2684,7 @@ public class Interpreter {
      */
     public void op_setlinecap() throws PSError, IOException {
         int cap = getOpStack().pop().toNonNegInt();
-        gstate.current.device.setlinecap(cap);
+        gstate.current.deviceRef.setlinecap(cap);
     }
    
     /**
@@ -2695,7 +2695,7 @@ public class Interpreter {
      */
     public void op_setlinejoin() throws PSError, IOException {
         int join = getOpStack().pop().toNonNegInt();
-        gstate.current.device.setlinejoin(join);
+        gstate.current.deviceRef.setlinejoin(join);
     }
    
     /**
@@ -2706,7 +2706,7 @@ public class Interpreter {
      */
     public void op_setlinewidth() throws PSError, IOException {
         double lineWidth = getOpStack().pop().toReal();
-        gstate.current.linewidth = Math.abs(lineWidth);
+        gstate.current.lineWidth = Math.abs(lineWidth);
     }
    
     /**
@@ -2716,7 +2716,7 @@ public class Interpreter {
      */
     public void op_setmatrix() throws PSError {
         PSObjectMatrix matrix = getOpStack().pop().toMatrix();
-        gstate.current.CTM.copy(matrix);
+        gstate.current.ctm.copy(matrix);
     }
     
     /**
@@ -2733,7 +2733,7 @@ public class Interpreter {
         if (num < 1.0) {
             throw new PSErrorRangeCheck();
         }
-        gstate.current.device.setmiterlimit(num);
+        gstate.current.deviceRef.setmiterlimit(num);
     }
     
     /**
@@ -2773,7 +2773,7 @@ public class Interpreter {
      */
     public void op_shfill() throws PSError, IOException {
         PSObjectDict dict = getOpStack().pop().toDict();
-        gstate.current.device.shfill(dict, gstate.current);
+        gstate.current.deviceRef.shfill(dict, gstate.current);
     }
     
     /**
@@ -2785,7 +2785,7 @@ public class Interpreter {
      */
     public void op_show() throws PSError, IOException, ProgramError {
         PSObjectString string = getOpStack().pop().toPSString();
-        double[] dpos = textHandler.showText(gstate.current.device, string);
+        double[] dpos = textHandler.showText(gstate.current.deviceRef, string);
         gstate.current.rmoveto(dpos[0], dpos[1]);
     }
     
@@ -2879,7 +2879,7 @@ public class Interpreter {
         PSObjectString string = getOpStack().pop().toPSString();
         string.checkAccess(false, true, false);
         
-        double[] dpos = textHandler.showText(gstate.current.device,
+        double[] dpos = textHandler.showText(gstate.current.deviceRef,
                                              string, true);
         getOpStack().push(new PSObjectReal(dpos[0]));
         getOpStack().push(new PSObjectReal(dpos[1]));
@@ -2892,7 +2892,7 @@ public class Interpreter {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void op_stroke() throws PSError, IOException {
-        gstate.current.device.stroke(gstate.current);
+        gstate.current.deviceRef.stroke(gstate.current);
         op_newpath();
     }
    
@@ -2985,7 +2985,7 @@ public class Interpreter {
         }
         double y;
         if (matrix == null) {
-            matrix = gstate.current.CTM;
+            matrix = gstate.current.ctm;
             y = obj.toReal();
         } else {
             y = getOpStack().pop().toReal();
@@ -3013,7 +3013,7 @@ public class Interpreter {
         } else {
             ty = obj.toReal();
             tx = getOpStack().pop().toReal();
-            gstate.current.CTM.translate(tx, ty);
+            gstate.current.ctm.translate(tx, ty);
             gstate.current.updatePosition();
         }
     }

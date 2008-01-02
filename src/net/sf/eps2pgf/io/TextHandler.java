@@ -104,10 +104,10 @@ public class TextHandler {
         
         PSObjectArray charNames = string.decode(currentFont.getEncoding());
         
-        double angle = gstate.current.CTM.getRotation();
+        double angle = gstate.current.ctm.getRotation();
         
         // Calculate scaling and fontsize in points (=1/72 inch)
-        double scaling = gstate.current.CTM.getMeanScaling();
+        double scaling = gstate.current.ctm.getMeanScaling();
 
         BoundingBox bbox = currentFont.getBBox(charNames);
 
@@ -127,7 +127,7 @@ public class TextHandler {
         // Determine current point shift in user space coordinates
         double[] showShift = shiftPos(currentFont.getWidth(charNames), 0,
                 scaling, angle);
-        showShift = gstate.current.CTM.idtransform(showShift);
+        showShift = gstate.current.ctm.idtransform(showShift);
         gstate.current.rmoveto(showShift[0], showShift[1]);
     }
     
@@ -242,10 +242,10 @@ public class TextHandler {
             text = currentFont.charNames2texStrings(charNames);            
         }
         
-        double angle = gstate.current.CTM.getRotation();
+        double angle = gstate.current.ctm.getRotation();
         
         // Calculate scaling and font size in points (= 1/72 inch)
-        double scaling = gstate.current.CTM.getMeanScaling();
+        double scaling = gstate.current.ctm.getMeanScaling();
         double fontsize = currentFont.getFontSize()
                             * gstate.current.getMeanUserScaling();
 
@@ -298,7 +298,7 @@ public class TextHandler {
         // Determine current point shift in user space coordinates
         double[] showShift = shiftPos(currentFont.getWidth(charNames), 0,
                 scaling, angle);
-        showShift = gstate.current.CTM.idtransform(showShift);
+        showShift = gstate.current.ctm.idtransform(showShift);
         
         return showShift;
     }
