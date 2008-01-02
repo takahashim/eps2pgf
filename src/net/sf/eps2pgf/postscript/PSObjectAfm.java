@@ -46,7 +46,9 @@ import org.fontbox.util.BoundingBox;
  * @author Paul Wagenaars
  */
 public class PSObjectAfm extends PSObject implements Cloneable {
-    FontMetric fontMetrics;
+    
+    /** Stores all font metrics. */
+    private FontMetric fontMetrics;
     
     /** Subrs entry from private dictionary. */
     private List<List<PSObject>> subrs;
@@ -80,8 +82,10 @@ public class PSObjectAfm extends PSObject implements Cloneable {
      * @param fontDict Font dictionary of the font.
      * 
      * @throws PSError a PostScript error occurred
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectAfm(PSObjectDict fontDict) throws PSError, ProgramError {
+    public PSObjectAfm(final PSObjectDict fontDict)
+            throws PSError, ProgramError {
         int fontType;
         try {
             fontType = fontDict.get("FontType").toInt();
@@ -117,11 +121,21 @@ public class PSObjectAfm extends PSObject implements Cloneable {
     }
     
     /**
-     * Convert a PostScript CharString to a CharMetric object
+     * Convert a PostScript CharString to a CharMetric object.
+     * 
+     * @param charName The character name.
+     * @param charString The character string.
+     * 
+     * @return Character metric
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public CharMetric charString2CharMetric(String charName, String charString) throws PSError {
+    public CharMetric charString2CharMetric(final String charName,
+            final String charString) throws PSError {
+        
         StringInputStream strInStream = new StringInputStream(charString);
-        InputStream decodedCharString = new EexecDecode(strInStream, 4330, true);
+        InputStream decodedCharString =
+            new EexecDecode(strInStream, 4330, true);
         List<PSObject> tokens = decodeCharString(decodedCharString);
         int[] sb = new int[2];
         int[] w = new int[2];
@@ -138,22 +152,27 @@ public class PSObjectAfm extends PSObject implements Cloneable {
         charMetric.setWx(w[0]);
         charMetric.setWy(w[1]);
         BoundingBox boundingBox = new BoundingBox();
-        boundingBox.setLowerLeftX((float)bbox[0]);
-        boundingBox.setLowerLeftY((float)bbox[1]);
-        boundingBox.setUpperRightX((float)bbox[2]);
-        boundingBox.setUpperRightY((float)bbox[3]);
+        boundingBox.setLowerLeftX((float) bbox[0]);
+        boundingBox.setLowerLeftY((float) bbox[1]);
+        boundingBox.setUpperRightX((float) bbox[2]);
+        boundingBox.setUpperRightY((float) bbox[3]);
         charMetric.setBoundingBox(boundingBox);
         
         return charMetric;
     }
     
     /**
-     * Convert a list of integers to CharString integers and commands
-     * @in Decrypted InputStream of CharString
+     * Convert a list of integers to CharString integers and commands.
+     * 
+     * @param in Decrypted InputStream of CharString
+     * 
      * @return List with CharString integers and commands. The commands are
-     *         represented as executable names.
+     * represented as executable names.
+     * 
+     * @throws PSErrorInvalidFont The font is invalid.
      */
-    public List<PSObject> decodeCharString(InputStream in) throws PSErrorInvalidFont {
+    public List<PSObject> decodeCharString(final InputStream in)
+            throws PSErrorInvalidFont {
         List<PSObject> out = new ArrayList<PSObject>();
         try {
             while (true) {
@@ -208,18 +227,19 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                 } else if (v <= 250) {
                     // it's a two byte positive integer
                     int w = in.read();
-                    out.add(new PSObjectInt( ((v - 247) * 256) + w + 108 ));
+                    out.add(new PSObjectInt(((v - 247) * 256) + w + 108));
                 } else if (v <= 254) {
                     // it's a two byte negative integer
                     int w = in.read();
-                    out.add(new PSObjectInt( -((v - 251) * 256) - w - 108 ));
+                    out.add(new PSObjectInt(-((v - 251) * 256) - w - 108));
                 } else {
                     // it's a 32-bit bit integer (5 bytes in total)
                     int b3 = in.read();
                     int b2 = in.read();
                     int b1 = in.read();
                     int b0 = in.read();
-                    out.add(new PSObjectInt((b3 << 24) | (b2 << 16) | (b1 << 8) | (b0)));
+                    out.add(new PSObjectInt((b3 << 24) | (b2 << 16) | (b1 << 8)
+                            | (b0)));
                 }
             }
         } catch (IOException e) {
@@ -266,19 +286,26 @@ public class PSObjectAfm extends PSObject implements Cloneable {
         return isis().hashCode();
     }
     
-    /** 
-     * @param subrs Array with subroutines. Value of 'Subrs' entry in 'Private'
+    /**
+     * Parses the subrs list.
+     * 
+     * @param pSubrs Array with subroutines. Value of 'Subrs' entry in 'Private'
      * dictionary.
+     * 
      * @return List with all subroutines. Each subroutines consists of a list
      * with PostScript objects.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occured.
+     * 
+     * @throws PSError A PostScript error occured.
      */
-    public List<List<PSObject>> parseSubrs(PSObjectArray subrs) throws PSError {
-        int N = subrs.size();
-        List<List<PSObject>> subrList = new ArrayList<List<PSObject>>(N);
-        for (int i = 0 ; i < N ; i++) {
-            PSObjectString inString = subrs.get(i).toPSString();
-            StringInputStream inStream = new StringInputStream(inString.toString());
+    public List<List<PSObject>> parseSubrs(final PSObjectArray pSubrs)
+            throws PSError {
+        
+        int nrSubrs = pSubrs.size();
+        List<List<PSObject>> subrList = new ArrayList<List<PSObject>>(nrSubrs);
+        for (int i = 0; i < nrSubrs; i++) {
+            PSObjectString inString = pSubrs.get(i).toPSString();
+            StringInputStream inStream = new StringInputStream(inString
+                                                                   .toString());
             InputStream decodedStream = new EexecDecode(inStream, 4330, true);
             List<PSObject> subroutine = decodeCharString(decodedStream);
             subrList.add(subroutine);
@@ -287,16 +314,20 @@ public class PSObjectAfm extends PSObject implements Cloneable {
     }
     
     /**
-     * Interpret a CharString and builds the path corresponding the
+     * Interpret a CharString and builds the path.
+     * 
      * @param execStack Stack with object that will be executed.
-     * @param paramSb Pointer to array with two values. These values are the X- and
-     * Y-coordinate of the left side bearing.
-     * @param paramW Pointer to array with two values. These values are the X- and
-     * Y-coordinate of the 'width' vector.
+     * @param paramSb Pointer to array with two values. These values are the X-
+     * and Y-coordinate of the left side bearing.
+     * @param paramW Pointer to array with two values. These values are the X-
+     * and Y-coordinate of the 'width' vector.
+     * 
      * @return Path describing the character
-     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public Path interpretCharString(List<PSObject> execStack, int[] paramSb, int[] paramW) throws PSError {
+    public Path interpretCharString(final List<PSObject> execStack,
+            final int[] paramSb, final int[] paramW) throws PSError {
         GstateStack gstate = new GstateStack(new NullDevice());
         ArrayStack<PSObject> opStack = new ArrayStack<PSObject>();
         
@@ -324,7 +355,8 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                     int dx2 = opStack.pop().toInt();
                     int dy1 = opStack.pop().toInt();
                     int dx1 = opStack.pop().toInt();
-                    gstate.current.rcurveto(dx1, dy1, (dx1+dx2), (dy1+dy2), (dx1+dx2+dx3), (dy1+dy2+dy3));
+                    gstate.current.rcurveto(dx1, dy1, (dx1 + dx2), (dy1 + dy2),
+                            (dx1 + dx2 + dx3), (dy1 + dy2 + dy3));
                 } else if (cmd.equals("vhcurveto")) {
                     int dy3 = 0;
                     int dx3 = opStack.pop().toInt();
@@ -332,7 +364,8 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                     int dx2 = opStack.pop().toInt();
                     int dy1 = opStack.pop().toInt();
                     int dx1 = 0;
-                    gstate.current.rcurveto(dx1, dy1, (dx1+dx2), (dy1+dy2), (dx1+dx2+dx3), (dy1+dy2+dy3));
+                    gstate.current.rcurveto(dx1, dy1, (dx1 + dx2), (dy1 + dy2),
+                            (dx1 + dx2 + dx3), (dy1 + dy2 + dy3));
                 } else if (cmd.equals("hvcurveto")) {
                     int dy3 = opStack.pop().toInt();
                     int dx3 = 0;
@@ -340,13 +373,16 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                     int dx2 = opStack.pop().toInt();
                     int dy1 = 0;
                     int dx1 = opStack.pop().toInt();
-                    gstate.current.rcurveto(dx1, dy1, (dx1+dx2), (dy1+dy2), (dx1+dx2+dx3), (dy1+dy2+dy3));
+                    gstate.current.rcurveto(dx1, dy1, (dx1 + dx2), (dy1 + dy2),
+                            (dx1 + dx2 + dx3), (dy1 + dy2 + dy3));
                 } else if (cmd.equals("hstem")) {
-                    // Not much to for this command, except for popping two values from the stack
+                    // Not much to for this command, except for popping two
+                    // values from the stack.
                     opStack.pop().toInt();  // dy
                     opStack.pop().toInt();  // y
                 } else if (cmd.equals("vstem")) {
-                    // Not much to for this command, except for popping two values from the stack
+                    // Not much to for this command, except for popping two
+                    // values from the stack.
                     opStack.pop().toInt();  // dx
                     opStack.pop().toInt();  // x
                 } else if (cmd.equals("hsbw")) {
@@ -373,22 +409,26 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                     int dy = opStack.pop().toInt();
                     gstate.current.rmoveto(0, dy);
                 } else if (cmd.equals("hstem3")) {
-                    // This doesn't do anything, just remove the argument from the stack
-                    for (int i = 0 ; i < 6 ; i++) {
+                    // This doesn't do anything, just remove the argument from
+                    // the stack.
+                    for (int i = 0; i < 6; i++) {
                         opStack.pop();
                     }
                 } else if (cmd.equals("vstem3")) {
-                    // This doesn't do anything, just remove the argument from the stack
-                    for (int i = 0 ; i < 6 ; i++) {
+                    // This doesn't do anything, just remove the argument from
+                    // the stack.
+                    for (int i = 0; i < 6; i++) {
                         opStack.pop();
                     }
                 } else if (cmd.equals("callsubr")) {
                     int subrnr = opStack.pop().toInt();
                     execStack.addAll(0, subrs.get(subrnr));
                 } else if (cmd.equals("return")) {
-                    // There's nothing to do for this command. Since it will return automatically
+                    // There's nothing to do for this command. Since it will
+                    // return automatically/
                 } else if (cmd.equals("pop")) {
-                    // Calls to OtherSubrs are ignored. That means that 'pop' can also be ignored.
+                    // Calls to OtherSubrs are ignored. That means that 'pop'
+                    // can also be ignored.
                 } else if (cmd.equals("callothersubr")) {
                     // Ignored, only required when rasterizing a font.
                 } else {
@@ -409,7 +449,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
      * 
      * @throws PSError a PostScript error occurred
      */
-    void loadType1(PSObjectDict fontDict) throws PSError {
+    void loadType1(final PSObjectDict fontDict) throws PSError {
         // Extract metrics information from character descriptions
         PSObjectDict charStrings;
         try {
@@ -427,15 +467,16 @@ public class PSObjectAfm extends PSObject implements Cloneable {
         }
 
         // Parse Subrs entry in private dictionary
-        PSObjectArray subrsArray = privateDict.get(PSObjectFont.KEY_PRV_SUBRS).toArray();
+        PSObjectArray subrsArray = privateDict.get(PSObjectFont.KEY_PRV_SUBRS)
+                                                                     .toArray();
         this.subrs = parseSubrs(subrsArray);
         
         this.fontMetrics = new FontMetric();
         List<PSObject> items = charStrings.getItemList();
         try {
-            for (int i = 1 ; i < items.size() ; i += 2) {
+            for (int i = 1; i < items.size(); i += 2) {
                 PSObjectName charName = items.get(i).toName();
-                PSObjectString charString = items.get(i+1).toPSString();
+                PSObjectString charString = items.get(i + 1).toPSString();
                 CharMetric charMetric = charString2CharMetric(charName.name, 
                         charString.toString());
                 this.fontMetrics.addCharMetric(charMetric);
@@ -453,8 +494,9 @@ public class PSObjectAfm extends PSObject implements Cloneable {
      * @param fontDict font dictionary describing a Type 3 font
      * 
      * @throws PSError a PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    void loadType3(PSObjectDict fontDict) throws PSError, ProgramError {
+    void loadType3(final PSObjectDict fontDict) throws PSError, ProgramError {
         PSObjectArray buildGlyph;
         try {
             buildGlyph = fontDict.get(PSObjectFont.KEY_BUILDGLYPH).toProc();
@@ -470,8 +512,8 @@ public class PSObjectAfm extends PSObject implements Cloneable {
             Interpreter fi = new Interpreter();
             
             // Load some often used procedures to make execution faster
-            fi.getExecStack().push(new PSObjectString("systemdict /gsave get " +
-                    "systemdict /grestore get systemdict /eps2pgfgetmetrics get"));
+            fi.getExecStack().push(new PSObjectString("systemdict /gsave get "
+               + "systemdict /grestore get systemdict /eps2pgfgetmetrics get"));
             fi.run();
             PSObject getmetrics = fi.getOpStack().pop();
             PSObject grestore = fi.getOpStack().pop();
@@ -479,11 +521,13 @@ public class PSObjectAfm extends PSObject implements Cloneable {
 
             // Create a list of all unique charNames and their corresponding 
             // character codes.
-            List<PSObject> encoding = fontDict.get(PSObjectFont.KEY_ENCODING).getItemList();
-            encoding.remove(0);  // remove the first item, for an array it is always 1.
+            List<PSObject> encoding = fontDict.get(PSObjectFont.KEY_ENCODING)
+                                                                 .getItemList();
+            encoding.remove(0);  // remove the first item, for an array it is
+                                 // always 1.
             List<PSObject> charNames = new ArrayList<PSObject>();
             List<Integer> charCodes = new ArrayList<Integer>();
-            for (int i = 0 ; i < encoding.size() ; i++) {
+            for (int i = 0; i < encoding.size(); i++) {
                 PSObject charName = encoding.get(i);
                 // Check whether this character was processed already
                 if (charNames.contains(charName)) {
@@ -496,7 +540,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
             // Next Step: fill the temporary interpreter with code to run the
             // buildGlyph/Char procedures.
             if (buildGlyph != null) {
-                for (int i = 0 ; i < charNames.size() ; i++) {
+                for (int i = 0; i < charNames.size(); i++) {
                     // Fill the execution stack with code
                     fi.getExecStack().push(grestore);
                     fi.getExecStack().push(getmetrics);
@@ -506,20 +550,21 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                     fi.getExecStack().push(gsave);
                 }
             } else {
-                // BuildGlyph is not defined. Apparently this is an old (version 1) font.
-                // Instead we load the BuildChar procedure
+                // BuildGlyph is not defined. Apparently this is an old
+                // (version 1) font. Instead we load the BuildChar procedure.
                 PSObjectArray buildChar;
                 try {
-                    buildChar = fontDict.get(PSObjectFont.KEY_BUILDCHAR).toProc();
+                    buildChar = fontDict.get(PSObjectFont.KEY_BUILDCHAR)
+                                                                      .toProc();
                 } catch (PSErrorUndefined e) {
-                    throw new PSErrorInvalidFont("Required entry (" + PSObjectFont.KEY_BUILDCHAR
-                            + ") is not defined");
+                    throw new PSErrorInvalidFont("Required entry ("
+                            + PSObjectFont.KEY_BUILDCHAR + ") is not defined");
                 } catch (PSErrorTypeCheck e) {
-                    throw new PSErrorInvalidFont("Entry " + PSObjectFont.KEY_BUILDCHAR
-                            + " is not an array");
+                    throw new PSErrorInvalidFont("Entry "
+                            + PSObjectFont.KEY_BUILDCHAR + " is not an array");
                 }
                 
-                for (int i = 0 ; i < charNames.size() ; i++) {
+                for (int i = 0; i < charNames.size(); i++) {
                     // Fill the execution stack with code
                     fi.getExecStack().push(grestore);
                     fi.getExecStack().push(getmetrics);
@@ -533,19 +578,19 @@ public class PSObjectAfm extends PSObject implements Cloneable {
             fi.run();
             
             this.fontMetrics = new FontMetric();
-            for (int i = 0 ; i < charNames.size() ; i++) {
+            for (int i = 0; i < charNames.size(); i++) {
                 String charName = charNames.get(i).toString();
                 PSObjectArray metrics = fi.getOpStack().pop().toArray();
                 
                 CharMetric charMetric = new CharMetric();
                 charMetric.setName(charName);
-                charMetric.setWx((float)metrics.get(0).toReal());
-                charMetric.setWy((float)metrics.get(1).toReal());
+                charMetric.setWx((float) metrics.get(0).toReal());
+                charMetric.setWy((float) metrics.get(1).toReal());
                 BoundingBox boundingBox = new BoundingBox();
-                boundingBox.setLowerLeftX((float)metrics.get(2).toReal());
-                boundingBox.setLowerLeftY((float)metrics.get(3).toReal());
-                boundingBox.setUpperRightX((float)metrics.get(4).toReal());
-                boundingBox.setUpperRightY((float)metrics.get(5).toReal());
+                boundingBox.setLowerLeftX((float) metrics.get(2).toReal());
+                boundingBox.setLowerLeftY((float) metrics.get(3).toReal());
+                boundingBox.setUpperRightX((float) metrics.get(4).toReal());
+                boundingBox.setUpperRightY((float) metrics.get(5).toReal());
                 charMetric.setBoundingBox(boundingBox);
                 this.fontMetrics.addCharMetric(charMetric);
             }
@@ -553,7 +598,8 @@ public class PSObjectAfm extends PSObject implements Cloneable {
         } catch (Exception e) {
             // Catch all errors produces by the font code
             throw new ProgramError("Exception occurred in loadType3, which"
-                    + " should not be possible.\n(Error generated by font: " + e + ")");
+                    + " should not be possible.\n(Error generated by font: "
+                    + e + ")");
         }
         
         
@@ -561,7 +607,8 @@ public class PSObjectAfm extends PSObject implements Cloneable {
     
     
     /**
-     * Returns the FontMetric object of this font
+     * Returns the FontMetric object of this font.
+     * 
      * @return FontMetric object
      */
     public FontMetric toFontMetric() {
