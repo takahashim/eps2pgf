@@ -35,10 +35,10 @@ public class PSObjectName extends PSObject {
     public PSObjectName(String str) {
         if (str.charAt(0) == '/') {
             name = str.substring(1);
-            isLiteral = true;
+            setLiteral(true);
         } else {
             name = new String(str);
-            isLiteral = false;
+            setLiteral(false);
         }
     }
     
@@ -49,7 +49,7 @@ public class PSObjectName extends PSObject {
      */
     public PSObjectName(String str, boolean aIsLiteral) {
         name = new String(str);
-        isLiteral = aIsLiteral;
+        setLiteral(aIsLiteral);
     }
     
     /** Creates a new instance of PSObjectName. */
@@ -79,7 +79,7 @@ public class PSObjectName extends PSObject {
      * PostScript manual under the == operator
      */
     public String isis() {
-        if (isLiteral) {
+        if (isLiteral()) {
             return "/" + name;
         } else {
             return name;
@@ -121,19 +121,45 @@ public class PSObjectName extends PSObject {
         }
     }
     
-    /** Return a hash code for this object. */
+    /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    public boolean equals(final Object obj) {
+        if (obj instanceof PSObject) {
+            return eq((PSObject) obj);
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns a hash code value for the object.
+     * 
+     * @return Hash code of this object.
+     */
     public int hashCode() {
         return name.hashCode();
     }
 
-    /** Creates a copy of this object. */
+    /**
+     * Creates a deep copy of this object.
+     * 
+     * @return Deep copy of this object.
+     */
+    @Override
     public PSObjectName clone() {
-        return new PSObjectName(this);
+        PSObjectName copy = (PSObjectName) super.clone();
+        return copy;
     }
-    
+
     /** Implement bind operator for this object. */
     public PSObject bind(Interpreter interp) {
-        if (isLiteral) {
+        if (isLiteral()) {
             return this;
         } else {
             PSObject lookedUp;

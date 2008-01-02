@@ -41,6 +41,17 @@ public class PSObjectMark extends PSObject {
     }
     
     /**
+     * Creates a deep copy of this object.
+     * 
+     * @return Deep copy of this object.
+     */
+    @Override
+    public PSObjectMark clone() {
+        PSObjectMark copy = (PSObjectMark) super.clone();
+        return copy;
+    }
+
+    /**
      * PostScript operator 'dup'. Create a copy of this object. The values
      * of composite object is not copied, but shared.
      */
@@ -56,6 +67,31 @@ public class PSObjectMark extends PSObject {
      */
     public boolean eq(PSObject obj) {
         return (obj instanceof PSObjectMark);
+    }
+    
+    /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    public boolean equals(final Object obj) {
+        if (obj instanceof PSObject) {
+            return eq((PSObject) obj);
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns a hash code value for the object.
+     * 
+     * @return Hash code of this object.
+     */
+    public int hashCode() {
+        return 1;
     }
     
     public String isis() {

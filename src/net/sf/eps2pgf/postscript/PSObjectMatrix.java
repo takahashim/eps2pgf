@@ -92,23 +92,14 @@ public class PSObjectMatrix extends PSObjectArray {
     }
     
     /**
-     * Creates a deep copy of this array.
-     * @throws java.lang.CloneNotSupportedException Unable to clone this object or one of its sub-objects
-     * @return Deep copy of this array
+     * Creates a deep copy of this object.
+     * 
+     * @return Deep copy of this object.
      */
+    @Override
     public PSObjectMatrix clone() {
-        try {
-            double a = getReal(0);
-            double b = getReal(1);
-            double c = getReal(2);
-            double d = getReal(3);
-            double tx = getReal(4);
-            double ty = getReal(5);
-            return new PSObjectMatrix(a, b, c, d, tx, ty);
-        } catch (PSError e) {
-            // this should never happen
-            return new PSObjectMatrix();
-        }
+        PSObjectMatrix copy = (PSObjectMatrix) super.clone();
+        return copy;
     }
 
     /**

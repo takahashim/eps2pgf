@@ -50,9 +50,12 @@ public class RGB extends PSColor {
      * Creates an exact deep copy of this object.
      * 
      * @return an exact deep copy of this object.
+     * 
+     * @throws CloneNotSupportedException Clone not supported by this object.
      */
-    public RGB clone() {
-        return (RGB) super.clone();
+    public RGB clone() throws CloneNotSupportedException {
+        RGB copy = (RGB) super.clone();
+        return copy;
     }
 
     /**

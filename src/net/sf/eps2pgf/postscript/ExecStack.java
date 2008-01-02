@@ -30,24 +30,19 @@ import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
  * @author Paul Wagenaars
  */
 public class ExecStack {
-    /**
-     * Execution stack (see PostScript manual for more info)
-     */
-    PSObjectArray stack = new PSObjectArray();
+    /** Execution stack (see PostScript manual for more info). */
+    private PSObjectArray stack = new PSObjectArray();
     
     /**
-     * A reference to the top-most item on the execution stack for faster access.
-     */
-    PSObject top = null;
-    
-    /**
-     * Returns the top-most file object on this execution stack
-     * @throws net.sf.eps2pgf.postscript.errors.PSError A PostScript error occurred.
+     * Returns the top-most file object on this execution stack.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * 
      * @return Topmost file or <code>null</code> when there is no file on this
      * execution stack.
      */
     public PSObjectFile getTopmostFile() throws PSError {
-        for (int i = size()-1 ; i >= 0 ; i--) {
+        for (int i = size() - 1; i >= 0; i--) {
             PSObject obj = stack.get(i);
             if (obj instanceof PSObjectFile) {
                 return obj.toFile();
@@ -57,11 +52,14 @@ public class ExecStack {
     }
     
     /**
-     * Gets the next PostScript token from the top-most item on this execution stack.
+     * Gets the next PostScript token from the top-most item on this execution
+     * stack.
+     * 
      * @return Returns next token. Returns <code>null</code> when there are no
      *         more tokens left on the top item on the stack. This empty top
      *         item is popped and <code>null</code> is returned.
-     * @throws net.sf.eps2pgf.postscript.errors.PSError There was a PostScript error retrieving the next token
+     *         
+     * @throws PSError There was a PostScript error retrieving the next token.
      */
     public PSObject getNextToken() throws PSError {
         // Check for empty stack
@@ -69,13 +67,9 @@ public class ExecStack {
             return null;
         }
         
-        // Check for valid top
-        if (top == null) {
-            top = stack.get(stack.size() - 1);
-        }
-        
         // Loop through all object on the stack until we find a token
-        while (top != null) {
+        PSObject top;
+        while ((top = getTop()) != null) {
             List<PSObject> list = top.token();
             if (list.size() == 2) {
                 return list.get(0);
@@ -103,38 +97,54 @@ public class ExecStack {
      */
     public PSObject pop() {
         try {
-            int N = stack.size();
-            if (N < 1) {
-                return null;
-            }
-            PSObject poppedObj = stack.remove(N-1);
-            if (N >= 2) {
-                top = stack.get(N-2);
-            } else {
-                top = null;
-            }
-            return poppedObj;
+            int nr = stack.size();
+            return stack.remove(nr - 1);
         } catch (PSErrorRangeCheck e) {
-            // This can never happen, since the stack size (N) is used.
+            // Most likely the stack is empty.
         }
         return null;
     }
 
     /**
      * Pushes a new item on this execution stack.
+     * 
      * @param obj Object to push on the stack.
      */
-    public void push(PSObject obj) {
+    public void push(final PSObject obj) {
         stack.addToEnd(obj);
-        top = obj;
     }
     
     /**
-     * Return the number of items on this exection stack
+     * Return the number of items on this exection stack.
+     * 
      * @return Number of items on the stack
      */
     public int size() {
         return stack.size();
+    }
+
+    /**
+     * Get the top element on the execution stack.
+     * 
+     * @return the top
+     */
+    public PSObject getTop() {
+        int nrItems = stack.size();
+        try {
+            return stack.get(nrItems - 1);
+        } catch (PSErrorRangeCheck e) {
+            // This can never happen.
+            return null;
+        }
+    }
+
+    /**
+     * Returns a reference to the execution stack.
+     * 
+     * @return the stack
+     */
+    public PSObjectArray getStack() {
+        return stack;
     }
     
 }

@@ -155,6 +155,17 @@ public class PSObjectInt extends PSObject {
     }
     
     /**
+     * Creates a deep copy of this object.
+     * 
+     * @return Deep copy of this object.
+     */
+    @Override
+    public PSObjectInt clone() {
+        PSObjectInt copy = (PSObjectInt) super.clone();
+        return copy;
+    }
+
+    /**
      * PostScript operator 'cvi'. Convert this object to an integer
      * 
      * @return Integer representation of this object.
@@ -236,6 +247,22 @@ public class PSObjectInt extends PSObject {
         return false;
     }
 
+    /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    public boolean equals(final Object obj) {
+        if (obj instanceof PSObject) {
+            return eq((PSObject) obj);
+        } else {
+            return false;
+        }
+    }
+    
     /**
      * Return this value rounded downwards.
      * 

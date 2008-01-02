@@ -27,23 +27,37 @@ import java.util.Map;
  *
  * @author Paul Wagenaars
  */
-public class Encoding {
-	// All fields and methods are static. Therefore, we need to initialize it
-	// only once.
-	private static boolean alreadyInitialized = false;
-	
+public final class Encoding {
+    /** All fields and methods are static. Therefore, we need to initialize it
+     * only once.
+     */
+    private static boolean alreadyInitialized = false;
+    
+    /** List with all possible character names. */
     private static Map<String, PSObjectName> names;
     
+    /** Standard encoding vector. */
     private static PSObjectName[] standard = new PSObjectName[256];
-    private static PSObjectName[] ISOLatin1 = new PSObjectName[256];
+    
+    /** ISO Latin 1 encoding vector. */
+    private static PSObjectName[] isoLatin1 = new PSObjectName[256];
+    
+    /** Symbol encoding vector. */
     private static PSObjectName[] symbol = new PSObjectName[256];
+    
+    /**
+     * "Hidden" constructor.
+     */
+    private Encoding() {
+        /* empty block */
+    }
     
     /** Initialize encodings. */
     public static void initialize() {
-    	if (alreadyInitialized) {
-    		return;
-    	}
-    	
+        if (alreadyInitialized) {
+            return;
+        }
+        
         initNames();
         initStandardEncoding();
         initISOLatin1Encoding();
@@ -57,30 +71,25 @@ public class Encoding {
      * @return Standard encoding array (see PostScript manual)
      */
     public static PSObjectName[] getStandardVector() {
-        return standard;
+        return standard.clone();
     }
     
     /**
      * Return the ISO Latin1 encoding vector.
+     * 
      * @return ISO Latin1 encoding array (see PostScript manual)
      */
     public static PSObjectName[] getISOLatin1Vector() {
-        return ISOLatin1;
+        return isoLatin1.clone();
     }
     
     /**
-     * Return the symbol encoding vector
+     * Return the symbol encoding vector.
+     * 
      * @return Symbol encoding vector array (see PostScript manual)
      */
     public static PSObjectName[] getSymbolVector() {
-        return symbol;
-    }
-    
-    /**
-     * Get a list with all possible character names
-     */
-    public static Map<String, PSObjectName> getCharNames() {
-        return names;
+        return symbol.clone();
     }
     
     /** Initialize character names map. */
@@ -211,7 +220,7 @@ public class Encoding {
             "parenrightsuperior", "threequartersemdash",
         };
         names = new HashMap<String, PSObjectName>(n.length);
-        for (int i = 0 ; i < n.length ; i++) {
+        for (int i = 0; i < n.length; i++) {
             names.put(n[i], new PSObjectName("/" + n[i]));
         }
     }
@@ -311,7 +320,7 @@ public class Encoding {
         standard[90] = names.get("Z");           //132
         standard[91] = names.get("bracketleft"); //133
         standard[92] = names.get("backslash");   //134
-        standard[93] = names.get("bracketright");//135
+        standard[93] = names.get("bracketright"); //135
         standard[94] = names.get("asciicircum"); //136
         standard[95] = names.get("underscore");  //137
         standard[96] = names.get("quoteleft");   //140
@@ -388,10 +397,10 @@ public class Encoding {
         standard[167] = names.get("section");     //247
         standard[168] = names.get("currency");    //250
         standard[169] = names.get("quotesingle"); //251
-        standard[170] = names.get("quotedblleft");//252
+        standard[170] = names.get("quotedblleft"); //252
         standard[171] = names.get("guillemotleft"); //253
         standard[172] = names.get("guilsinglleft"); //254
-        standard[173] = names.get("guilsinglright");//255
+        standard[173] = names.get("guilsinglright"); //255
         standard[174] = names.get("fi");          //256
         standard[175] = names.get("fl");          //257
         standard[176] = names.get(".notdef");     //260
@@ -403,13 +412,13 @@ public class Encoding {
         standard[182] = names.get("paragraph");   //266
         standard[183] = names.get("bullet");      //267
         standard[184] = names.get("quotesinglbase"); //270
-        standard[185] = names.get("quotedblbase");//271
+        standard[185] = names.get("quotedblbase"); //271
         standard[186] = names.get("quotedblright");  //272
         standard[187] = names.get("guillemotright"); //273
         standard[188] = names.get("ellipsis");    //274
         standard[189] = names.get("perthousand"); //275        
         standard[190] = names.get(".notdef");     //276        
-        standard[191] = names.get("questiondown");//277        
+        standard[191] = names.get("questiondown"); //277
         standard[192] = names.get(".notdef");     //300
         standard[193] = names.get("grave");       //301
         standard[194] = names.get("acute");       //302
@@ -423,7 +432,7 @@ public class Encoding {
         standard[202] = names.get("ring");        //312
         standard[203] = names.get("cedilla");     //313
         standard[204] = names.get(".notdef");     //314
-        standard[205] = names.get("hungarumlaut");//315
+        standard[205] = names.get("hungarumlaut"); //315
         standard[206] = names.get("ogonek");      //316
         standard[207] = names.get("caron");       //317
         standard[208] = names.get("emdash");      //320
@@ -453,7 +462,7 @@ public class Encoding {
         standard[232] = names.get("Lslash");      //350
         standard[233] = names.get("Oslash");      //351
         standard[234] = names.get("OE");          //352
-        standard[235] = names.get("ordmasculine");//353
+        standard[235] = names.get("ordmasculine"); //353
         standard[236] = names.get(".notdef");     //354
         standard[237] = names.get(".notdef");     //355
         standard[238] = names.get(".notdef");     //356
@@ -478,262 +487,262 @@ public class Encoding {
     
     /** Defines the ISO Latin1 encoding vector. */
     private static void initISOLatin1Encoding() {
-        ISOLatin1[0] = names.get(".notdef");     //000
-        ISOLatin1[1] = names.get(".notdef");     //001
-        ISOLatin1[2] = names.get(".notdef");     //002
-        ISOLatin1[3] = names.get(".notdef");     //003
-        ISOLatin1[4] = names.get(".notdef");     //004
-        ISOLatin1[5] = names.get(".notdef");     //005
-        ISOLatin1[6] = names.get(".notdef");     //006
-        ISOLatin1[7] = names.get(".notdef");     //007
-        ISOLatin1[8] = names.get(".notdef");     //010
-        ISOLatin1[9] = names.get(".notdef");     //011
-        ISOLatin1[10] = names.get(".notdef");     //012
-        ISOLatin1[11] = names.get(".notdef");     //013
-        ISOLatin1[12] = names.get(".notdef");     //014
-        ISOLatin1[13] = names.get(".notdef");     //015
-        ISOLatin1[14] = names.get(".notdef");     //016
-        ISOLatin1[15] = names.get(".notdef");     //017
-        ISOLatin1[16] = names.get(".notdef");     //020
-        ISOLatin1[17] = names.get(".notdef");     //021
-        ISOLatin1[18] = names.get(".notdef");     //022
-        ISOLatin1[19] = names.get(".notdef");     //023
-        ISOLatin1[20] = names.get(".notdef");     //024
-        ISOLatin1[21] = names.get(".notdef");     //025
-        ISOLatin1[22] = names.get(".notdef");     //026
-        ISOLatin1[23] = names.get(".notdef");     //027
-        ISOLatin1[24] = names.get(".notdef");     //030
-        ISOLatin1[25] = names.get(".notdef");     //031
-        ISOLatin1[26] = names.get(".notdef");     //032
-        ISOLatin1[27] = names.get(".notdef");     //033
-        ISOLatin1[28] = names.get(".notdef");     //034
-        ISOLatin1[29] = names.get(".notdef");     //035
-        ISOLatin1[30] = names.get(".notdef");     //036
-        ISOLatin1[31] = names.get(".notdef");     //037
-        ISOLatin1[32] = names.get("space");       //040
-        ISOLatin1[33] = names.get("exclam");      //041
-        ISOLatin1[34] = names.get("quotedbl");    //042
-        ISOLatin1[35] = names.get("numbersign");  //043
-        ISOLatin1[36] = names.get("dollar");      //044
-        ISOLatin1[37] = names.get("percent");     //045
-        ISOLatin1[38] = names.get("ampersand");   //046
-        ISOLatin1[39] = names.get("quoteright");  //047
-        ISOLatin1[40] = names.get("parenleft");   //050
-        ISOLatin1[41] = names.get("parenright");  //051
-        ISOLatin1[42] = names.get("asterisk");    //052
-        ISOLatin1[43] = names.get("plus");        //053
-        ISOLatin1[44] = names.get("comma");       //054
-        ISOLatin1[45] = names.get("minus");       //055
-        ISOLatin1[46] = names.get("period");      //056
-        ISOLatin1[47] = names.get("slash");       //057
-        ISOLatin1[48] = names.get("zero");        //060
-        ISOLatin1[49] = names.get("one");         //061
-        ISOLatin1[50] = names.get("two");         //062
-        ISOLatin1[51] = names.get("three");       //063
-        ISOLatin1[52] = names.get("four");        //064
-        ISOLatin1[53] = names.get("five");        //065
-        ISOLatin1[54] = names.get("six");         //066
-        ISOLatin1[55] = names.get("seven");       //067
-        ISOLatin1[56] = names.get("eight");       //070
-        ISOLatin1[57] = names.get("nine");        //071
-        ISOLatin1[58] = names.get("colon");       //072
-        ISOLatin1[59] = names.get("semicolon");   //073
-        ISOLatin1[60] = names.get("less");        //074
-        ISOLatin1[61] = names.get("equal");       //075
-        ISOLatin1[62] = names.get("greater");     //076
-        ISOLatin1[63] = names.get("question");    //077
-        ISOLatin1[64] = names.get("at");          //100
-        ISOLatin1[65] = names.get("A");           //101
-        ISOLatin1[66] = names.get("B");           //102
-        ISOLatin1[67] = names.get("C");           //103
-        ISOLatin1[68] = names.get("D");           //104
-        ISOLatin1[69] = names.get("E");           //105
-        ISOLatin1[70] = names.get("F");           //106
-        ISOLatin1[71] = names.get("G");           //107
-        ISOLatin1[72] = names.get("H");           //110
-        ISOLatin1[73] = names.get("I");           //111
-        ISOLatin1[74] = names.get("J");           //112
-        ISOLatin1[75] = names.get("K");           //113
-        ISOLatin1[76] = names.get("L");           //114
-        ISOLatin1[77] = names.get("M");           //115
-        ISOLatin1[78] = names.get("N");           //116
-        ISOLatin1[79] = names.get("O");           //117
-        ISOLatin1[80] = names.get("P");           //120
-        ISOLatin1[81] = names.get("Q");           //121
-        ISOLatin1[82] = names.get("R");           //122
-        ISOLatin1[83] = names.get("S");           //123
-        ISOLatin1[84] = names.get("T");           //124
-        ISOLatin1[85] = names.get("U");           //125
-        ISOLatin1[86] = names.get("V");           //126
-        ISOLatin1[87] = names.get("W");           //127
-        ISOLatin1[88] = names.get("X");           //130
-        ISOLatin1[89] = names.get("Y");           //131
-        ISOLatin1[90] = names.get("Z");           //132
-        ISOLatin1[91] = names.get("bracketleft"); //133
-        ISOLatin1[92] = names.get("backslash");   //134
-        ISOLatin1[93] = names.get("bracketright");//135
-        ISOLatin1[94] = names.get("asciicircum"); //136
-        ISOLatin1[95] = names.get("underscore");  //137
-        ISOLatin1[96] = names.get("quoteleft");   //140
-        ISOLatin1[97] = names.get("a");           //141
-        ISOLatin1[98] = names.get("b");           //142
-        ISOLatin1[99] = names.get("c");           //143
-        ISOLatin1[100] = names.get("d");           //144
-        ISOLatin1[101] = names.get("e");           //145
-        ISOLatin1[102] = names.get("f");           //146
-        ISOLatin1[103] = names.get("g");           //147
-        ISOLatin1[104] = names.get("h");           //150
-        ISOLatin1[105] = names.get("i");           //151
-        ISOLatin1[106] = names.get("j");           //152
-        ISOLatin1[107] = names.get("k");           //153
-        ISOLatin1[108] = names.get("l");           //154
-        ISOLatin1[109] = names.get("m");           //155
-        ISOLatin1[110] = names.get("n");           //156
-        ISOLatin1[111] = names.get("o");           //157
-        ISOLatin1[112] = names.get("p");           //160
-        ISOLatin1[113] = names.get("q");           //161
-        ISOLatin1[114] = names.get("r");           //162
-        ISOLatin1[115] = names.get("s");           //163
-        ISOLatin1[116] = names.get("t");           //164
-        ISOLatin1[117] = names.get("u");           //165
-        ISOLatin1[118] = names.get("v");           //166
-        ISOLatin1[119] = names.get("w");           //167
-        ISOLatin1[120] = names.get("x");           //170
-        ISOLatin1[121] = names.get("y");           //171
-        ISOLatin1[122] = names.get("z");           //172
-        ISOLatin1[123] = names.get("braceleft");   //173
-        ISOLatin1[124] = names.get("bar");         //174
-        ISOLatin1[125] = names.get("braceright");  //175
-        ISOLatin1[126] = names.get("asciitilde");  //176
-        ISOLatin1[127] = names.get(".notdef");     //177
-        ISOLatin1[128] = names.get(".notdef");     //200
-        ISOLatin1[129] = names.get(".notdef");     //201
-        ISOLatin1[130] = names.get(".notdef");     //202
-        ISOLatin1[131] = names.get(".notdef");     //203
-        ISOLatin1[132] = names.get(".notdef");     //204
-        ISOLatin1[133] = names.get(".notdef");     //205
-        ISOLatin1[134] = names.get(".notdef");     //206
-        ISOLatin1[135] = names.get(".notdef");     //207
-        ISOLatin1[136] = names.get(".notdef");     //210
-        ISOLatin1[137] = names.get(".notdef");     //211
-        ISOLatin1[138] = names.get(".notdef");     //212
-        ISOLatin1[139] = names.get(".notdef");     //213
-        ISOLatin1[140] = names.get(".notdef");     //214
-        ISOLatin1[141] = names.get(".notdef");     //215
-        ISOLatin1[142] = names.get(".notdef");     //216
-        ISOLatin1[143] = names.get(".notdef");     //217
-        ISOLatin1[144] = names.get("dotlessi");    //220
-        ISOLatin1[145] = names.get("grave");       //221
-        ISOLatin1[146] = names.get("acute");       //222
-        ISOLatin1[147] = names.get("circumflex");  //223
-        ISOLatin1[148] = names.get("tilde");       //224
-        ISOLatin1[149] = names.get("macron");      //225
-        ISOLatin1[150] = names.get("breve");       //226
-        ISOLatin1[151] = names.get("dotaccent");   //227
-        ISOLatin1[152] = names.get("dieresis");    //230
-        ISOLatin1[153] = names.get(".notdef");     //231
-        ISOLatin1[154] = names.get("ring");        //232
-        ISOLatin1[155] = names.get("cedilla");     //233
-        ISOLatin1[156] = names.get(".notdef");     //234
-        ISOLatin1[157] = names.get("hungarumlaut");//235
-        ISOLatin1[158] = names.get("ogonek");      //236
-        ISOLatin1[159] = names.get("caron");       //237
-        ISOLatin1[160] = names.get("space");       //240
-        ISOLatin1[161] = names.get("exclamdown");  //241
-        ISOLatin1[162] = names.get("cent");        //242
-        ISOLatin1[163] = names.get("sterling");    //243
-        ISOLatin1[164] = names.get("currency");    //244
-        ISOLatin1[165] = names.get("yen");         //245
-        ISOLatin1[166] = names.get("brokenbar");   //246
-        ISOLatin1[167] = names.get("section");     //247
-        ISOLatin1[168] = names.get("dieresis");    //250
-        ISOLatin1[169] = names.get("copyright");   //251
-        ISOLatin1[170] = names.get("ordfeminine"); //252
-        ISOLatin1[171] = names.get("guillemotleft"); //253
-        ISOLatin1[172] = names.get("logicalnot");  //254
-        ISOLatin1[173] = names.get("hyphen");      //255
-        ISOLatin1[174] = names.get("registered");  //256
-        ISOLatin1[175] = names.get("macron");      //257
-        ISOLatin1[176] = names.get("degree");      //260
-        ISOLatin1[177] = names.get("plusminus");   //261
-        ISOLatin1[178] = names.get("twosuperior"); //262
-        ISOLatin1[179] = names.get("threesuperior"); //263
-        ISOLatin1[180] = names.get("acute");       //264
-        ISOLatin1[181] = names.get("mu");          //265
-        ISOLatin1[182] = names.get("paragraph");   //266
-        ISOLatin1[183] = names.get("periodcentered"); //267
-        ISOLatin1[184] = names.get("cedilla");     //270
-        ISOLatin1[185] = names.get("onesuperior"); //271
-        ISOLatin1[186] = names.get("ordmasculine");//272
-        ISOLatin1[187] = names.get("guillemotright"); //273
-        ISOLatin1[188] = names.get("onequarter");  //274
-        ISOLatin1[189] = names.get("onehalf");     //275        
-        ISOLatin1[190] = names.get("threequarters"); //276        
-        ISOLatin1[191] = names.get("questiondown");//277        
-        ISOLatin1[192] = names.get("Agrave");      //300
-        ISOLatin1[193] = names.get("Aacute");      //301
-        ISOLatin1[194] = names.get("Acircumflex"); //302
-        ISOLatin1[195] = names.get("Atilde");      //303
-        ISOLatin1[196] = names.get("Adieresis");   //304
-        ISOLatin1[197] = names.get("Aring");       //305
-        ISOLatin1[198] = names.get("AE");          //306
-        ISOLatin1[199] = names.get("Ccedilla");    //307
-        ISOLatin1[200] = names.get("Egrave");      //310
-        ISOLatin1[201] = names.get("Eacute");      //311
-        ISOLatin1[202] = names.get("Ecircumflex"); //312
-        ISOLatin1[203] = names.get("Edieresis");   //313
-        ISOLatin1[204] = names.get("Igrave") ;     //314
-        ISOLatin1[205] = names.get("Iacute");      //315
-        ISOLatin1[206] = names.get("Icircumflex"); //316
-        ISOLatin1[207] = names.get("Idieresis");   //317
-        ISOLatin1[208] = names.get("Eth");         //320
-        ISOLatin1[209] = names.get("Ntilde");      //321
-        ISOLatin1[210] = names.get("Ograve");      //322
-        ISOLatin1[211] = names.get("Oacute");      //323
-        ISOLatin1[212] = names.get("Ocircumflex"); //324
-        ISOLatin1[213] = names.get("Otilde");      //325
-        ISOLatin1[214] = names.get("Odieresis");   //326
-        ISOLatin1[215] = names.get("multiply");    //327
-        ISOLatin1[216] = names.get("Oslash");      //330
-        ISOLatin1[217] = names.get("Ugrave");      //331
-        ISOLatin1[218] = names.get("Uacute");      //332
-        ISOLatin1[219] = names.get("Ucircumflex"); //333
-        ISOLatin1[220] = names.get("Udieresis");   //334
-        ISOLatin1[221] = names.get("Yacute");      //335
-        ISOLatin1[222] = names.get("Thorn");       //336
-        ISOLatin1[223] = names.get("germandbls");  //337
-        ISOLatin1[224] = names.get("agrave");      //340
-        ISOLatin1[225] = names.get("aacute");      //341
-        ISOLatin1[226] = names.get("acircumflex"); //342
-        ISOLatin1[227] = names.get("atilde");      //343
-        ISOLatin1[228] = names.get("adieresis");   //344
-        ISOLatin1[229] = names.get("aring");       //345
-        ISOLatin1[230] = names.get("ae");          //346
-        ISOLatin1[231] = names.get("ccedilla");    //347
-        ISOLatin1[232] = names.get("egrave");      //350
-        ISOLatin1[233] = names.get("eacute");      //351
-        ISOLatin1[234] = names.get("ecircumflex"); //352
-        ISOLatin1[235] = names.get("edieresis");   //353
-        ISOLatin1[236] = names.get("igrave");      //354
-        ISOLatin1[237] = names.get("iacute");      //355
-        ISOLatin1[238] = names.get("icircumflex"); //356
-        ISOLatin1[239] = names.get("idieresis");   //357
-        ISOLatin1[240] = names.get("eth");         //360
-        ISOLatin1[241] = names.get("ntilde");      //361
-        ISOLatin1[242] = names.get("ograve");      //362
-        ISOLatin1[243] = names.get("oacute");      //363
-        ISOLatin1[244] = names.get("ocircumflex"); //364
-        ISOLatin1[245] = names.get("otilde");      //365
-        ISOLatin1[246] = names.get("odieresis");   //366
-        ISOLatin1[247] = names.get("divide");      //367
-        ISOLatin1[248] = names.get("oslash");      //370
-        ISOLatin1[249] = names.get("ugrave");      //371
-        ISOLatin1[250] = names.get("uacute");      //372
-        ISOLatin1[251] = names.get("ucircumflex"); //373
-        ISOLatin1[252] = names.get("udieresis");   //374
-        ISOLatin1[253] = names.get("yacute");      //375
-        ISOLatin1[254] = names.get("thorn");       //376
-        ISOLatin1[255] = names.get("ydieresis");   //377
+        isoLatin1[0] = names.get(".notdef");     //000
+        isoLatin1[1] = names.get(".notdef");     //001
+        isoLatin1[2] = names.get(".notdef");     //002
+        isoLatin1[3] = names.get(".notdef");     //003
+        isoLatin1[4] = names.get(".notdef");     //004
+        isoLatin1[5] = names.get(".notdef");     //005
+        isoLatin1[6] = names.get(".notdef");     //006
+        isoLatin1[7] = names.get(".notdef");     //007
+        isoLatin1[8] = names.get(".notdef");     //010
+        isoLatin1[9] = names.get(".notdef");     //011
+        isoLatin1[10] = names.get(".notdef");     //012
+        isoLatin1[11] = names.get(".notdef");     //013
+        isoLatin1[12] = names.get(".notdef");     //014
+        isoLatin1[13] = names.get(".notdef");     //015
+        isoLatin1[14] = names.get(".notdef");     //016
+        isoLatin1[15] = names.get(".notdef");     //017
+        isoLatin1[16] = names.get(".notdef");     //020
+        isoLatin1[17] = names.get(".notdef");     //021
+        isoLatin1[18] = names.get(".notdef");     //022
+        isoLatin1[19] = names.get(".notdef");     //023
+        isoLatin1[20] = names.get(".notdef");     //024
+        isoLatin1[21] = names.get(".notdef");     //025
+        isoLatin1[22] = names.get(".notdef");     //026
+        isoLatin1[23] = names.get(".notdef");     //027
+        isoLatin1[24] = names.get(".notdef");     //030
+        isoLatin1[25] = names.get(".notdef");     //031
+        isoLatin1[26] = names.get(".notdef");     //032
+        isoLatin1[27] = names.get(".notdef");     //033
+        isoLatin1[28] = names.get(".notdef");     //034
+        isoLatin1[29] = names.get(".notdef");     //035
+        isoLatin1[30] = names.get(".notdef");     //036
+        isoLatin1[31] = names.get(".notdef");     //037
+        isoLatin1[32] = names.get("space");       //040
+        isoLatin1[33] = names.get("exclam");      //041
+        isoLatin1[34] = names.get("quotedbl");    //042
+        isoLatin1[35] = names.get("numbersign");  //043
+        isoLatin1[36] = names.get("dollar");      //044
+        isoLatin1[37] = names.get("percent");     //045
+        isoLatin1[38] = names.get("ampersand");   //046
+        isoLatin1[39] = names.get("quoteright");  //047
+        isoLatin1[40] = names.get("parenleft");   //050
+        isoLatin1[41] = names.get("parenright");  //051
+        isoLatin1[42] = names.get("asterisk");    //052
+        isoLatin1[43] = names.get("plus");        //053
+        isoLatin1[44] = names.get("comma");       //054
+        isoLatin1[45] = names.get("minus");       //055
+        isoLatin1[46] = names.get("period");      //056
+        isoLatin1[47] = names.get("slash");       //057
+        isoLatin1[48] = names.get("zero");        //060
+        isoLatin1[49] = names.get("one");         //061
+        isoLatin1[50] = names.get("two");         //062
+        isoLatin1[51] = names.get("three");       //063
+        isoLatin1[52] = names.get("four");        //064
+        isoLatin1[53] = names.get("five");        //065
+        isoLatin1[54] = names.get("six");         //066
+        isoLatin1[55] = names.get("seven");       //067
+        isoLatin1[56] = names.get("eight");       //070
+        isoLatin1[57] = names.get("nine");        //071
+        isoLatin1[58] = names.get("colon");       //072
+        isoLatin1[59] = names.get("semicolon");   //073
+        isoLatin1[60] = names.get("less");        //074
+        isoLatin1[61] = names.get("equal");       //075
+        isoLatin1[62] = names.get("greater");     //076
+        isoLatin1[63] = names.get("question");    //077
+        isoLatin1[64] = names.get("at");          //100
+        isoLatin1[65] = names.get("A");           //101
+        isoLatin1[66] = names.get("B");           //102
+        isoLatin1[67] = names.get("C");           //103
+        isoLatin1[68] = names.get("D");           //104
+        isoLatin1[69] = names.get("E");           //105
+        isoLatin1[70] = names.get("F");           //106
+        isoLatin1[71] = names.get("G");           //107
+        isoLatin1[72] = names.get("H");           //110
+        isoLatin1[73] = names.get("I");           //111
+        isoLatin1[74] = names.get("J");           //112
+        isoLatin1[75] = names.get("K");           //113
+        isoLatin1[76] = names.get("L");           //114
+        isoLatin1[77] = names.get("M");           //115
+        isoLatin1[78] = names.get("N");           //116
+        isoLatin1[79] = names.get("O");           //117
+        isoLatin1[80] = names.get("P");           //120
+        isoLatin1[81] = names.get("Q");           //121
+        isoLatin1[82] = names.get("R");           //122
+        isoLatin1[83] = names.get("S");           //123
+        isoLatin1[84] = names.get("T");           //124
+        isoLatin1[85] = names.get("U");           //125
+        isoLatin1[86] = names.get("V");           //126
+        isoLatin1[87] = names.get("W");           //127
+        isoLatin1[88] = names.get("X");           //130
+        isoLatin1[89] = names.get("Y");           //131
+        isoLatin1[90] = names.get("Z");           //132
+        isoLatin1[91] = names.get("bracketleft"); //133
+        isoLatin1[92] = names.get("backslash");   //134
+        isoLatin1[93] = names.get("bracketright"); //135
+        isoLatin1[94] = names.get("asciicircum"); //136
+        isoLatin1[95] = names.get("underscore");  //137
+        isoLatin1[96] = names.get("quoteleft");   //140
+        isoLatin1[97] = names.get("a");           //141
+        isoLatin1[98] = names.get("b");           //142
+        isoLatin1[99] = names.get("c");           //143
+        isoLatin1[100] = names.get("d");           //144
+        isoLatin1[101] = names.get("e");           //145
+        isoLatin1[102] = names.get("f");           //146
+        isoLatin1[103] = names.get("g");           //147
+        isoLatin1[104] = names.get("h");           //150
+        isoLatin1[105] = names.get("i");           //151
+        isoLatin1[106] = names.get("j");           //152
+        isoLatin1[107] = names.get("k");           //153
+        isoLatin1[108] = names.get("l");           //154
+        isoLatin1[109] = names.get("m");           //155
+        isoLatin1[110] = names.get("n");           //156
+        isoLatin1[111] = names.get("o");           //157
+        isoLatin1[112] = names.get("p");           //160
+        isoLatin1[113] = names.get("q");           //161
+        isoLatin1[114] = names.get("r");           //162
+        isoLatin1[115] = names.get("s");           //163
+        isoLatin1[116] = names.get("t");           //164
+        isoLatin1[117] = names.get("u");           //165
+        isoLatin1[118] = names.get("v");           //166
+        isoLatin1[119] = names.get("w");           //167
+        isoLatin1[120] = names.get("x");           //170
+        isoLatin1[121] = names.get("y");           //171
+        isoLatin1[122] = names.get("z");           //172
+        isoLatin1[123] = names.get("braceleft");   //173
+        isoLatin1[124] = names.get("bar");         //174
+        isoLatin1[125] = names.get("braceright");  //175
+        isoLatin1[126] = names.get("asciitilde");  //176
+        isoLatin1[127] = names.get(".notdef");     //177
+        isoLatin1[128] = names.get(".notdef");     //200
+        isoLatin1[129] = names.get(".notdef");     //201
+        isoLatin1[130] = names.get(".notdef");     //202
+        isoLatin1[131] = names.get(".notdef");     //203
+        isoLatin1[132] = names.get(".notdef");     //204
+        isoLatin1[133] = names.get(".notdef");     //205
+        isoLatin1[134] = names.get(".notdef");     //206
+        isoLatin1[135] = names.get(".notdef");     //207
+        isoLatin1[136] = names.get(".notdef");     //210
+        isoLatin1[137] = names.get(".notdef");     //211
+        isoLatin1[138] = names.get(".notdef");     //212
+        isoLatin1[139] = names.get(".notdef");     //213
+        isoLatin1[140] = names.get(".notdef");     //214
+        isoLatin1[141] = names.get(".notdef");     //215
+        isoLatin1[142] = names.get(".notdef");     //216
+        isoLatin1[143] = names.get(".notdef");     //217
+        isoLatin1[144] = names.get("dotlessi");    //220
+        isoLatin1[145] = names.get("grave");       //221
+        isoLatin1[146] = names.get("acute");       //222
+        isoLatin1[147] = names.get("circumflex");  //223
+        isoLatin1[148] = names.get("tilde");       //224
+        isoLatin1[149] = names.get("macron");      //225
+        isoLatin1[150] = names.get("breve");       //226
+        isoLatin1[151] = names.get("dotaccent");   //227
+        isoLatin1[152] = names.get("dieresis");    //230
+        isoLatin1[153] = names.get(".notdef");     //231
+        isoLatin1[154] = names.get("ring");        //232
+        isoLatin1[155] = names.get("cedilla");     //233
+        isoLatin1[156] = names.get(".notdef");     //234
+        isoLatin1[157] = names.get("hungarumlaut"); //235
+        isoLatin1[158] = names.get("ogonek");      //236
+        isoLatin1[159] = names.get("caron");       //237
+        isoLatin1[160] = names.get("space");       //240
+        isoLatin1[161] = names.get("exclamdown");  //241
+        isoLatin1[162] = names.get("cent");        //242
+        isoLatin1[163] = names.get("sterling");    //243
+        isoLatin1[164] = names.get("currency");    //244
+        isoLatin1[165] = names.get("yen");         //245
+        isoLatin1[166] = names.get("brokenbar");   //246
+        isoLatin1[167] = names.get("section");     //247
+        isoLatin1[168] = names.get("dieresis");    //250
+        isoLatin1[169] = names.get("copyright");   //251
+        isoLatin1[170] = names.get("ordfeminine"); //252
+        isoLatin1[171] = names.get("guillemotleft"); //253
+        isoLatin1[172] = names.get("logicalnot");  //254
+        isoLatin1[173] = names.get("hyphen");      //255
+        isoLatin1[174] = names.get("registered");  //256
+        isoLatin1[175] = names.get("macron");      //257
+        isoLatin1[176] = names.get("degree");      //260
+        isoLatin1[177] = names.get("plusminus");   //261
+        isoLatin1[178] = names.get("twosuperior"); //262
+        isoLatin1[179] = names.get("threesuperior"); //263
+        isoLatin1[180] = names.get("acute");       //264
+        isoLatin1[181] = names.get("mu");          //265
+        isoLatin1[182] = names.get("paragraph");   //266
+        isoLatin1[183] = names.get("periodcentered"); //267
+        isoLatin1[184] = names.get("cedilla");     //270
+        isoLatin1[185] = names.get("onesuperior"); //271
+        isoLatin1[186] = names.get("ordmasculine"); //272
+        isoLatin1[187] = names.get("guillemotright"); //273
+        isoLatin1[188] = names.get("onequarter");  //274
+        isoLatin1[189] = names.get("onehalf");     //275        
+        isoLatin1[190] = names.get("threequarters"); //276        
+        isoLatin1[191] = names.get("questiondown"); //277
+        isoLatin1[192] = names.get("Agrave");      //300
+        isoLatin1[193] = names.get("Aacute");      //301
+        isoLatin1[194] = names.get("Acircumflex"); //302
+        isoLatin1[195] = names.get("Atilde");      //303
+        isoLatin1[196] = names.get("Adieresis");   //304
+        isoLatin1[197] = names.get("Aring");       //305
+        isoLatin1[198] = names.get("AE");          //306
+        isoLatin1[199] = names.get("Ccedilla");    //307
+        isoLatin1[200] = names.get("Egrave");      //310
+        isoLatin1[201] = names.get("Eacute");      //311
+        isoLatin1[202] = names.get("Ecircumflex"); //312
+        isoLatin1[203] = names.get("Edieresis");   //313
+        isoLatin1[204] = names.get("Igrave");      //314
+        isoLatin1[205] = names.get("Iacute");      //315
+        isoLatin1[206] = names.get("Icircumflex"); //316
+        isoLatin1[207] = names.get("Idieresis");   //317
+        isoLatin1[208] = names.get("Eth");         //320
+        isoLatin1[209] = names.get("Ntilde");      //321
+        isoLatin1[210] = names.get("Ograve");      //322
+        isoLatin1[211] = names.get("Oacute");      //323
+        isoLatin1[212] = names.get("Ocircumflex"); //324
+        isoLatin1[213] = names.get("Otilde");      //325
+        isoLatin1[214] = names.get("Odieresis");   //326
+        isoLatin1[215] = names.get("multiply");    //327
+        isoLatin1[216] = names.get("Oslash");      //330
+        isoLatin1[217] = names.get("Ugrave");      //331
+        isoLatin1[218] = names.get("Uacute");      //332
+        isoLatin1[219] = names.get("Ucircumflex"); //333
+        isoLatin1[220] = names.get("Udieresis");   //334
+        isoLatin1[221] = names.get("Yacute");      //335
+        isoLatin1[222] = names.get("Thorn");       //336
+        isoLatin1[223] = names.get("germandbls");  //337
+        isoLatin1[224] = names.get("agrave");      //340
+        isoLatin1[225] = names.get("aacute");      //341
+        isoLatin1[226] = names.get("acircumflex"); //342
+        isoLatin1[227] = names.get("atilde");      //343
+        isoLatin1[228] = names.get("adieresis");   //344
+        isoLatin1[229] = names.get("aring");       //345
+        isoLatin1[230] = names.get("ae");          //346
+        isoLatin1[231] = names.get("ccedilla");    //347
+        isoLatin1[232] = names.get("egrave");      //350
+        isoLatin1[233] = names.get("eacute");      //351
+        isoLatin1[234] = names.get("ecircumflex"); //352
+        isoLatin1[235] = names.get("edieresis");   //353
+        isoLatin1[236] = names.get("igrave");      //354
+        isoLatin1[237] = names.get("iacute");      //355
+        isoLatin1[238] = names.get("icircumflex"); //356
+        isoLatin1[239] = names.get("idieresis");   //357
+        isoLatin1[240] = names.get("eth");         //360
+        isoLatin1[241] = names.get("ntilde");      //361
+        isoLatin1[242] = names.get("ograve");      //362
+        isoLatin1[243] = names.get("oacute");      //363
+        isoLatin1[244] = names.get("ocircumflex"); //364
+        isoLatin1[245] = names.get("otilde");      //365
+        isoLatin1[246] = names.get("odieresis");   //366
+        isoLatin1[247] = names.get("divide");      //367
+        isoLatin1[248] = names.get("oslash");      //370
+        isoLatin1[249] = names.get("ugrave");      //371
+        isoLatin1[250] = names.get("uacute");      //372
+        isoLatin1[251] = names.get("ucircumflex"); //373
+        isoLatin1[252] = names.get("udieresis");   //374
+        isoLatin1[253] = names.get("yacute");      //375
+        isoLatin1[254] = names.get("thorn");       //376
+        isoLatin1[255] = names.get("ydieresis");   //377
     }
     
     /** Defines the symbol encoding vector. */
@@ -831,7 +840,7 @@ public class Encoding {
         symbol[90] = names.get("Zeta");        //132
         symbol[91] = names.get("bracketleft"); //133
         symbol[92] = names.get("therefore");    //134
-        symbol[93] = names.get("bracketright");//135
+        symbol[93] = names.get("bracketright"); //135
         symbol[94] = names.get("perpendicular"); //136
         symbol[95] = names.get("underscore");  //137
         symbol[96] = names.get("radicalex");   //140
@@ -922,25 +931,25 @@ public class Encoding {
         symbol[181] = names.get("proportional"); //265
         symbol[182] = names.get("partialdiff");  //266
         symbol[183] = names.get("bullet");       //267
-        symbol[184] = names.get("divide") ;      //270
+        symbol[184] = names.get("divide");       //270
         symbol[185] = names.get("notequal");     //271
         symbol[186] = names.get("equivalence");  //272
         symbol[187] = names.get("approxequal");  //273
         symbol[188] = names.get("ellipsis");     //274
         symbol[189] = names.get("arrowvertex");  //275        
         symbol[190] = names.get("arrowhorizex"); //276
-        symbol[191] = names.get("carriagereturn");//277        
+        symbol[191] = names.get("carriagereturn"); //277
         symbol[192] = names.get("aleph");        //300
         symbol[193] = names.get("Ifraktur");     //301
         symbol[194] = names.get("Rfraktur");     //302
         symbol[195] = names.get("weierstrass");  //303
-        symbol[196] = names.get("circlemultiply");//304
+        symbol[196] = names.get("circlemultiply"); //304
         symbol[197] = names.get("circleplus");   //305
         symbol[198] = names.get("emptyset");     //306
         symbol[199] = names.get("intersection"); //307
         symbol[200] = names.get("union");        //310
-        symbol[201] = names.get("propersuperset");//311
-        symbol[202] = names.get("reflexsuperset");//312
+        symbol[201] = names.get("propersuperset"); //311
+        symbol[202] = names.get("reflexsuperset"); //312
         symbol[203] = names.get("notsubset");    //313
         symbol[204] = names.get("propersubset"); //314
         symbol[205] = names.get("reflexsubset"); //315
@@ -949,8 +958,8 @@ public class Encoding {
         symbol[208] = names.get("angle");        //320
         symbol[209] = names.get("gradient");     //321
         symbol[210] = names.get("registerserif"); //322
-        symbol[211] = names.get("copyrightserif");//323
-        symbol[212] = names.get("trademarkserif");//324
+        symbol[211] = names.get("copyrightserif"); //323
+        symbol[212] = names.get("trademarkserif"); //324
         symbol[213] = names.get("product");       //325
         symbol[214] = names.get("radical");       //326
         symbol[215] = names.get("dotmath");       //327
@@ -987,9 +996,9 @@ public class Encoding {
         symbol[246] = names.get("parenrighttp");  //366
         symbol[247] = names.get("parenrightex");  //367
         symbol[248] = names.get("parenrightbt");  //370
-        symbol[249] = names.get("bracketrighttp");//371
-        symbol[250] = names.get("bracketrightex");//372
-        symbol[251] = names.get("bracketrightbt");//373
+        symbol[249] = names.get("bracketrighttp"); //371
+        symbol[250] = names.get("bracketrightex"); //372
+        symbol[251] = names.get("bracketrightbt"); //373
         symbol[252] = names.get("bracerighttp");  //374
         symbol[253] = names.get("bracerightmid"); //375
         symbol[254] = names.get("bracerightbt");  //376

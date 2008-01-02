@@ -42,7 +42,7 @@ import net.sf.eps2pgf.postscript.filters.HexDecode;
  * @author Wagenaars
  */
 public class PSObjectString extends PSObject {
-    private StringBuffer value;
+    private StringBuilder value;
     private int offset;
     private int count;
     
@@ -60,7 +60,7 @@ public class PSObjectString extends PSObject {
             str.append("\u0000");
         }
         
-        value = new StringBuffer(str.toString());
+        value = new StringBuilder(str.toString());
         offset = 0;
         count = value.length();
     }
@@ -71,7 +71,7 @@ public class PSObjectString extends PSObject {
      * @throws net.sf.eps2pgf.postscript.errors.PSErrorIOError The supplied string is invalid
      */
     public PSObjectString(String str) {
-        value = new StringBuffer(str);
+        value = new StringBuilder(str);
         offset = 0;
         count = value.length();
     }
@@ -92,7 +92,7 @@ public class PSObjectString extends PSObject {
                 str = parseHex(str.substring(1, len-1));
             }
         }
-        value = new StringBuffer(str);
+        value = new StringBuilder(str);
         offset = 0;
         count = value.length();
     }
@@ -148,10 +148,15 @@ public class PSObjectString extends PSObject {
     }
     
     /**
-     * Creates an exact deep copy of this object.
+     * Creates a deep copy of this object.
+     * 
+     * @return Deep copy of this object.
      */
+    @Override
     public PSObjectString clone() {
-        return new PSObjectString(toString());
+        PSObjectString copy = (PSObjectString) super.clone();
+        copy.value = new StringBuilder(value);
+        return copy;
     }
 
     /**
@@ -177,7 +182,7 @@ public class PSObjectString extends PSObject {
      * PostScript operator 'cvn'. Convert this object to a name object.
      */
     public PSObjectName cvn() {
-        return new PSObjectName(value.toString(), isLiteral);
+        return new PSObjectName(value.toString(), isLiteral());
     }
 
     /**
@@ -243,10 +248,26 @@ public class PSObjectString extends PSObject {
     }
     
     /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    public boolean equals(final Object obj) {
+        if (obj instanceof PSObject) {
+            return eq((PSObject) obj);
+        } else {
+            return false;
+        }
+    }
+    
+    /**
      * PostScript operator 'executeonly'. Set access attribute to executeonly.
      */
     public void executeonly() {
-        access = ACCESS_EXECUTEONLY;
+        setAccess(Access.EXECUTEONLY);
     }
 
     /**
@@ -362,7 +383,7 @@ public class PSObjectString extends PSObject {
      * PostScript operator: 'noaccess'
      */
     public void noaccess() {
-        access = ACCESS_NONE;
+        setAccess(Access.NONE);
     }
     
     /**
@@ -521,7 +542,9 @@ public class PSObjectString extends PSObject {
      * 'unlimited' or 'readonly'.
      */
     public boolean rcheck() {
-        if ( (access == ACCESS_UNLIMITED) || (access == ACCESS_READONLY) ) {
+        if ( (getAccess() == Access.UNLIMITED)
+                || (getAccess() == Access.READONLY) ) {
+            
             return true;
         } else {
             return false;
@@ -532,7 +555,7 @@ public class PSObjectString extends PSObject {
      * PostScript operator: 'readonly'
      */
     public void readonly() {
-        access = ACCESS_READONLY;
+        setAccess(Access.READONLY);
     }
     
     /**
@@ -642,6 +665,6 @@ public class PSObjectString extends PSObject {
      * 'unlimited'.
      */
     public boolean wcheck() {
-        return (access == ACCESS_UNLIMITED);
+        return (getAccess() == Access.UNLIMITED);
     }
 }

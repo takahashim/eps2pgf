@@ -48,12 +48,28 @@ import org.fontbox.util.BoundingBox;
 public class PSObjectAfm extends PSObject implements Cloneable {
     FontMetric fontMetrics;
     
-    // Subrs entry from private dictionary
-    List<List<PSObject>> subrs;
+    /** Subrs entry from private dictionary. */
+    private List<List<PSObject>> subrs;
     
     /** Creates a new instance of PSObjectAfm */
-    public PSObjectAfm(FontMetric aFontMetrics) {
-        fontMetrics = aFontMetrics;
+    /**
+     * @param pFontMetrics Glyph metrics.
+     * @param pSubrs Subrs entry from private dictionary.
+     */
+    public PSObjectAfm(final FontMetric pFontMetrics,
+            final List<List<PSObject>> pSubrs) {
+        
+        fontMetrics = pFontMetrics;
+        subrs = pSubrs;
+    }
+    
+    /** Creates a new instance of PSObjectAfm */
+    /**
+     * @param pFontMetrics Glyph metrics.
+     */
+    public PSObjectAfm(final FontMetric pFontMetrics) {
+        fontMetrics = pFontMetrics;
+        subrs = new ArrayList<List<PSObject>>();
     }
     
     /**
@@ -66,33 +82,38 @@ public class PSObjectAfm extends PSObject implements Cloneable {
      * @throws PSError a PostScript error occurred
      */
     public PSObjectAfm(PSObjectDict fontDict) throws PSError, ProgramError {
-    	int fontType;
-    	try {
-    		fontType = fontDict.get("FontType").toInt();
-    	} catch (PSErrorUndefined e) {
-    		throw new PSErrorInvalidFont("FontType is not defined.");
-    	} catch (PSErrorTypeCheck e) {
-    		throw new PSErrorInvalidFont("FontType is not an integer.");
-    	}
-    	
-    	switch (fontType) {
-    		case 1:
-    			loadType1(fontDict);
-    			break;
-    		case 3:
-    			loadType3(fontDict);
-    			break;
-    		default:
-    			throw new PSErrorUnimplemented("type " + fontType + " fonts");
-    	}
-    		
+        int fontType;
+        try {
+            fontType = fontDict.get("FontType").toInt();
+        } catch (PSErrorUndefined e) {
+            throw new PSErrorInvalidFont("FontType is not defined.");
+        } catch (PSErrorTypeCheck e) {
+            throw new PSErrorInvalidFont("FontType is not an integer.");
+        }
+        
+        switch (fontType) {
+            case 1:
+                loadType1(fontDict);
+                break;
+            case 3:
+                loadType3(fontDict);
+                break;
+            default:
+                throw new PSErrorUnimplemented("type " + fontType + " fonts");
+        }
+            
     }
     
     /**
-     * Create a shallow copy of this object. The fontMetrics object it not copied.
+     * Creates a (deep) copy of this object.
+     * 
+     * @return Deep copy of this object
      */
     public PSObjectAfm clone() {
-        return new PSObjectAfm(fontMetrics);
+        PSObjectAfm copy = (PSObjectAfm) super.clone();
+        copy.fontMetrics = fontMetrics;
+        copy.subrs = subrs;
+        return new PSObjectAfm(fontMetrics, subrs);
     }
     
     /**
@@ -209,7 +230,43 @@ public class PSObjectAfm extends PSObject implements Cloneable {
     }
     
     /**
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The
+     * values of composite object is not copied, but shared.
      * 
+     * @return Shallow copy of this object.
+     */
+    public PSObjectAfm dup() {
+        PSObjectAfm dupAfm = new PSObjectAfm(fontMetrics, subrs);
+        dupAfm.copyCommonAttributes(this);
+        return dupAfm;
+    }
+
+    /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    public boolean equals(final Object obj) {
+        if (obj instanceof PSObject) {
+            return eq((PSObject) obj);
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns a hash code value for the object.
+     * 
+     * @return Hash code of this object.
+     */
+    public int hashCode() {
+        return isis().hashCode();
+    }
+    
+    /** 
      * @param subrs Array with subroutines. Value of 'Subrs' entry in 'Private'
      * dictionary.
      * @return List with all subroutines. Each subroutines consists of a list
@@ -353,20 +410,20 @@ public class PSObjectAfm extends PSObject implements Cloneable {
      * @throws PSError a PostScript error occurred
      */
     void loadType1(PSObjectDict fontDict) throws PSError {
-    	// Extract metrics information from character descriptions
-    	PSObjectDict charStrings;
-    	try {
-    		charStrings = fontDict.get(PSObjectFont.KEY_CHARSTRINGS).toDict();
-    	} catch (PSErrorUndefined e) {
-        	throw new PSErrorInvalidFont("Required entry (" 
-        			+ PSObjectFont.KEY_CHARSTRINGS + ") not defined");
-    	}
-    	PSObjectDict privateDict;
+        // Extract metrics information from character descriptions
+        PSObjectDict charStrings;
         try {
-        	privateDict = fontDict.get(PSObjectFont.KEY_PRIVATE).toDict();
+            charStrings = fontDict.get(PSObjectFont.KEY_CHARSTRINGS).toDict();
         } catch (PSErrorUndefined e) {
-        	throw new PSErrorInvalidFont("Required entry (" 
-        			+ PSObjectFont.KEY_PRIVATE + ") not defined");
+            throw new PSErrorInvalidFont("Required entry (" 
+                    + PSObjectFont.KEY_CHARSTRINGS + ") not defined");
+        }
+        PSObjectDict privateDict;
+        try {
+            privateDict = fontDict.get(PSObjectFont.KEY_PRIVATE).toDict();
+        } catch (PSErrorUndefined e) {
+            throw new PSErrorInvalidFont("Required entry (" 
+                    + PSObjectFont.KEY_PRIVATE + ") not defined");
         }
 
         // Parse Subrs entry in private dictionary
@@ -398,108 +455,108 @@ public class PSObjectAfm extends PSObject implements Cloneable {
      * @throws PSError a PostScript error occurred.
      */
     void loadType3(PSObjectDict fontDict) throws PSError, ProgramError {
-    	PSObjectArray buildGlyph;
-    	try {
-    		buildGlyph = fontDict.get(PSObjectFont.KEY_BUILDGLYPH).toProc();
-    	} catch (PSErrorUndefined e) {
-    		buildGlyph = null;
-    	} catch (PSErrorTypeCheck e) {
-    		throw new PSErrorInvalidFont("Entry " + PSObjectFont.KEY_BUILDGLYPH
-    				+ " is not a procedure");
-    	}
-    	
-    	// Create a temporary in which the characters will be processed
-    	try {
-    		Interpreter fi = new Interpreter();
-    		
-    		// Load some often used procedures to make execution faster
-    		fi.getExecStack().push(new PSObjectString("systemdict /gsave get " +
-    				"systemdict /grestore get systemdict /eps2pgfgetmetrics get"));
-    		fi.run();
-    		PSObject getmetrics = fi.getOpStack().pop();
-    		PSObject grestore = fi.getOpStack().pop();
-    		PSObject gsave = fi.getOpStack().pop();
+        PSObjectArray buildGlyph;
+        try {
+            buildGlyph = fontDict.get(PSObjectFont.KEY_BUILDGLYPH).toProc();
+        } catch (PSErrorUndefined e) {
+            buildGlyph = null;
+        } catch (PSErrorTypeCheck e) {
+            throw new PSErrorInvalidFont("Entry " + PSObjectFont.KEY_BUILDGLYPH
+                    + " is not a procedure");
+        }
+        
+        // Create a temporary in which the characters will be processed
+        try {
+            Interpreter fi = new Interpreter();
+            
+            // Load some often used procedures to make execution faster
+            fi.getExecStack().push(new PSObjectString("systemdict /gsave get " +
+                    "systemdict /grestore get systemdict /eps2pgfgetmetrics get"));
+            fi.run();
+            PSObject getmetrics = fi.getOpStack().pop();
+            PSObject grestore = fi.getOpStack().pop();
+            PSObject gsave = fi.getOpStack().pop();
 
-    		// Create a list of all unique charNames and their corresponding 
-    		// character codes.
-    		List<PSObject> encoding = fontDict.get(PSObjectFont.KEY_ENCODING).getItemList();
-    		encoding.remove(0);  // remove the first item, for an array it is always 1.
-    		List<PSObject> charNames = new ArrayList<PSObject>();
-    		List<Integer> charCodes = new ArrayList<Integer>();
-    		for (int i = 0 ; i < encoding.size() ; i++) {
-    			PSObject charName = encoding.get(i);
-    			// Check whether this character was processed already
-    			if (charNames.contains(charName)) {
-    				continue;
-    			}
-    			charNames.add(charName);
-    			charCodes.add(i);
-    		}
+            // Create a list of all unique charNames and their corresponding 
+            // character codes.
+            List<PSObject> encoding = fontDict.get(PSObjectFont.KEY_ENCODING).getItemList();
+            encoding.remove(0);  // remove the first item, for an array it is always 1.
+            List<PSObject> charNames = new ArrayList<PSObject>();
+            List<Integer> charCodes = new ArrayList<Integer>();
+            for (int i = 0 ; i < encoding.size() ; i++) {
+                PSObject charName = encoding.get(i);
+                // Check whether this character was processed already
+                if (charNames.contains(charName)) {
+                    continue;
+                }
+                charNames.add(charName);
+                charCodes.add(i);
+            }
 
-    		// Next Step: fill the temporary interpreter with code to run the
-    		// buildGlyph/Char procedures.
-	    	if (buildGlyph != null) {
-	    		for (int i = 0 ; i < charNames.size() ; i++) {
-	    			// Fill the execution stack with code
-	    			fi.getExecStack().push(grestore);
-	    			fi.getExecStack().push(getmetrics);
-	    			fi.getExecStack().push(buildGlyph);
-	    			fi.getExecStack().push(charNames.get(i));
-	    			fi.getExecStack().push(fontDict);
-	    			fi.getExecStack().push(gsave);
-	    		}
-	    	} else {
-	    		// BuildGlyph is not defined. Apparently this is an old (version 1) font.
-	    		// Instead we load the BuildChar procedure
-		    	PSObjectArray buildChar;
-		    	try {
-		    		buildChar = fontDict.get(PSObjectFont.KEY_BUILDCHAR).toProc();
-		    	} catch (PSErrorUndefined e) {
-		    		throw new PSErrorInvalidFont("Required entry (" + PSObjectFont.KEY_BUILDCHAR
-		    				+ ") is not defined");
-		    	} catch (PSErrorTypeCheck e) {
-		    		throw new PSErrorInvalidFont("Entry " + PSObjectFont.KEY_BUILDCHAR
-		    				+ " is not an array");
-		    	}
-		    	
-		    	for (int i = 0 ; i < charNames.size() ; i++) {
-	    			// Fill the execution stack with code
-	    			fi.getExecStack().push(grestore);
-	    			fi.getExecStack().push(getmetrics);
-	    			fi.getExecStack().push(buildChar);
-	    			fi.getExecStack().push(new PSObjectInt(charCodes.get(i)));
-	    			fi.getExecStack().push(fontDict);
-	    			fi.getExecStack().push(gsave);
-		    	}
-	    	}
-	    	
-    		fi.run();
-    		
-    		this.fontMetrics = new FontMetric();
-    		for (int i = 0 ; i < charNames.size() ; i++) {
-    			String charName = charNames.get(i).toString();
-    			PSObjectArray metrics = fi.getOpStack().pop().toArray();
-    			
-    	        CharMetric charMetric = new CharMetric();
-    	        charMetric.setName(charName);
-    	        charMetric.setWx((float)metrics.get(0).toReal());
-    	        charMetric.setWy((float)metrics.get(1).toReal());
-    	        BoundingBox boundingBox = new BoundingBox();
-    	        boundingBox.setLowerLeftX((float)metrics.get(2).toReal());
-    	        boundingBox.setLowerLeftY((float)metrics.get(3).toReal());
-    	        boundingBox.setUpperRightX((float)metrics.get(4).toReal());
-    	        boundingBox.setUpperRightY((float)metrics.get(5).toReal());
-    	        charMetric.setBoundingBox(boundingBox);
-    	        this.fontMetrics.addCharMetric(charMetric);
-    		}
+            // Next Step: fill the temporary interpreter with code to run the
+            // buildGlyph/Char procedures.
+            if (buildGlyph != null) {
+                for (int i = 0 ; i < charNames.size() ; i++) {
+                    // Fill the execution stack with code
+                    fi.getExecStack().push(grestore);
+                    fi.getExecStack().push(getmetrics);
+                    fi.getExecStack().push(buildGlyph);
+                    fi.getExecStack().push(charNames.get(i));
+                    fi.getExecStack().push(fontDict);
+                    fi.getExecStack().push(gsave);
+                }
+            } else {
+                // BuildGlyph is not defined. Apparently this is an old (version 1) font.
+                // Instead we load the BuildChar procedure
+                PSObjectArray buildChar;
+                try {
+                    buildChar = fontDict.get(PSObjectFont.KEY_BUILDCHAR).toProc();
+                } catch (PSErrorUndefined e) {
+                    throw new PSErrorInvalidFont("Required entry (" + PSObjectFont.KEY_BUILDCHAR
+                            + ") is not defined");
+                } catch (PSErrorTypeCheck e) {
+                    throw new PSErrorInvalidFont("Entry " + PSObjectFont.KEY_BUILDCHAR
+                            + " is not an array");
+                }
+                
+                for (int i = 0 ; i < charNames.size() ; i++) {
+                    // Fill the execution stack with code
+                    fi.getExecStack().push(grestore);
+                    fi.getExecStack().push(getmetrics);
+                    fi.getExecStack().push(buildChar);
+                    fi.getExecStack().push(new PSObjectInt(charCodes.get(i)));
+                    fi.getExecStack().push(fontDict);
+                    fi.getExecStack().push(gsave);
+                }
+            }
+            
+            fi.run();
+            
+            this.fontMetrics = new FontMetric();
+            for (int i = 0 ; i < charNames.size() ; i++) {
+                String charName = charNames.get(i).toString();
+                PSObjectArray metrics = fi.getOpStack().pop().toArray();
+                
+                CharMetric charMetric = new CharMetric();
+                charMetric.setName(charName);
+                charMetric.setWx((float)metrics.get(0).toReal());
+                charMetric.setWy((float)metrics.get(1).toReal());
+                BoundingBox boundingBox = new BoundingBox();
+                boundingBox.setLowerLeftX((float)metrics.get(2).toReal());
+                boundingBox.setLowerLeftY((float)metrics.get(3).toReal());
+                boundingBox.setUpperRightX((float)metrics.get(4).toReal());
+                boundingBox.setUpperRightY((float)metrics.get(5).toReal());
+                charMetric.setBoundingBox(boundingBox);
+                this.fontMetrics.addCharMetric(charMetric);
+            }
 
-    	} catch (Exception e) {
-    		// Catch all errors produces by the font code
-    		throw new ProgramError("Exception occurred in loadType3, which"
-    				+ " should not be possible.\n(Error generated by font: " + e + ")");
-    	}
-    	
-    	
+        } catch (Exception e) {
+            // Catch all errors produces by the font code
+            throw new ProgramError("Exception occurred in loadType3, which"
+                    + " should not be possible.\n(Error generated by font: " + e + ")");
+        }
+        
+        
     }
     
     

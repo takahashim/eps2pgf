@@ -53,6 +53,17 @@ public class PSObjectBool extends PSObject {
     }
     
     /**
+     * Creates a deep copy of this object.
+     * 
+     * @return Deep copy of this object.
+     */
+    @Override
+    public PSObjectBool clone() {
+        PSObjectBool copy = (PSObjectBool) super.clone();
+        return copy;
+    }
+    
+    /**
      * Produce a text representation of this object (see PostScript
      * operator 'cvs' for more info)
      * @return Text representation
@@ -81,11 +92,36 @@ public class PSObjectBool extends PSObject {
      */
     public boolean eq(PSObject obj) {
         if (obj instanceof PSObjectBool) {
-            PSObjectBool objBool = (PSObjectBool)obj;
+            PSObjectBool objBool = (PSObjectBool) obj;
             return (value == objBool.value);
         } else {
             return false;
         }
+    }
+    
+    /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    public boolean equals(final Object obj) {
+        if (obj instanceof PSObject) {
+            return eq((PSObject) obj);
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns a hash code value for the object.
+     * 
+     * @return Hash code of this object.
+     */
+    public int hashCode() {
+        return isis().hashCode();
     }
     
     /**

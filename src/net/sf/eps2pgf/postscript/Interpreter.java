@@ -170,7 +170,7 @@ public class Interpreter {
         
         // An eps-file defines a bounding box. Set this bounding box as the
         // default clipping path.
-        double[] bbox = this.header.boundingBox;
+        double[] bbox = this.header.getBoundingBox();
         double left, right, top, bottom;
         if (bbox != null) {
             left = bbox[0];
@@ -294,10 +294,10 @@ public class Interpreter {
      */
     public void runObject(final PSObject objectToRun)
             throws PSError, ProgramError {
-        PSObject topAtStart = getExecStack().top;
+        PSObject topAtStart = execStack.getTop();
         executeObject(objectToRun);
         try {
-            while (getExecStack().top != topAtStart) {
+            while (execStack.getTop() != topAtStart) {
                 PSObject obj = getExecStack().getNextToken();
                 if (obj != null) {
                     executeObject(obj, false);
@@ -306,7 +306,7 @@ public class Interpreter {
         } catch (PSError e) {
             // There was an error. Restore the execution stack to its original
             // state. After that the error is thrown again.
-            while (getExecStack().top != topAtStart) {
+            while (execStack.getTop() != topAtStart) {
                 getExecStack().pop();
             }
             throw e;
@@ -345,7 +345,7 @@ public class Interpreter {
      */
     public void executeObject(final PSObject obj, final boolean indirect)
             throws PSError, ProgramError {
-        if (obj.isLiteral) {
+        if (obj.isLiteral()) {
             // Object is literal
             getOpStack().push(obj);
         } else {
@@ -376,6 +376,8 @@ public class Interpreter {
                 } catch (InvocationTargetException e) {
                     if (e.getCause() instanceof PSError) {
                         throw (PSError) e.getCause();
+                    } else if (e.getCause() instanceof ProgramError) {
+                        throw (ProgramError) e.getCause();
                     } else {
                         except = e.getCause();
                     }
@@ -1365,7 +1367,7 @@ public class Interpreter {
     public void op_execstack() throws PSError {
         PSObjectArray array = getOpStack().pop().toArray();
         array.checkAccess(false, false, true);
-        PSObject subArray = array.copy(getExecStack().stack);
+        PSObject subArray = array.copy(getExecStack().getStack());
         getOpStack().push(subArray);
     }
     

@@ -26,23 +26,27 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Reads DSC header and holds header info
+ * Reads DSC header and holds header info.
+ * 
  * @author Paul Wagenaars
  */
 public class DSCHeader {
-    // Value of BoundingBox, HiResBoundingBox or ExactBoundingBox
-    public double[] boundingBox = null;
+    /** Value of BoundingBox, HiResBoundingBox or ExactBoundingBox. */
+    private double[] boundingBox = null;
     
-    Pattern DSCRegExp = Pattern.compile("%%(\\w+):?\\s*(.*)\\s*");
+    /** Pattern describing a DSC comment. */
+    private Pattern dscRegExp = Pattern.compile("%%(\\w+):?\\s*(.*)\\s*");
     
     /**
      * Creates a new instance of DSCHeader. Reads and interprets characters
      * from file until it encounters a line that does not start with a
      * '%'-character.
+     * 
      * @param in Read header from this reader
-     * @throws java.io.IOException Unable to read from reader
+     * 
+     * @throws IOException Unable to read from reader
      */
-    public DSCHeader(InputStream in) throws IOException {
+    public DSCHeader(final InputStream in) throws IOException {
         loadAllDSCComments(in);
     }
     
@@ -52,34 +56,44 @@ public class DSCHeader {
      * 
      * @param bbox Use this array of four doubles as bounding box
      */
-    public DSCHeader(double[] bbox) {
-    	boundingBox = bbox;
+    public DSCHeader(final double[] bbox) {
+        boundingBox = bbox.clone();
     }
     
     /**
-     * Read and interpret all DSC comments from the header
+     * Read and interpret all DSC comments from the header.
+     * 
      * @param in Read header from this reader
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    void loadAllDSCComments(InputStream in) throws IOException {
+    void loadAllDSCComments(final InputStream in) throws IOException {
         String[] comment;
-        while ( (comment = readDSCComment(in)) != null ) {
+        while ((comment = readDSCComment(in)) != null) {
             String fieldname = comment[0].toLowerCase();
             if (fieldname.equals("hiresboundingbox")) {
                 boundingBox = parseBoundingBox(comment[1]);
             } else if (fieldname.equals("exactboundingbox")) {
                 boundingBox = parseBoundingBox(comment[1]);
-            } else if ( fieldname.equals("boundingbox") && (boundingBox == null) ) {
+            } else if (fieldname.equals("boundingbox")
+                    && (boundingBox == null)) {
+                
                 boundingBox = parseBoundingBox(comment[1]);
             }
         }
     }
     
     /**
-     * Parse a string as bounding box
-     * @param bbox String representation of the bounding box
+     * Parse a string as bounding box.
+     * 
+     * @param bboxString String representation of the bounding box.
+     * 
+     * @return The bounding box.
      */
-    double[] parseBoundingBox(String bboxString) {
-        Matcher matcher = Pattern.compile("\\s*(\\S*)\\s+(\\S*)\\s+(\\S*)\\s+(\\S*)\\s*").matcher(bboxString);
+    double[] parseBoundingBox(final String bboxString) {
+        Matcher matcher = Pattern.compile(
+                "\\s*(\\S*)\\s+(\\S*)\\s+(\\S*)\\s+(\\S*)\\s*")
+                .matcher(bboxString);
         if (!matcher.matches()) {
             return null;
         } else {
@@ -93,10 +107,15 @@ public class DSCHeader {
     }
     
     /**
-     * Read the next DSC comment
+     * Read the next DSC comment.
+     * 
      * @param in Read comments from this reader
+     * 
+     * @return the string[]
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    String[] readDSCComment(InputStream in) throws IOException {
+    String[] readDSCComment(final InputStream in) throws IOException {
         Matcher matcher;
                 
         while (true) {
@@ -107,7 +126,7 @@ public class DSCHeader {
             }
             
             // Check whether this is a DSC comment
-            matcher = DSCRegExp.matcher(line);
+            matcher = dscRegExp.matcher(line);
             if (matcher.matches()) {
                 // we found a good DSC comment
                 break;
@@ -121,17 +140,22 @@ public class DSCHeader {
     }
     
     /**
-     * Reads characters from 'in' until a full comment line is read. Returns
-     * immediately if the current line 
-     * @param in Read comments from this reader
+     * Reads characters from 'in' until a full comment line is read. Return
+     * immediately if the current line is not a comment line.
+     * 
+     * @param in Read comments from this stream.
+     * 
+     * @return The comment line.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    String readCommentLine(InputStream in) throws IOException {
-        StringBuffer line = new StringBuffer();
+    String readCommentLine(final InputStream in) throws IOException {
+        StringBuilder line = new StringBuilder();
         int nextChar;
         boolean lineEnded = false;
         
         in.mark(1);
-        while ( (nextChar = in.read()) != -1 ) {
+        while ((nextChar = in.read()) != -1) {
             // Check for the end of a line
             if ((nextChar == 10) || (nextChar == 12) || (nextChar == 13)) {
                 if (line.length() > 0) {
@@ -141,12 +165,12 @@ public class DSCHeader {
                 in.reset();
                 break;
             } else if (line.length() > 0) {
-                line.append((char)nextChar);
+                line.append((char) nextChar);
             } else {
                 // this is the first character of a new line. Check whether it
                 // is a comment line (i.e. starts with %-character).
                 if (nextChar == 37) {
-                    line.append((char)nextChar);
+                    line.append((char) nextChar);
                 } else {
                     in.reset();
                     break;
@@ -157,5 +181,16 @@ public class DSCHeader {
         }
         
         return line.toString();
+    }
+
+    /**
+     * @return the boundingBox
+     */
+    public double[] getBoundingBox() {
+        if (boundingBox != null) {
+            return boundingBox.clone();
+        } else {
+            return null;
+        }
     }
 }
