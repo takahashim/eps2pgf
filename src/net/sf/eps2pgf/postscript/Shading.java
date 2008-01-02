@@ -29,35 +29,37 @@ import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /**
- * Base class for shading 
+ * Base class for shading.
  *
  * @author Paul Wagenaars
  */
 public class Shading {
-    String ColorSpace;
-    
-    PSFunction function;
+
+    /** Function describing shading colors. */
+    private PSFunction function;
     
     /**
-     * Lower limit of parametric variable t (see PostScript doc for more info)
+     * Lower limit of parametric variable t (see PostScript doc for more info).
      */
-    public double t0;
+    private double t0;
     
     /**
-     * Upper limit of parametric variable t (see PostScript doc for more info)
+     * Upper limit of parametric variable t (see PostScript doc for more info).
      */
-    public double t1;
+    private double t1;
     
     
     /**
-     * Create a new shading of the type defined in the supplied shading dictionary.
+     * Create a new shading of the type defined in the supplied shading
+     * dictionary.
+     * 
      * @param dict PostScript shading dictionary
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck One or more required fields were not found in the dictionary
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One of the fields has an invalid type
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented A feature is not (yet) implemented
+     * 
      * @return New shading object
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public static Shading newShading(PSObjectDict dict) throws PSError {
+    public static Shading newShading(final PSObjectDict dict) throws PSError {
         PSObject shadingTypeObj = dict.lookup("ShadingType");
         if (shadingTypeObj == null) {
             throw new PSErrorRangeCheck();
@@ -69,24 +71,21 @@ public class Shading {
                 newShading = new RadialShading(dict);
                 break;
             default:
-                throw new PSErrorUnimplemented("Shading type " + shadingTypeObj.toInt());
+                throw new PSErrorUnimplemented("Shading type "
+                        + shadingTypeObj.toInt());
         }
         
         return newShading;
     }
     
     /**
-     * Load the entries common to all types of shading dictionaries
+     * Load the entries common to all types of shading dictionaries.
+     * 
+     * @param dict The dictionary describing the shading.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    void loadCommonEntries(PSObjectDict dict) throws PSError {
-        PSObject colSpaceObj = dict.get("ColorSpace");
-        if (colSpaceObj instanceof PSObjectName) {
-            ColorSpace = ((PSObjectName)colSpaceObj).name;
-        } else if (colSpaceObj instanceof PSObjectArray) {
-            throw new PSErrorUnimplemented("Defining ColorSpace with an array");
-        } else {
-            throw new PSErrorTypeCheck();
-        }
+    void loadCommonEntries(final PSObjectDict dict) throws PSError {
         
         PSObject functionObj = dict.get("Function");
         if (functionObj instanceof PSObjectDict) {
@@ -109,21 +108,24 @@ public class Shading {
     }
     
     /**
-     * Gets the color corresponding to a certain value of s
-     * @param s Parametric variable ranging from 0.0 to 1.0, where 0.0 corresponds
-     *          with the starting circle and 1.0 with the ending circle.
-     * @return Array with values of color components. Check the ColorSpace for which
-     *         value in the array is which component.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck S-value out of range
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented A required feature is not (yet) implemented
+     * Gets the color corresponding to a certain value of s.
+     * 
+     * @param s Parametric variable ranging from 0.0 to 1.0, where 0.0
+     * corresponds with the starting circle and 1.0 with the ending circle.
+     *          
+     * @return Array with values of color components. Check the ColorSpace for
+     * which value in the array is which component.
+     *         
+     * @throws PSErrorRangeCheck S-value out of range.
+     * @throws PSErrorUnimplemented A required feature is not (yet) implemented.
      */
-    public double[] getColor(double s) throws PSErrorRangeCheck, 
+    public double[] getColor(final double s) throws PSErrorRangeCheck, 
             PSErrorUnimplemented {
         // First, we must convert s to t
-        double t = s*(t1-t0) + t0;
+        double t = s * (t1 - t0) + t0;
         double[] in = {t};
         double[] color = function.evaluate(in);
-        for (int i = 0 ; i < color.length ; i++) {
+        for (int i = 0; i < color.length; i++) {
             if (color[i] < 0) {
                 color[i] = 0.0;
             } else if (color[i] > 1) {
@@ -134,23 +136,27 @@ public class Shading {
     }
     
     /**
-     * Fit linear segments on color
-     * @return S-values that create a good fit with linear segments
-     * @param maxError Maximum vertical distance between original and
-     *                 fitted colors.
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented A required feature is not yet implemented
+     * Fit linear segments on color.
+     * 
+     * @return S-values that create a good fit with linear segments.
+     * 
+     * @param maxError Maximum vertical distance between original and fitted
+     * colors.
+     * 
+     * @throws PSErrorUnimplemented A required feature is not yet implemented.
      */
-    public double[] fitLinearSegmentsOnColor(double maxError) 
+    public double[] fitLinearSegmentsOnColor(final double maxError) 
             throws PSErrorUnimplemented {
-        int N = 101;
-        double[] s = new double[N];
-        for (int i = 0 ; i < N ; i++) {
-            s[i] = ((double)i)/(((double)N)-1.0);
+        
+        int nrSegments = 101;
+        double[] s = new double[nrSegments];
+        for (int i = 0; i < nrSegments; i++) {
+            s[i] = ((double) i) / (((double) nrSegments) - 1.0);
         }
         // First get the colors for N steps
-        List<double[]> colors = new ArrayList<double[]>(N);
+        List<double[]> colors = new ArrayList<double[]>(nrSegments);
         try {
-            for (int i = 0 ; i < N ; i++) {
+            for (int i = 0; i < nrSegments; i++) {
                 colors.add(getColor(s[i]));
             }
         } catch (PSErrorRangeCheck e) {
@@ -160,17 +166,17 @@ public class Shading {
         List<Double> fits = new ArrayList<Double>();
         int lastIndex = 0;
         fits.add(s[0]);
-        for (int i = 2 ; i < N ; i++) {
+        for (int i = 2; i < nrSegments; i++) {
             double currentError = getMaxError(s, colors, lastIndex, i);
             if (currentError > maxError) {
-                lastIndex = i-1;
-                fits.add(s[i-1]);
+                lastIndex = i - 1;
+                fits.add(s[i - 1]);
             }
         }
-        fits.add(s[N-1]);
+        fits.add(s[nrSegments - 1]);
         
         double[] fit = new double[fits.size()];
-        for (int i = 0 ; i < fits.size() ; i++) {
+        for (int i = 0; i < fits.size(); i++) {
             fit[i] = fits.get(i);
         }
         return fit;
@@ -186,19 +192,21 @@ public class Shading {
      * @return Maximum vertical distance between given colors and straight line
      * between start end end index
      */
-    double getMaxError(double[] s, List<double[]> colors, int start, int end) {
+    double getMaxError(final double[] s, final List<double[]> colors,
+            final int start, final int end) {
         double maxSoFar = 0.0;
         double[] startColor = colors.get(start);
         double[] endColor = colors.get(end);
-        for (int i = (start+1) ; i < end ; i++) {
+        for (int i = (start + 1); i < end; i++) {
             double[] currentColor = colors.get(i);
             
             // Loop through all color component and check the distance for
             // each color.
-            for (int j = 0 ; j < startColor.length ; j++) {
+            for (int j = 0; j < startColor.length; j++) {
                 double frac = (s[i] - s[start]) / (s[end] - s[start]);
-                double linCol = startColor[j] + (frac*(endColor[j]-startColor[j]));
-                double error = Math.abs(linCol-currentColor[j]);
+                double linCol = startColor[j]
+                                       + (frac * (endColor[j] - startColor[j]));
+                double error = Math.abs(linCol - currentColor[j]);
                 maxSoFar = Math.max(maxSoFar, error);
             }
         }

@@ -23,58 +23,60 @@ package net.sf.eps2pgf.postscript;
 import net.sf.eps2pgf.postscript.errors.PSError;
 
 /**
- * Represent radial (type 3) shading dictionary
+ * Represent radial (type 3) shading dictionary.
+ * 
  * @author Paul Wagenaars
  */
 public class RadialShading extends Shading {
-    /**
-     * X-coordinate of first point (see PostScript doc for more info)
-     */
-    public double x0;
     
     /**
-     * Y-coordinate of first point (see PostScript doc for more info)
+     * X-coordinate of first point (see PostScript doc for more info).
      */
-    public double y0;
-
-    /**
-     * First radius (see PostScript doc for more info)
-     */
-    public double r0;
-
-    /**
-     * X-coordinate of second point (see PostScript doc for more info)
-     */
-    public double x1;
-
-    /**
-     * Y-coordinate of second point (see PostScript doc for more info)
-     */
-    public double y1;
-
-    /**
-     * Second radius (see PostScript doc for more info)
-     */
-    public double r1;
+    private double x0;
     
     /**
-     * Extend shading beyond first point? (see PostScript doc for more info)
+     * Y-coordinate of first point (see PostScript doc for more info).
      */
-    public boolean extend0;
+    private double y0;
+
+    /**
+     * First radius (see PostScript doc for more info).
+     */
+    private double r0;
+
+    /**
+     * X-coordinate of second point (see PostScript doc for more info).
+     */
+    private double x1;
+
+    /**
+     * Y-coordinate of second point (see PostScript doc for more info).
+     */
+    private double y1;
+
+    /**
+     * Second radius (see PostScript doc for more info).
+     */
+    private double r1;
     
     /**
-     * Extend shading beyong second point? (see PostScript doc for more info)
+     * Extend shading beyond first point? (see PostScript doc for more info).
      */
-    public boolean extend1;
+    private boolean extend0;
     
     /**
-     * Creates a new instance of RadialShading
+     * Extend shading beyond second point? (see PostScript doc for more info).
+     */
+    private boolean extend1;
+    
+    /**
+     * Creates a new instance of RadialShading.
+     * 
      * @param dict PostScript dictionary describing the shading
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One or more entries has an invalid type
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck One or more entries are out of range
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented A required feature is not implemented
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public RadialShading(PSObjectDict dict) throws PSError {
+    public RadialShading(final PSObjectDict dict) throws PSError {
         // First, load the entries common to all shading types
         loadCommonEntries(dict);
         
@@ -99,62 +101,72 @@ public class RadialShading extends Shading {
     }
     
     /**
-     * Get the X- and Y-coordinate corresponding to a certain value of s
-     * @param s Parametric variable ranging from 0.0 to 1.0, where 0.0 corresponds
-     *          with the starting circle and 1.0 with the ending circle.
+     * Get the X- and Y-coordinate corresponding to a certain value of s.
+     * 
+     * @param s Parametric variable ranging from 0.0 to 1.0, where 0.0
+     * corresponds with the starting circle and 1.0 with the ending circle.
+     *          
      * @return Array of two values: X-coordinate and Y-coordinate
      */
-    public double[] getCoord(double s) {
+    public double[] getCoord(final double s) {
         double[] out = new double[2];
-        out[0] = x0 + s*(x1-x0);
-        out[1] = y0 + s*(y1-y0);
+        out[0] = x0 + s * (x1 - x0);
+        out[1] = y0 + s * (y1 - y0);
         return out;
     }
     
     /**
-     * Get the radius corresponding to a certain value of s
-     * @param s Parametric variable ranging from 0.0 to 1.0, where 0.0 corresponds
-     *          with the starting circle and 1.0 with the ending circle.
+     * Get the radius corresponding to a certain value of s.
+     * 
+     * @param s Parametric variable ranging from 0.0 to 1.0, where 0.0
+     * corresponds with the starting circle and 1.0 with the ending circle.
+     *          
      * @return Radius for the requested s
      */
-    public double getRadius(double s) {
-        return r0 + s*(r1-r0);
+    public double getRadius(final double s) {
+        return r0 + s * (r1 - r0);
     }
     
     /**
-     * Find the s value for a given radius (inverse of getRadius)
-     * @param radius Radius
+     * Find the s value for a given radius (inverse of getRadius).
+     * 
+     * @param radius Radius.
+     * 
      * @return S-value corresponding to radius
      */
-    public double getSForRadius(double radius) {
+    public double getSForRadius(final double radius) {
         if (r1 != r0) {
-            return (radius - r0)/(r1-r0);
+            return (radius - r0) / (r1 - r0);
         } else {
             return Double.POSITIVE_INFINITY;
         }
     }
     
     /**
-     * Find the s value for given x-value
+     * Find the s value for given x-value.
+     * 
      * @param x X-coordinate
+     * 
      * @return S-value corresponding to x-coordinate
      */
-    public double getSForXValue(double x) {
+    public double getSForXValue(final double x) {
         if (x0 != x1) {
-            return (x - x0)/(x1-x0);
+            return (x - x0) / (x1 - x0);
         } else {
             return Double.POSITIVE_INFINITY;
         }
     }
 
     /**
-     * Find the s value for given y-value
-     * @param y Y-coordinate
+     * Find the s value for given y-value.
+     * 
+     * @param y Y-coordinate.
+     * 
      * @return S-value corresponding to y-coordinate
      */
-    public double getSForYValue(double y) {
+    public double getSForYValue(final double y) {
         if (y0 != y1) {
-            return (y - y0)/(y1-y0);
+            return (y - y0) / (y1 - y0);
         } else {
             return Double.POSITIVE_INFINITY;
         }
@@ -162,14 +174,18 @@ public class RadialShading extends Shading {
     
     /**
      * Find the smallest (absolute) s value (within the given limit) for
-     * which the x-value or y-value is -<value> or <value> or the radius
-     * is zero or <value>.
+     * which the x-value or y-value is -"value" or "value" or the radius
+     * is zero or "value".
+     * 
      * @param value Distance
      * @param minS Minimal s-value
      * @param maxS Maximum s-value
+     * 
      * @return Smallest s-value corresponding to distance
      */
-    public double getSForDistance(double value, double minS, double maxS) {
+    public double getSForDistance(final double value, final double minS,
+            final double maxS) {
+        
         double ret = Double.POSITIVE_INFINITY;
         double s;
         
@@ -204,5 +220,23 @@ public class RadialShading extends Shading {
         }
         
         return ret;
+    }
+
+    /**
+     * Extend beyond first?
+     * 
+     * @return the extend0
+     */
+    public boolean getExtend0() {
+        return extend0;
+    }
+
+    /**
+     * Extend beyond second?
+     * 
+     * @return the extend1
+     */
+    public boolean getExtend1() {
+        return extend1;
     }
 }
