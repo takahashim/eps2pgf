@@ -25,16 +25,26 @@ package net.sf.eps2pgf.postscript.errors;
  * @author Paul Wagenaars
  */
 public class PSErrorUnimplemented extends PSError {
-	private static final long serialVersionUID = 1L;
-	
-    String message;
+    /** Serial version UID. */
+    private static final long serialVersionUID = 1L;
     
-    /** Creates a new instance of PSErrorUnimplemented */
-    public PSErrorUnimplemented(String msg) {
+    /** Detailed error message. */
+    private String message;
+    
+    /**
+     * Creates a new instance of PSErrorUnimplemented.
+     * 
+     * @param msg The error message.
+     */
+    public PSErrorUnimplemented(final String msg) {
         message = msg;
     }
     
-    /** Return error message */
+    /**
+     * Return error message.
+     * 
+     * @return Detailed error message.
+     */
     public String getMessage() {
         return "Feature not (yet) implemented: " + message;
     }

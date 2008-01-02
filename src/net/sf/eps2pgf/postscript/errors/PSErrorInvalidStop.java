@@ -25,5 +25,7 @@ package net.sf.eps2pgf.postscript.errors;
  * @author Paul Wagenaars
  */
 public class PSErrorInvalidStop extends PSError {
-	private static final long serialVersionUID = 1L;
+    
+    /** Serial version UID. */
+    private static final long serialVersionUID = 1L;
 }
