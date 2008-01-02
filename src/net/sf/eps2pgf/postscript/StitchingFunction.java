@@ -29,30 +29,34 @@ import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /**
- * Represents a PostScript function of type 3 (stitching function)
+ * Represents a PostScript function of type 3 (stitching function).
+ * 
  * @author Paul Wagenaars
  */
 public class StitchingFunction extends PSFunction {
-    List<PSFunction> functions = new ArrayList<PSFunction>();
+    /** Functions that are "stiched" together. */
+    private List<PSFunction> functions = new ArrayList<PSFunction>();
     
-    // Number of subdomains/subfunctions
-    int k;
+    /** Number of subdomains/subfunctions. */
+    private int k;
     
-    // Bounds for subdomains
-    double[] bounds;
-    
-    // Encode field, map each subset of Domain and the Bounds array to the
-    // domain of the the domain de?ned by corresponding function. 
-    double[] encode;
+    /** Bounds for subdomains. */
+    private double[] bounds;
     
     /**
-     * Creates a new instance of StitchingFunction
+     * Encode field, map each subset of Domain and the Bounds array to the
+     * domain of the the domain defined by corresponding function.
+     */ 
+    private double[] encode;
+    
+    /**
+     * Creates a new instance of StitchingFunction.
+     * 
      * @param dict Dictionary describing the function
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck A required key was not found or one of the entries is out of range
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck One of the entries has an invalid type
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented A feature is not (yet) implemented
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public StitchingFunction(PSObjectDict dict) throws PSError {
+    public StitchingFunction(final PSObjectDict dict) throws PSError {
         // First, load all common entries
         loadCommonEntries(dict);
         
@@ -60,65 +64,73 @@ public class StitchingFunction extends PSFunction {
         // Functions array
         PSObjectArray funcArr = dict.get("Functions").toArray();
         k = funcArr.size();
-        for (int i = 0 ; i < k ; i++) {
+        for (int i = 0; i < k; i++) {
             PSObject currentObj = funcArr.get(i);
             if (!(currentObj instanceof PSObjectDict)) {
                 throw new PSErrorTypeCheck();
             }
-            PSFunction funcDict = PSFunction.newFunction((PSObjectDict)currentObj);
+            PSFunction funcDict = PSFunction.newFunction(
+                    (PSObjectDict) currentObj);
             functions.add(funcDict);
         }
         
         // Bounds array
-        bounds = dict.get("Bounds").toArray().toDoubleArray(k-1);
+        bounds = dict.get("Bounds").toArray().toDoubleArray(k - 1);
         
         // Encode array
-        encode = dict.get("Encode").toArray().toDoubleArray(2*k);
+        encode = dict.get("Encode").toArray().toDoubleArray(2 * k);
     }
     
     /**
-     * Evaluate this function for a set of input values
-     * @param input values
-     * @return output values
+     * Evaluate this function for a set of input values.
+     * 
+     * @param pInput Input values.
+     * 
+     * @return Output values.
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * (yet) implemented.
      */
-    public double[] evaluate(double[] input) throws PSErrorRangeCheck, 
+    public double[] evaluate(final double[] pInput) throws PSErrorRangeCheck, 
             PSErrorUnimplemented {
-        input = evaluatePreProcess(input);
+        
+        double[] input = evaluatePreProcess(pInput);
         
         double x = input[0];
         
         // Search in which range x falls
         int subFunc = -1;
-        for (int i = 0 ; i < (k-1) ; i++) {
+        for (int i = 0; i < (k - 1); i++) {
             if (x < bounds[i]) {
                 subFunc = i;
                 break;
             }
         }
         if (subFunc < 0) {
-            subFunc = k-1;
+            subFunc = k - 1;
         }
         
         // encode x value as described by encoding vector
         double bound0;
         double bound1;
         if (subFunc == 0) {
-            bound0 = domain[0];
+            bound0 = getDomain(0);
             if (k > 1) {
                 bound1 = bounds[0];
             } else {
-                bound1 = domain[1];
+                bound1 = getDomain(1);
             }
-        } else if (subFunc == (k-1)) {
-            bound0 = bounds[k-2];
-            bound1 = domain[1];
+        } else if (subFunc == (k - 1)) {
+            bound0 = bounds[k - 2];
+            bound1 = getDomain(1);
         } else {
-            bound0 = bounds[subFunc-1];
+            bound0 = bounds[subFunc - 1];
             bound1 = bounds[subFunc];
         }
-        double encode0 = encode[2*subFunc];
-        double encode1 = encode[2*subFunc+1];
-        x = (x-bound0)/(bound1-bound0) * (encode1-encode0) + encode0;
+        double encode0 = encode[2 * subFunc];
+        double encode1 = encode[2 * subFunc + 1];
+        x = (x - bound0) / (bound1 - bound0) * (encode1 - encode0) + encode0;
         
         double[] encInput = {x};
         double[] y = functions.get(subFunc).evaluate(encInput);
