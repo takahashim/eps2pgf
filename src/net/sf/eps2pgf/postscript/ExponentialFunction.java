@@ -25,63 +25,77 @@ import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /**
- * Represent a PostScript function of type 2 (exponential interpolation function)
+ * Represent a PostScript function of type 2 (exponential interpolation
+ * function).
  *
  * @author Paul Wagenaars
  */
 public class ExponentialFunction extends PSFunction {
-    // Interpolation exponent
-    double N;
+    /** Interpolation exponent. */
+    private double capN;
     
-    // C0
-    double[] C0;
+    /** C0 parameter. */
+    private double[] c0;
     
-    // C1
-    double[] C1;
+    /** C1 parameter. */
+    private double[] c1;
     
-    /** Creates a new instance of ExponentialFunction */
-    public ExponentialFunction(PSObjectDict dict) throws PSError {
+    /**
+     * Creates a new instance of ExponentialFunction.
+     * 
+     * @param dict The funcion dictionary.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public ExponentialFunction(final PSObjectDict dict) throws PSError {
         // First, load all entries common to all functions
         loadCommonEntries(dict);
         
         // Next, load all type specific entries
-        N = dict.get("N").toReal();
+        capN = dict.get("N").toReal();
         
         try {
-            if (n >= 0) {
-                C0 = dict.get("C0").toArray().toDoubleArray(n);
+            if (getNrOutputValues() >= 0) {
+                c0 = dict.get("C0").toArray()
+                        .toDoubleArray(getNrOutputValues());
             } else {
-                C0 = dict.get("C0").toArray().toDoubleArray();
-                n = C0.length;
+                c0 = dict.get("C0").toArray().toDoubleArray();
+                setNrOutputValues(c0.length);
             }
         } catch (PSErrorRangeCheck e) {
-            C0 = new double[1];
-            C0[0] = 0.0;
-            n = 1;
+            c0 = new double[1];
+            c0[0] = 0.0;
+            setNrOutputValues(1);
         }
         
         try {
-            C1 = dict.get("C1").toArray().toDoubleArray(n);
+            c1 = dict.get("C1").toArray().toDoubleArray(getNrOutputValues());
         } catch (PSErrorRangeCheck e) {
-            C1 = new double[1];
-            C1[0] = 1.0;
+            c1 = new double[1];
+            c1[0] = 1.0;
         }
         
     }
     
     /**
-     * Evaluate this function for a set of input values
-     * @param input values
-     * @return output values
+     * Evaluate this function for a set of input values.
+     * 
+     * @param pInput Input values.
+     * 
+     * @return Output values.
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * (yet) implemented.
      */
-    public double[] evaluate(double[] input) throws PSErrorRangeCheck, 
+    public double[] evaluate(final double[] pInput) throws PSErrorRangeCheck, 
             PSErrorUnimplemented {
-        input = evaluatePreProcess(input);
+        double[] input = evaluatePreProcess(pInput);
         
         double x = input[0];
-        double[] y = new double[n];
-        for (int i = 0 ; i < n ; i++) {
-            y[i] = C0[i] + Math.pow(x,N)*(C1[i]-C0[i]);
+        double[] y = new double[getNrOutputValues()];
+        for (int i = 0; i < getNrOutputValues(); i++) {
+            y[i] = c0[i] + Math.pow(x, capN) * (c1[i] - c0[i]);
         }
         
         return evaluatePostProcess(y);

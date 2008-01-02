@@ -27,30 +27,36 @@ import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
 import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /**
- * Represents a PostScript function dictionary
+ * Represents a PostScript function dictionary.
  *
  * @author Paul Wagenaars
  */
 public class PSFunction {
-    double[] domain;
-    double[] range;
     
-    // number of input values
-    int m;
+    /** Domain (see PostScript manual). */
+    private double[] domain;
     
-    // number of output values
-    int n;
+    /** Range (see PostScript manual). */
+    private double[] range;
+    
+    /** number of input values. */
+    private int nrInputValues;
+    
+    /** number of output values. */
+    private int nrOutputValues;
     
     /**
      * Create a new function of the type specified in the FuntionType field.
+     * 
      * @param dict PostScript dictionary with function description
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck A required fields not found and/or a dictionary value is out of
-     * range
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented Encountered a feature that is not (yet) implemented
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck A dictionary field has an invalid type
+     * 
      * @return New PostScript function
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public static PSFunction newFunction(PSObjectDict dict) throws PSError {
+    public static PSFunction newFunction(final PSObjectDict dict)
+            throws PSError {
+        
         PSObject typeObj = dict.lookup("FunctionType");
         if (typeObj == null) {
             throw new PSErrorRangeCheck();
@@ -75,52 +81,71 @@ public class PSFunction {
     }
     
     /**
-     * Load entries common to all PostScript functions
+     * Load entries common to all PostScript functions.
+     * 
      * @param dict PostScript dictionary describing the function
+     * 
+     * @throws PSErrorUndefined The PostScript error undefined.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    void loadCommonEntries(PSObjectDict dict) throws PSErrorUndefined, PSErrorTypeCheck {
+    void loadCommonEntries(final PSObjectDict dict)
+            throws PSErrorUndefined, PSErrorTypeCheck {
+        
         // Load domain field
         domain = dict.get("Domain").toArray().toDoubleArray();
-        m = (int)Math.floor(domain.length/2);
+        nrInputValues = (int) Math.floor(domain.length / 2.0);
         
         // Load range field
         PSObject obj;
         try {
             obj = dict.get("Range");
             range = obj.toArray().toDoubleArray();
-            n = (int)Math.floor(range.length/2);
+            nrOutputValues = (int) Math.floor(range.length / 2.0);
         } catch (PSErrorUndefined e) {
             range = new double[0];
-            n = -1;
+            nrOutputValues = -1;
         }
     }
     
     /**
-     * Evaluate this function for a set of input values
+     * Evaluate this function for a set of input values.
+     * 
+     * @param input The input.
+     * 
+     * @return The output values.
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * (yet) implemented.
      */
-    public double[] evaluate(double[] input) throws PSErrorRangeCheck, 
+    public double[] evaluate(final double[] input) throws PSErrorRangeCheck, 
             PSErrorUnimplemented {
-        throw new PSErrorUnimplemented("Evaluating functions of this type");        
+        
+        throw new PSErrorUnimplemented("Evaluating functions of this type");
     }
     
     /**
-     * Preprocessing common to the evaluate methods of all function types
+     * Pre-processing common to the evaluate methods of all function types.
+     * 
      * @param input Input values
+     * 
      * @return New array with input values (clipped to the domain)
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
-    double[] evaluatePreProcess(double[] input) throws PSErrorRangeCheck {
+    double[] evaluatePreProcess(final double[] input) throws PSErrorRangeCheck {
         // Check whether the number of input values is correct
-        if (input.length != m) {
+        if (input.length != nrInputValues) {
             throw new PSErrorRangeCheck();
         }
         
         // Clip input values to domain
-        double[] newInput = new double[m];
-        for (int i = 0 ; i < m ; i++) {
-            if (input[i] < domain[2*i]) {
+        double[] newInput = new double[nrInputValues];
+        for (int i = 0; i < nrInputValues; i++) {
+            if (input[i] < domain[2 * i]) {
                 newInput[i] = domain[i];
-            } else if (input[i] > domain[2*i+1]) {
-                newInput[i] = domain[2*i+1];
+            } else if (input[i] > domain[2 * i + 1]) {
+                newInput[i] = domain[2 * i + 1];
             } else {
                 newInput[i] = input[i];
             }
@@ -130,22 +155,53 @@ public class PSFunction {
     }
     
     /**
-     * Postprocessing common to the evaluate methods of all function types
+     * Post-processing common to the evaluate methods of all function types.
+     * 
      * @param output Unclipped output values of the function
+     * 
      * @return Same array as input parameter
      */
-    double[] evaluatePostProcess(double[] output) {
+    double[] evaluatePostProcess(final double[] output) {
         if (range.length > 0) {
-            for (int i = 0 ; i < n ; i++) {
-                if (output[i] < range[2*i]) {
-                    output[i] = range[2*i];
-                } else if (output[i] > range[2*i+1]) {
-                    output[i] = range[2*i+1];
+            for (int i = 0; i < nrOutputValues; i++) {
+                if (output[i] < range[2 * i]) {
+                    output[i] = range[2 * i];
+                } else if (output[i] > range[2 * i + 1]) {
+                    output[i] = range[2 * i + 1];
                 }
             }
         }
         
         return output;
     }
+
+    /**
+     * Sets the number of output values.
+     * 
+     * @param pNrOutputValues the nrOutputValues to set
+     */
+    void setNrOutputValues(final int pNrOutputValues) {
+        nrOutputValues = pNrOutputValues;
+    }
+
+    /**
+     * Get the number of output values.
+     * 
+     * @return the nrOutputValues
+     */
+    int getNrOutputValues() {
+        return nrOutputValues;
+    }
     
+    /**
+     * Get a single value from the domain[] array.
+     * 
+     * @param index The index of the value.
+     * 
+     * @return The requested value.
+     */
+    double getDomain(final int index) {
+        return domain[index];
+    }
+
 }
