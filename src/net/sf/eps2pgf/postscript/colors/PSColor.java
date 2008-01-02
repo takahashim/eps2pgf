@@ -26,7 +26,7 @@ import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
 /**
  * The Interface PSColor.
  */
-public abstract class PSColor {
+public abstract class PSColor implements Cloneable {
     
     /** Color levels of this color. Exact meaning depends of color space. */
     private double[] levels;
@@ -35,14 +35,11 @@ public abstract class PSColor {
      * Creates an exact deep copy of this object.
      * 
      * @return an exact deep copy of this object.
+     * 
+     * @throws CloneNotSupportedException Clone is not supported by this object.
      */
-    public PSColor clone() {
-        PSColor copy;
-        try {
-            copy = (PSColor) super.clone();
-        } catch (CloneNotSupportedException e) {
-            copy = new Gray();
-        }
+    public PSColor clone() throws CloneNotSupportedException {
+        PSColor copy = (PSColor) super.clone();
         copy.levels = this.levels.clone();
         return copy;
     }

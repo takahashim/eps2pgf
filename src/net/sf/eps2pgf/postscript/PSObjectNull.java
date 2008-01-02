@@ -41,6 +41,17 @@ public class PSObjectNull extends PSObject {
     }
     
     /**
+     * Creates a deep copy of this object.
+     * 
+     * @return Deep copy of this object.
+     */
+    @Override
+    public PSObjectNull clone() {
+        PSObjectNull copy = (PSObjectNull) super.clone();
+        return copy;
+    }
+
+    /**
      * PostScript operator 'dup'. Create a copy of this object. The values
      * of composite object is not copied, but shared.
      */
@@ -58,7 +69,33 @@ public class PSObjectNull extends PSObject {
         return (obj instanceof PSObjectNull);
     }
     
-    /** Return PostScript text representation of this object. See the
+    /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    public boolean equals(final Object obj) {
+        if (obj instanceof PSObject) {
+            return eq((PSObject) obj);
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns a hash code value for the object.
+     * 
+     * @return Hash code of this object.
+     */
+    public int hashCode() {
+        return 856346;
+    }
+    
+    /**
+     * Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
      */
     public String isis() {

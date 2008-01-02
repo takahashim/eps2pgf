@@ -50,9 +50,12 @@ public class CMYK extends PSColor {
      * Creates an exact deep copy of this object.
      * 
      * @return an exact deep copy of this object.
+     * 
+     * @throws CloneNotSupportedException Clone not supported by this object.
      */
-    public CMYK clone() {
-        return (CMYK) super.clone();
+    public CMYK clone() throws CloneNotSupportedException {
+        CMYK copy = (CMYK) super.clone();
+        return copy;
     }
 
     /**

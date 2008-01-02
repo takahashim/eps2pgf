@@ -56,7 +56,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
     PSObjectDict dict;
     
     /** The log. */
-    Logger log = Logger.getLogger("net.sourceforge.eps2pgf");
+    private static final Logger LOG =
+                                    Logger.getLogger("net.sourceforge.eps2pgf");
     
     // Standard fields in font dictionary
     /** The fontinfo field name. */
@@ -171,7 +172,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
         } else if (encoding.equals("Symbol")) {
             dict.setKey(KEY_ENCODING, new PSObjectArray(Encoding.getSymbolVector()));
         } else {
-            log.severe("Unknown encoding: " + encoding);
+            LOG.severe("Unknown encoding: " + encoding);
             throw new PSErrorInvalidFont();
         }
         dict.setKey(KEY_PAINTTYPE, new PSObjectInt(2));
@@ -202,8 +203,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
      */
     public PSObjectFont(PSObjectDict aDict) {
         dict = aDict;
-        access = aDict.access;
-        isLiteral = aDict.isLiteral;
+        setAccess(aDict.getAccess());
+        setLiteral(aDict.isLiteral());
     }
     
     /**
@@ -309,17 +310,17 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * Creates an exact deep copy of this font.
+     * Creates a deep copy of this object.
      * 
-     * @return Created copy
+     * @return Deep copy of this object.
      */
+    @Override
     public PSObjectFont clone() {
-        PSObjectDict newDict = dict.clone();
-        PSObjectFont newFont = null;
-        newFont = new PSObjectFont(newDict);
-        return newFont;
+        PSObjectFont copy = (PSObjectFont) super.clone();
+        copy.dict = dict.clone();
+        return copy;
     }
-    
+
     /**
      * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
      * of composite object is not copied, but shared.
@@ -328,6 +329,43 @@ public class PSObjectFont extends PSObject implements Cloneable {
      */
     public PSObjectFont dup() {
         return this;
+    }
+    
+    /**
+     * Compare this object with another object and return true if they are
+     * equal. See PostScript manual on what's equal and what's not.
+     * 
+     * @param obj Object to compare this object with
+     * 
+     * @return True if objects are equal, false otherwise
+     */
+    public boolean eq(final PSObject obj) {
+        return dict.eq(obj);
+    }
+    
+    /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    public boolean equals(final Object obj) {
+        if (obj instanceof PSObject) {
+            return eq((PSObject) obj);
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns a hash code value for the object.
+     * 
+     * @return Hash code of this object.
+     */
+    public int hashCode() {
+        return dict.hashCode();
     }
     
     /**

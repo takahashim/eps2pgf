@@ -47,9 +47,12 @@ public class Gray extends PSColor {
      * Create an exact copy of this object.
      * 
      * @return Copy of this object.
+     * 
+     * @throws CloneNotSupportedException Clone not supported by this object.
      */
-    public Gray clone() {
-        return (Gray) super.clone();
+    public Gray clone() throws CloneNotSupportedException {
+        Gray copy = (Gray) super.clone();
+        return copy;
     }
 
     /**

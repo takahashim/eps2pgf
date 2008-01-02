@@ -51,9 +51,20 @@ public class PSObjectFile extends PSObject {
         } else {
             setStream(new StringInputStream(""));
         }
-        isLiteral = false;
+        setLiteral(false);
     }
     
+    /**
+     * Creates a deep copy of this object.
+     * 
+     * @return Deep copy of this object.
+     */
+    @Override
+    public PSObjectFile clone() {
+        PSObjectFile copy = (PSObjectFile) super.clone();
+        return copy;
+    }
+
     /**
      * PostScript operator 'closefile'. Breaks connection between this file
      * object and the <code>InputStream</code>.
@@ -84,7 +95,32 @@ public class PSObjectFile extends PSObject {
      * PostScript operator 'executeonly'. Set access attribute to executeonly.
      */
     public void executeonly() {
-        access = ACCESS_EXECUTEONLY;
+        setAccess(Access.EXECUTEONLY);
+    }
+    
+    /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    public boolean equals(final Object obj) {
+        if (obj instanceof PSObjectFile) {
+            return eq((PSObjectFile) obj);
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns a hash code value for the object.
+     * 
+     * @return Hash code of this object.
+     */
+    public int hashCode() {
+        return inStr.hashCode();
     }
     
     /**
@@ -100,7 +136,7 @@ public class PSObjectFile extends PSObject {
      * PostScript operator: 'noaccess'.
      */
     public void noaccess() {
-        access = ACCESS_NONE;
+        setAccess(Access.NONE);
     }
     
     /**

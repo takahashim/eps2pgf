@@ -36,16 +36,52 @@ public class PSObjectOperator extends PSObject {
     public PSObjectOperator(String nm, Method op) {
         name = nm;
         opMethod = op;
-        isLiteral = false;
+        setLiteral(false);
     }
     
     /**
      * Create new operator object
      */
-    public PSObjectOperator(PSObjectOperator obj) {
+    public PSObjectOperator(final PSObjectOperator obj) {
         name = obj.name;
         opMethod = obj.opMethod;
         copyCommonAttributes(obj);
+    }
+    
+    /**
+     * Creates a deep copy of this object.
+     * 
+     * @return Deep copy of this object.
+     */
+    @Override
+    public PSObjectOperator clone() {
+        PSObjectOperator copy = (PSObjectOperator) super.clone();
+        return copy;
+    }
+
+    /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    public boolean equals(final Object obj) {
+        if (obj instanceof PSObject) {
+            return eq((PSObject) obj);
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns a hash code value for the object.
+     * 
+     * @return Hash code of this object.
+     */
+    public int hashCode() {
+        return opMethod.hashCode();
     }
     
     /** Return PostScript text representation of this object. See the

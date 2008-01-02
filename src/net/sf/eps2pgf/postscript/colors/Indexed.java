@@ -29,80 +29,136 @@ import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /**
- * Implements Indexed color space
+ * Implements Indexed color space.
  */
 public class Indexed extends PSColor {
-	PSObjectArray colorSpaceArray;
-	PSColor currentColor;
-	
-	public Indexed(PSObject obj) throws PSError {
-		// Indexed color spaces must be defined using an array
-		if (!(obj instanceof PSObjectArray)) {
-			throw new PSErrorTypeCheck();
-		}
-		
-		// Save the array specifying this color space
-		colorSpaceArray = (PSObjectArray)obj;
-		
-		// Extract base color space
-		currentColor = ColorUtils.autoSetColorSpace(colorSpaceArray.get(1));
-		
-		// Extract lookup table
-		PSObject lookup = colorSpaceArray.get(3);
-		if (lookup instanceof PSObjectString) {
-			// Convert the lookup string to a more convenient format
-			
-		} else {
-			throw new PSErrorUnimplemented("Indexed color space with non-string lookup table.");
-		}
-		
-	}
+    
+    /** Array with colors. */
+    private PSObjectArray colorSpaceArray;
+    
+    /** Currently selected color. */
+    private PSColor currentColor;
+    
+    /**
+     * Create a new indexed color.
+     * 
+     * @param obj Object describing this color
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public Indexed(final PSObject obj) throws PSError {
+        // Indexed color spaces must be defined using an array
+        if (!(obj instanceof PSObjectArray)) {
+            throw new PSErrorTypeCheck();
+        }
+        
+        // Save the array specifying this color space
+        colorSpaceArray = (PSObjectArray) obj;
+        
+        // Extract base color space
+        currentColor = ColorUtils.autoSetColorSpace(colorSpaceArray.get(1));
+        
+        // Extract lookup table
+        PSObject lookup = colorSpaceArray.get(3);
+        if (lookup instanceof PSObjectString) {
+            // Convert the lookup string to a more convenient format
+            
+        } else {
+            throw new PSErrorUnimplemented("Indexed color space with non-string"
+                    + " lookup table.");
+        }
+        
+    }
 
-	@Override
-	public PSColor clone() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * Creates an exact deep copy of this object.
+     * 
+     * @return an exact deep copy of this object.
+     */
+    @Override
+    public PSColor clone() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public double[] getCMYK() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * Gets the equivalent CMYK levels of this color.
+     * 
+     * @return the CMYK
+     */
+    @Override
+    public double[] getCMYK() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public PSObjectArray getColorSpace() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * Gets a PostScript array describing the color space of this color.
+     * 
+     * @return array describing color space.
+     */
+    @Override
+    public PSObjectArray getColorSpace() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public double getGray() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    /**
+     * Gets the gray level equivalent of this color.
+     * 
+     * @return the gray level
+     */
+    @Override
+    public double getGray() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
-	@Override
-	public double[] getHSB() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /**
+     * Gets the equivalent HSB levels of this color.
+     * 
+     * @return the HSB
+     */
+    @Override
+    public double[] getHSB() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public int getNrComponents() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    /**
+     * Gets the number of color components required to specify this color.
+     * E.g. RGB has three and CMYK has four components.
+     * 
+     * @return the number of components for this color
+     */
+    @Override
+    public int getNrComponents() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
-	@Override
-	public double[] getRGB() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	public void setColor(final double[] components)
-			throws PSErrorRangeCheck {
-		// TODO Implement set color method
-	}
+    /**
+     * Gets the equivalent RGB levels of this color.
+     * 
+     * @return the RGB
+     */
+    @Override
+    public double[] getRGB() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    /**
+     * Changes the current color to another color in the same color space.
+     * 
+     * @param components the new color
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     */
+    @Override
+    public void setColor(final double[] components)
+            throws PSErrorRangeCheck {
+        // TODO Implement set color method
+    }
 
 }

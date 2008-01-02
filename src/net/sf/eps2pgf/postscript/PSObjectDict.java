@@ -57,13 +57,14 @@ public class PSObjectDict extends PSObject {
      * 
      * @return Deep copy of this object.
      */
+    @Override
     public PSObjectDict clone() {
-        PSObjectDict newDict = new PSObjectDict();
-        newDict.capacity = capacity;
-        for(PSObject key : map.keySet()) {
-            newDict.map.put(key.clone(), map.get(key).clone());
-        }
-        return newDict;
+        PSObjectDict copy = (PSObjectDict) super.clone();
+        copy.map = new HashMap<PSObject, PSObject>();
+        for (PSObject key : map.keySet()) {
+            copy.map.put(key.clone(), map.get(key).clone());
+        }        
+        return copy;
     }
 
     /**
@@ -100,6 +101,31 @@ public class PSObjectDict extends PSObject {
      */
     public PSObjectDict dup() {
         return this;
+    }
+    
+    /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    public boolean equals(final Object obj) {
+        if (obj instanceof PSObject) {
+            return eq((PSObject) obj);
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns a hash code value for the object.
+     * 
+     * @return Hash code of this object.
+     */
+    public int hashCode() {
+        return map.hashCode();
     }
     
     /**
@@ -211,7 +237,7 @@ public class PSObjectDict extends PSObject {
      * PostScript operator: 'noaccess'
      */
     public void noaccess() {
-        access = ACCESS_NONE;
+        setAccess(Access.NONE);
     }
     
     /**
@@ -232,7 +258,9 @@ public class PSObjectDict extends PSObject {
      * 'readonly'. Returns false otherwise.
      */
     public boolean rcheck() {
-        if ( (access == ACCESS_UNLIMITED) || (access == ACCESS_READONLY) ) {
+        if ( (getAccess() == Access.UNLIMITED)
+                || (getAccess() == Access.READONLY) ) {
+            
             return true;
         } else {
             return false;
@@ -240,10 +268,10 @@ public class PSObjectDict extends PSObject {
     }
 
     /**
-     * PostScript operator: 'readonly'
+     * PostScript operator: 'readonly'.
      */
     public void readonly() {
-        access = ACCESS_READONLY;
+        setAccess(Access.READONLY);
     }
     
     /**
@@ -336,6 +364,6 @@ public class PSObjectDict extends PSObject {
      * false otherwise
      */
     public boolean wcheck() {
-        return (access == ACCESS_UNLIMITED);
+        return (getAccess() == Access.UNLIMITED);
     }
 }

@@ -96,9 +96,9 @@ public class PSObjectArray extends PSObject {
     	
         // quick check whether it is a literal or executable array
         if (str.charAt(0) == '{') {
-            isLiteral = false;
+            setLiteral(false);
         } else if (str.charAt(0) == '[') {
-            isLiteral = true;
+            setLiteral(true);
         }
         
         str = str.substring(1, str.length() - 1);
@@ -173,7 +173,7 @@ public class PSObjectArray extends PSObject {
                 PSObject obj = get(i);
                 set(i, obj.bind(interp));
                 if (obj instanceof PSObjectArray) {
-                    if (!((PSObjectArray) obj).isLiteral) {
+                    if (!((PSObjectArray) obj).isLiteral()) {
                         obj.readonly();
                     }
                 }
@@ -190,15 +190,12 @@ public class PSObjectArray extends PSObject {
      * @return Deep copy of this array
      */
     public PSObjectArray clone() {
-        PSObject[] objs = new PSObject[size()];
-        int i = 0;
-        for (PSObject obj : this) {
-            objs[i] = obj.clone();
-            i++;
+        PSObjectArray copy = (PSObjectArray) super.clone();
+        copy.array = new ArrayList<PSObject>(array.size());
+        for (PSObject obj : array) {
+            copy.array.add(obj.clone());
         }
-        PSObjectArray newArray = new PSObjectArray(objs);
-        newArray.copyCommonAttributes(this);
-        return newArray;
+        return copy;
     }
 
     /**
@@ -247,10 +244,35 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    public boolean equals(final Object obj) {
+        if (obj instanceof PSObject) {
+            return eq((PSObject) obj);
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns a hash code value for the object.
+     * 
+     * @return Hash code of this object.
+     */
+    public int hashCode() {
+        return array.hashCode() + offset;
+    }
+    
+    /**
      * PostScript operator 'executeonly'. Set access attribute to executeonly.
      */
     public void executeonly() {
-        access = ACCESS_EXECUTEONLY;
+        setAccess(Access.EXECUTEONLY);
     }
     
     /**
@@ -337,7 +359,7 @@ public class PSObjectArray extends PSObject {
      */
     public String isis() {
         StringBuilder str = new StringBuilder();
-        if (isLiteral) {
+        if (isLiteral()) {
             str.append("[ ");
         } else {
             str.append("{ ");
@@ -345,7 +367,7 @@ public class PSObjectArray extends PSObject {
         for (PSObject obj : this) {
             str.append(obj.isis() + " ");
         }
-        if (isLiteral) {
+        if (isLiteral()) {
             str.append("]");
         } else {
             str.append("}");
@@ -365,7 +387,7 @@ public class PSObjectArray extends PSObject {
      * PostScript operator: 'noaccess'
      */
     public void noaccess() {
-        access = ACCESS_NONE;
+        setAccess(Access.NONE);
     }
     
     /**
@@ -410,7 +432,9 @@ public class PSObjectArray extends PSObject {
      * 'unlimited' or 'readonly'.
      */
     public boolean rcheck() {
-        if ( (access == ACCESS_UNLIMITED) || (access == ACCESS_READONLY) ) {
+        if ( (getAccess() == Access.UNLIMITED)
+                || (getAccess() == Access.READONLY) ) {
+            
             return true;
         } else {
             return false;
@@ -421,7 +445,7 @@ public class PSObjectArray extends PSObject {
      * PostScript operator: 'readonly'
      */
     public void readonly() {
-        access = ACCESS_READONLY;
+        setAccess(Access.READONLY);
     }
     
     /**
@@ -518,7 +542,7 @@ public class PSObjectArray extends PSObject {
      * Convert this object to an executable array (procedure), if possible.
      */
     public PSObjectArray toProc() throws PSErrorTypeCheck {
-        if (isLiteral) {
+        if (isLiteral()) {
             throw new PSErrorTypeCheck();
         }
         return this;
@@ -571,7 +595,7 @@ public class PSObjectArray extends PSObject {
      * 'unlimited'.
      */
     public boolean wcheck() {
-        return (access == ACCESS_UNLIMITED);
+        return (getAccess() == Access.UNLIMITED);
     }
 
 }

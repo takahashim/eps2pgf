@@ -52,8 +52,11 @@ public class DictStack {
     
     /**
      *  Create a new dictionary stack.
+     *  
+     *  @param interp The interpreter with which this dictionary stack is
+     *  associated.
      */
-    public DictStack(Interpreter interp) {
+    public DictStack(final Interpreter interp) {
         fillSystemDict(interp);
         systemdict.readonly();
     }
@@ -61,8 +64,16 @@ public class DictStack {
     /**
      * Check the access attribute of this object. Throws an exception when
      * not allowed.
+     * 
+     * @param execute Is this object to be executed?
+     * @param read Is this object to be read?
+     * @param write Is this object to be written?
+     * 
+     * @throws PSErrorInvalidAccess the PS error invalid access
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
      */
-    public void checkAccess(boolean execute, boolean read, boolean write)
+    public void checkAccess(final boolean execute, final boolean read,
+            final boolean write)
             throws PSErrorInvalidAccess, PSErrorStackUnderflow {
         if (dictStack.size() > 0) {
             dictStack.peek().checkAccess(execute, read, write);
@@ -72,8 +83,8 @@ public class DictStack {
     }
     
     /**
-     * PostScript operator <code>cleardictstack</code>. Pops all dictionaries off
-     * the dictionary stack except the permanent entries.
+     * PostScript operator <code>cleardictstack</code>. Pops all dictionaries
+     * off the dictionary stack except the permanent entries.
      */
     public void cleardictstack() {
         try {
@@ -86,15 +97,21 @@ public class DictStack {
     }
     
     /**
-     * Implements PostScript operator 'countdictstack'
+     * Implements PostScript operator 'countdictstack'.
+     * 
      * @return Returns the number of dictionaries on the stack
      */
     int countdictstack() {
         return 3 + dictStack.size();
     }
     
-    /** Define key->value in current dictionary. */
-    public void def(PSObject key, PSObject value) throws PSErrorTypeCheck {
+    /**
+     * Define key->value in current dictionary.
+     * 
+     * @param key The key.
+     * @param value The value.
+     */
+    public void def(final PSObject key, final PSObject value) {
         try {
             PSObjectDict dict = dictStack.peek();
             dict.setKey(key, value);
@@ -104,15 +121,20 @@ public class DictStack {
     }
     
     /**
-     * PostScript operator <code>dictstack</code>
+     * PostScript operator <code>dictstack</code>.
      * Stores all elements of the dictionary stack into <code>array</code>
      * and returns an object describing the initial <code>n</code>'-element
      * subarray of 'array'.
+     * 
      * @param array Array to which the dictionaries will be stored
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck <CODE>array</CODE> is too short to store all dictionaries
+     * 
+     * @throws PSErrorRangeCheck <CODE>array</CODE> is too short to store all
+     * dictionaries.
+     * 
      * @return Subarray of <code>array</code> with all dictionaries
      */
-    public PSObjectArray dictstack(PSObjectArray array) throws PSErrorRangeCheck {
+    public PSObjectArray dictstack(final PSObjectArray array)
+            throws PSErrorRangeCheck {
         int n = countdictstack();
         if (n > array.length()) {
             throw new PSErrorRangeCheck();
@@ -120,16 +142,22 @@ public class DictStack {
         array.put(0, systemdict);
         array.put(1, globaldict);
         array.put(2, userdict);
-        for (int i = 0 ; i < dictStack.size() ; i++) {
-            array.put(i+3, dictStack.get(i));
+        for (int i = 0; i < dictStack.size(); i++) {
+            array.put(i + 3, dictStack.get(i));
         }
         
         return array.getinterval(0, n);
     }
     
+    /**
+     * Write a representation of the full dictionary stack to the standard
+     * output.
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     */
     public void dumpFull() throws PSErrorRangeCheck {
         System.out.println("----- Dictionary stack");
-        for(int i = dictStack.size()-1 ; i >= 0 ; i--) {
+        for (int i = dictStack.size() - 1; i >= 0; i--) {
             PSObjectDict dict = dictStack.get(i);
             System.out.println("  --- dict" + i);
             dict.dumpFull("    - ");
@@ -137,12 +165,17 @@ public class DictStack {
         System.out.println("  --- userdict");
         userdict.dumpFull("    - ");
         System.out.println("  --- systemdict");
-        System.out.println("    - " + systemdict.length() + " key->value pairs.");
+        System.out.println("    - " + systemdict.length()
+                + " key->value pairs.");
         System.out.println("----- End of dictionary stack");
     }
 
-    /** Fill the system dictionary */
-    private void fillSystemDict(Interpreter interp) {
+    /**
+     * Fill the system dictionary with all operators and other values.
+     * 
+     * @param interp The interpreter.
+     */
+    private void fillSystemDict(final Interpreter interp) {
         // Add operators
         Method[] mthds = interp.getClass().getMethods();
         HashMap<String, String> replaceNames = new HashMap<String, String>();
@@ -197,17 +230,27 @@ public class DictStack {
         
         // add encoding vectors
         PSObjectName[] encodingVector = Encoding.getISOLatin1Vector();
-        systemdict.setKey("ISOLatin1Encoding", new PSObjectArray(encodingVector));
+        systemdict.setKey("ISOLatin1Encoding",
+                new PSObjectArray(encodingVector));
         encodingVector = Encoding.getStandardVector();
-        systemdict.setKey("StandardEncoding", new PSObjectArray(encodingVector));        
+        systemdict.setKey("StandardEncoding",
+                new PSObjectArray(encodingVector));        
     }
 
-    /** Push a dictionary onto the stack */
-    public void pushDict(PSObjectDict dict) {
+    /**
+     * Push a dictionary onto the stack.
+     * 
+     * @param dict The dictionary.
+     */
+    public void pushDict(final PSObjectDict dict) {
         dictStack.push(dict);
     }
     
-    /** Peeks at the topmost dictionary. */
+    /**
+     * Peeks at the topmost dictionary.
+     * 
+     * @return the top-most dictionary on the stack.
+     */
     public PSObjectDict peekDict() {
         try {
             return dictStack.peek();
@@ -216,7 +259,13 @@ public class DictStack {
         }
     }
     
-    /** Pops the topmost dictionary from the stack. */
+    /**
+     * Pops the topmost dictionary from the stack.
+     * 
+     * @return The popped dictionary.
+     * 
+     * @throws PSErrorDictStackUnderflow the PS error dict stack underflow
+     */
     public PSObjectDict popDict() throws PSErrorDictStackUnderflow {
         try {
             return dictStack.pop();
@@ -225,10 +274,16 @@ public class DictStack {
         }
     }
     
-    /** Search the dictionary that defines a specific key. */
-    public PSObjectDict where(PSObject key) {
+    /**
+     * Search the dictionary that defines a specific key.
+     * 
+     * @param key The key.
+     * 
+     * @return The dictionary in which key is defined.
+     */
+    public PSObjectDict where(final PSObject key) {
         // First look in the non-permanent dictionaries
-        for(int i = dictStack.size()-1 ; i >= 0 ; i--) {
+        for (int i = dictStack.size() - 1; i >= 0; i--) {
             PSObjectDict dict = dictStack.get(i);
             if (dict.known(key)) {
                 return dict;
@@ -254,8 +309,15 @@ public class DictStack {
     }
     
     
-    /** Lookup a key in the dictionary stack */
-    public PSObject lookup(PSObject key) {
+    /**
+     * Lookup a key in the dictionary stack.
+     * 
+     * @param key The key.
+     * 
+     * @return The requested object. Or <code>null</code> if the key is not
+     * found.
+     */
+    public PSObject lookup(final PSObject key) {
         PSObjectDict dict = where(key);
         if (dict == null) {
             return null;
@@ -264,13 +326,28 @@ public class DictStack {
         }
     }
     
-    /** Lookup a key in the dictionary stack */
-    public PSObject lookup(String key) {
-    	return this.lookup(new PSObjectName(key, true));
+    /**
+     * Lookup a key in the dictionary stack.
+     * 
+     * @param key The key.
+     * 
+     * @return The requested object. Or <code>null</code> if the key is not
+     * found.
+     */
+    public PSObject lookup(final String key) {
+        return this.lookup(new PSObjectName(key, true));
     }
     
-    /** Implement PostScript operator: store */
-    public void store(PSObject key, PSObject value) throws PSErrorTypeCheck {
+    /**
+     * Implement PostScript operator: store.
+     * 
+     * @param key The key.
+     * @param value The value.
+     * 
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
+    public void store(final PSObject key, final PSObject value)
+            throws PSErrorTypeCheck {
         PSObjectDict dict = where(key);
         if (dict == null) {
             // Key is currently not defined in any dictionary. So define it in

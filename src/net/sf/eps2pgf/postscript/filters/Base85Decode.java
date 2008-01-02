@@ -77,7 +77,7 @@ public class Base85Decode extends InputStream {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void close() throws IOException {
-        in.close();
+        in = null;
     }
     
     /**

@@ -64,7 +64,7 @@ public class HexDecode extends InputStream {
      * @throws IOException An I/O error occurred.
      */
     public void close() throws IOException {
-        in.close();
+        in = null;
     }
     
     /**
