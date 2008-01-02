@@ -21,14 +21,17 @@
 package net.sf.eps2pgf.postscript.errors;
 
 /**
- * PostScript error: nocurrentpoint
+ * PostScript error: nocurrentpoint.
  *
  * @author Paul Wagenaars
  */
 public class PSErrorNoCurrentPoint extends PSError {
-	private static final long serialVersionUID = 1L;
+    /** Serial version UID. */
+    private static final long serialVersionUID = 1L;
     
-    /** Creates a new instance of PSErrorNoCurrentPoint */
+    /**
+     * Creates a new instance of PSErrorNoCurrentPoint.
+     */
     public PSErrorNoCurrentPoint() {
     }
     

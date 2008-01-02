@@ -20,10 +20,12 @@
 
 package net.sf.eps2pgf.postscript.errors;
 
-/** Represents PostScript error: stackunderflow
+/**
+ * Represents PostScript error: stackunderflow.
  *
  * @author Paul Wagenaars
  */
 public class PSErrorStackUnderflow extends PSError {
-	private static final long serialVersionUID = 1L;
+    /** Serial version UID. */
+    private static final long serialVersionUID = 1L;
 }
