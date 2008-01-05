@@ -271,6 +271,8 @@ public class PSObjectDict extends PSObject {
      * PostScript operator: 'readonly'.
      */
     public void readonly() {
+        //TODO: can this on be removeed. Isn't is exactly the same as fot the
+        // generic PSObject.
         setAccess(Access.READONLY);
     }
     

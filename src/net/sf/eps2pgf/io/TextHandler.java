@@ -239,7 +239,7 @@ public class TextHandler {
         if ((replaceRule == null) && (textMode == TextMode.DIRECT_COPY)) {
             text = string.toString();
         } else {
-            text = currentFont.charNames2texStrings(charNames);            
+            text = currentFont.charNames2texStrings(charNames);
         }
         
         double angle = gstate.current.ctm.getRotation();

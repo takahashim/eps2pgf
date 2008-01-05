@@ -308,6 +308,7 @@ public class GraphicsState implements Cloneable {
         // dashoffset is primitive, it doesn't need to be cloned explicitly.
         copy.dashPattern = dashPattern.clone();
         // deviceRef is not cloned explicitly because it's a reference.
+        //TODO: keeping the same deviceRef doesn't work across clones
         copy.deviceData = deviceData.clone();
         // flat is primitive, it doesn't need to be cloned explicitly.
         copy.font = font.clone();
