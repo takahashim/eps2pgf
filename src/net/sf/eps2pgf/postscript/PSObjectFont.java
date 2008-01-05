@@ -53,7 +53,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
     private static int nextFID = 0;
     
     /** The font dictionary. */
-    PSObjectDict dict;
+    private PSObjectDict dict;
     
     /** The log. */
     private static final Logger LOG =
@@ -182,7 +182,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
         FontMetric fontMetrics = loadAfm(resourceDir, fontName);
         dict.setKey(KEY_AFM, new PSObjectAfm(fontMetrics));
         String texStringName = props.getProperty("texstrings", "default");
-        dict.setKey(KEY_TEXSTRINGS, Fonts.getTexStringDict(texStringName));
+        dict.setKey(KEY_TEXSTRINGS, FontManager.getTexStringDict(texStringName));
         
         // An AFM file foes not specify CharStrings. Instead, we make a fake entry
         List charMetrics = fontMetrics.getCharMetrics();
@@ -219,11 +219,11 @@ public class PSObjectFont extends PSObject implements Cloneable {
     boolean assertValidFont() throws PSError, ProgramError {
         boolean alreadyValid = true;
         
-        String fontname = this.getFontName();
+        String fontname = getFontName();
         
         // See if texstrings are defined for this font. If not, copy standard texstrings
         if (!dict.known(KEY_TEXSTRINGS)) {
-            dict.setKey(KEY_TEXSTRINGS, Fonts.getTexStringDictByFontname(fontname));
+            dict.setKey(KEY_TEXSTRINGS, FontManager.getTexStringDictByFontname(fontname));
             alreadyValid = false;
         }
         
@@ -283,6 +283,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      */
     public String charNames2texStrings(PSObjectArray charNames) throws 
             PSError, ProgramError {
+        
         assertValidFont();
         
         StringBuilder str = new StringBuilder();
@@ -520,7 +521,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * 
      * @return Font metrics
      * 
-     * @throws PSErrorTypeCheck the PS error type check
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public FontMetric getFontMetric() throws PSError, ProgramError {
         assertValidFont();
@@ -535,24 +537,17 @@ public class PSObjectFont extends PSObject implements Cloneable {
     String getFontName() {
         if (dict.known(KEY_FONTNAME)) {
             PSObject fontNameObj = dict.lookup(KEY_FONTNAME);
-            if (fontNameObj instanceof PSObjectName) {
-                return ((PSObjectName) fontNameObj).toName().name;
-            }
+            return fontNameObj.toString();
         }
+        
         // No font name is defined in this dictionary. Instead we use the key
-        // in the FontDirectory that is associated with this font.
-        List<PSObject> items = Fonts.FontDirectory.getItemList();
-        int thisFID = this.getFID(); 
-        try {
-            for (int i = 1; i < items.size(); i += 2) {
-                PSObjectFont itemFont = items.get(i + 1).toFont();
-                if (itemFont.getFID() == thisFID) {
-                    return items.get(i).toString();
-                }
-            }
-        } catch (PSErrorTypeCheck e) {
-            return "";
+        // in the FontDirectory that is associated with this font. This key is
+        // stored in the font itself behind the FontManager.FONT_DICT_KEY key.
+        if (dict.known(FontManager.FONT_DICT_KEY)) {
+            PSObject keyObj = dict.lookup(FontManager.FONT_DICT_KEY);
+            return keyObj.toString();
         }
+        
         return "";
     }
     
@@ -670,14 +665,18 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * Set the font ID for this font to the next available ID.
+     * Check if this font already has a font ID (FID). If not, set the font ID
+     * for this font to the next available ID.
      * 
      * @return New font ID
      */
     int setFID() {
-        int FID = nextFID++;
-        dict.setKey(KEY_FID, new PSObjectInt(FID));
-        return FID;
+        int fid = getFID();
+        if (fid < 0) {
+            fid = nextFID++;
+            dict.setKey(KEY_FID, new PSObjectInt(fid));
+        }
+        return fid;
     }
     
     /**

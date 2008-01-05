@@ -81,6 +81,9 @@ public class Interpreter {
     /** Default clipping path. */
     private Path defaultClippingPath;
     
+    /** Font directory. */
+    private FontManager fontDirectory;
+    
     /** Log information. */
     private final Logger log = Logger.getLogger("net.sourceforge.eps2pgf");
     
@@ -136,16 +139,16 @@ public class Interpreter {
     public Interpreter() throws ProgramError, PSError, IOException {
         // Create graphics state stack with output device
         OutputDevice output = new NullDevice();
-        this.gstate = new GstateStack(output);
+        gstate = new GstateStack(output);
         
         // "Infinite" bounding box (square box from (-10m,-10m) to (10m,10m))
         double[] bbox = {-28346.46, -28346.46, 28346.46, 28346.46};
-        this.header = new DSCHeader(bbox);
+        header = new DSCHeader(bbox);
 
         // Text handler
-        this.textHandler = new TextHandler(this.gstate);
+        textHandler = new TextHandler(gstate);
         
-        this.initialize();
+        initialize();
     }
     
     /**
@@ -158,7 +161,7 @@ public class Interpreter {
     void initialize() throws IOException, PSError, ProgramError {
         // Initialize character encodings and fonts
         Encoding.initialize();
-        Fonts.initialize();
+        fontDirectory = new FontManager();
         
         // Create dictionary stack
         this.setDictStack(new DictStack(this));
@@ -233,6 +236,13 @@ public class Interpreter {
      */
     public ArrayStack<PSObject> getOpStack() {
         return opStack;
+    }
+
+    /**
+     * @return The FontDirectory
+     */
+    public FontManager getFontDirectory() {
+        return fontDirectory;
     }
 
     /**
@@ -1172,7 +1182,7 @@ public class Interpreter {
     public void op_definefont() throws PSError {
         PSObjectFont font = getOpStack().pop().toFont();
         PSObject key = getOpStack().pop();
-        getOpStack().push(Fonts.defineFont(key, font));
+        getOpStack().push(fontDirectory.defineFont(key, font));
     }
     
     /**
@@ -1431,7 +1441,7 @@ public class Interpreter {
      */
     public void op_findfont() throws PSError, ProgramError {
         PSObject key = getOpStack().pop();
-        getOpStack().push(Fonts.findFont(key));
+        getOpStack().push(fontDirectory.findFont(key));
     }
     
     /**

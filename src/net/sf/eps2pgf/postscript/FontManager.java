@@ -37,110 +37,153 @@ import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
 
 /**
- * Manages font resources.
+ * Manages font resources and serves as FontDirectory.
  * 
  * @author Paul Wagenaars
  */
-public final class Fonts {
-    /** All fields and methods are static. Therefore, we need to initialize it
-     * only once. */
+public final class FontManager extends PSObjectDict {
+    
+    /** All static fields need to be initialized only once. */
     private static boolean alreadyInitialized = false;
 
-    /** The Font directory, see PostScript manual. */
-    static PSObjectDict FontDirectory = new PSObjectDict();
+    /** Default font to use when actual font can not be found. */
+    private static final PSObjectName DEFAULT_FONT =
+                                          new PSObjectName("Times-Roman", true);
     
-    static PSObjectName defaultFont = new PSObjectName("Times-Roman", true);
+    /** Directory with font resources. */
+    private static File resourceDir;
     
-    static File resourceDir;
-    
-    static Properties fontSubstitutions;
-    
-    static Map<String,Properties> allTexStrings;
-    
-    static Logger log = Logger.getLogger("net.sourceforge.eps2pgf");
-    
-    public static final String RESOURCE_DIR_NAME = "resources";
-    public static final String AFM_DIR_NAME = "afm";
-    public static final String FONTDESC_DIR_NAME = "fontdescriptions";
-    public static final String TEXSTRINGS_DIR_NAME = "texstrings";
-    
-    public static final String TEXSTRINGS_ORDER = "eps2pgf_select_order";
-    public static final String TEXSTRINGS_REGEXP = "eps2pgf_select_regexp";
+    /** Some fonts are substituted by another font. This list describes this. */
+    private static Properties fontSubstitutions;
     
     /**
-     * "Hidden" constructor.
+     * All TeX strings. A TeX string is a portion of LaTeX code describing a
+     * certain character.
      */
-    private Fonts() {
-        /* empty block */
+    private static Map<String, Properties> allTexStrings;
+    
+    /** The logger. */
+    private static final Logger LOG =
+                                    Logger.getLogger("net.sourceforge.eps2pgf");
+    
+    /** Name of directory containing font resources. */
+    private static final String RESOURCE_DIR_NAME = "resources";
+    
+    /** Name of directory (within resource dir) with afm files. */
+    private static final String AFM_DIR_NAME = "afm";
+    
+    /** Name of directory (within resource dir) with font descriptions. */
+    private static final String FONTDESC_DIR_NAME = "fontdescriptions";
+    
+    /** Name of directory (within resource dir) with TeX strings. */
+    private static final String TEXSTRINGS_DIR_NAME = "texstrings";
+    
+    /**
+     * Key name of entry in text strings file with regexp that determines for
+     * which font names this texstrings file is valid.
+     */ 
+    private static final String TEXSTRINGS_REGEXP = "eps2pgf_select_regexp";
+
+    /**
+     * Key name of entry in TeX strings file describing priority of list. If
+     * more than one regexp matches a font name, the one with the lowest order
+     * is used for the TeX strings.
+     */
+    private static final String TEXSTRINGS_ORDER = "eps2pgf_select_order";
+    
+    /**
+     * Key in font dictionary which contains the FontDirectory key with which
+     * this font is associated.
+     */
+    public static final PSObjectName FONT_DICT_KEY =
+                                          new PSObjectName("/FontDirectoryKey");
+    
+    
+    /**
+     * Create a new FontDirectory and makes sure the FontManager is initialized.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public FontManager() throws ProgramError {
+        super();
+        
+        // Make sure the FontManager is initialized
+        initialize();
+        
+        // Make the FontManager/FontDirectory, which is also a dictionary,
+        // read only.
+        readonly();
     }
     
     /**
-     * Initializes Fonts.
+     * Initializes all static fields in the FontManager.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public static void initialize() throws ProgramError {
-        if (alreadyInitialized) {
-            return;
-        }
-        
-        // Make FontDirectory read-only (for the user)
-        FontDirectory.readonly();
-        
-        // Try to find the resource dir
-        // In the current directory.
-        File userDir = new File(System.getProperty("user.dir"));
+        if (!alreadyInitialized) {
+            //TODO: move this findResourceDirectory algorithm to its own method.
+            // Try to find the resource dir in the current directory, ...
+            File userDir = new File(System.getProperty("user.dir"));
 
-        // Relative to the class path
-        String fullClassPath = System.getProperty("java.class.path");
-        int index = fullClassPath.indexOf(';');
-        File classPath;
-        if (index == -1) {
-            classPath = new File(fullClassPath);
-        } else {
-            classPath = new File(fullClassPath.substring(0, index));
-        }
-        if (!(classPath.isAbsolute())) {
-            classPath = new File(userDir, classPath.getPath()); 
-        }
-        if (classPath.isFile()) {
-            classPath = classPath.getParentFile();
-        }
-        
-        // In the dist_root directory in the current directory.
-        File distRoot = new File(userDir, "dist_root");
+            // ..., or relative to the class path
+            String fullClassPath = System.getProperty("java.class.path");
+            int index = fullClassPath.indexOf(';');
+            File classPath;
+            if (index == -1) {
+                classPath = new File(fullClassPath);
+            } else {
+                classPath = new File(fullClassPath.substring(0, index));
+            }
+            if (!(classPath.isAbsolute())) {
+                classPath = new File(userDir, classPath.getPath()); 
+            }
+            if (classPath.isFile()) {
+                classPath = classPath.getParentFile();
+            }
+            
+            // ..., or in the dist_root directory in the current directory.
+            File distRoot = new File(userDir, "dist_root");
 
-        resourceDir = findResourceDirInPath(classPath);
-        if (resourceDir == null) {
-            resourceDir = findResourceDirInPath(userDir);
-        }
-        if (resourceDir == null) {
-            resourceDir = findResourceDirInPath(distRoot);
-        }
-        if (resourceDir == null) {
-            throw new ProgramError("Unable to find resource dir.");
+            resourceDir = findResourceDirInPath(classPath);
+            if (resourceDir == null) {
+                resourceDir = findResourceDirInPath(userDir);
+            }
+            if (resourceDir == null) {
+                resourceDir = findResourceDirInPath(distRoot);
+            }
+            if (resourceDir == null) {
+                throw new ProgramError("Unable to find resource dir.");
+            }
+            
+            fontSubstitutions = loadFontSubstitutions(new File(resourceDir,
+                    "fontSubstitution.xml"));
+            allTexStrings = loadAllTexstrings();
+            
+            alreadyInitialized = true;
         }
         
-        fontSubstitutions = loadFontSubstitutions(new File(resourceDir,
-                "fontSubstitution.xml"));
-        allTexStrings = loadAllTexstrings();
-        
-        alreadyInitialized = true;
     }
     
     /**
      * Define a new font and associate it with a key.
-     * @return Defined font
      * 
      * @param key Key to associate the font with
      * @param font Font to define
      * 
+     * @return Defined font
+     * 
      * @throws PSErrorTypeCheck Unable to use the key as dictionary key
      */
-    public static PSObjectFont defineFont(final PSObject key,
-            final PSObjectFont font) throws PSErrorTypeCheck {
+    public PSObjectFont defineFont(final PSObject key, final PSObjectFont font)
+            throws PSErrorTypeCheck {
+        
         font.setFID();
-        FontDirectory.setKey(key, font);
+        font.toDict().setKey(FONT_DICT_KEY, key);
+        //TODO: moet ik hier font.assertValidFont() aanroepen om te voorkomen
+        //      dat deze functie telkens opnieuw word aangeroepen.
+        this.setKey(key, font);
+        
         return font;
     }
     
@@ -154,18 +197,18 @@ public final class Fonts {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      * @throws PSError A PostScript error occurred.
      */
-    public static PSObjectFont findFont(final PSObject pFontName)
+    public PSObjectFont findFont(final PSObject pFontName)
             throws ProgramError, PSError {
         PSObject fontName = pFontName;
         PSObject subFontName = findSubstitutionFont(fontName);
         if (subFontName != null) {
-            log.info("Substituting font " + subFontName + " for " + fontName);
+            LOG.info("Substituting font " + subFontName + " for " + fontName);
             fontName = subFontName;
         }
         
         // First we search whether this font has already been loaded
         try {
-            PSObject font = FontDirectory.get(fontName);
+            PSObject font = this.get(fontName);
             if (!(font instanceof PSObjectFont)) {
                 throw new ProgramError("Non PSObjectFont object found in"
                         + " FontDirectory");
@@ -180,13 +223,13 @@ public final class Fonts {
         try {
             return loadFont(fontName);
         } catch (PSErrorInvalidFont e) {
-            if (fontName.equals(defaultFont)) {
-                throw new ProgramError("Unable to load " + defaultFont
+            if (fontName.equals(DEFAULT_FONT)) {
+                throw new ProgramError("Unable to load " + DEFAULT_FONT
                         + " font.");
             } else {
-                log.info("Unable to find this font. Substituting font "
-                        + defaultFont + " for " + fontName + ".");
-                return findFont(defaultFont);
+                LOG.info("Unable to find this font. Substituting font "
+                        + DEFAULT_FONT + " for " + fontName + ".");
+                return findFont(DEFAULT_FONT);
             }
         }
     }
@@ -199,7 +242,7 @@ public final class Fonts {
      * 
      * @return the file
      */
-    public static File findResourceDirInPath(final File pDir) {
+    private static File findResourceDirInPath(final File pDir) {
         File dir = pDir;
         File returnDir = null;
         
@@ -226,12 +269,14 @@ public final class Fonts {
     
     /**
      * Search the font substitution list for a font.
+     * 
      * @return If the requested font is found in the substitution list the
      *         substitution font is returned. If the requested font is not
      *         found, the requested font itself is returned.
+     *         
      * @param fontNameObj Name of the font for which a substitute is searched
      */
-    public static PSObject findSubstitutionFont(final PSObject fontNameObj) {
+    private static PSObject findSubstitutionFont(final PSObject fontNameObj) {
         String fontName;
         if (fontNameObj instanceof PSObjectName) {
             fontName = ((PSObjectName) fontNameObj).name;
@@ -250,29 +295,35 @@ public final class Fonts {
     
     /**
      * Load a font from the resource directory.
+     * 
+     * @param fontKey The font key.
+     * 
      * @return Font dictionary of the loaded font
-     * @param fontName Name of the font
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont Unable to find requested font.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public static PSObjectFont loadFont(PSObject fontKey) throws PSError {
+    private PSObjectFont loadFont(final PSObject fontKey)
+            throws PSError {
         String fontName = fontKey.toString();
-        log.info("Loading " + fontName + " font from " + resourceDir);
+        LOG.info("Loading " + fontName + " font from " + resourceDir);
         PSObjectFont font = new PSObjectFont(resourceDir, fontName);
         
         // Now the font is loaded, add it to the fonts list so that it
         // doesn't need to loaded again.
-        FontDirectory.setKey(fontName, font);
+        defineFont(fontKey, font);
         
         return font;
     }
     
     /**
-     * Load list with font substitutions
-     * @param fontSubFile File from which the substitution list will be loaded
+     * Load list with font substitutions.
+     * 
+     * @param fontSubFile File from which the substitution list will be loaded.
+     * 
      * @return List with font substitution. Returns null if the list could not
-     *         be loaded.
+     * be loaded.
      */
-    public static Properties loadFontSubstitutions(File fontSubFile) {
+    private static Properties loadFontSubstitutions(final File fontSubFile) {
         Properties fontSubList;
         try {
             FileInputStream in = new FileInputStream(fontSubFile);
@@ -288,17 +339,20 @@ public final class Fonts {
     }
     
     /**
-     * Load the list with texstring (string to produce a certain character in LaTeX)
-     * @param texstringsFile File from which texstrings have to be loaded.
-     * @throws net.sf.eps2pgf.ProgramError Unable to read the texstrings from file.
+     * Load the list with texstring (string to produce a certain character in
+     * TeX).
+     * 
+     * @throws ProgramError Unable to read the texstrings from file.
+     * 
      * @return Dictionary with all loaded "character names -> texstring" pairs.
      */
-    public static Map<String, Properties> loadAllTexstrings() throws ProgramError {
+    private static Map<String, Properties> loadAllTexstrings()
+            throws ProgramError {
         File texStringsDir = new File(resourceDir, TEXSTRINGS_DIR_NAME);
         File[] texStringFiles = texStringsDir.listFiles();
         Map<String, Properties> texStrings = new HashMap<String, Properties>();
         
-        for (int i = 0 ; i < texStringFiles.length ; i++) {
+        for (int i = 0; i < texStringFiles.length; i++) {
             Properties props;
             try {
                 FileInputStream in = new FileInputStream(texStringFiles[i]);
@@ -310,7 +364,7 @@ public final class Fonts {
             }
             String name = texStringFiles[i].getName();
             if (name.endsWith(".xml")) {
-                name = name.substring(0, name.length()-4);
+                name = name.substring(0, name.length() - 4);
             }
             texStrings.put(name, props);
         }
@@ -320,13 +374,16 @@ public final class Fonts {
     
     /**
      * Retrieves a set of TeX strings specified by the filename.
-     * @param name Filename of the set of TeX strings, e.g. default
+     * 
+     * @param filename The filename.
+     * 
+     * @return The TeX strings dictionary.
      */
-    public static PSObjectDict getTexStringDict(String filename) {
+    public static PSObjectDict getTexStringDict(final String filename) {
         Properties props = allTexStrings.get(filename);
         PSObjectDict texStringDict = new PSObjectDict();
         
-        for(Enumeration<Object> e = props.keys() ; e.hasMoreElements() ;) {
+        for (Enumeration<Object> e = props.keys(); e.hasMoreElements();) {
             String key = e.nextElement().toString();
             if (key.startsWith("eps2pgf")) {
                 continue;
@@ -340,10 +397,16 @@ public final class Fonts {
     /**
      * Retrieve a set of TeX strings specified by the font name and
      * the regexps in the texstrings files. This selects the set of
-     * TeX strings with a regexp that matches the fontname. If there
+     * TeX strings with a regexp that matches the font name. If there
      * are multiple matches the set with lowest order is selected.
+     * 
+     * @param fontname The font name.
+     * 
+     * @return the TeX strings dictionary for the requested font name.
      */
-    public static PSObjectDict getTexStringDictByFontname(String fontname) {
+    public static PSObjectDict getTexStringDictByFontname(
+            final String fontname) {
+        
         String matchName = "default";
         int matchOrder = Integer.MAX_VALUE; 
         for (String texStringName : allTexStrings.keySet()) {
