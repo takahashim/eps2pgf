@@ -54,7 +54,7 @@ public class Converter {
      * @param pOpts command line options passed to the program
      */
     public Converter(final Options pOpts) {
-        this.opts = pOpts;
+        opts = pOpts;
     }
     
     /**
@@ -115,6 +115,24 @@ public class Converter {
 
         in.close();
         out.close();
+    }
+
+    /**
+     * Sets the options used for the conversion process.
+     * 
+     * @param pOpts The options to set
+     */
+    public void setOpts(final Options pOpts) {
+        opts = pOpts;
+    }
+
+    /**
+     * Gets the current options.
+     * 
+     * @return the opts
+     */
+    public Options getOpts() {
+        return opts;
     }
     
 }
