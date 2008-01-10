@@ -419,7 +419,7 @@ public final class Common {
             gs = findGhostscript();
         }
         
-        String[] commandArray = {gs.getAbsolutePath(),
+        String[] commandArray = {gs.getPath(),
                 "-dSAFER", "-dBATCH", "-dNOPAUSE",
                 "-r300", "-sDEVICE=png16m",
                 "-dTextAlphaBits=1", "-dGraphicsAlphaBits=1",

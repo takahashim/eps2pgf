@@ -7,19 +7,24 @@
 		<format property="NOW" pattern="yyyy-MM-dd" />
 	</tstamp>
 
-	<!-- Specify libraries -->
-	<path id="classpath">
+	<!-- Specify some paths -->
+	<path id="classpath.path">
 		<fileset dir="${lib.dir}" includes="**/*.jar" />
 	</path>
+	<path id="test-classpath.path">
+		<path refid="classpath.path" />
+		<pathelement location="${build.dir}" />
+		<fileset dir="${testsuite.dir}" includes="junit*.jar" />
+	</path>
 	<manifestclasspath property="jar.classpath" jarfile="${jar.file}">
-		<classpath refid="classpath" />
+		<classpath refid="classpath.path" />
 	</manifestclasspath>
 	
 	<!-- Cleaning targets -->
 	<target name="clean">
 		<delete dir="${build.dir}" />
 		<delete dir="${temp.build.dir}" />
-		<delete dir="${temp.dist.dir}" />
+		<delete dir="${test-build.dir}" />
 		<delete file="${jar.file}" />
 		<delete file="${zip.file}" />
 		<delete file="${dist.dir}/${readme.file}" />
@@ -39,7 +44,7 @@
 		<javac
 			srcdir="${temp.build.dir}"
 			destdir="${build.dir}"
-			classpathref="classpath"
+			classpathref="classpath.path"
 			target="1.5"
 		/>
 		
@@ -71,9 +76,33 @@
 			level="9"
 		/>
 	</target>
-
-	<!-- Combined targets -->
-	<target name="clean-build" depends="clean,jar" />
-	<target name="clean-build-zip" depends="clean,jar,zip" />
+	
+	<!-- Compile the test suite -->
+	<target name="test-compile" depends="compile">
+		<mkdir dir="${test-build.dir}" />
+		<javac
+			srcdir="${testsuite.dir}"
+			destdir="${test-build.dir}"
+			classpathref="test-classpath.path"
+			target="1.5"
+		/>		
+	</target>
+	
+	<!-- Run test suite -->
+	<target name="test" depends="test-compile">
+		<junit printsummary="yes">
+			<classpath>
+				<pathelement location="${test-build.dir}" />
+				<path refid="test-classpath.path" />
+			</classpath>
+			
+			<formatter type="brief" />
+			
+			<test name="net.sf.eps2pgf.testsuite.pstests.AllPSTests"
+				todir="${test-build.dir}" />
+<!--			<test name="net.sf.eps2pgf.testsuite.figures.AllFigures"
+				todir="${test-build.dir}" /> -->
+		</junit>
+	</target>
 
 </project>
