@@ -55,6 +55,7 @@ public class Lineto extends PathSection implements Cloneable {
      * 
      * @return String representation of this object.
      */
+    @Override
     public String toString() {
         return String.format("lineto (%.4g, %.4g)", getParam(0), getParam(1));
     }
@@ -64,6 +65,7 @@ public class Lineto extends PathSection implements Cloneable {
      * 
      * @return Returns clone of this object.
      */
+    @Override
     public Lineto clone() {
         return (Lineto) super.clone();
     }

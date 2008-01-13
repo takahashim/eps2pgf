@@ -39,6 +39,7 @@ public class PathSection implements Cloneable {
      * Create a clone of this object.
      * @return Returns clone of this object.
      */
+    @Override
     public PathSection clone() {
         LOG.finest("PathSection clone() called.");
         PathSection copy;

@@ -38,6 +38,7 @@ public abstract class PSColor implements Cloneable {
      * 
      * @throws CloneNotSupportedException Clone is not supported by this object.
      */
+    @Override
     public PSColor clone() throws CloneNotSupportedException {
         PSColor copy = (PSColor) super.clone();
         copy.levels = this.levels.clone();

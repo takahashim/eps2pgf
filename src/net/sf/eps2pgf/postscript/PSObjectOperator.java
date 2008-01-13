@@ -23,24 +23,35 @@ package net.sf.eps2pgf.postscript;
 import java.lang.reflect.Method;
 
 /**
- * Object that represents a PostScript operator. Either a built-in or user-defined operator.
+ * Object that represents a PostScript operator. Either a built-in or
+ * user-defined operator.
+ * 
  * @author Paul Wagenaars
  */
 public class PSObjectOperator extends PSObject {
-    public String name;
-    public Method opMethod;
+    
+    /** Name of this operator. */
+    private String name;
+    
+    /** Method with which this object is associated. */
+    private Method opMethod;
     
     /**
-     * Creates a new instance of PSObjectOperator
+     * Creates a new instance of PSObjectOperator.
+     * 
+     * @param pName The name of the operator.
+     * @param op The method associated with this operator.
      */
-    public PSObjectOperator(String nm, Method op) {
-        name = nm;
+    public PSObjectOperator(final String pName, final Method op) {
+        name = pName;
         opMethod = op;
         setLiteral(false);
     }
     
     /**
-     * Create new operator object
+     * Create new operator object.
+     * 
+     * @param obj New object is shallow copy of this object.
      */
     public PSObjectOperator(final PSObjectOperator obj) {
         name = obj.name;
@@ -67,6 +78,7 @@ public class PSObjectOperator extends PSObject {
      * 
      * @return True, if equal.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (obj instanceof PSObject) {
             return eq((PSObject) obj);
@@ -80,39 +92,60 @@ public class PSObjectOperator extends PSObject {
      * 
      * @return Hash code of this object.
      */
+    @Override
     public int hashCode() {
         return opMethod.hashCode();
     }
     
-    /** Return PostScript text representation of this object. See the
+    /**
+     * Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
+     * 
+     * @return PostScript representation of this object.
      */
+    @Override
     public String isis() {
         return "--" + name + "--";
     }
     
     /**
      * Produce a text representation of this object (see PostScript
-     * operator 'cvs' for more info)
+     * operator 'cvs' for more info).
+     * 
      * @return Text representation
      */
+    @Override
     public String cvs() {
         return name;
     }
     
     /**
-     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
-     * of composite object is not copied, but shared.
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The
+     * values of composite object is not copied, but shared.
+     * 
+     * @return Shallow copy of this object.
      */
+    @Override
     public PSObjectOperator dup() {
         return new PSObjectOperator(this);
     }
     
     /**
-     * Returns the type of this object
+     * Returns the type of this object.
+     * 
      * @return Type of this object (see PostScript manual for possible values)
      */
+    @Override
     public String type() {
         return "operatortype";
+    }
+
+    /**
+     * Returns the method associated with this operator.
+     * 
+     * @return the opMethod
+     */
+    public Method getOpMethod() {
+        return opMethod;
     }
 }

@@ -53,6 +53,7 @@ public class RGB extends PSColor {
      * 
      * @throws CloneNotSupportedException Clone not supported by this object.
      */
+    @Override
     public RGB clone() throws CloneNotSupportedException {
         RGB copy = (RGB) super.clone();
         return copy;
@@ -63,6 +64,7 @@ public class RGB extends PSColor {
      * 
      * @return the CMYK
      */
+    @Override
     public double[] getCMYK() {
         // First step: convert RGB to CMY
         double c = 1.0 - getLevel(0);
@@ -91,6 +93,7 @@ public class RGB extends PSColor {
      * 
      * @return array describing color space.
      */
+    @Override
     public PSObjectArray getColorSpace() {
         PSObjectArray array = new PSObjectArray();
         array.addToEnd(new PSObjectName("DeviceRGB", true));
@@ -102,6 +105,7 @@ public class RGB extends PSColor {
      * 
      * @return the gray level
      */
+    @Override
     public double getGray() {
         return (0.3 * getLevel(0) + 0.59 * getLevel(1) + 0.11 * getLevel(2));
     }
@@ -111,6 +115,7 @@ public class RGB extends PSColor {
      * 
      * @return the HSB
      */
+    @Override
     public double[] getHSB() {
         return convertRGBtoHSB(getLevel(0), getLevel(1), getLevel(2));
     }
@@ -121,6 +126,7 @@ public class RGB extends PSColor {
      * 
      * @return the number of components for this color
      */
+    @Override
     public int getNrComponents() {
         return 3;
     }
@@ -130,6 +136,7 @@ public class RGB extends PSColor {
      * 
      * @return the RGB
      */
+    @Override
     public double[] getRGB() {
         double[] rgb = {getLevel(0), getLevel(1), getLevel(2)};
         return rgb;

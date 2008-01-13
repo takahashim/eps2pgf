@@ -63,6 +63,7 @@ public class PSStringInputStream extends InputStream {
      * 
      * @param readlimit This parameter has no meaning for PSStringInputStream
      */
+    @Override
     public void mark(final int readlimit) {
         lastMark = ptr;
     }
@@ -74,6 +75,7 @@ public class PSStringInputStream extends InputStream {
      * this object returns <code>false</code>.
      * @return Always returns <code>true</code>
      */
+    @Override
     public boolean markSupported() {
         return true;
     }
@@ -86,6 +88,7 @@ public class PSStringInputStream extends InputStream {
      * @throws IOException A character in the PostScript string is not in the
      * 0-255 range.
      */
+    @Override
     public int read() throws IOException {
         try {
             int chr = string.get(ptr);
@@ -104,6 +107,7 @@ public class PSStringInputStream extends InputStream {
      * last called on this input stream.
      * @throws IOException This stream has not yet been <code>mark</code>ed.
      */
+    @Override
     public void reset() throws IOException {
         if (lastMark < 0) {
             throw new IOException();

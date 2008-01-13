@@ -22,33 +22,46 @@ package net.sf.eps2pgf.postscript;
 
 import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 
-/** Represent PostScript object: boolean
+/**
+ * Represent PostScript object: boolean.
  *
  * @author Paul Wagenaars
  */
 public class PSObjectBool extends PSObject {
-    boolean value = false;
     
-    /** Creates a new instance of PSObjectBool */
-    public PSObjectBool(boolean bool) {
+    /** Value of this boolean. */
+    private boolean value = false;
+    
+    /**
+     * Creates a new instance of PSObjectBool.
+     * 
+     * @param bool The bool.
+     */
+    public PSObjectBool(final boolean bool) {
         value = bool;
     }
     
     /**
-     * Creates a new boolean object
+     * Creates a new boolean object.
+     * 
+     * @param obj Boolean value is copied from this object.
      */
-    public PSObjectBool(PSObjectBool obj) {
+    public PSObjectBool(final PSObjectBool obj) {
         value = obj.value;
         copyCommonAttributes(obj);
     }
     
     /**
-     * PostScript operator 'and'
+     * PostScript operator 'and'.
+     * 
      * @param obj2 Object to 'and' with this object
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Obj2 is not a boolean object
+     * 
      * @return Return true when both objects are true, return false otherwise.
+     * 
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    public PSObjectBool and(PSObject obj2) throws PSErrorTypeCheck {
+    @Override
+    public PSObjectBool and(final PSObject obj2) throws PSErrorTypeCheck {
         return new PSObjectBool((value && obj2.toBool()));
     }
     
@@ -64,10 +77,12 @@ public class PSObjectBool extends PSObject {
     }
     
     /**
-     * Produce a text representation of this object (see PostScript
-     * operator 'cvs' for more info)
+     * Produce a text representation of this object (see PostScript operator
+     * 'cvs' for more info).
+     * 
      * @return Text representation
      */
+    @Override
     public String cvs() {
         if (value) {
             return "true";
@@ -77,20 +92,26 @@ public class PSObjectBool extends PSObject {
     }    
 
     /**
-     * PostScript operator 'dup'. Create a shallow copy of this object. The values
-     * of composite object is not copied, but shared.
+     * PostScript operator 'dup'. Create a shallow copy of this object. The
+     * values of composite object is not copied, but shared.
+     * 
+     * @return Duplicate of this object.
      */
+    @Override
     public PSObjectBool dup() {
         return new PSObjectBool(this);
     }
     
     /**
-     * Compare this object with another object and return true if they are equal.
-     * See PostScript manual on what's equal and what's not.
+     * Compare this object with another object and return true if they are
+     * equal. See PostScript manual on what's equal and what's not.
+     * 
      * @param obj Object to compare this object with
+     * 
      * @return True if objects are equal, false otherwise
      */
-    public boolean eq(PSObject obj) {
+    @Override
+    public boolean eq(final PSObject obj) {
         if (obj instanceof PSObjectBool) {
             PSObjectBool objBool = (PSObjectBool) obj;
             return (value == objBool.value);
@@ -107,6 +128,7 @@ public class PSObjectBool extends PSObject {
      * 
      * @return True, if equal.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (obj instanceof PSObject) {
             return eq((PSObject) obj);
@@ -120,36 +142,53 @@ public class PSObjectBool extends PSObject {
      * 
      * @return Hash code of this object.
      */
+    @Override
     public int hashCode() {
         return isis().hashCode();
     }
     
     /**
-     * PostScript operator: 'not'
+     * PostScript operator: 'not'.
+     * 
      * @return Logical negation of this object
      */
+    @Override
     public PSObjectBool not() {
         return new PSObjectBool(!value);
     }
     
     /**
-     * PostScript operator 'or'
+     * PostScript operator 'or'.
+     * 
      * @param obj2 Object to 'or' with this object
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Obj2 is not a boolean object
-     * @return Return true when one or both objects are true, return false otherwise.
+     * 
+     * @return Return true when one or both objects are true, return false
+     * otherwise.
+     * 
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    public PSObjectBool or(PSObject obj2) throws PSErrorTypeCheck {
+    @Override
+    public PSObjectBool or(final PSObject obj2) throws PSErrorTypeCheck {
         return new PSObjectBool((value || obj2.toBool()));
     }
     
-    /** Convert this object to a boolean, if possible. */
+    /**
+     * Convert this object to a boolean, if possible.
+     * 
+     * @return Boolean representation of this object.
+     */
+    @Override
     public boolean toBool() {
         return value;
     }
     
-    /** Return PostScript text representation of this object. See the
+    /**
+     * Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
+     * 
+     * @return String representation of this object.
      */
+    @Override
     public String isis() {
         if (value) {
             return "true";
@@ -159,20 +198,27 @@ public class PSObjectBool extends PSObject {
     }
 
     /**
-     * Returns the type of this object
-     * @return Type of this object (see PostScript manual for possible values)
+     * Returns the type of this object.
+     * 
+     * @return Type of this object (see PostScript manual for possible values).
      */
+    @Override
     public String type() {
         return "booleantype";
     }
 
     /**
-     * PostScript operator 'xor'
+     * PostScript operator 'xor'.
+     * 
      * @param obj2 Object to 'xor' with this object
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Obj2 is not a boolean object
-     * @return Return true when only one of the objects is true, return false otherwise.
+     * 
+     * @return Return true when only one of the objects is true, return false
+     * otherwise.
+     * 
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    public PSObjectBool xor(PSObject obj2) throws PSErrorTypeCheck {
+    @Override
+    public PSObjectBool xor(final PSObject obj2) throws PSErrorTypeCheck {
         boolean bool2 = obj2.toBool();
         boolean tot = ((value && !bool2) || (!value && bool2));
         return new PSObjectBool(tot);

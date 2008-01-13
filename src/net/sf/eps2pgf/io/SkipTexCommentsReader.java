@@ -61,6 +61,7 @@ public class SkipTexCommentsReader extends Reader {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Override
     public void close() throws IOException {
         reader.close();
         lastChar = -1;
@@ -78,6 +79,7 @@ public class SkipTexCommentsReader extends Reader {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Override
     public void mark(final int readlimit) throws IOException {
         // The output might contain comments. Therefore, we increase the read
         // the readlimit by 160, representing two comment lines.
@@ -91,6 +93,7 @@ public class SkipTexCommentsReader extends Reader {
      * 
      * @return Returns always true.
      */
+    @Override
     public boolean markSupported() {
         return true;
     }
@@ -102,6 +105,7 @@ public class SkipTexCommentsReader extends Reader {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Override
     public int read() throws IOException {
         boolean inComment = false;
         boolean consumeNext = false;
@@ -145,6 +149,7 @@ public class SkipTexCommentsReader extends Reader {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Override
     public int read(final char[] cbuf, final int off, final int len)
             throws IOException {
         
@@ -191,6 +196,7 @@ public class SkipTexCommentsReader extends Reader {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Override
     public boolean ready() throws IOException {
         return reader.ready();
     }
@@ -205,6 +211,7 @@ public class SkipTexCommentsReader extends Reader {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Override
     public void reset() throws IOException {
         reader.reset();
         lastChar = lastMarkLastChar;

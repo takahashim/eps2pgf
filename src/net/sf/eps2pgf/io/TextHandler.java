@@ -100,35 +100,35 @@ public class TextHandler {
      */
     public final void charpath(final PSObjectString string)
             throws PSError, ProgramError {
-        PSObjectFont currentFont = gstate.current.font;
+        PSObjectFont currentFont = gstate.current().getFont();
         
         PSObjectArray charNames = string.decode(currentFont.getEncoding());
         
-        double angle = gstate.current.ctm.getRotation();
+        double angle = gstate.current().getCtm().getRotation();
         
         // Calculate scaling and fontsize in points (=1/72 inch)
-        double scaling = gstate.current.ctm.getMeanScaling();
+        double scaling = gstate.current().getCtm().getMeanScaling();
 
         BoundingBox bbox = currentFont.getBBox(charNames);
 
-        double[] pos = gstate.current.getCurrentPosInDeviceSpace();
+        double[] pos = gstate.current().getCurrentPosInDeviceSpace();
         double[] dpos;
 
         dpos = getAnchor("bl", bbox, scaling, angle);
-        gstate.current.path.moveto(pos[0] + dpos[0], pos[1] + dpos[1]);
+        gstate.current().getPath().moveto(pos[0] + dpos[0], pos[1] + dpos[1]);
         dpos = getAnchor("br", bbox, scaling, angle);
-        gstate.current.path.lineto(pos[0] + dpos[0], pos[1] + dpos[1]);
+        gstate.current().getPath().lineto(pos[0] + dpos[0], pos[1] + dpos[1]);
         dpos = getAnchor("tr", bbox, scaling, angle);
-        gstate.current.path.lineto(pos[0] + dpos[0], pos[1] + dpos[1]);
+        gstate.current().getPath().lineto(pos[0] + dpos[0], pos[1] + dpos[1]);
         dpos = getAnchor("tl", bbox, scaling, angle);
-        gstate.current.path.lineto(pos[0] + dpos[0], pos[1] + dpos[1]);
-        gstate.current.path.closepath();
+        gstate.current().getPath().lineto(pos[0] + dpos[0], pos[1] + dpos[1]);
+        gstate.current().getPath().closepath();
 
         // Determine current point shift in user space coordinates
         double[] showShift = shiftPos(currentFont.getWidth(charNames), 0,
                 scaling, angle);
-        showShift = gstate.current.ctm.idtransform(showShift);
-        gstate.current.rmoveto(showShift[0], showShift[1]);
+        showShift = gstate.current().getCtm().idtransform(showShift);
+        gstate.current().rmoveto(showShift[0], showShift[1]);
     }
     
     /**
@@ -217,7 +217,7 @@ public class TextHandler {
             final PSObjectString string, final boolean noOutput) 
             throws PSError, IOException, ProgramError {     
         
-        PSObjectFont currentFont = gstate.current.font;
+        PSObjectFont currentFont = gstate.current().getFont();
         
         Rule replaceRule = textReplace.findReplacement(string.toString());
         String texRefPoint = "cc";
@@ -242,18 +242,18 @@ public class TextHandler {
             text = currentFont.charNames2texStrings(charNames);
         }
         
-        double angle = gstate.current.ctm.getRotation();
+        double angle = gstate.current().getCtm().getRotation();
         
         // Calculate scaling and font size in points (= 1/72 inch)
-        double scaling = gstate.current.ctm.getMeanScaling();
+        double scaling = gstate.current().getCtm().getMeanScaling();
         double fontsize = currentFont.getFontSize()
-                            * gstate.current.getMeanUserScaling();
+                            * gstate.current().getMeanUserScaling();
 
         // Draw text
         if (!noOutput) {
             BoundingBox bbox = currentFont.getBBox(charNames);
 
-            double[] pos = gstate.current.getCurrentPosInDeviceSpace();
+            double[] pos = gstate.current().getCurrentPosInDeviceSpace();
             double[] dpos;
 
             // Print red dots for the bounding box of the text. This is
@@ -298,7 +298,7 @@ public class TextHandler {
         // Determine current point shift in user space coordinates
         double[] showShift = shiftPos(currentFont.getWidth(charNames), 0,
                 scaling, angle);
-        showShift = gstate.current.ctm.idtransform(showShift);
+        showShift = gstate.current().getCtm().idtransform(showShift);
         
         return showShift;
     }

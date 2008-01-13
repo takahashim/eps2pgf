@@ -51,6 +51,7 @@ public class PSErrorUndefined extends PSError {
      * 
      * @return Detailed message string
      */
+    @Override
     public String getMessage() {
         if (operator == null) {
             return super.getMessage();

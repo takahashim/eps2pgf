@@ -50,6 +50,7 @@ public class Gray extends PSColor {
      * 
      * @throws CloneNotSupportedException Clone not supported by this object.
      */
+    @Override
     public Gray clone() throws CloneNotSupportedException {
         Gray copy = (Gray) super.clone();
         return copy;
@@ -60,6 +61,7 @@ public class Gray extends PSColor {
      * 
      * @return This color converted to CMYK.
      */
+    @Override
     public double[] getCMYK() {
         double c = 0.0;
         double m = 0.0;
@@ -74,6 +76,7 @@ public class Gray extends PSColor {
      * 
      * @return array describing color space.
      */
+    @Override
     public PSObjectArray getColorSpace() {
         PSObjectArray array = new PSObjectArray();
         array.addToEnd(new PSObjectName("DeviceGray", true));
@@ -85,6 +88,7 @@ public class Gray extends PSColor {
      * 
      * @return the gray level
      */
+    @Override
     public double getGray() {
         return getLevel(0);
     }
@@ -94,6 +98,7 @@ public class Gray extends PSColor {
      * 
      * @return the HSB
      */
+    @Override
     public double[] getHSB() {
         return RGB.convertRGBtoHSB(getLevel(0), getLevel(0), getLevel(0));
     }
@@ -104,6 +109,7 @@ public class Gray extends PSColor {
      * 
      * @return the number of components for this color
      */
+    @Override
     public int getNrComponents() {
         return 1;
     }
@@ -113,6 +119,7 @@ public class Gray extends PSColor {
      * 
      * @return the RGB
      */
+    @Override
     public double[] getRGB() {
         double[] rgb = {getLevel(0), getLevel(0), getLevel(0)};
         return rgb;

@@ -62,6 +62,7 @@ public class StringInputStream extends InputStream {
      * @return the number of bytes that can be read from this input stream
      * without blocking.
      */
+    @Override
     public int available() {
         return (string.length() - ptr);
     }
@@ -73,6 +74,7 @@ public class StringInputStream extends InputStream {
      * 
      * @param readlimit this parameter is ignored.
      */
+    @Override
     public void mark(final int readlimit) {
         lastMark = ptr;
     }
@@ -84,6 +86,7 @@ public class StringInputStream extends InputStream {
      * return <code>true</code>.
      * @return always returns <code>true</code>.
      */
+    @Override
     public boolean markSupported() {
         return true;
     }
@@ -99,6 +102,7 @@ public class StringInputStream extends InputStream {
      * @throws IOException Character encountered in String that has a value not
      * in the range 0-255.
      */
+    @Override
     public int read() throws IOException {
         int c;
         try {
@@ -119,6 +123,7 @@ public class StringInputStream extends InputStream {
      * Repositions this stream to the position at the time the mark method was
      * last called on this input stream.
      */
+    @Override
     public void reset() {
         ptr = lastMark;
     }
@@ -135,6 +140,7 @@ public class StringInputStream extends InputStream {
      * 
      * @return Number of characters that were actually skipped.
      */
+    @Override
     public long skip(final long pN) {
         long n = pN;
         if (n < 0) {

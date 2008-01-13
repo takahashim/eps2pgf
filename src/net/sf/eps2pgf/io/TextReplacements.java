@@ -346,6 +346,7 @@ public class TextReplacements {
      * 
      * @see java.lang.Object#toString()
      */
+    @Override
     public final String toString() {
         StringBuilder builder = new StringBuilder();
         for (Rule rule : this.rules.values()) {
@@ -455,6 +456,7 @@ public class TextReplacements {
          * 
          * @see java.lang.Object#toString()
          */
+        @Override
         public String toString() {
             return "\\psfrag{" + this.tag + "}[" + this.texRefPoint + "]["
                     + this.psRefPoint + "][" + this.scale + "][" + this.rotation

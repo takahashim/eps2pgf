@@ -31,18 +31,27 @@ import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
  * @author Paul Wagenaars
  */
 public class PSObjectIterator implements Iterator<PSObject> {
+    
+    /** Object over which is iterated. */
     private PSObject obj;
+    
+    /** Index of next item to be retrieved. */
     private int nextIndex;
     
-    /** Creates a new instance of PSObjectArrayIterator */
-    public PSObjectIterator(PSObject newObj) {
-        obj = newObj;
+    /**
+     * Creates a new instance of PSObjectArrayIterator.
+     * 
+     * @param pObj The object over which is iterated.
+     */
+    public PSObjectIterator(final PSObject pObj) {
+        obj = pObj;
         nextIndex = 0;
     }
     
     /**
-     * Returns true if the iteration has more elements. (In other words, return true if next would return an
-     * element rather than throwing an exception.
+     * Returns true if the iteration has more elements. (In other words, return
+     * true if next would return an element rather than throwing an exception.
+     * 
      * @return true if the iterator has more elements
      */
     public boolean hasNext() {
@@ -54,12 +63,13 @@ public class PSObjectIterator implements Iterator<PSObject> {
     }
     
     /**
-     * Returns the next element in the iteration. Callnig this method repeatedly until the hasNext() method
-     * returns false will return each element in the underlying collection exactly once.
+     * Returns the next element in the iteration. Callnig this method repeatedly
+     * until the hasNext() method returns false will return each element in the
+     * underlying collection exactly once.
+     * 
      * @return The next element in the iteration.
-     * @throws NoSuchElementException Iteration has no more elements.
      */
-    public PSObject next() throws NoSuchElementException {
+    public PSObject next() {
         try {
             PSObject retObj = obj.get(new PSObjectInt(nextIndex));
             nextIndex++;
@@ -70,10 +80,10 @@ public class PSObjectIterator implements Iterator<PSObject> {
     }
     
     /**
-     * Not implemented in this iterator. Always throws UnsupportedOperationException
-     * @throws UnsupportedOperationException This operation is not supported by this iterator.
+     * Not implemented in this iterator. Always throws
+     * <code>UnsupportedOperationException</code>.
      */
-    public void remove() throws UnsupportedOperationException {
+    public void remove() {
         throw new UnsupportedOperationException();
     }
 }

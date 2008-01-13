@@ -29,7 +29,8 @@ import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
  * @author Paul Wagenaars
  */
 public class PSObjectInt extends PSObject {
-	/** Value of this integer object. */
+    
+    /** Value of this integer object. */
     private int value;
     
     /**
@@ -37,7 +38,7 @@ public class PSObjectInt extends PSObject {
      * @param i Value of new integer object.
      */
     public PSObjectInt(final int i) {
-    	this.value = i;
+        this.value = i;
     }
     
     /**
@@ -47,7 +48,7 @@ public class PSObjectInt extends PSObject {
      *          (i.e. round(r)).
      */
     public PSObjectInt(final double r) {
-    	this.value = (int) Math.round(r);
+        this.value = (int) Math.round(r);
     }
     
     /**
@@ -61,7 +62,7 @@ public class PSObjectInt extends PSObject {
         try {
             int i = str.indexOf("#");
             if (i < 0) {
-            	this.value = Integer.parseInt(str);
+                this.value = Integer.parseInt(str);
             } else {
                 int base = Integer.parseInt(str.substring(0, i));
                 String strNumber = str.substring(i + 1);
@@ -79,7 +80,7 @@ public class PSObjectInt extends PSObject {
      * @param obj Create an exact copy of this object.
      */
     public PSObjectInt(final PSObjectInt obj) {
-    	this.value = obj.value;
+        this.value = obj.value;
         copyCommonAttributes(obj);
     }
     
@@ -89,6 +90,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return String representation of this object.
      */
+    @Override
     public String isis() {
         return String.valueOf(this.value);
     }
@@ -97,6 +99,7 @@ public class PSObjectInt extends PSObject {
      * Returns the absolute value of this integer.
      * @return Absolute value of this object
      */
+    @Override
     public PSObject abs() {
         if (this.value == Integer.MIN_VALUE) {
             double dbl = (double) this.value;
@@ -116,6 +119,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @throws PSErrorTypeCheck Object is not numeric
      */
+    @Override
     public PSObject add(final PSObject obj) throws PSErrorTypeCheck {
         if (obj instanceof PSObjectReal) {
             return obj.add(this);
@@ -123,9 +127,9 @@ public class PSObjectInt extends PSObject {
             int num2 = obj.toInt();
             // Do some simplistic overflow detection
             if ((this.value >= Integer.MAX_VALUE / 2)
-            		|| (num2 >= Integer.MAX_VALUE / 2)
-            		|| (this.value <= Integer.MIN_VALUE / 2)
-            		|| (num2 <= Integer.MIN_VALUE / 2)) {
+                    || (num2 >= Integer.MAX_VALUE / 2)
+                    || (this.value <= Integer.MIN_VALUE / 2)
+                    || (num2 <= Integer.MIN_VALUE / 2)) {
                 double valuedbl = this.toReal();
                 double num2dbl = obj.toReal();
                 return new PSObjectReal(valuedbl + num2dbl);
@@ -141,6 +145,7 @@ public class PSObjectInt extends PSObject {
      * @throws PSErrorTypeCheck Obj2 is not an integer object.
      * @return Bitwise and between this object and obj2.
      */
+    @Override
     public PSObjectInt and(final PSObject obj2) throws PSErrorTypeCheck {
         int obj2Int = obj2.toInt();
         return new PSObjectInt(this.value & obj2Int);
@@ -150,6 +155,7 @@ public class PSObjectInt extends PSObject {
      * Return this value rounded upwards.
      * @return New object with same integer
      */
+    @Override
     public PSObjectInt ceiling() {
         return new PSObjectInt(this.value);
     }
@@ -170,6 +176,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return Integer representation of this object.
      */
+    @Override
     public int cvi() {
         return this.value;
     }
@@ -179,6 +186,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return Floating point representation of this object.
      */
+    @Override
     public double cvr() {
         return toReal();
     }
@@ -193,8 +201,9 @@ public class PSObjectInt extends PSObject {
      * @throws PSErrorTypeCheck PostScript typecheck error occurred.
      * @throws PSErrorRangeCheck PostScript rangecheck error occurred.
      */
+    @Override
     public String cvrs(final int radix) throws PSErrorTypeCheck,
-    		PSErrorRangeCheck {
+            PSErrorRangeCheck {
         if (radix < 2) {
             throw new PSErrorRangeCheck();
         }
@@ -212,6 +221,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return Text representation
      */
+    @Override
     public String cvs() {
         return String.valueOf(this.value);
     }
@@ -222,6 +232,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return Copy of this object.
      */
+    @Override
     public PSObjectInt dup() {
         return new PSObjectInt(this);
     }
@@ -234,6 +245,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return True if objects are equal, false otherwise
      */
+    @Override
     public boolean eq(final PSObject obj) {
         try {
             if (obj instanceof PSObjectInt) {
@@ -255,6 +267,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return True, if equal.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (obj instanceof PSObject) {
             return eq((PSObject) obj);
@@ -268,6 +281,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return New object with same integer
      */
+    @Override
     public PSObjectInt floor() {
         return new PSObjectInt(this.value);
     }
@@ -280,6 +294,7 @@ public class PSObjectInt extends PSObject {
      * @return Returns true when this object is greater than obj2, return false
      * otherwise.
      */
+    @Override
     public boolean gt(final PSObject obj2) throws PSErrorTypeCheck {
         return (this.toReal() > obj2.toReal());
     }
@@ -290,8 +305,9 @@ public class PSObjectInt extends PSObject {
      * 
      * @return Hash for this object.
      */
+    @Override
     public int hashCode() {
-    	return this.value * 1000000;
+        return this.value * 1000000;
     }
     
     /**
@@ -317,6 +333,7 @@ public class PSObjectInt extends PSObject {
      * @return Multiplication object
      * @throws PSErrorTypeCheck Object(s) are not numeric
      */
+    @Override
     public PSObject mul(final PSObject obj) throws PSErrorTypeCheck {
         if (obj instanceof PSObjectReal) {
             double num2 = obj.toReal();
@@ -344,6 +361,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return Absolute value of this integer
      */
+    @Override
     public PSObject neg() {
         if (this.value == Integer.MIN_VALUE) {
             double dbl = (double) this.value;
@@ -358,6 +376,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return Logical negation of this object
      */
+    @Override
     public PSObjectInt not() {
         return new PSObjectInt(~this.value);
     }
@@ -371,6 +390,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @throws PSErrorTypeCheck Obj2 is not an integer object
      */
+    @Override
     public PSObjectInt or(final PSObject obj2) throws PSErrorTypeCheck {
         int obj2Int = obj2.toInt();
         return new PSObjectInt(this.value | obj2Int);
@@ -381,6 +401,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return New object with same integer
      */
+    @Override
     public PSObjectInt round() {
         return new PSObjectInt(this.value);
     }
@@ -394,6 +415,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @throws PSErrorTypeCheck Object is not numeric
      */
+    @Override
     public PSObject sub(final PSObject obj) throws PSErrorTypeCheck {
         if (obj instanceof PSObjectReal) {
                 double valuedbl = this.toReal();
@@ -403,9 +425,9 @@ public class PSObjectInt extends PSObject {
             int num2 = obj.toInt();
             // Do some simplistic overflow detection
             if ((this.value >= Integer.MAX_VALUE / 2)
-            		|| (num2 >= Integer.MAX_VALUE / 2)
-            		|| (this.value <= Integer.MIN_VALUE / 2)
-            		|| (num2 <= Integer.MIN_VALUE / 2)) {
+                    || (num2 >= Integer.MAX_VALUE / 2)
+                    || (this.value <= Integer.MIN_VALUE / 2)
+                    || (num2 <= Integer.MIN_VALUE / 2)) {
                 double valuedbl = this.toReal();
                 double num2dbl = obj.toReal();
                 return new PSObjectReal(valuedbl - num2dbl);
@@ -429,6 +451,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return Human readable string.
      */
+    @Override
     public String toString() {
         return "Int: " + this.value;
     }
@@ -438,6 +461,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return Integer representation of this object.
      */
+    @Override
     public int toInt() {
         return this.value;
     }
@@ -447,6 +471,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return Real/floating point representation of this object.
      */
+    @Override
     public double toReal() {
         return (double) this.value;
     }
@@ -456,6 +481,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return New object with same integer
      */
+    @Override
     public PSObjectInt truncate() {
         return new PSObjectInt(this.value);
     }
@@ -465,6 +491,7 @@ public class PSObjectInt extends PSObject {
      * 
      * @return Type of this object (see PostScript manual for possible values)
      */
+    @Override
     public String type() {
         return "integertype";
     }
@@ -475,6 +502,7 @@ public class PSObjectInt extends PSObject {
      * @throws PSErrorTypeCheck Obj2 is not an integer object
      * @return Return bitwise xor between this object and obj2
      */
+    @Override
     public PSObjectInt xor(final PSObject obj2) throws PSErrorTypeCheck {
         int obj2Int = obj2.toInt();
         return new PSObjectInt(this.value ^ obj2Int);

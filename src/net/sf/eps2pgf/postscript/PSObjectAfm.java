@@ -113,6 +113,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
      * 
      * @return Deep copy of this object
      */
+    @Override
     public PSObjectAfm clone() {
         PSObjectAfm copy = (PSObjectAfm) super.clone();
         copy.fontMetrics = fontMetrics;
@@ -255,6 +256,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
      * 
      * @return Shallow copy of this object.
      */
+    @Override
     public PSObjectAfm dup() {
         PSObjectAfm dupAfm = new PSObjectAfm(fontMetrics, subrs);
         dupAfm.copyCommonAttributes(this);
@@ -269,6 +271,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
      * 
      * @return True, if equal.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (obj instanceof PSObject) {
             return eq((PSObject) obj);
@@ -282,6 +285,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
      * 
      * @return Hash code of this object.
      */
+    @Override
     public int hashCode() {
         return isis().hashCode();
     }
@@ -337,17 +341,17 @@ public class PSObjectAfm extends PSObject implements Cloneable {
             if (obj instanceof PSObjectInt) {
                 opStack.add(obj);
             } else {
-                String cmd = obj.toName().name;
+                String cmd = obj.toName().toString();
                 if (cmd.equals("rlineto")) {
                     int dy = opStack.pop().toInt();
                     int dx = opStack.pop().toInt();
-                    gstate.current.rlineto(dx, dy);
+                    gstate.current().rlineto(dx, dy);
                 } else if (cmd.equals("hlineto")) {
                     int dx = opStack.pop().toInt();
-                    gstate.current.rlineto(dx, 0);
+                    gstate.current().rlineto(dx, 0);
                 } else if (cmd.equals("vlineto")) {
                     int dy = opStack.pop().toInt();
-                    gstate.current.rmoveto(0, dy);
+                    gstate.current().rmoveto(0, dy);
                 } else if (cmd.equals("rrcurveto")) {
                     int dy3 = opStack.pop().toInt();
                     int dx3 = opStack.pop().toInt();
@@ -355,8 +359,8 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                     int dx2 = opStack.pop().toInt();
                     int dy1 = opStack.pop().toInt();
                     int dx1 = opStack.pop().toInt();
-                    gstate.current.rcurveto(dx1, dy1, (dx1 + dx2), (dy1 + dy2),
-                            (dx1 + dx2 + dx3), (dy1 + dy2 + dy3));
+                    gstate.current().rcurveto(dx1, dy1, (dx1 + dx2),
+                            (dy1 + dy2), (dx1 + dx2 + dx3), (dy1 + dy2 + dy3));
                 } else if (cmd.equals("vhcurveto")) {
                     int dy3 = 0;
                     int dx3 = opStack.pop().toInt();
@@ -364,8 +368,8 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                     int dx2 = opStack.pop().toInt();
                     int dy1 = opStack.pop().toInt();
                     int dx1 = 0;
-                    gstate.current.rcurveto(dx1, dy1, (dx1 + dx2), (dy1 + dy2),
-                            (dx1 + dx2 + dx3), (dy1 + dy2 + dy3));
+                    gstate.current().rcurveto(dx1, dy1, (dx1 + dx2),
+                            (dy1 + dy2), (dx1 + dx2 + dx3), (dy1 + dy2 + dy3));
                 } else if (cmd.equals("hvcurveto")) {
                     int dy3 = opStack.pop().toInt();
                     int dx3 = 0;
@@ -373,8 +377,8 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                     int dx2 = opStack.pop().toInt();
                     int dy1 = 0;
                     int dx1 = opStack.pop().toInt();
-                    gstate.current.rcurveto(dx1, dy1, (dx1 + dx2), (dy1 + dy2),
-                            (dx1 + dx2 + dx3), (dy1 + dy2 + dy3));
+                    gstate.current().rcurveto(dx1, dy1, (dx1 + dx2),
+                            (dy1 + dy2), (dx1 + dx2 + dx3), (dy1 + dy2 + dy3));
                 } else if (cmd.equals("hstem")) {
                     // Not much to for this command, except for popping two
                     // values from the stack.
@@ -388,8 +392,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                 } else if (cmd.equals("hsbw")) {
                     int wx = opStack.pop().toInt();
                     int sbx = opStack.pop().toInt();
-                    gstate.current.position[0] = sbx;
-                    gstate.current.position[1] = 0;
+                    gstate.current().setPosition(sbx, 0);
                     paramSb[0] = sbx;
                     paramSb[1] = 0;
                     paramW[0] = wx;
@@ -397,17 +400,17 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                 } else if (cmd.equals("rmoveto")) {
                     int dy = opStack.pop().toInt();
                     int dx = opStack.pop().toInt();
-                    gstate.current.rmoveto(dx, dy);
+                    gstate.current().rmoveto(dx, dy);
                 } else if (cmd.equals("closepath")) {
-                    gstate.current.path.closepath();
+                    gstate.current().getPath().closepath();
                 } else if (cmd.equals("endchar")) {
                     break;
                 } else if (cmd.equals("hmoveto")) {
                     int dx = opStack.pop().toInt();
-                    gstate.current.rmoveto(dx, 0);
+                    gstate.current().rmoveto(dx, 0);
                 } else if (cmd.equals("vmoveto")) {
                     int dy = opStack.pop().toInt();
-                    gstate.current.rmoveto(0, dy);
+                    gstate.current().rmoveto(0, dy);
                 } else if (cmd.equals("hstem3")) {
                     // This doesn't do anything, just remove the argument from
                     // the stack.
@@ -437,9 +440,9 @@ public class PSObjectAfm extends PSObject implements Cloneable {
             }
         }
         
-        gstate.current.moveto(paramW[0], paramW[1]);
+        gstate.current().moveto(paramW[0], paramW[1]);
         
-        return gstate.current.path;
+        return gstate.current().getPath();
     }
     
     /**
@@ -477,8 +480,8 @@ public class PSObjectAfm extends PSObject implements Cloneable {
             for (int i = 1; i < items.size(); i += 2) {
                 PSObjectName charName = items.get(i).toName();
                 PSObjectString charString = items.get(i + 1).toPSString();
-                CharMetric charMetric = charString2CharMetric(charName.name, 
-                        charString.toString());
+                CharMetric charMetric = charString2CharMetric(
+                        charName.toString(), charString.toString());
                 this.fontMetrics.addCharMetric(charMetric);
             }
         } catch (PSError e) {
@@ -595,7 +598,17 @@ public class PSObjectAfm extends PSObject implements Cloneable {
                 this.fontMetrics.addCharMetric(charMetric);
             }
 
-        } catch (Exception e) {
+        } catch (PSError e) {
+            // Catch all errors produces by the font code
+            throw new ProgramError("Exception occurred in loadType3, which"
+                    + " should not be possible.\n(Error generated by font: "
+                    + e + ")");
+        } catch (IOException e) {
+            // Catch all errors produces by the font code
+            throw new ProgramError("Exception occurred in loadType3, which"
+                    + " should not be possible.\n(Error generated by font: "
+                    + e + ")");
+        } catch (ProgramError e) {
             // Catch all errors produces by the font code
             throw new ProgramError("Exception occurred in loadType3, which"
                     + " should not be possible.\n(Error generated by font: "
@@ -611,6 +624,7 @@ public class PSObjectAfm extends PSObject implements Cloneable {
      * 
      * @return FontMetric object
      */
+    @Override
     public FontMetric toFontMetric() {
         return fontMetrics;
     }

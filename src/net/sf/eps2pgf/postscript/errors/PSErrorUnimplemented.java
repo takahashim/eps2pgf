@@ -45,6 +45,7 @@ public class PSErrorUnimplemented extends PSError {
      * 
      * @return Detailed error message.
      */
+    @Override
     public String getMessage() {
         return "Feature not (yet) implemented: " + message;
     }

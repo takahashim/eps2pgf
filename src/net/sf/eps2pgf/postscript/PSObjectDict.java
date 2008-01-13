@@ -34,22 +34,31 @@ import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
  * @author Paul Wagenaars
  */
 public class PSObjectDict extends PSObject {
+    
+    /** Map containing all key->value pairs in this dictionary. */
     private HashMap<PSObject, PSObject> map = new HashMap<PSObject, PSObject>();
     
-    int capacity;
+    /**
+     * Maximum number of entries in this dictionary. (this value is
+     * informational only).
+     */
+    private int capacity;
     
-    /** Creates a new instance of PSObjectDict */
+    /**
+     * Creates a new instance of PSObjectDict.
+     */
     public PSObjectDict() {
         capacity = 0;
     }
     
     /**
-     * Creates a new instance of PSObjectDict
-     * @param aCapacity Maximum number of items that can be stored in this dictionary.
-     * This value has no effect. The dictionary size is unlimited.
+     * Creates a new instance of PSObjectDict.
+     * 
+     * @param pCapacity Maximum number of items that can be stored in this
+     * dictionary. This value has no effect. The dictionary size is unlimited.
      */
-    public PSObjectDict(int aCapacity) {
-        capacity = aCapacity;
+    public PSObjectDict(final int pCapacity) {
+        capacity = pCapacity;
     }
     
     /**
@@ -69,11 +78,15 @@ public class PSObjectDict extends PSObject {
 
     /**
      * PostScript operator copy. Copies values from obj1 to this object.
+     * 
      * @param obj1 Copy values from obj1
+     * 
      * @return Returns subsequence of this object
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Invalid or incompatible object type(s) for copy operator
+     * 
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    public PSObject copy(PSObject obj1) throws PSErrorTypeCheck {
+    @Override
+    public PSObject copy(final PSObject obj1) throws PSErrorTypeCheck {
         PSObjectDict dict1 = obj1.toDict();
         for (Map.Entry<PSObject, PSObject> entry : dict1.map.entrySet()) {
             setKey(entry.getKey(), entry.getValue());
@@ -83,22 +96,25 @@ public class PSObjectDict extends PSObject {
     }
 
     /**
-     * Dumps the entire dictionary to stdout
+     * Dumps the entire dictionary to stdout.
      * 
-     * @param preStr String that will be prepended to each line written to output.
+     * @param preStr String that will be prepended to each line written to
+     * output.
      */
-    public void dumpFull(String preStr) {
+    public void dumpFull(final String preStr) {
         Set<PSObject> keys = map.keySet();
-        for (PSObject key: keys) {
+        for (PSObject key : keys) {
             System.out.println(preStr + key + " -> " + map.get(key).isis());
         }
     }
     
     /**
-     * PostScript operator 'dup'. Create a (shallow) copy of this object. The values
-     * of composite object is not copied, but shared.
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The
+     * values of composite object is not copied, but shared.
+     * 
      * @return Duplicate of this object
      */
+    @Override
     public PSObjectDict dup() {
         return this;
     }
@@ -111,6 +127,7 @@ public class PSObjectDict extends PSObject {
      * 
      * @return True, if equal.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (obj instanceof PSObject) {
             return eq((PSObject) obj);
@@ -124,6 +141,7 @@ public class PSObjectDict extends PSObject {
      * 
      * @return Hash code of this object.
      */
+    @Override
     public int hashCode() {
         return map.hashCode();
     }
@@ -131,14 +149,19 @@ public class PSObjectDict extends PSObject {
     /**
      * Return value associated with key. Same as lookup, except that a
      * PSErrorRangeCheck is thrown when the item doesn't exist.
-     * @return Value associated with key
+     * 
      * @param key Key for which the associated value will be returned
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
+     * 
+     * @return Value associated with key
+     * 
+     * @throws PSErrorUndefined The PostScript undefined error.
      */
-    public PSObject get(PSObject key) throws PSErrorUndefined {
+    @Override
+    public PSObject get(final PSObject key) throws PSErrorUndefined {
         PSObject value = lookup(key);
         if (value == null) {
-            throw new PSErrorUndefined("Key (" + key.isis() + ") not defined in dictionary.");
+            throw new PSErrorUndefined("Key (" + key.isis()
+                    + ") not defined in dictionary.");
         }
         return value;
     }
@@ -146,12 +169,15 @@ public class PSObjectDict extends PSObject {
     /**
      * Return value associated with key. Same as lookup, except that a
      * PSErrorRangeCheck is thrown when the item doesn't exist.
-     * @return Value associated with key
+     * 
      * @param key Key for which the associated value will be returned
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorUndefined Requested key is not defined in this dictionary
+     * 
+     * @return Value associated with key
+     * 
+     * @throws PSErrorUndefined The PostScript error "undefined".
      */
-    public PSObject get(String key) throws PSErrorUndefined {
-        return this.get(new PSObjectName(key, true));
+    public PSObject get(final String key) throws PSErrorUndefined {
+        return get(new PSObjectName(key, true));
     }
     
     /**
@@ -162,6 +188,7 @@ public class PSObjectDict extends PSObject {
      *         dictionaries this is 2. All consecutive items (index 1 and
      *         up) are the object's items.
      */
+    @Override
     public List<PSObject> getItemList() {
         List<PSObject> lst = new ArrayList<PSObject>();
         lst.add(new PSObjectInt(2));
@@ -177,56 +204,70 @@ public class PSObjectDict extends PSObject {
      * PostScript manual under the == operator
      * @return String representing this object.
      */
+    @Override
     public String isis() {
         return "-dict(" + map.size() + ")-";
     }
     
     /**
-     * PostScript operator 'known'
+     * PostScript operator 'known'.
+     * 
      * @param key Key of the entry to check
+     * 
      * @return Returns true when the key is known, returns false otherwise
      */
-    public boolean known(PSObject key) {
+    public boolean known(final PSObject key) {
         return map.containsKey(key);
     }
     
     /**
-     * PostScript operator 'known'
+     * PostScript operator 'known'.
+     * 
      * @param key Key of the entry to check
+     * 
      * @return Returns true when the key is known, returns false otherwise
      */
-    public boolean known(String key) {
+    public boolean known(final String key) {
         return map.containsKey(new PSObjectName(key, true));
     }
     
     /**
-     * Get the number of elements
+     * Get the number of elements.
+     * 
      * @return The number of entries in this dictionary.
      */
+    @Override
     public int length() {
         return map.size();
     }
     
     /**
-     * Looks up a key in this dictionary
-     * @return Object associated with the key, <code>null</code> if no object is associated with this key.
+     * Looks up a key in this dictionary.
+     * 
+     * @return Object associated with the key, <code>null</code> if no object is
+     * associated with this key.
+     * 
      * @param key Key of the entry to look up.
      */
-    public PSObject lookup(PSObject key) {
+    public PSObject lookup(final PSObject key) {
         return map.get(key);
     }
     
     /**
-     * Looks up a key in this dictionary
-     * @return Object associated with the key, <code>null</code> if no object is associated with this key.
+     * Looks up a key in this dictionary.
+     * 
+     * @return Object associated with the key, <code>null</code> if no object is
+     * associated with this key.
+     * 
      * @param key Key of the entry to look up.
      */
-    public PSObject lookup(String key) {
+    public PSObject lookup(final String key) {
         return map.get(new PSObjectName(key, true));
     }
     
     /**
-     * PostScript operator 'maxlength'
+     * PostScript operator 'maxlength'.
+     * 
      * @return maximum of the 'capacity' and the actual number of entries
      */
     public int maxlength() {
@@ -234,8 +275,9 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
-     * PostScript operator: 'noaccess'
+     * PostScript operator: 'noaccess'.
      */
+    @Override
     public void noaccess() {
         setAccess(Access.NONE);
     }
@@ -243,76 +285,78 @@ public class PSObjectDict extends PSObject {
     /**
      * PostScript operator put. Replace a single value in this object.
      * Same as setKey() method
+     * 
      * @param key Key or key for new value
      * @param value New value
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Supplied key does not have a valid type
+     * 
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    public void put(PSObject key, PSObject value) throws PSErrorTypeCheck {
-        this.setKey(key, value);
+    @Override
+    public void put(final PSObject key, final PSObject value)
+            throws PSErrorTypeCheck {
+        
+        setKey(key, value);
     }
 
     /**
      * PostScript operator 'rcheck'. Checks whether the access attribute is
      * 'unlimited' or 'readonly'.
+     * 
      * @return Returns 'true' when 'access' attribute is set to 'unlimited' or
      * 'readonly'. Returns false otherwise.
      */
+    //TODO: is denk dat alle rcheck(), wcheck(), ... method kunnen worden
+    //      verwijderd.
+    @Override
     public boolean rcheck() {
-        if ( (getAccess() == Access.UNLIMITED)
-                || (getAccess() == Access.READONLY) ) {
-            
-            return true;
-        } else {
-            return false;
-        }
+        return ((getAccess() == Access.UNLIMITED)
+                || (getAccess() == Access.READONLY));
     }
 
     /**
-     * PostScript operator: 'readonly'.
-     */
-    public void readonly() {
-        //TODO: can this on be removeed. Isn't is exactly the same as fot the
-        // generic PSObject.
-        setAccess(Access.READONLY);
-    }
-    
-    /**
-     * Sets a key in the dictionary
-     * @param key Key of the new dictionary entry.
+     * Sets a key in the dictionary.
+     * 
+     * @param pKey Key of the new dictionary entry.
      * @param value Value of the new dictionary entry.
      */
-    public void setKey(PSObject key, PSObject value) {
-    	if (key instanceof PSObjectString) {
-    		key = new PSObjectName(((PSObjectString)key).toString(), true);
-    	}
+    public void setKey(final PSObject pKey, final PSObject value) {
+        PSObject key = pKey;
+        if (key instanceof PSObjectString) {
+            key = new PSObjectName(((PSObjectString) key).toString(), true);
+        }
         map.put(key, value);
     }
     
     /**
-     * Sets a key in the dictionary
+     * Sets a key in the dictionary.
+     * 
      * @param key Key of the new dictionary entry.
      * @param value Value of the new dictionary entry.
      */
-    public void setKey(String key, PSObject value) {
+    public void setKey(final String key, final PSObject value) {
         map.put(new PSObjectName(key, true), value);
     }
     
     /**
-     * Sets a key in the dictionary
+     * Sets a key in the dictionary.
+     * 
      * @param key Key of the new dictionary entry.
      * @param value Value of the new dictionary entry.
      */
-    public void setKey(String key, String value) {
+    public void setKey(final String key, final String value) {
         map.put(new PSObjectName(key, true), new PSObjectString(value));
     }
     
     /**
-     * Set a key in the dictionary
-     * @return Created PSObjectString.
+     * Set a key in the dictionary.
+     * 
      * @param key Key of the new dictionary entry.
-     * @param value Value of the new dictionary item. Will be converted to a PSObjectString.
+     * @param value Value of the new dictionary item. Will be converted to a
+     * PSObjectString.
+     * 
+     * @return Created PSObjectString.
      */
-    public PSObjectString setKey(PSObject key, String value) {
+    public PSObjectString setKey(final PSObject key, final String value) {
         PSObjectString psoValue = new PSObjectString(value);
         map.put(key, psoValue);
         return psoValue;
@@ -322,6 +366,7 @@ public class PSObjectDict extends PSObject {
      * Convert this object to a dictionary, if possible.
      * @return This dictionary.
      */
+    @Override
     public PSObjectDict toDict() {
         return this;
     }
@@ -330,32 +375,39 @@ public class PSObjectDict extends PSObject {
      * Convert this object to a font.
      * @return Font dictionary object
      */
+    @Override
     public PSObjectFont toFont() {
         return new PSObjectFont(this);
     }
     
     /**
-     * Convert this object to string
+     * Convert this object to string.
+     * 
      * @return Human-readable string representation of this object.
      */
+    @Override
     public String toString() {
         return "Dict: (" + map.size() + " items)";
     }
     
     /**
-     * Returns the type of this object
+     * Returns the type of this object.
+     * 
      * @return Type of this object (see PostScript manual for possible values)
      */
+    @Override
     public String type() {
         return "dicttype";
     }
     
     /**
-     * PostScript operator 'undef'
+     * PostScript operator 'undef'.
+     * 
      * @param key Key of the entry to remove
-     * @throws net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck Type of key is incorrect
+     * 
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    public void undef(PSObject key) throws PSErrorTypeCheck {
+    public void undef(final PSObject key) throws PSErrorTypeCheck {
         map.remove(key);
     }
 
@@ -365,6 +417,7 @@ public class PSObjectDict extends PSObject {
      * @return Returns true when there is write access to this object, returns
      * false otherwise
      */
+    @Override
     public boolean wcheck() {
         return (getAccess() == Access.UNLIMITED);
     }

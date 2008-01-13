@@ -52,6 +52,7 @@ public class PSErrorInvalidFont extends PSError {
      * 
      * @return Detail message string
      */
+    @Override
     public String getMessage() {
         if (operator == null) {
             return super.getMessage();

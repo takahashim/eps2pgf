@@ -20,23 +20,26 @@
 
 package net.sf.eps2pgf.postscript;
 
-/** Represent PostScript mark
+/**
+ * Represent PostScript mark.
  *
  * @author Paul Wagenaars
  */
 public class PSObjectMark extends PSObject {
     
     /**
-     * Create new mark object
+     * Create new mark object.
      */
     public PSObjectMark() {
         
     }
     
     /**
-     * Create new mark object
+     * Create new mark object.
+     * 
+     * @param obj Copy common attributes from this object.
      */
-    public PSObjectMark(PSObjectMark obj) {
+    public PSObjectMark(final PSObjectMark obj) {
         copyCommonAttributes(obj);
     }
     
@@ -54,18 +57,24 @@ public class PSObjectMark extends PSObject {
     /**
      * PostScript operator 'dup'. Create a copy of this object. The values
      * of composite object is not copied, but shared.
+     * 
+     * @return Duplicate of this object.
      */
+    @Override
     public PSObjectMark dup() {
         return new PSObjectMark(this);
     }
     
     /**
-     * Compare this object with another object and return true if they are equal.
-     * See PostScript manual on what's equal and what's not.
+     * Compare this object with another object and return true if they are
+     * equal. See PostScript manual on what's equal and what's not.
+     * 
      * @param obj Object to compare this object with
+     * 
      * @return True if objects are equal, false otherwise
      */
-    public boolean eq(PSObject obj) {
+    @Override
+    public boolean eq(final PSObject obj) {
         return (obj instanceof PSObjectMark);
     }
     
@@ -77,6 +86,7 @@ public class PSObjectMark extends PSObject {
      * 
      * @return True, if equal.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (obj instanceof PSObject) {
             return eq((PSObject) obj);
@@ -90,18 +100,27 @@ public class PSObjectMark extends PSObject {
      * 
      * @return Hash code of this object.
      */
+    @Override
     public int hashCode() {
         return 1;
     }
     
+    /**
+     * Implements PostScript operator ==.
+     * 
+     * @return PostScript representation of this object.
+     */
+    @Override
     public String isis() {
         return "-mark-";
     }
 
     /**
-     * Returns the type of this object
+     * Returns the type of this object.
+     * 
      * @return Type of this object (see PostScript manual for possible values)
      */
+    @Override
     public String type() {
         return "marktype";
     }

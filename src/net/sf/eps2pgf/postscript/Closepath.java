@@ -42,6 +42,7 @@ public class Closepath extends PathSection implements Cloneable {
      * Create a clone of this object.
      * @return Returns clone of this object.
      */
+    @Override
     public Closepath clone() {
         Closepath copy = (Closepath) super.clone();
         return copy;

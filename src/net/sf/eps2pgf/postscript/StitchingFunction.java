@@ -92,6 +92,7 @@ public class StitchingFunction extends PSFunction {
      * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
      * (yet) implemented.
      */
+    @Override
     public double[] evaluate(final double[] pInput) throws PSErrorRangeCheck, 
             PSErrorUnimplemented {
         

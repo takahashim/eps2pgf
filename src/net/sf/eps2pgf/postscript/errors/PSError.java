@@ -40,6 +40,7 @@ public class PSError extends Exception {
      * 
      * @return Message describing the error.
      */
+    @Override
     public String getMessage() {
         // Get the error type from the class name
         String error = this.getClass().getName();

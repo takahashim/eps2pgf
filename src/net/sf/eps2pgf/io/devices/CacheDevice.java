@@ -178,13 +178,13 @@ public class CacheDevice implements OutputDevice {
      * @param newBbox Bounding box to merge with current bounding box.
      */
     void mergeBbox(final double[] newBbox) {
-        if (this.pathBbox == null) {
-            this.pathBbox = newBbox;
+        if (pathBbox == null) {
+            pathBbox = newBbox.clone();
         } else {
-            this.pathBbox[0] = Math.min(this.pathBbox[0], newBbox[0]);
-            this.pathBbox[1] = Math.min(this.pathBbox[1], newBbox[1]);
-            this.pathBbox[2] = Math.max(this.pathBbox[2], newBbox[2]);
-            this.pathBbox[3] = Math.max(this.pathBbox[3], newBbox[3]);
+            pathBbox[0] = Math.min(pathBbox[0], newBbox[0]);
+            pathBbox[1] = Math.min(pathBbox[1], newBbox[1]);
+            pathBbox[2] = Math.max(pathBbox[2], newBbox[2]);
+            pathBbox[3] = Math.max(pathBbox[3], newBbox[3]);
         }
     }
     
@@ -196,7 +196,7 @@ public class CacheDevice implements OutputDevice {
      */
     public void shfill(final PSObjectDict dict, final GraphicsState gstate) {
         try {
-            this.mergeBbox(gstate.path.boundingBox());
+            mergeBbox(gstate.getPath().boundingBox());
         } catch (PSErrorNoCurrentPoint e) {
             // do nothing
         }
@@ -209,7 +209,7 @@ public class CacheDevice implements OutputDevice {
      */
     public void stroke(final GraphicsState gstate) {
         try {
-            this.mergeBbox(gstate.path.boundingBox());
+            mergeBbox(gstate.getPath().boundingBox());
         } catch (PSErrorNoCurrentPoint e) {
             // do nothing
         }

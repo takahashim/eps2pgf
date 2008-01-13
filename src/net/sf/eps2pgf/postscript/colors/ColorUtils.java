@@ -55,9 +55,9 @@ public final class ColorUtils {
     public static PSColor autoSetColorSpace(final PSObject obj) throws PSError {
         String spaceName;
         if (obj instanceof PSObjectName) {
-            spaceName = ((PSObjectName) obj).name;
+            spaceName = ((PSObjectName) obj).toString();
         } else if (obj instanceof PSObjectArray) {
-            spaceName = ((PSObjectArray) obj).get(0).toName().name;
+            spaceName = ((PSObjectArray) obj).get(0).toName().toString();
         } else {
             throw new PSErrorTypeCheck();
         }

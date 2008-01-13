@@ -95,7 +95,7 @@ public final class Main {
         if (!parseResult.success()) {
             System.err.println();
 
-            for (Iterator errs = parseResult.getErrorMessageIterator();
+            for (Iterator< ? > errs = parseResult.getErrorMessageIterator();
                     errs.hasNext();) {
                 System.err.println("Error: " + errs.next());
             }

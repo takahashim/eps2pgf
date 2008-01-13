@@ -32,34 +32,50 @@ import net.sf.eps2pgf.postscript.errors.PSError;
  *
  * @author Paul Wagenaars
  */
-public class Parser {
+public final class Parser {
+    /** Numbers of characters consumed in the last convertSingle call. */
+    private static int charsLastConvert = -1;
+    
     /**
-     * Numbers of characters consumed in the last convertSingle call
+     * "Hidden" constructor.
      */
-    public static int charsLastConvert = -1;
+    private Parser() {
+        /* empty block */
+    }
     
     /**
      * Convert PostScript code to list of objects.
+     * 
      * @param in Reader with PostScript code
+     * 
      * @return List with PostScript objects
-     * @throws java.io.IOException Unable to read from in
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    public static List<PSObject> convertAll(InputStream in) throws IOException, PSError {
+    public static List<PSObject> convertAll(final InputStream in)
+            throws IOException, PSError {
         List<PSObject> seq = new ArrayList<PSObject>();
         PSObject obj;
-        while ( (obj = convertSingle(in)) != null ) {
+        while ((obj = convertSingle(in)) != null) {
             seq.add(obj);
         }
         return seq;
     }
     
     /**
-     * Read PostScript code until a single object is encountered
-     * @param in Read characters (PostScript code) from this reader
-     * @throws java.io.IOException Unable to read from input
-     * @return Object read from in reader or 'null' if there were no more objects
+     * Read PostScript code until a single object is encountered.
+     * 
+     * @param in Read characters (PostScript code) from this reader.
+     * 
+     * @return Object read from in reader or 'null' if there were no more
+     * objects.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    public static PSObject convertSingle(InputStream in) throws IOException, PSError {
+    public static PSObject convertSingle(final InputStream in)
+            throws IOException, PSError {
         StringBuilder strSoFar = new StringBuilder();
         boolean inComment = false;
         boolean inString = false;
@@ -74,11 +90,11 @@ public class Parser {
         String lastTwo;
         
         int charsThisConvert = 0;
-        while ( (readChar = in.read()) != -1 ) {
+        while ((readChar = in.read()) != -1) {
             charsThisConvert++;
             
             prevChr = chr;
-            chr = (char)readChar;
+            chr = (char) readChar;
             if (charsThisConvert > 1) {
                 lastTwo = Character.toString(prevChr) + Character.toString(chr);
             } else {
@@ -95,11 +111,11 @@ public class Parser {
                 if ((chr == 10) || (chr == 12) || (chr == 13)) {
                     inComment = false;
                 }
-            }
-            
-            // In a string
-            else if (inString) {
-                if ( (chr == ')') && !lastTwo.equals("\\)")) {
+            } else if (inString) {
+                //
+                // In a string
+                //
+                if ((chr == ')') && !lastTwo.equals("\\)")) {
                     stringDepth--;
                     if (stringDepth == 0) {
                         inString = false;
@@ -107,35 +123,36 @@ public class Parser {
                             tokenAfter = true;
                         }
                     }
-                } else if ( (chr == '(') && !lastTwo.equals("\\(")) {
+                } else if ((chr == '(') && !lastTwo.equals("\\(")) {
                     stringDepth++;
                 }
-            }
-            
-            else if (inHexString) {
+            } else if (inHexString) {
+                //
                 // End of the hex string
+                //
                 if (chr == '>') {
                     inHexString = false;
                     tokenAfter = true;
                 }
-            }
-            
-            else if (inB85String) {
+            } else if (inB85String) {
+                //
                 // End of base-85 string
+                //
                 if (lastTwo.equals("~>")) {
                     inB85String = false;
                     tokenAfter = true;
                 }
-            }
-            
-            // start of comment
-            else if (chr == '%') {
+            } else if (chr == '%') {
+                //
+                // start of comment
+                //
                 appendCurrentChar = false;
                 inComment = true;
-            }
-            
-            // In a procedure
-            else if (inProc) {
+            } else if (inProc) {
+                //
+                // In a procedure
+                //
+                
                 // End of the procedure
                 if (chr == '}') {
                     procDepth--;
@@ -143,73 +160,75 @@ public class Parser {
                         tokenAfter = true;
                         inProc = false;
                     }
-                }
-                // A string in a procedure
-                else if (chr == '(') {
+                } else if (chr == '(') {
+                    //
+                    // A string in a procedure
+                    //
                     stringDepth++;
                     inString = true;
-                }
-                // a procedure in a procedure
-                else if (chr == '{') {
+                } else if (chr == '{') {
+                    //
+                    // a procedure in a procedure
+                    //
                     procDepth++;
                 }
-            }
-
-            // start of string
-            else if (chr == '(') {
+            } else if (chr == '(') {
+                //
+                // start of string
+                //
                 stringDepth++;
                 inString = true;
                 tokenBefore = true;
-            }
-            
-            // start or end of array
-            else if ((chr == '[') || (chr == ']')) {
+            } else if ((chr == '[') || (chr == ']')) {
+                //
+                // start or end of array
+                //
                 tokenBefore = true;
                 tokenAfter = true;
-            }
-            
-            // Start of literal
-            else if (chr == '/') {
+            } else if (chr == '/') {
+                //
+                // Start of literal
+                //
                 tokenBefore = true;
-            }
-            
-            // Start of procedure .. {
-            else if ( (chr == '{') && !inString ) {
+            } else if ((chr == '{') && !inString) {
+                //
+                // Start of procedure .. {
+                //
                 tokenBefore = true;
                 inProc = true;
                 procDepth++;
-            }
-            
-            // start of hex string, base-85 string or dictionary
-            else if (chr == '<') {
+            } else if (chr == '<') {
+                //
+                // start of hex string, base-85 string or dictionary
+                //
                 if (prevChr == '<') {
                     tokenAfter = true;
                 } else {
                     tokenBefore = true;
                 }
-            }
-            
-            // second char of base-85 string
-            else if ( (prevChr == '<') && (chr == '~') ) {
+            } else if ((prevChr == '<') && (chr == '~')) {
+                //
+                // second char of base-85 string
+                //
                 inB85String = true;
-            }
-            
-            // second char of hex string
-            else if (prevChr == '<') {
+            } else if (prevChr == '<') {
+                //
+                // second char of hex string
+                //
                 inHexString = true;
-            }
-            
-            // end of dictionary >>
-            else if (chr == '>') {
+            } else if (chr == '>') {
+                //
+                // end of dictionary >>
+                //
                 if (prevChr == '>') {
                     tokenAfter = true;
                 } else {
                     tokenBefore = true;
                 }
-            }
-            
-            // object ended by whitespace
-            else if ( Character.isWhitespace(chr) ) {
+            } else if (Character.isWhitespace(chr)) {
+                //
+                // object ended by whitespace
+                //
                 appendCurrentChar = false;
                 tokenBefore = true;
             }
@@ -217,7 +236,7 @@ public class Parser {
             //
             // Create token, append current character
             //
-            if ( tokenBefore && (strSoFar.length() > 0) ) {
+            if (tokenBefore && (strSoFar.length() > 0)) {
                 if (!Character.isWhitespace(chr)) {
                     in.reset();
                     charsThisConvert--;
@@ -229,7 +248,7 @@ public class Parser {
             if (appendCurrentChar) {
                 strSoFar.append(chr);
             }
-            if ( tokenAfter && (strSoFar.length() > 0) ) {
+            if (tokenAfter && (strSoFar.length() > 0)) {
                 PSObject newObj = convertToPSObject(strSoFar.toString());
                 charsLastConvert = charsThisConvert;
                 return newObj;
@@ -248,10 +267,18 @@ public class Parser {
         return null;
     }
     
-    /** Convert a string to a PostScript object.
+    /**
+     * Convert a string to a PostScript object.
+     * 
      * @param str String to convert.
+     * 
+     * @return the PS object
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    static PSObject convertToPSObject(String str) throws IOException, PSError {
+    static PSObject convertToPSObject(final String str) throws IOException,
+            PSError {
         if (PSObjectInt.isType(str)) {
             return new PSObjectInt(str);
         } else if (PSObjectReal.isType(str)) {
@@ -266,5 +293,12 @@ public class Parser {
             return new PSObjectName(str);
         }
     }
+
+    /**
+     * @return the charsLastConvert
+     */
+    public static int getCharsLastConvert() {
+        return charsLastConvert;
+    }
     
-}  // end of class Parser
+}
