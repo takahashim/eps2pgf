@@ -257,7 +257,12 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * to 'executeonly'.
      */
     public void executeonly() throws PSErrorTypeCheck {
-        throw new PSErrorTypeCheck();
+        if ((this instanceof PSObjectArray) || (this instanceof PSObjectFile)
+                || (this instanceof PSObjectString)) {
+            setAccess(Access.EXECUTEONLY);
+        } else {
+            throw new PSErrorTypeCheck();
+        }
     }
     
     /**
@@ -415,7 +420,15 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * type.
      */
     public void noaccess() throws PSErrorTypeCheck {
-        throw new PSErrorTypeCheck();
+        if ((this instanceof PSObjectArray)
+                || (this instanceof PSObjectFile)
+                || (this instanceof PSObjectString)
+                || (this instanceof PSObjectDict)
+                || (this instanceof PSObjectFont)) {
+            setAccess(Access.NONE);
+        } else {
+            throw new PSErrorTypeCheck();
+        }
     }
     
     /**
@@ -485,14 +498,33 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * otherwise.
      */
     public boolean rcheck() throws PSErrorTypeCheck {
-        throw new PSErrorTypeCheck();
+        if ((this instanceof PSObjectArray)
+                || (this instanceof PSObjectFile)
+                || (this instanceof PSObjectString)
+                || (this instanceof PSObjectDict)
+                || (this instanceof PSObjectFont)) {
+            Access acs = getAccess();
+            return ((acs == Access.UNLIMITED) || (acs == Access.READONLY));
+        } else {
+            throw new PSErrorTypeCheck();
+        }        
     }
 
     /**
      * PostScript operator 'readonly'. Set access attribute to 'readonly'.
+     * 
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    public void readonly() {
-        setAccess(Access.READONLY);
+    public void readonly() throws PSErrorTypeCheck {
+        if ((this instanceof PSObjectArray)
+                || (this instanceof PSObjectFile)
+                || (this instanceof PSObjectString)
+                || (this instanceof PSObjectDict)
+                || (this instanceof PSObjectFont)) {
+            setAccess(Access.READONLY);
+        } else {
+            throw new PSErrorTypeCheck();
+        }
     }
     
     /**
@@ -779,7 +811,15 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * otherwise.
      */
     public boolean wcheck() throws PSErrorTypeCheck {
-        throw new PSErrorTypeCheck();
+        if ((this instanceof PSObjectArray)
+                || (this instanceof PSObjectFile)
+                || (this instanceof PSObjectString)
+                || (this instanceof PSObjectDict)
+                || (this instanceof PSObjectFont)) {
+            return (getAccess() == Access.UNLIMITED);
+        } else {
+            throw new PSErrorTypeCheck();
+        }        
     }
 
     /**

@@ -275,14 +275,6 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
-     * PostScript operator: 'noaccess'.
-     */
-    @Override
-    public void noaccess() {
-        setAccess(Access.NONE);
-    }
-    
-    /**
      * PostScript operator put. Replace a single value in this object.
      * Same as setKey() method
      * 
@@ -296,21 +288,6 @@ public class PSObjectDict extends PSObject {
             throws PSErrorTypeCheck {
         
         setKey(key, value);
-    }
-
-    /**
-     * PostScript operator 'rcheck'. Checks whether the access attribute is
-     * 'unlimited' or 'readonly'.
-     * 
-     * @return Returns 'true' when 'access' attribute is set to 'unlimited' or
-     * 'readonly'. Returns false otherwise.
-     */
-    //TODO: is denk dat alle rcheck(), wcheck(), ... method kunnen worden
-    //      verwijderd.
-    @Override
-    public boolean rcheck() {
-        return ((getAccess() == Access.UNLIMITED)
-                || (getAccess() == Access.READONLY));
     }
 
     /**
@@ -411,14 +388,4 @@ public class PSObjectDict extends PSObject {
         map.remove(key);
     }
 
-    /**
-     * PostScript operator 'wcheck'. Checks whether the access attribute is
-     * 'unlimited'.
-     * @return Returns true when there is write access to this object, returns
-     * false otherwise
-     */
-    @Override
-    public boolean wcheck() {
-        return (getAccess() == Access.UNLIMITED);
-    }
 }

@@ -93,14 +93,6 @@ public class PSObjectFile extends PSObject {
     }
     
     /**
-     * PostScript operator 'executeonly'. Set access attribute to executeonly.
-     */
-    @Override
-    public void executeonly() {
-        setAccess(Access.EXECUTEONLY);
-    }
-    
-    /**
      * Indicates whether some other object is equal to this one.
      * Required when used as index in PSObjectDict
      * 
@@ -135,14 +127,6 @@ public class PSObjectFile extends PSObject {
     @Override
     public String isis() {
         return "-file-";
-    }
-    
-    /**
-     * PostScript operator: 'noaccess'.
-     */
-    @Override
-    public void noaccess() {
-        setAccess(Access.NONE);
     }
     
     /**

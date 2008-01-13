@@ -294,14 +294,6 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
-     * PostScript operator 'executeonly'. Set access attribute to executeonly.
-     */
-    @Override
-    public void executeonly() {
-        setAccess(Access.EXECUTEONLY);
-    }
-    
-    /**
      * Returns an object from this array.
      * 
      * @param index Index of the element to return.
@@ -439,14 +431,6 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
-     * PostScript operator: 'noaccess'.
-     */
-    @Override
-    public void noaccess() {
-        setAccess(Access.NONE);
-    }
-    
-    /**
      * PostScript operator put. Replace a single value in this object.
      * 
      * @param index Index or key for new value
@@ -494,19 +478,6 @@ public class PSObjectArray extends PSObject {
         for (int i = 0; i < nr; i++) {
             set(index + i, array3.get(i));
         }
-    }
-
-    /**
-     * PostScript operator 'rcheck'. Checks whether the access attribute is
-     * 'unlimited' or 'readonly'.
-     * 
-     * @return true, if readable.
-     */
-    @Override
-    public boolean rcheck() {
-        
-        return ((getAccess() == Access.UNLIMITED)
-                || (getAccess() == Access.READONLY));
     }
 
     /**
@@ -682,17 +653,6 @@ public class PSObjectArray extends PSObject {
     @Override
     public String type() {
         return "arraytype";
-    }
-
-    /**
-     * PostScript operator 'wcheck'. Checks whether the access attribute is
-     * 'unlimited'.
-     * 
-     * @return true, if writtable.
-     */
-    @Override
-    public boolean wcheck() {
-        return (getAccess() == Access.UNLIMITED);
     }
 
     /**
