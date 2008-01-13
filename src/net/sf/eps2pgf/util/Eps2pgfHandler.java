@@ -35,6 +35,7 @@ public class Eps2pgfHandler extends Handler {
     /**
      * Close the Handler and free all associated resources.
      */
+    @Override
     public void close() {
         /* empty block */
     }
@@ -42,6 +43,7 @@ public class Eps2pgfHandler extends Handler {
     /**
      * Flush any buffered output.
      */
+    @Override
     public void flush() {
         System.out.flush();
         System.err.flush();
@@ -52,6 +54,7 @@ public class Eps2pgfHandler extends Handler {
      * 
      * @param record Record to format and publish.
      */
+    @Override
     public void publish(final LogRecord record) {
         Formatter formatter = getFormatter();
         String message = formatter.format(record);

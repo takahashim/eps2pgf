@@ -154,6 +154,7 @@ public class Options extends JSAP {
      * 
      * @return Processed arguments
      */
+    @Override
     public JSAPResult parse(final String[] arguments) {
         JSAPResult args = super.parse(arguments);
         

@@ -47,6 +47,9 @@ import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /**
  * Writes PGF files.
+ * 
+ *TODO: make output devices non-static
+ * 
  * @author Paul Wagenaars
  */
 public class PGFDevice implements OutputDevice {
@@ -118,9 +121,12 @@ public class PGFDevice implements OutputDevice {
     public void init(final GraphicsState gstate) throws PSError, IOException {
         // Force setting the line width by setting the last width to an
         // impossible/negative value.
-        gstate.deviceData.setKey("pgf_last_linewidth", new PSObjectReal(-1.0));
-        gstate.deviceData.setKey("pgf_last_dashpattern", new PSObjectArray());
-        gstate.deviceData.setKey("pgf_last_dashoffset", new PSObjectReal(0.0));
+        gstate.getDeviceData().setKey("pgf_last_linewidth",
+                                                new PSObjectReal(-1.0));
+        gstate.getDeviceData().setKey("pgf_last_dashpattern",
+                                                new PSObjectArray());
+        gstate.getDeviceData().setKey("pgf_last_dashoffset",
+                                                new PSObjectReal(0.0));
         
         out.write("% Created by " + net.sf.eps2pgf.Main.getNameVersion() + " ");
         Date now = new Date();
@@ -196,7 +202,7 @@ public class PGFDevice implements OutputDevice {
     public void stroke(final GraphicsState gstate) throws IOException, PSError {
         updateDash(gstate);
         updateLinewidth(gstate);
-        writePath(gstate.path);
+        writePath(gstate.getPath());
         out.write("\\pgfusepath{stroke}\n");
     }
     
@@ -298,12 +304,12 @@ public class PGFDevice implements OutputDevice {
         // Convert coordinates and radii from user space to coordinate space
         // PGF does not support the Extend parameters for shadings. So we
         // try to emulate the effect.
-        double scaling = gstate.ctm.getMeanScaling();
-        double xScale = gstate.ctm.getXScaling() / scaling;
-        double yScale = gstate.ctm.getYScaling() / scaling;
-        double angle = gstate.ctm.getRotation();
-        double[] coor0 = gstate.ctm.transform(shading.getCoord(0.0));
-        double[] coor1 = gstate.ctm.transform(shading.getCoord(1.0));
+        double scaling = gstate.getCtm().getMeanScaling();
+        double xScale = gstate.getCtm().getXScaling() / scaling;
+        double yScale = gstate.getCtm().getYScaling() / scaling;
+        double angle = gstate.getCtm().getRotation();
+        double[] coor0 = gstate.getCtm().transform(shading.getCoord(0.0));
+        double[] coor1 = gstate.getCtm().transform(shading.getCoord(1.0));
 
         double maxS = 1.0;
         if (shading.getExtend1()) {
@@ -311,7 +317,7 @@ public class PGFDevice implements OutputDevice {
             // a4 paper).
             maxS = shading.getSForDistance(0.3 * 1e6 / scaling, 1,
                     Double.POSITIVE_INFINITY);
-            coor1 = gstate.ctm.transform(shading.getCoord(maxS));
+            coor1 = gstate.getCtm().transform(shading.getCoord(maxS));
         }
         
         startScope();
@@ -418,19 +424,19 @@ public class PGFDevice implements OutputDevice {
      * @throws PSError A PostScript error occurred.
      */
     void updateDash(final GraphicsState gstate) throws IOException, PSError {
-        String lastPattern = gstate.deviceData.get("pgf_last_dashpattern")
+        String lastPattern = gstate.getDeviceData().get("pgf_last_dashpattern")
                                 .isis();
-        double lastOffset = gstate.deviceData.get("pgf_last_dashoffset")
+        double lastOffset = gstate.getDeviceData().get("pgf_last_dashoffset")
                                 .toReal();
         
-        double scaling = gstate.ctm.getMeanScaling();
+        double scaling = gstate.getCtm().getMeanScaling();
         PSObjectArray currentArray = new PSObjectArray();
-        for (int i = 0; i < gstate.dashPattern.size(); i++) {
-            currentArray.addToEnd(new PSObjectReal(gstate.dashPattern.get(i)
-                    .toReal() * scaling));
+        for (int i = 0; i < gstate.getDashPattern().size(); i++) {
+            currentArray.addToEnd(new PSObjectReal(gstate.getDashPattern()
+                    .get(i).toReal() * scaling));
         }
         String currentPattern = currentArray.isis();
-        double currentOffset = gstate.dashOffset * scaling;
+        double currentOffset = gstate.getDashOffset() * scaling;
         
         if (!currentPattern.equals(lastPattern)
                 || (Math.abs(lastOffset - currentOffset) > 1e-10)) {
@@ -447,8 +453,8 @@ public class PGFDevice implements OutputDevice {
                 out.write("}{" + LENGTH_FORMAT.format(1e-4 * currentOffset)
                         + "cm}\n");
             }
-            gstate.deviceData.setKey("pgf_last_dashpattern", currentArray);
-            gstate.deviceData.setKey("pgf_last_dashoffset",
+            gstate.getDeviceData().setKey("pgf_last_dashpattern", currentArray);
+            gstate.getDeviceData().setKey("pgf_last_dashoffset",
                     new PSObjectReal(currentOffset));
         }
     }
@@ -464,12 +470,14 @@ public class PGFDevice implements OutputDevice {
      */
     void updateLinewidth(final GraphicsState gstate)
             throws PSError, IOException {
-        double lastWidth = gstate.deviceData.get("pgf_last_linewidth").toReal();
-        double currentWidth = gstate.lineWidth * gstate.ctm.getMeanScaling();
+        double lastWidth = gstate.getDeviceData().get("pgf_last_linewidth")
+                                                                    .toReal();
+        double currentWidth = gstate.getLineWidth()
+                                       * gstate.getCtm().getMeanScaling();
         if (Math.abs(currentWidth - lastWidth) > 1e-10) {
             out.write("\\pgfsetlinewidth{"
                     + LENGTH_FORMAT.format(1e-3 * currentWidth) + "mm}\n");
-            gstate.deviceData.setKey("pgf_last_linewidth",
+            gstate.getDeviceData().setKey("pgf_last_linewidth",
                     new PSObjectReal(currentWidth));
         }
     }

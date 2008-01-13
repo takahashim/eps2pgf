@@ -53,6 +53,7 @@ public class CMYK extends PSColor {
      * 
      * @throws CloneNotSupportedException Clone not supported by this object.
      */
+    @Override
     public CMYK clone() throws CloneNotSupportedException {
         CMYK copy = (CMYK) super.clone();
         return copy;
@@ -63,6 +64,7 @@ public class CMYK extends PSColor {
      * 
      * @return the CMYK
      */
+    @Override
     public double[] getCMYK() {
         double[] cmyk = {getLevel(0), getLevel(1), getLevel(2), getLevel(3)};
         return cmyk;
@@ -73,6 +75,7 @@ public class CMYK extends PSColor {
      * 
      * @return array describing color space.
      */
+    @Override
     public PSObjectArray getColorSpace() {
         PSObjectArray array = new PSObjectArray();
         array.addToEnd(new PSObjectName("DeviceCMYK", true));
@@ -84,6 +87,7 @@ public class CMYK extends PSColor {
      * 
      * @return the gray level
      */
+    @Override
     public double getGray() {
         return (1.0 - Math.min(1.0, 0.3 * getLevel(0) + 0.59 * getLevel(1)
                + 0.11 * getLevel(2) + getLevel(3)));
@@ -94,6 +98,7 @@ public class CMYK extends PSColor {
      * 
      * @return the HSB
      */
+    @Override
     public double[] getHSB() {
         double[] rgb = getRGB();
         return RGB.convertRGBtoHSB(rgb[0], rgb[1], rgb[2]);
@@ -105,6 +110,7 @@ public class CMYK extends PSColor {
      * 
      * @return the number of components for this color
      */
+    @Override
     public int getNrComponents() {
         return 4;
     }
@@ -114,6 +120,7 @@ public class CMYK extends PSColor {
      * 
      * @return the RGB
      */
+    @Override
     public double[] getRGB() {
         double r = 1.0 - Math.min(1.0, getLevel(0) + getLevel(3));
         double g = 1.0 - Math.min(1.0, getLevel(1) + getLevel(3));

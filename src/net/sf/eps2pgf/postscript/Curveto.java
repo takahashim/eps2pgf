@@ -61,6 +61,7 @@ public class Curveto extends PathSection implements Cloneable {
      * @return X- and Y-coordinate in device space. Returns {NaN, NaN} when
      *         this section has no coordinate.
      */
+    @Override
     public double[] deviceCoor() {
         double[] coor = new double[2];
         coor[0] = getParam(4);
@@ -72,6 +73,7 @@ public class Curveto extends PathSection implements Cloneable {
      * Create a clone of this object.
      * @return Returns clone of this object.
      */
+    @Override
     public Curveto clone() {
         Curveto newSection = (Curveto) super.clone();
         return newSection;

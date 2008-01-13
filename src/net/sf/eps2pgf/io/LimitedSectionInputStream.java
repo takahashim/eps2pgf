@@ -77,6 +77,7 @@ public class LimitedSectionInputStream extends InputStream {
      * Closing a previously-closed stream, however, has no effect.
      * @throws java.io.IOException If an I/O error occurs
      */
+    @Override
     public void close() throws IOException {
         rdr.close();
     }
@@ -90,6 +91,7 @@ public class LimitedSectionInputStream extends InputStream {
      * while still preserving the mark. After reading this many characters,
      * attempting to reset the stream may fail.
      */
+    @Override
     public void mark(final int readAheadLimit) {
         rdr.mark(readAheadLimit);
         lastMark = charsRead;
@@ -99,6 +101,7 @@ public class LimitedSectionInputStream extends InputStream {
      * Tell whether this stream supports the mark() operation, which it does.
      * @return Returns always true if the Reader supports mark()
      */
+    @Override
     public boolean markSupported() {
         return rdr.markSupported();
     }
@@ -110,6 +113,7 @@ public class LimitedSectionInputStream extends InputStream {
      * @return The character read, as an integer in the range 0 to 65535
      * (0x00-0xffff), or -1 if the end of the stream has been reached
      */
+    @Override
     public int read() throws IOException {
         if (charsRead >= length) {
             return -1;
@@ -130,6 +134,7 @@ public class LimitedSectionInputStream extends InputStream {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Override
     public int read(final byte[] cbuf) throws IOException {
         int len = Math.min(length - charsRead, cbuf.length);
         int n = rdr.read(cbuf, 0, len);
@@ -156,6 +161,7 @@ public class LimitedSectionInputStream extends InputStream {
      * 
      * @throws IOException If an I/O error occurs
      */
+    @Override
     public int read(final byte[] cbuf, final int off, final int len)
             throws IOException {
         int maxLength = Math.min(length - charsRead, len);
@@ -177,6 +183,7 @@ public class LimitedSectionInputStream extends InputStream {
      * reset() without supporting mark().
      * @throws java.io.IOException If an I/O error occurs
      */
+    @Override
     public void reset() throws IOException {
         charsRead = lastMark;
         rdr.reset();
@@ -192,6 +199,7 @@ public class LimitedSectionInputStream extends InputStream {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Override
     public long skip(final long pN) throws IOException {
         long n = rdr.skip(pN);
         charsRead += n;

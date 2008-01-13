@@ -56,6 +56,7 @@ public class Moveto extends PathSection implements Cloneable {
      * 
      * @return String representation of this object.
      */
+    @Override
     public String toString() {
         return String.format("moveto (%.4g, %.4g)", getParam(0), getParam(1));
     }
@@ -64,6 +65,7 @@ public class Moveto extends PathSection implements Cloneable {
      * Create a clone of this object.
      * @return Returns clone of this object.
      */
+    @Override
     public Moveto clone() {
         return (Moveto) super.clone();
     }

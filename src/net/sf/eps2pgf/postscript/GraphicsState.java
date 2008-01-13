@@ -45,64 +45,44 @@ public class GraphicsState implements Cloneable {
      * files to micrometers.
      * [a b c d tx ty] -> x' = a*x + b*y + tx ; y' = c*x + d*y * ty
      */
-    public PSObjectMatrix ctm = new PSObjectMatrix();
+    private PSObjectMatrix ctm = new PSObjectMatrix();
     
-    /**
-     * Current position in pt (before CTM is applied).
-     */
-    public double[] position = new double[2];
+    /** Current position in pt (before CTM is applied). */
+    private double[] position = new double[2];
     
-    /**
-     * Current path.
-     */
-    public Path path;
+    /** Current path. */
+    private Path path;
     
-    /**
-     * Current clipping path.
-     */
-    public Path clippingPath;
+    /** Current clipping path. */
+    private Path clippingPath;
     
-    /**
-     * Current color.
-     */
-    public PSColor color;
+    /** Current color. */
+    private PSColor color;
     
-    /**
-     * Parameter describing the accuracy of flattening a path.
-     */
-    public double flat = 1.0;
+    /** Parameter describing the accuracy of flattening a path. */
+    private double flat = 1.0;
     
-    /**
-     * Current font.
-     */
-    public PSObjectFont font;
+    /** Current font. */
+    private PSObjectFont font;
     
-    /**
-     * Current line width (in user space coordinates).
-     */
-    public double lineWidth = 1.0;
+    /** Current line width (in user space coordinates). */
+    private double lineWidth = 1.0;
     
-    /**
-     * Current dash pattern.
-     */
-    public PSObjectArray dashPattern = new PSObjectArray();
+    /** Current dash pattern. */
+    private PSObjectArray dashPattern = new PSObjectArray();
     
-    /**
-     * Current dash offset.
-     */
-    public double dashOffset = 0.0;
+    /** Current dash offset. */
+    private double dashOffset = 0.0;
     
     
-    /**
-     * Reference to current output device.
-     */
-    public OutputDevice deviceRef;
+    /** Reference to current output device. */
+    private OutputDevice device;
     
     /**
      * Dictionary that can be used by the output device to store information.
      * The contents of this dictionary is output device specific.
      */
-    public PSObjectDict deviceData = new PSObjectDict();
+    private PSObjectDict deviceData = new PSObjectDict();
     
     /**
      * Creates a new default graphics state.
@@ -114,7 +94,7 @@ public class GraphicsState implements Cloneable {
     public GraphicsState(final GstateStack parentGraphicsStack,
             final OutputDevice wDevice) {
 
-        deviceRef = wDevice;
+        device = wDevice;
                 
         initmatrix();
         path = new Path(parentGraphicsStack);
@@ -299,6 +279,7 @@ public class GraphicsState implements Cloneable {
      *         supported. This should not happen.
      * @return Returns the deep copy.
      */
+    @Override
     public GraphicsState clone() throws CloneNotSupportedException {
         
         GraphicsState copy = (GraphicsState) super.clone();
@@ -417,7 +398,7 @@ public class GraphicsState implements Cloneable {
     public void flattenpath() throws PSError, ProgramError {
         // Maximum difference between normal and flattened path. Defined in
         // device space coordinates. Assume a device resolution of 1200 dpi.
-        double deviceScale = this.deviceRef.defaultCTM().getMeanScaling();
+        double deviceScale = this.device.defaultCTM().getMeanScaling();
         double maxError = this.flat * 72.0 / 1200.0 * deviceScale;
 
         this.path = this.path.flattenpath(maxError);
@@ -448,7 +429,7 @@ public class GraphicsState implements Cloneable {
         double scaling = Double.NaN;
         try {
             scaling = this.ctm.getMeanScaling()
-                    / this.deviceRef.defaultCTM().getMeanScaling();
+                    / this.device.defaultCTM().getMeanScaling();
         } catch (PSErrorRangeCheck e) {
             // this can never happen, since none of the matrices above are
             // controlled by the is user.
@@ -463,7 +444,7 @@ public class GraphicsState implements Cloneable {
      * Sets the current transformation matrix (CTM) to its default value.
      */
     public void initmatrix() {
-        this.ctm = this.deviceRef.defaultCTM();
+        this.ctm = this.device.defaultCTM();
     }
     
     /**
@@ -595,7 +576,7 @@ public class GraphicsState implements Cloneable {
      */
     public void setcolor(final double[] newColor) throws IOException, PSError {
         this.color.setColor(newColor);
-        this.deviceRef.setColor(this.color);
+        this.device.setColor(this.color);
     }
     
     /**
@@ -613,7 +594,7 @@ public class GraphicsState implements Cloneable {
         this.color = ColorUtils.autoSetColorSpace(obj);
         
         if (writeDevice) {
-            this.deviceRef.setColor(this.color);
+            this.device.setColor(this.color);
         }
     }
     
@@ -634,6 +615,214 @@ public class GraphicsState implements Cloneable {
             this.position[0] = Double.NaN;
             this.position[1] = Double.NaN;
         }
+    }
+
+    /**
+     * Sets the current transformation matrix (CTM).
+     * 
+     * @param pCtm the ctm to set
+     */
+    public void setCtm(final PSObjectMatrix pCtm) {
+        ctm = pCtm;
+    }
+
+    /**
+     * Gets the current transformation matrix (CTM).
+     * @return the ctm
+     */
+    public PSObjectMatrix getCtm() {
+        return ctm;
+    }
+
+    /**
+     * Sets the current position.
+     * 
+     * @param x The X-coordinate.
+     * @param y The Y-coordinate.
+     */
+    public void setPosition(final double x, final double y) {
+        position[0] = x;
+        position[1] = y;
+    }
+
+    /**
+     * Gets the current position.
+     * 
+     * @return the position
+     */
+    public double[] getPosition() {
+        return position.clone();
+    }
+
+    /**
+     * Sets the current path.
+     * 
+     * @param pPath the path to set
+     */
+    public void setPath(final Path pPath) {
+        path = pPath;
+    }
+
+    /**
+     * Gets the current path.
+     * 
+     * @return the path
+     */
+    public Path getPath() {
+        return path;
+    }
+
+    /**
+     * Sets the clipping path.
+     * 
+     * @param pClippingPath the clippingPath to set
+     */
+    public void setClippingPath(final Path pClippingPath) {
+        clippingPath = pClippingPath;
+    }
+
+    /**
+     * Gets the clipping path.
+     * 
+     * @return the clippingPath
+     */
+    public Path getClippingPath() {
+        return clippingPath;
+    }
+
+    /**
+     * Sets the color.
+     * 
+     * @param pColor The new color.
+     */
+    public void setColor(final PSColor pColor) {
+        color = pColor;
+    }
+
+    /**
+     * Gets the color.
+     * 
+     * @return The current color.
+     */
+    public PSColor getColor() {
+        return color;
+    }
+
+    /**
+     * Sets the flat parameter.
+     * 
+     * @param pFlat the flat to set
+     */
+    public void setFlat(final double pFlat) {
+        flat = pFlat;
+    }
+
+    /**
+     * Gets the flat parameter.
+     * 
+     * @return the flat
+     */
+    public double getFlat() {
+        return flat;
+    }
+
+    /**
+     * Sets the font.
+     * 
+     * @param pFont the font to set
+     */
+    public void setFont(final PSObjectFont pFont) {
+        font = pFont;
+    }
+
+    /**
+     * Gets the font.
+     * 
+     * @return the font
+     */
+    public PSObjectFont getFont() {
+        return font;
+    }
+
+    /**
+     * Sets the line width.
+     * 
+     * @param pLineWidth the lineWidth to set
+     */
+    public void setLineWidth(final double pLineWidth) {
+        lineWidth = pLineWidth;
+    }
+
+    /**
+     * Gets the line width.
+     * 
+     * @return the lineWidth
+     */
+    public double getLineWidth() {
+        return lineWidth;
+    }
+
+    /**
+     * Sets the dash pattern.
+     * 
+     * @param pDashPattern the dashPattern to set
+     */
+    public void setDashPattern(final PSObjectArray pDashPattern) {
+        dashPattern = pDashPattern;
+    }
+
+    /**
+     * Gets the dash pattern.
+     * 
+     * @return the dashPattern
+     */
+    public PSObjectArray getDashPattern() {
+        return dashPattern;
+    }
+
+    /**
+     * Sets the dash offset.
+     * 
+     * @param pDashOffset the dashOffset to set
+     */
+    public void setDashOffset(final double pDashOffset) {
+        dashOffset = pDashOffset;
+    }
+
+    /**
+     * Gets the dash offset.
+     * 
+     * @return the dashOffset
+     */
+    public double getDashOffset() {
+        return dashOffset;
+    }
+
+    /**
+     * Sets the output device.
+     * 
+     * @param pDevice the device to set
+     */
+    public void setDevice(final OutputDevice pDevice) {
+        device = pDevice;
+    }
+
+    /**
+     * Gets the output device.
+     * 
+     * @return the device
+     */
+    public OutputDevice getDevice() {
+        return device;
+    }
+
+    /**
+     * Gets the device data.
+     * 
+     * @return the deviceData
+     */
+    public PSObjectDict getDeviceData() {
+        return deviceData;
     }
     
 }

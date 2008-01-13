@@ -28,7 +28,8 @@ import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
  * @author Paul Wagenaars
  */
 public class PSObjectReal extends PSObject {
-	/** Value of this real object. */
+    
+    /** Value of this real object. */
     private double value;
     
     /**
@@ -81,6 +82,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return String representation of this object.
      */
+    @Override
     public final String isis() {
         return String.valueOf(this.value);
     }
@@ -89,6 +91,7 @@ public class PSObjectReal extends PSObject {
      * Returns the absolute value of this integer.
      * @return Absolute value of this object
      */
+    @Override
     public final PSObjectReal abs() {
         return new PSObjectReal(Math.abs(this.value));
     }
@@ -103,6 +106,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @throws PSErrorTypeCheck Object is not numeric
      */
+    @Override
     public final PSObject add(final PSObject obj) throws PSErrorTypeCheck {
         double num2 = obj.toReal();
         return new PSObjectReal(this.value + num2);
@@ -113,6 +117,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return Value of this object rounded upwards
      */
+    @Override
     public final PSObject ceiling() {
         return new PSObjectReal(Math.ceil(this.value));
     }
@@ -133,6 +138,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return Integer representation of this object.
      */
+    @Override
     public final int cvi() {
         try {
             return (int) truncate().toReal();
@@ -147,6 +153,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return Value of this object.
      */
+    @Override
     public final double cvr() {
         return this.value;
     }
@@ -161,8 +168,9 @@ public class PSObjectReal extends PSObject {
      * @throws PSErrorTypeCheck PostScript typecheck error
      * @throws PSErrorRangeCheck PostScript rangecheck error
      */
+    @Override
     public final String cvrs(final int radix)
-    		throws PSErrorTypeCheck, PSErrorRangeCheck {
+            throws PSErrorTypeCheck, PSErrorRangeCheck {
         if (radix < 2) {
             throw new PSErrorRangeCheck();
         }
@@ -180,6 +188,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return Text representation
      */
+    @Override
     public final String cvs() {
         return String.valueOf(this.value);
     }
@@ -190,6 +199,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return Exact copy of this object.
      */
+    @Override
     public final PSObjectReal dup() {
         return new PSObjectReal(this);
     }
@@ -202,6 +212,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return True if objects are equal, false otherwise
      */
+    @Override
     public final boolean eq(final PSObject obj) {
         try {
             if ((obj instanceof PSObjectReal) || (obj instanceof PSObjectInt)) {
@@ -221,6 +232,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return True, if equal.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (obj instanceof PSObject) {
             return eq((PSObject) obj);
@@ -234,6 +246,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return Value of this object rounded downwards
      */
+    @Override
     public final PSObject floor() {
         return new PSObjectReal(Math.floor(this.value));
     }
@@ -249,6 +262,7 @@ public class PSObjectReal extends PSObject {
      * @return Returns true when this object is greater than obj2, return false
      *         otherwise.
      */
+    @Override
     public final boolean gt(final PSObject obj2) throws PSErrorTypeCheck {
         return (toReal() > obj2.toReal());
     }
@@ -259,8 +273,9 @@ public class PSObjectReal extends PSObject {
      * 
      * @return Hash value of this object.
      */
+    @Override
     public final int hashCode() {
-    	return (int) (this.value * 1000000);
+        return (int) (this.value * 1000000);
     }
     
     /**
@@ -272,6 +287,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @throws PSErrorTypeCheck Object(s) are not numeric
      */
+    @Override
     public final PSObject mul(final PSObject obj) throws PSErrorTypeCheck {
         double num2 = obj.toReal();
         return new PSObjectReal(this.value * num2);
@@ -282,6 +298,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return Absolute value of this double
      */
+    @Override
     public final PSObjectReal neg() {
         return new PSObjectReal(-this.value);
     }
@@ -291,6 +308,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return Value of this object rounded to the nearest integer
      */
+    @Override
     public final PSObject round() {
         return new PSObjectReal(Math.round(this.value));
     }
@@ -301,6 +319,7 @@ public class PSObjectReal extends PSObject {
      * @return Passed object subtracted from this object
      * @throws PSErrorTypeCheck Object is not numeric
      */
+    @Override
     public final PSObject sub(final PSObject obj) throws PSErrorTypeCheck {
         double num2 = obj.toReal();
         return new PSObjectReal(this.value - num2);
@@ -310,6 +329,7 @@ public class PSObjectReal extends PSObject {
      * Convert this object to a human readable string.
      * @return Human readable string.
      */
+    @Override
     public final String toString() {
         return "Real: " + this.value;
     }
@@ -319,6 +339,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return Real/floating point representation of this object.
      */
+    @Override
     public final double toReal() {
         return this.value;
     }
@@ -328,6 +349,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return Value of this object rounded towards zero
      */
+    @Override
     public final PSObject truncate() {
         if (this.value > 0) {
             return floor();
@@ -341,6 +363,7 @@ public class PSObjectReal extends PSObject {
      * 
      * @return Type of this object (see PostScript manual for possible values)
      */
+    @Override
     public final String type() {
         return "realtype";
     }

@@ -144,6 +144,7 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * 
      * @return Deep copy of this object
      */
+    @Override
     public PSObject clone() {
         PSObject copy;
         try {
@@ -246,6 +247,7 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * 
      * @return True, if equal.
      */
+    @Override
     public abstract boolean equals(final Object obj);
     
     /**
@@ -342,6 +344,7 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * 
      * @return Hash code for this object.
      */
+    @Override
     public abstract int hashCode();
     
     /**
@@ -487,12 +490,9 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
 
     /**
      * PostScript operator 'readonly'. Set access attribute to 'readonly'.
-     * 
-     * @throws PSErrorTypeCheck Can not change the 'access' attribute of this
-     * object type.
      */
-    public void readonly() throws PSErrorTypeCheck {
-        throw new PSErrorTypeCheck();
+    public void readonly() {
+        setAccess(Access.READONLY);
     }
     
     /**

@@ -27,16 +27,18 @@ package net.sf.eps2pgf.postscript;
 public class PSObjectNull extends PSObject {
     
     /**
-     * Create a new null object
+     * Create a new null object.
      */
     public PSObjectNull() {
-        
+        /* empty block */
     }
     
     /**
-     * Create a new null object
+     * Create a new null object.
+     * 
+     * @param obj Common attributes are copied from this object.
      */
-    public PSObjectNull(PSObjectNull obj) {
+    public PSObjectNull(final PSObjectNull obj) {
         copyCommonAttributes(obj);
     }
     
@@ -54,18 +56,24 @@ public class PSObjectNull extends PSObject {
     /**
      * PostScript operator 'dup'. Create a copy of this object. The values
      * of composite object is not copied, but shared.
+     * 
+     * @return Duplicate of this object.
      */
+    @Override
     public PSObject dup() {
         return new PSObjectNull(this);
     }
     
     /**
-     * Compare this object with another object and return true if they are equal.
-     * See PostScript manual on what's equal and what's not.
+     * Compare this object with another object and return true if they are
+     * equal. See PostScript manual on what's equal and what's not.
+     * 
      * @param obj Object to compare this object with
+     * 
      * @return True if objects are equal, false otherwise
      */
-    public boolean eq(PSObject obj) {
+    @Override
+    public boolean eq(final PSObject obj) {
         return (obj instanceof PSObjectNull);
     }
     
@@ -77,6 +85,7 @@ public class PSObjectNull extends PSObject {
      * 
      * @return True, if equal.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (obj instanceof PSObject) {
             return eq((PSObject) obj);
@@ -90,6 +99,7 @@ public class PSObjectNull extends PSObject {
      * 
      * @return Hash code of this object.
      */
+    @Override
     public int hashCode() {
         return 856346;
     }
@@ -97,15 +107,20 @@ public class PSObjectNull extends PSObject {
     /**
      * Return PostScript text representation of this object. See the
      * PostScript manual under the == operator
+     * 
+     * @return PostScript representation of this object.
      */
+    @Override
     public String isis() {
         return "null";
     }
 
     /**
-     * Returns the type of this object
+     * Returns the type of this object.
+     * 
      * @return Type of this object (see PostScript manual for possible values)
      */
+    @Override
     public String type() {
         return "nulltype";
     }

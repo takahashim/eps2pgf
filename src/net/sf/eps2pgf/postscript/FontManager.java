@@ -278,10 +278,9 @@ public final class FontManager extends PSObjectDict {
      */
     private static PSObject findSubstitutionFont(final PSObject fontNameObj) {
         String fontName;
-        if (fontNameObj instanceof PSObjectName) {
-            fontName = ((PSObjectName) fontNameObj).name;
-        } else if (fontNameObj instanceof PSObjectString) {
-            fontName = ((PSObjectString) fontNameObj).toString();
+        if ((fontNameObj instanceof PSObjectName)
+                || (fontNameObj instanceof PSObjectString)) {
+            fontName = fontNameObj.toString();
         } else {
             fontName = fontNameObj.isis();
         }

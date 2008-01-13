@@ -95,6 +95,7 @@ public class Path implements Cloneable {
      * Create a clone of this object.
      * @return Returns a clone of this object. 
      */
+    @Override
     public Path clone() {
         LOG.finest("Path clone() called.");
         Path copy;
@@ -137,7 +138,7 @@ public class Path implements Cloneable {
         for (int i = len - 1; i >= 0; i--) {
             PathSection section = getSections().get(i);
             if (section instanceof Moveto) {
-                position = gStateStack.current.ctm.itransform(
+                position = gStateStack.current().getCtm().itransform(
                         section.getParam(0), section.getParam(1));
                 break;
             }
@@ -227,6 +228,7 @@ public class Path implements Cloneable {
      * Creates a human-readable string representation of this object.
      * @return Human-readable string representation of this path
      */
+    @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
         str.append("Path (" + getSections().size() + " items)\n");

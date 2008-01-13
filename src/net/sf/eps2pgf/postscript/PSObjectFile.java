@@ -85,6 +85,7 @@ public class PSObjectFile extends PSObject {
      * 
      * @return Shallow copy of this object.
      */
+    @Override
     public PSObjectFile dup() {
         PSObjectFile dupFile = new PSObjectFile(getStream());
         dupFile.copyCommonAttributes(this);
@@ -94,6 +95,7 @@ public class PSObjectFile extends PSObject {
     /**
      * PostScript operator 'executeonly'. Set access attribute to executeonly.
      */
+    @Override
     public void executeonly() {
         setAccess(Access.EXECUTEONLY);
     }
@@ -106,6 +108,7 @@ public class PSObjectFile extends PSObject {
      * 
      * @return True, if equal.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (obj instanceof PSObjectFile) {
             return eq((PSObjectFile) obj);
@@ -119,6 +122,7 @@ public class PSObjectFile extends PSObject {
      * 
      * @return Hash code of this object.
      */
+    @Override
     public int hashCode() {
         return inStr.hashCode();
     }
@@ -128,6 +132,7 @@ public class PSObjectFile extends PSObject {
      * PostScript manual under the == operator
      * @return Text representation of this object.
      */
+    @Override
     public String isis() {
         return "-file-";
     }
@@ -135,6 +140,7 @@ public class PSObjectFile extends PSObject {
     /**
      * PostScript operator: 'noaccess'.
      */
+    @Override
     public void noaccess() {
         setAccess(Access.NONE);
     }
@@ -178,6 +184,7 @@ public class PSObjectFile extends PSObject {
      * 
      * @return File object representation of this object
      */
+    @Override
     public PSObjectFile toFile() {
         return this;
     }
@@ -191,6 +198,7 @@ public class PSObjectFile extends PSObject {
      * @return List with one or more objects. See PostScript manual under the
      * 'token' operator for more info.
      */
+    @Override
     public List<PSObject> token() throws PSError {
         PSObject any;
         try {
@@ -213,6 +221,7 @@ public class PSObjectFile extends PSObject {
      * 
      * @return Type of this object (see PostScript manual for possible values)
      */
+    @Override
     public String type() {
         return "filetype";
     }

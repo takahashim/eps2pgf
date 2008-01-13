@@ -92,6 +92,7 @@ public class EexecDecode extends InputStream {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Override
     public int available() throws IOException {
         return (in.available() - n);
     }
@@ -102,6 +103,7 @@ public class EexecDecode extends InputStream {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
+    @Override
     public void close() throws IOException {
         in = null;
     }
@@ -124,6 +126,7 @@ public class EexecDecode extends InputStream {
      * @param readlimit The maximum limit of bytes that can be read before the
      * mark position becomes invalid.
      */
+    @Override
     public void mark(final int readlimit) {
         in.mark(readlimit + n);
         markedR = r;
@@ -137,6 +140,7 @@ public class EexecDecode extends InputStream {
      * @return <code>true</code> if this stream instance supports the mark and
      * reset methods; <code>false</code> otherwise.
      */
+    @Override
     public boolean markSupported() {
         return in.markSupported();
     }
@@ -153,6 +157,7 @@ public class EexecDecode extends InputStream {
      * 
      * @return The next byte of data, or -1 if the end of the stream is reached.
      */
+    @Override
     public int read() throws IOException {
         if (in == null) {
             return -1;
@@ -183,6 +188,7 @@ public class EexecDecode extends InputStream {
      * 
      * @throws IOException An I/O exception occurred.
      */
+    @Override
     public void reset() throws IOException {
         if (in == null) {
             throw new IOException();

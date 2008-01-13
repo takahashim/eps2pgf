@@ -37,6 +37,7 @@ public class Eps2pgfFormatter extends Formatter {
      * 
      * @return The formatted log record.
      */
+    @Override
     public String format(final LogRecord record) {
         StringBuilder str = new StringBuilder();
         if (record.getLevel().intValue() >= Level.SEVERE.intValue()) {
