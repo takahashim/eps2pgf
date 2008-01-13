@@ -330,14 +330,6 @@ public class PSObjectString extends PSObject {
     }
     
     /**
-     * PostScript operator 'executeonly'. Set access attribute to executeonly.
-     */
-    @Override
-    public void executeonly() {
-        setAccess(Access.EXECUTEONLY);
-    }
-
-    /**
      * Gets the (integer) value of a character in this string.
      * 
      * @param index Index of character (first character has index 0)
@@ -487,15 +479,6 @@ public class PSObjectString extends PSObject {
         return count;
     }
 
-    /**
-     * PostScript operator: 'noaccess'.
-     */
-    //TODO: allo noaccess kunnen weg, alleen in PSObject moet hij blijven.
-    @Override
-    public void noaccess() {
-        setAccess(Access.NONE);
-    }
-    
     /**
      * Overwrites this string with a new value.
      * 
@@ -683,18 +666,6 @@ public class PSObjectString extends PSObject {
     }
     
     /**
-     * PostScript operator 'rcheck'. Checks whether the access attribute is
-     * 'unlimited' or 'readonly'.
-     * 
-     * @return True, if readable.
-     */
-    @Override
-    public boolean rcheck() {
-        return ((getAccess() == Access.UNLIMITED)
-                || (getAccess() == Access.READONLY));
-    }
-
-    /**
      * PostScript operator: search.
      * 
      * @param seek Look for this string in this PSObjectString.
@@ -810,14 +781,4 @@ public class PSObjectString extends PSObject {
         return "stringtype";
     }
 
-    /**
-     * PostScript operator 'wcheck'. Checks whether the access attribute is
-     * 'unlimited'.
-     * 
-     * @return true, if writeable.
-     */
-    @Override
-    public boolean wcheck() {
-        return (getAccess() == Access.UNLIMITED);
-    }
 }

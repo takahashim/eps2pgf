@@ -112,7 +112,11 @@ public final class FontManager extends PSObjectDict {
         
         // Make the FontManager/FontDirectory, which is also a dictionary,
         // read only.
-        readonly();
+        try {
+            readonly();
+        } catch (PSErrorTypeCheck e) {
+            /* this can never happen */
+        }
     }
     
     /**

@@ -58,7 +58,11 @@ public class DictStack {
      */
     public DictStack(final Interpreter interp) {
         fillSystemDict(interp);
-        systemdict.readonly();
+        try {
+            systemdict.readonly();
+        } catch (PSErrorTypeCheck e) {
+            /* this can never happen */
+        }
     }
     
     /**
