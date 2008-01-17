@@ -88,7 +88,7 @@ limitations under the License.
 	</target>
 	
 	<!-- Create zip file -->
-	<target name="zip" depends="jar">
+	<target name="zip" depends="jar,test">
 		<zip
 			destfile="${zip.file}"
 			basedir="${dist.dir}"
@@ -109,7 +109,7 @@ limitations under the License.
 	
 	<!-- Run test suite -->
 	<target name="test" depends="test-compile">
-		<junit printsummary="yes">
+		<junit printsummary="yes" haltonfailure="yes">
 			<classpath>
 				<pathelement location="${test-build.dir}" />
 				<path refid="test-classpath.path" />
@@ -119,8 +119,8 @@ limitations under the License.
 			
 			<test name="net.sf.eps2pgf.testsuite.pstests.AllPSTests"
 				todir="${test-build.dir}" />
-<!--			<test name="net.sf.eps2pgf.testsuite.figures.AllFigures"
-				todir="${test-build.dir}" /> -->
+			<test name="net.sf.eps2pgf.testsuite.figures.AllFigures"
+				todir="${test-build.dir}" />
 		</junit>
 	</target>
 
