@@ -345,7 +345,7 @@ public class PSObjectInt extends PSObject {
             // Simple (non-perfect) overflow check
             int maxNum = Math.max(Math.abs(this.value), Math.abs(num2));
             int minNum = Math.min(Math.abs(this.value), Math.abs(num2));
-            if (maxNum >= (Integer.MAX_VALUE / minNum)) {
+            if ((minNum != 0) && (maxNum >= (Integer.MAX_VALUE / minNum))) {
                 double num2dbl = obj.toReal();
                 double valuedbl = this.toReal();
                 return new PSObjectReal(valuedbl * num2dbl);
