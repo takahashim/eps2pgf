@@ -103,10 +103,21 @@ public final class Main {
             System.exit(1);
         }
         
-        if (opts.isVerboseFlagSet()) {
-            LOG.setLevel(Level.INFO);
+        String debug = System.getenv("EPS2PGF_DEBUG");
+        if (debug != null) {
+            if (debug.equals("fine")) {
+                LOG.setLevel(Level.FINE);
+            } else if (debug.equals("finer")) {
+                LOG.setLevel(Level.FINER);
+            } else {
+                LOG.setLevel(Level.ALL);
+            }
         } else {
-            LOG.setLevel(Level.WARNING);
+            if (opts.isVerboseFlagSet()) {
+                LOG.setLevel(Level.INFO);
+            } else {
+                LOG.setLevel(Level.WARNING);
+            }
         }
         
         Converter cnv = new Converter(opts);
