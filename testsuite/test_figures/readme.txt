@@ -9,8 +9,6 @@ colorcir.ps              - GhostScript <www.ghostscript.com>, with some small
 coreldraw_Graphic1.eps   - Eps2pgf, created using Coreldraw
 creohn_Sheep_in_gray.eps - Open Clip Art Library http://openclipart.org/media/files/creohn/3012
                            converted from svg to eps with Inkscape.
-doretree.ps              - GhostScript <www.ghostscript.com>, with some small
-                           changes.
 dvips1.ps                - Eps2pgf, created using latex+pgf -> dvips
 golfer.ps                - GhostScript <www.ghostscript.com>, with some small
                            changes.
