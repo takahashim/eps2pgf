@@ -108,12 +108,6 @@ public final class AllFigures {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void doretree() throws Exception {
-        assertTrue(Common.testFigure(conv, "doretree.ps"));
-    }
-    
-    /** Test. @throws Exception the exception */
-    @Test
     public void dvips1() throws Exception {
         assertTrue(Common.testFigure(conv, "dvips1.ps"));
     }
