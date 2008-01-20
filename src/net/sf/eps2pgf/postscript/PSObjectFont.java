@@ -278,6 +278,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
             // character descriptions.
             alreadyValid = false;
             dict.setKey(KEY_AFM, new PSObjectAfm(dict));
+            LOG.fine("Creating font metrics for font " + getFontName());
         }
         
         return alreadyValid;

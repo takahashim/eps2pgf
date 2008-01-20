@@ -35,6 +35,7 @@ import net.sf.eps2pgf.postscript.errors.PSError;
 import net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
+import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
 
 /**
  * Manages font resources and serves as FontDirectory.
@@ -177,16 +178,21 @@ public final class FontManager extends PSObjectDict {
      * 
      * @return Defined font
      * 
-     * @throws PSErrorTypeCheck Unable to use the key as dictionary key
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public PSObjectFont defineFont(final PSObject key, final PSObjectFont font)
-            throws PSErrorTypeCheck {
+            throws PSError, ProgramError {
         
         font.setFID();
         font.toDict().setKey(FONT_DICT_KEY, key);
-        //TODO: moet ik hier font.assertValidFont() aanroepen om te voorkomen
-        //      dat deze functie telkens opnieuw word aangeroepen.
-        this.setKey(key, font);
+        try {
+            font.assertValidFont();
+        } catch (PSErrorUnimplemented e) {
+            // At this point this error is not fatal. So for now we just ignore
+            // it. When the font is actually used it will be fatal.
+        }
+        setKey(key, font);
         
         return font;
     }
@@ -304,9 +310,10 @@ public final class FontManager extends PSObjectDict {
      * @return Font dictionary of the loaded font
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     private PSObjectFont loadFont(final PSObject fontKey)
-            throws PSError {
+            throws PSError, ProgramError {
         String fontName = fontKey.toString();
         LOG.info("Loading " + fontName + " font from " + resourceDir);
         PSObjectFont font = new PSObjectFont(resourceDir, fontName);
