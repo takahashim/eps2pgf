@@ -165,6 +165,12 @@ public final class AllFigures {
 
     /** Test. @throws Exception the exception */
     @Test
+    public void rproject1() throws Exception {
+        assertTrue(Common.testFigure(conv, "rproject1.eps"));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
     public void showtext_mathematica1() throws Exception {
         assertTrue(Common.testFigure(conv, "showtext_mathematica1.ps"));
     }
