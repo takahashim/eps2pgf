@@ -1179,8 +1179,9 @@ public class Interpreter {
      * PostScript op: definefont.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_definefont() throws PSError {
+    public void op_definefont() throws PSError, ProgramError {
         PSObjectFont font = getOpStack().pop().toFont();
         PSObject key = getOpStack().pop();
         getOpStack().push(fontDirectory.defineFont(key, font));
