@@ -62,6 +62,7 @@ v0.6.0 (2007-12-??)
   - Fixed: bug #1809102 (partially) Problems with Inkscape figure with text.
   - Fixed: bug #1807713 In some situations Eps2pgf produced lines that are
            too long. 
+  - Fixed: bug #1874016 divison by zero in multiplication operator
 
 v0.5.0 (2007-11-04)
   - Added: handling of binary headers found in some eps files

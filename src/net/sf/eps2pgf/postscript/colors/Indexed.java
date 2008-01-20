@@ -22,6 +22,8 @@ package net.sf.eps2pgf.postscript.colors;
 
 import net.sf.eps2pgf.postscript.PSObject;
 import net.sf.eps2pgf.postscript.PSObjectArray;
+import net.sf.eps2pgf.postscript.PSObjectInt;
+import net.sf.eps2pgf.postscript.PSObjectName;
 import net.sf.eps2pgf.postscript.PSObjectString;
 import net.sf.eps2pgf.postscript.errors.PSError;
 import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
@@ -33,8 +35,15 @@ import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
  */
 public class Indexed extends PSColor {
     
-    /** Array with colors. */
-    private PSObjectArray colorSpaceArray;
+    /** Integer specifying the maximum valid index value. */
+    private int hival;
+    
+    /**
+     * If a string is used to specify the color, this table specifies the color
+     * components for each index. If a procedure is as lookup table this value
+     * is <code>null</code>.
+     */
+    private double[][] levels;
     
     /** Currently selected color. */
     private PSColor currentColor;
@@ -53,16 +62,35 @@ public class Indexed extends PSColor {
         }
         
         // Save the array specifying this color space
-        colorSpaceArray = (PSObjectArray) obj;
+        PSObjectArray colorArray = (PSObjectArray) obj;
         
         // Extract base color space
-        currentColor = ColorUtils.autoSetColorSpace(colorSpaceArray.get(1));
+        currentColor = ColorUtils.autoSetColorSpace(colorArray.get(1));
+        
+        // Extract the hival.
+        hival = colorArray.get(2).toInt();
+        if (hival > 4095) {
+            throw new PSErrorRangeCheck();
+        }
         
         // Extract lookup table
-        PSObject lookup = colorSpaceArray.get(3);
+        PSObject lookup = colorArray.get(3);
         if (lookup instanceof PSObjectString) {
+            //
             // Convert the lookup string to a more convenient format
-            
+            //
+            PSObjectString str = colorArray.get(3).toPSString();
+            int m = currentColor.getNrInputValues();
+            if (m * (hival + 1) != str.length()) {
+                throw new PSErrorRangeCheck();
+            }
+            levels = new double[hival + 1][m];
+            for (int i = 0; i <= hival; i++) {
+                for (int j = 0; j < m; j++) {
+                    double value = (double) str.get(i * m + j) / 255.0;
+                    levels[i][j] = value;
+                }
+            }
         } else {
             throw new PSErrorUnimplemented("Indexed color space with non-string"
                     + " lookup table.");
@@ -76,11 +104,31 @@ public class Indexed extends PSColor {
      * @return an exact deep copy of this object.
      */
     @Override
-    public PSColor clone() {
-        // TODO Auto-generated method stub
-        return null;
+    public Indexed clone() {
+        Indexed copy;
+        try {
+            copy = (Indexed) super.clone();
+            copy.currentColor = currentColor.clone();
+            copy.levels = levels.clone();
+        } catch (CloneNotSupportedException e) {
+            copy = null;
+        }
+        
+        return copy;
     }
 
+    /**
+     * Gets a single color level.
+     * 
+     * @param i Index of color component to get.
+     * 
+     * @return The color level.
+     */
+    @Override
+    public double getLevel(final int i) {
+        return currentColor.getLevel(i);
+    }
+    
     /**
      * Gets the equivalent CMYK levels of this color.
      * 
@@ -88,8 +136,7 @@ public class Indexed extends PSColor {
      */
     @Override
     public double[] getCMYK() {
-        // TODO Auto-generated method stub
-        return null;
+        return currentColor.getCMYK();
     }
 
     /**
@@ -99,8 +146,26 @@ public class Indexed extends PSColor {
      */
     @Override
     public PSObjectArray getColorSpace() {
-        // TODO Auto-generated method stub
-        return null;
+        PSObjectArray array = new PSObjectArray();
+        array.addToEnd(new PSObjectName("Indexed", true));
+        array.addToEnd(currentColor.getColorSpace());
+        array.addToEnd(new PSObjectInt(hival));
+
+        try {
+            int m = currentColor.getNrComponents();
+            PSObjectString str = new PSObjectString(m * (hival + 1));
+            for (int i = 0; i <= hival; i++) {
+                for (int j = 0; j < m; j++) {
+                    char chr = (char) Math.round(levels[i][j] * 255.0);
+                    str.set(i * m + j, chr);
+                }
+            }
+            array.addToEnd(str);
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen
+        }
+        
+        return array;
     }
 
     /**
@@ -110,8 +175,7 @@ public class Indexed extends PSColor {
      */
     @Override
     public double getGray() {
-        // TODO Auto-generated method stub
-        return 0;
+        return currentColor.getGray();
     }
 
     /**
@@ -121,8 +185,7 @@ public class Indexed extends PSColor {
      */
     @Override
     public double[] getHSB() {
-        // TODO Auto-generated method stub
-        return null;
+        return currentColor.getHSB();
     }
 
     /**
@@ -133,8 +196,21 @@ public class Indexed extends PSColor {
      */
     @Override
     public int getNrComponents() {
-        // TODO Auto-generated method stub
-        return 0;
+        return currentColor.getNrComponents();
+    }
+
+    /**
+     * Gets the number of values required to specify this color. For an RGB,
+     * CMYK, ... this is the same as getNrComponents(), but for an indexed
+     * color space the number of input values is only 1, while the number of
+     * components is 3 (in case the indexed colors were specified as RGB
+     * values).
+     * 
+     * @return The number of input values required to specify this color. 
+     */
+    @Override
+    public int getNrInputValues() {
+        return 1;
     }
 
     /**
@@ -144,8 +220,7 @@ public class Indexed extends PSColor {
      */
     @Override
     public double[] getRGB() {
-        // TODO Auto-generated method stub
-        return null;
+        return currentColor.getRGB();
     }
     
     /**
@@ -158,7 +233,13 @@ public class Indexed extends PSColor {
     @Override
     public void setColor(final double[] components)
             throws PSErrorRangeCheck {
-        // TODO Implement set color method
+        
+        if (components.length != 1) {
+            throw new PSErrorRangeCheck();
+        }
+        
+        int index = (int) components[0];
+        currentColor.setColor(levels[index]);
     }
 
 }

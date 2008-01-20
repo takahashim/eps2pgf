@@ -68,6 +68,8 @@ public final class ColorUtils {
             return new RGB();
         } else if (spaceName.equals("DeviceCMYK")) {
             return new CMYK();
+        } else if (spaceName.equals("Indexed")) {
+            return new Indexed(obj);
         } else {
             throw new PSErrorUndefined();
         }
