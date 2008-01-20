@@ -36,7 +36,7 @@ import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
 public class PSObjectDict extends PSObject {
     
     /** Map containing all key->value pairs in this dictionary. */
-    private HashMap<PSObject, PSObject> map = new HashMap<PSObject, PSObject>();
+    private HashMap<PSObject, PSObject> map;
     
     /**
      * Maximum number of entries in this dictionary. (this value is
@@ -48,6 +48,7 @@ public class PSObjectDict extends PSObject {
      * Creates a new instance of PSObjectDict.
      */
     public PSObjectDict() {
+        map = new HashMap<PSObject, PSObject>();
         capacity = 0;
     }
     
@@ -58,7 +59,21 @@ public class PSObjectDict extends PSObject {
      * dictionary. This value has no effect. The dictionary size is unlimited.
      */
     public PSObjectDict(final int pCapacity) {
+        map = new HashMap<PSObject, PSObject>();
         capacity = pCapacity;
+    }
+    
+    /**
+     * Creates a new PSObjectDict. The new dictionary shares its hash map with
+     * the passed dictionary.
+     * 
+     * @param pDict The new dictionary will use the same hash map as this
+     * dictionary.
+     */
+    public PSObjectDict(final PSObjectDict pDict) {
+        map = pDict.map;
+        capacity = pDict.capacity;
+        copyCommonAttributes(pDict);
     }
     
     /**

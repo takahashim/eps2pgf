@@ -28,18 +28,17 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import org.fontbox.afm.AFMParser;
+import org.fontbox.afm.CharMetric;
+import org.fontbox.afm.FontMetric;
+import org.fontbox.util.BoundingBox;
+
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.postscript.errors.PSError;
 import net.sf.eps2pgf.postscript.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.postscript.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.postscript.errors.PSErrorUndefined;
 import net.sf.eps2pgf.postscript.errors.PSErrorUnimplemented;
-
-import org.fontbox.afm.AFMParser;
-import org.fontbox.afm.CharMetric;
-import org.fontbox.afm.FontMetric;
-import org.fontbox.util.BoundingBox;
 
 /**
  * Wrapper around a font dictionary. This class provides methods to handle the
@@ -47,13 +46,10 @@ import org.fontbox.util.BoundingBox;
  * 
  * @author Paul Wagenaars
  */
-public class PSObjectFont extends PSObject implements Cloneable {
+public class PSObjectFont extends PSObjectDict {
     
     /** The next font id. */
     private static int nextFID = 0;
-    
-    /** The font dictionary. */
-    private PSObjectDict dict;
     
     /** The log. */
     private static final Logger LOG =
@@ -129,11 +125,11 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * matrix.
      */
     public PSObjectFont() {
-        dict = new PSObjectDict();
+        super();
+        
         setFID();
-        dict.setKey(KEY_FONTTYPE, new PSObjectInt(1));
-        dict.setKey(KEY_FONTMATRIX,
-                new PSObjectMatrix(0.001, 0, 0, 0.001, 0, 0));
+        setKey(KEY_FONTTYPE, new PSObjectInt(1));
+        setKey(KEY_FONTMATRIX, new PSObjectMatrix(0.001, 0, 0, 0.001, 0, 0));
     }
     
     /**
@@ -146,6 +142,8 @@ public class PSObjectFont extends PSObject implements Cloneable {
      */
     public PSObjectFont(final File resourceDir, final String fontName)
             throws PSErrorInvalidFont {
+        
+        super();
         
         File fontFile = new File(resourceDir, "fontdescriptions"
                 + File.separator + fontName + ".font");
@@ -163,37 +161,36 @@ public class PSObjectFont extends PSObject implements Cloneable {
         }
         
         // Setting the dictionary keys with font info
-        dict = new PSObjectDict();
-        dict.setKey(KEY_FONTTYPE, new PSObjectInt(1));
-        dict.setKey(KEY_FONTMATRIX,
-                new PSObjectMatrix(0.001, 0, 0, 0.001, 0, 0));
-        dict.setKey(KEY_FONTNAME, new PSObjectName(fontName, true));
+        setKey(KEY_FONTTYPE, new PSObjectInt(1));
+        setKey(KEY_FONTMATRIX, new PSObjectMatrix(0.001, 0, 0, 0.001, 0, 0));
+        setKey(KEY_FONTNAME, new PSObjectName(fontName, true));
         setFID();
         String encoding = props.getProperty("encoding", "Standard");
         if (encoding.equals("Standard")) {
-            dict.setKey(KEY_ENCODING,
+            setKey(KEY_ENCODING,
                     new PSObjectArray(Encoding.getStandardVector()));
         } else if (encoding.equals("ISOLatin1")) {
-            dict.setKey(KEY_ENCODING,
+            setKey(KEY_ENCODING,
                     new PSObjectArray(Encoding.getISOLatin1Vector()));
         } else if (encoding.equals("Symbol")) {
-            dict.setKey(KEY_ENCODING,
+            setKey(KEY_ENCODING,
                     new PSObjectArray(Encoding.getSymbolVector()));
         } else {
             LOG.severe("Unknown encoding: " + encoding);
             throw new PSErrorInvalidFont();
         }
-        dict.setKey(KEY_PAINTTYPE, new PSObjectInt(2));
+        setKey(KEY_PAINTTYPE, new PSObjectInt(2));
         
-        dict.setKey(KEY_LATEXPRECODE, props.getProperty("latexprecode", ""));
-        dict.setKey(KEY_LATEXPOSTCODE, props.getProperty("latexpostcode", ""));
-        FontMetric fontMetrics = loadAfm(resourceDir, fontName);
-        dict.setKey(KEY_AFM, new PSObjectAfm(fontMetrics));
+        setKey(KEY_LATEXPRECODE, props.getProperty("latexprecode", ""));
+        setKey(KEY_LATEXPOSTCODE, props.getProperty("latexpostcode", ""));
+        
         String texStringName = props.getProperty("texstrings", "default");
-        dict.setKey(KEY_TEXSTRINGS,
-                FontManager.getTexStringDict(texStringName));
+        setKey(KEY_TEXSTRINGS, FontManager.getTexStringDict(texStringName));
         
-        // An AFM file foes not specify CharStrings. Instead, we make a fake
+        FontMetric fontMetrics = loadAfm(resourceDir, fontName);
+        setKey(KEY_AFM, new PSObjectAfm(fontMetrics));
+        
+        // An AFM file does not specify CharStrings. Instead, we make a fake
         // entry.
         List< ? > charMetrics = fontMetrics.getCharMetrics();
         PSObjectDict charStrings = new PSObjectDict();
@@ -203,17 +200,16 @@ public class PSObjectFont extends PSObject implements Cloneable {
                 charStrings.setKey(cm.getName(), "");
             }
         }
-        dict.setKey(KEY_CHARSTRINGS, charStrings);
+        setKey(KEY_CHARSTRINGS, charStrings);
     }
     
     /**
      * Creates a new font dictionary with aDict as dictionary.
      * 
-     * @param pDict Dictionary to use as font dictionary
+     * @param dict Dictionary to use as font dictionary
      */
-    public PSObjectFont(final PSObjectDict pDict) {
-        dict = pDict;
-        copyCommonAttributes(pDict);
+    public PSObjectFont(final PSObjectDict dict) {
+        super(dict);
     }
     
     /**
@@ -233,15 +229,15 @@ public class PSObjectFont extends PSObject implements Cloneable {
         
         // See if texstrings are defined for this font. If not, copy standard
         // texstrings.
-        if (!dict.known(KEY_TEXSTRINGS)) {
-            dict.setKey(KEY_TEXSTRINGS,
+        if (!known(KEY_TEXSTRINGS)) {
+            setKey(KEY_TEXSTRINGS,
                     FontManager.getTexStringDictByFontname(fontname));
             alreadyValid = false;
         }
         
         // If the LaTeX pre- and post codes are unknown, try to derive
         // them from the font name.
-        if (!dict.known(KEY_LATEXPRECODE) || !dict.known(KEY_LATEXPOSTCODE)) {
+        if (!known(KEY_LATEXPRECODE) || !known(KEY_LATEXPOSTCODE)) {
             String[][] fontTypes = {
                     {"Serif",     "\\textrm{", "}"},
                     {"Roman",     "\\textrm{", "}"},
@@ -267,17 +263,17 @@ public class PSObjectFont extends PSObject implements Cloneable {
                     post = fontTypes[i][2] + post;
                 }
             }
-            dict.setKey(KEY_LATEXPRECODE, pre);
-            dict.setKey(KEY_LATEXPOSTCODE, post);
+            setKey(KEY_LATEXPRECODE, pre);
+            setKey(KEY_LATEXPOSTCODE, post);
             alreadyValid = false;
         }
         
         // Check for font metrics
-        if (!dict.known(KEY_AFM)) {
+        if (!known(KEY_AFM)) {
             // Apparently there are no metrics. Try to extract it from the 
             // character descriptions.
             alreadyValid = false;
-            dict.setKey(KEY_AFM, new PSObjectAfm(dict));
+            setKey(KEY_AFM, new PSObjectAfm(this));
             LOG.fine("Creating font metrics for font " + getFontName());
         }
         
@@ -301,9 +297,9 @@ public class PSObjectFont extends PSObject implements Cloneable {
         assertValidFont();
         
         StringBuilder str = new StringBuilder();
-        PSObjectDict texStrings = dict.lookup(KEY_TEXSTRINGS).toDict();
-        PSObjectString preCode = dict.lookup(KEY_LATEXPRECODE).toPSString();
-        PSObjectString postCode = dict.lookup(KEY_LATEXPOSTCODE).toPSString();
+        PSObjectDict texStrings = lookup(KEY_TEXSTRINGS).toDict();
+        PSObjectString preCode = lookup(KEY_LATEXPRECODE).toPSString();
+        PSObjectString postCode = lookup(KEY_LATEXPOSTCODE).toPSString();
         
         str.append(preCode.toString());
         for (int i = 0; i < charNames.size(); i++) {
@@ -332,77 +328,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
     @Override
     public PSObjectFont clone() {
         PSObjectFont copy = (PSObjectFont) super.clone();
-        copy.dict = dict.clone();
         return copy;
-    }
-
-    /**
-     * PostScript operator 'dup'. Create a (shallow) copy of this object. The
-     * values of composite object is not copied, but shared.
-     * 
-     * @return Duplicate of this object
-     */
-    @Override
-    public PSObjectFont dup() {
-        return this;
-    }
-    
-    /**
-     * Compare this object with another object and return true if they are
-     * equal. See PostScript manual on what's equal and what's not.
-     * 
-     * @param obj Object to compare this object with
-     * 
-     * @return True if objects are equal, false otherwise
-     */
-    @Override
-    public boolean eq(final PSObject obj) {
-        return dict.eq(obj);
-    }
-    
-    /**
-     * Indicates whether some other object is equal to this one.
-     * Required when used as index in PSObjectDict
-     * 
-     * @param obj The object to compare to.
-     * 
-     * @return True, if equal.
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj instanceof PSObject) {
-            return eq((PSObject) obj);
-        } else {
-            return false;
-        }
-    }
-    
-    /**
-     * Returns a hash code value for the object.
-     * 
-     * @return Hash code of this object.
-     */
-    @Override
-    public int hashCode() {
-        return dict.hashCode();
-    }
-    
-    /**
-     * PostScript operator: get
-     * Return value associated with key.
-     * 
-     * @param key Key for which the associated value will be returned
-     * 
-     * @return Value associated with key
-     * 
-     * @throws PSErrorUndefined the PostScript error undefined
-     * @throws PSErrorTypeCheck the PostScript error type check
-     */
-    @Override
-    public PSObject get(final PSObject key) throws PSErrorUndefined,
-            PSErrorTypeCheck {
-        
-        return dict.get(key);
     }
 
     /**
@@ -505,7 +431,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @throws PSErrorTypeCheck the PS error type check
      */
     public PSObjectArray getEncoding() throws PSErrorTypeCheck {
-        return dict.lookup(KEY_ENCODING).toArray();
+        return lookup(KEY_ENCODING).toArray();
     }
     
     /**
@@ -515,7 +441,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      */
     int getFID() {
         try {
-            return dict.lookup(KEY_FID).toInt();
+            return lookup(KEY_FID).toInt();
         } catch (PSErrorTypeCheck e) {
             // FID is not an integer
             return -1;
@@ -536,7 +462,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
     public PSObjectMatrix getFontMatrix() throws PSErrorTypeCheck,
             PSErrorRangeCheck {
         
-        return dict.lookup(KEY_FONTMATRIX).toMatrix();
+        return lookup(KEY_FONTMATRIX).toMatrix();
     }
     
     /**
@@ -549,7 +475,7 @@ public class PSObjectFont extends PSObject implements Cloneable {
      */
     public FontMetric getFontMetric() throws PSError, ProgramError {
         assertValidFont();
-        return dict.lookup(KEY_AFM).toFontMetric();
+        return lookup(KEY_AFM).toFontMetric();
     }
     
     /**
@@ -558,16 +484,16 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @return Fontname
      */
     String getFontName() {
-        if (dict.known(KEY_FONTNAME)) {
-            PSObject fontNameObj = dict.lookup(KEY_FONTNAME);
+        if (known(KEY_FONTNAME)) {
+            PSObject fontNameObj = lookup(KEY_FONTNAME);
             return fontNameObj.toString();
         }
         
         // No font name is defined in this dictionary. Instead we use the key
         // in the FontDirectory that is associated with this font. This key is
         // stored in the font itself behind the FontManager.FONT_DICT_KEY key.
-        if (dict.known(FontManager.FONT_DICT_KEY)) {
-            PSObject keyObj = dict.lookup(FontManager.FONT_DICT_KEY);
+        if (known(FontManager.FONT_DICT_KEY)) {
+            PSObject keyObj = lookup(FontManager.FONT_DICT_KEY);
             return keyObj.toString();
         }
         
@@ -583,23 +509,9 @@ public class PSObjectFont extends PSObject implements Cloneable {
      * @throws PSErrorRangeCheck the PS error range check
      */
     public double getFontSize() throws PSErrorTypeCheck, PSErrorRangeCheck {
-        return dict.lookup(KEY_FONTMATRIX).toMatrix().getMeanScaling() * 1000;
+        return lookup(KEY_FONTMATRIX).toMatrix().getMeanScaling() * 1000;
     }
     
-    /**
-     * Returns a list with all items in object.
-     * 
-     * @return List with all items in this object. The first object (with
-     * index 0) is always a PSObjectInt with the number of object
-     * in a single item. For most object types this is 1, but for
-     * dictionaries this is 2. All consecutive items (index 1 and
-     * up) are the object's items.
-     */
-    @Override
-    public List<PSObject> getItemList() {
-        return dict.getItemList();
-    }
-
     /**
      * Determines the total width of a string.
      * 
@@ -639,16 +551,6 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
 
     /**
-     * Get the number of elements.
-     * 
-     * @return The number of dictionary entries in this font.
-     */
-    @Override
-    public int length() {
-        return dict.length();
-    }
-    
-    /**
      * Load font metrics (*.afm) from the resource directory.
      * 
      * @param resourceDir Resource directory with font information
@@ -681,21 +583,6 @@ public class PSObjectFont extends PSObject implements Cloneable {
     }
     
     /**
-     * PostScript operator put. Replace a single value in this object.
-     * 
-     * @param index Index or key for new value
-     * @param value New value
-     * 
-     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
-     */
-    @Override
-    public void put(final PSObject index, final PSObject value)
-            throws PSErrorTypeCheck {
-        
-        dict.put(index, value);
-    }
-    
-    /**
      * Check if this font already has a font ID (FID). If not, set the font ID
      * for this font to the next available ID.
      * 
@@ -705,19 +592,9 @@ public class PSObjectFont extends PSObject implements Cloneable {
         int fid = getFID();
         if (fid < 0) {
             fid = nextFID++;
-            dict.setKey(KEY_FID, new PSObjectInt(fid));
+            setKey(KEY_FID, new PSObjectInt(fid));
         }
         return fid;
-    }
-    
-    /**
-     * Return the dictionary used by this font.
-     * 
-     * @return Dictionary object of this font
-     */
-    @Override
-    public PSObjectDict toDict() {
-        return dict;
     }
     
     /**
@@ -730,13 +607,4 @@ public class PSObjectFont extends PSObject implements Cloneable {
         return this;
     }
 
-    /**
-     * Returns the type of this object.
-     * 
-     * @return Type of this object (see PostScript manual for possible values)
-     */
-    @Override
-    public String type() {
-        return "dicttype";
-    }
 }
