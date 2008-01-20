@@ -2607,7 +2607,7 @@ public class Interpreter {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void op_setcolor() throws PSError, IOException {
-        int n = gstate.current().getColor().getNrComponents();
+        int n = gstate.current().getColor().getNrInputValues();
         double[] newColor = new double[n];
         for (int i = 0; i < n; i++) {
             newColor[n - i - 1] = getOpStack().pop().toReal();

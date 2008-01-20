@@ -85,6 +85,15 @@ public class GraphicsPSTest {
 
     /** Test. @throws Exception the exception */
     @Test
+    public void graphicsTest4Setcolorspace() throws Exception {
+        String cmd = "[/Indexed /DeviceRGB 3 <012345 6789AB CDEF01 234567>]"
+            + " setcolorspace"
+            + " currentcolorspace 3 get <012345 6789AB CDEF01 234567> eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
     public void graphicsTest4Currentcolor() throws Exception {
         String cmd = "currentcolor 0 eq count 1 eq";
         assertTrue(Common.testString(interp, cmd));

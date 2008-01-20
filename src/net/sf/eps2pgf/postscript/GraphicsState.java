@@ -575,8 +575,8 @@ public class GraphicsState implements Cloneable {
      * @throws PSError A PostScript error occurred.
      */
     public void setcolor(final double[] newColor) throws IOException, PSError {
-        this.color.setColor(newColor);
-        this.device.setColor(this.color);
+        color.setColor(newColor);
+        device.setColor(color);
     }
     
     /**

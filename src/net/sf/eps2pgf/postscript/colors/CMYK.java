@@ -114,6 +114,20 @@ public class CMYK extends PSColor {
     public int getNrComponents() {
         return 4;
     }
+    
+    /**
+     * Gets the number of values required to specify this color. For an RGB,
+     * CMYK, ... this is the same as getNrComponents(), but for an indexed
+     * color space the number of input values is only 1, while the number of
+     * components is 3 (in case the indexed colors were specified as RGB
+     * values).
+     * 
+     * @return The number of input values required to specify this color. 
+     */
+    @Override
+    public int getNrInputValues() {
+        return getNrComponents();
+    }
 
     /**
      * Gets the equivalent RGB levels of this color.
