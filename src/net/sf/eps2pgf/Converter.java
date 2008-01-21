@@ -31,11 +31,11 @@ import java.text.ParseException;
 
 import net.sf.eps2pgf.io.LimitedSectionInputStream;
 import net.sf.eps2pgf.io.TextReplacements;
-import net.sf.eps2pgf.postscript.DSCHeader;
-import net.sf.eps2pgf.postscript.Header;
-import net.sf.eps2pgf.postscript.Interpreter;
-import net.sf.eps2pgf.postscript.PSObjectFile;
-import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.ps.DSCHeader;
+import net.sf.eps2pgf.ps.Header;
+import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.ps.PSObjectFile;
+import net.sf.eps2pgf.ps.errors.PSError;
 
 /**
  * Object that converts Encapsulated PostScript (EPS) to Portable Graphics

@@ -21,10 +21,10 @@
 package net.sf.eps2pgf.testsuite.pstests;
 
 import net.sf.eps2pgf.io.StringInputStream;
-import net.sf.eps2pgf.postscript.Interpreter;
-import net.sf.eps2pgf.postscript.PSObject;
-import net.sf.eps2pgf.postscript.PSObjectBool;
-import net.sf.eps2pgf.postscript.PSObjectFile;
+import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.ps.PSObject;
+import net.sf.eps2pgf.ps.PSObjectBool;
+import net.sf.eps2pgf.ps.PSObjectFile;
 import net.sf.eps2pgf.util.ArrayStack;
 
 /**

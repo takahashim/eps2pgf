@@ -23,8 +23,8 @@ package net.sf.eps2pgf.io;
 import java.io.IOException;
 import java.io.InputStream;
 
-import net.sf.eps2pgf.postscript.PSObjectString;
-import net.sf.eps2pgf.postscript.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.ps.PSObjectString;
+import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 
 /**
  * Create an InputStream from a PSObjectString.
