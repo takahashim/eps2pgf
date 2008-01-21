@@ -1,5 +1,5 @@
 /*
- * CMYK.java
+ * Gray.java
  *
  * This file is part of Eps2pgf.
  *
@@ -18,58 +18,59 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps.colors;
+package net.sf.eps2pgf.ps.resources.colors;
 
 import net.sf.eps2pgf.ps.PSObjectArray;
 import net.sf.eps2pgf.ps.PSObjectName;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 
 /**
- * CMYK color.
- * 
- * @author Wagenaars
- *
+ * Gray color.
  */
-public class CMYK extends PSColor {
+public class Gray extends PSColor {
     
     /** Default color is black. */
-    private static final double[] DEFAULT_LEVELS = {0.0, 0.0, 0.0, 1.0};
+    private static final double[] DEFAULT_LEVELS = {0.0};
     
     /**
-     * Instantiates a new CMYK color.
+     * Instantiates a new gray color.
      */
-    public CMYK() {
+    public Gray() {
         try {
             setColor(DEFAULT_LEVELS);
         } catch (PSErrorRangeCheck e) {
             // this can never happen
         }
     }
-
+    
     /**
-     * Creates an exact deep copy of this object.
+     * Create an exact copy of this object.
      * 
-     * @return an exact deep copy of this object.
+     * @return Copy of this object.
      * 
      * @throws CloneNotSupportedException Clone not supported by this object.
      */
     @Override
-    public CMYK clone() throws CloneNotSupportedException {
-        CMYK copy = (CMYK) super.clone();
+    public Gray clone() throws CloneNotSupportedException {
+        Gray copy = (Gray) super.clone();
         return copy;
     }
 
     /**
-     * Gets the equivalent CMYK levels of this color.
+     * Convert this color to CMYK.
      * 
-     * @return the CMYK
+     * @return This color converted to CMYK.
      */
     @Override
     public double[] getCMYK() {
-        double[] cmyk = {getLevel(0), getLevel(1), getLevel(2), getLevel(3)};
+        double c = 0.0;
+        double m = 0.0;
+        double y = 0.0;
+        double k = 1.0 - getLevel(0);
+        double[] cmyk = {c, m, y, k};
         return cmyk;
     }
-
+    
     /**
      * Gets a PostScript array describing the color space of this color.
      * 
@@ -78,7 +79,7 @@ public class CMYK extends PSColor {
     @Override
     public PSObjectArray getColorSpace() {
         PSObjectArray array = new PSObjectArray();
-        array.addToEnd(new PSObjectName("DeviceCMYK", true));
+        array.addToEnd(new PSObjectName("DeviceGray", true));
         return array;
     }
 
@@ -89,8 +90,7 @@ public class CMYK extends PSColor {
      */
     @Override
     public double getGray() {
-        return (1.0 - Math.min(1.0, 0.3 * getLevel(0) + 0.59 * getLevel(1)
-               + 0.11 * getLevel(2) + getLevel(3)));
+        return getLevel(0);
     }
 
     /**
@@ -100,8 +100,7 @@ public class CMYK extends PSColor {
      */
     @Override
     public double[] getHSB() {
-        double[] rgb = getRGB();
-        return RGB.convertRGBtoHSB(rgb[0], rgb[1], rgb[2]);
+        return RGB.convertRGBtoHSB(getLevel(0), getLevel(0), getLevel(0));
     }
 
     /**
@@ -112,9 +111,9 @@ public class CMYK extends PSColor {
      */
     @Override
     public int getNrComponents() {
-        return 4;
+        return 1;
     }
-    
+
     /**
      * Gets the number of values required to specify this color. For an RGB,
      * CMYK, ... this is the same as getNrComponents(), but for an indexed
@@ -136,10 +135,7 @@ public class CMYK extends PSColor {
      */
     @Override
     public double[] getRGB() {
-        double r = 1.0 - Math.min(1.0, getLevel(0) + getLevel(3));
-        double g = 1.0 - Math.min(1.0, getLevel(1) + getLevel(3));
-        double b = 1.0 - Math.min(1.0, getLevel(2) + getLevel(3));
-        double[] rgb = {r, g, b};
+        double[] rgb = {getLevel(0), getLevel(0), getLevel(0)};
         return rgb;
     }
 

@@ -32,7 +32,7 @@ import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
-import net.sf.eps2pgf.ps.filters.EexecDecode;
+import net.sf.eps2pgf.ps.resources.filters.EexecDecode;
 import net.sf.eps2pgf.ps.resources.outputdevices.NullDevice;
 import net.sf.eps2pgf.util.ArrayStack;
 

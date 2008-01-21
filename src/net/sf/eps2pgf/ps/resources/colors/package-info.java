@@ -22,4 +22,4 @@
  * Contains ColorSpace resources and color related utilities.
  */
 
-package net.sf.eps2pgf.ps.colors;
+package net.sf.eps2pgf.ps.resources.colors;

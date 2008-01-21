@@ -24,4 +24,4 @@
  * @see "Section 3.9.2 of the PostScript Language Reference"
  */
 
-package net.sf.eps2pgf.ps.filters;
+package net.sf.eps2pgf.ps.resources.filters;
