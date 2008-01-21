@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps;
+package net.sf.eps2pgf.ps.resources.functions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,9 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
 
 /**
  * Represents a PostScript function of type 3 (stitching function).

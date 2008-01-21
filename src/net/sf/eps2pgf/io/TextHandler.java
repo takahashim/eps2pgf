@@ -29,10 +29,10 @@ import net.sf.eps2pgf.Options.TextMode;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.TextReplacements.Rule;
 import net.sf.eps2pgf.ps.GstateStack;
-import net.sf.eps2pgf.ps.PSObjectArray;
-import net.sf.eps2pgf.ps.PSObjectFont;
-import net.sf.eps2pgf.ps.PSObjectString;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectFont;
+import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
 
 /**

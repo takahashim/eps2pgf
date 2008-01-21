@@ -24,6 +24,9 @@ import java.util.List;
 
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectFile;
 
 /**
  * Execution stack. Stack of objects that await processing by the interpreter.

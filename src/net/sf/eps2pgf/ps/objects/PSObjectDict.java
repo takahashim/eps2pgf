@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps;
+package net.sf.eps2pgf.ps.objects;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -28,6 +28,14 @@ import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorStackUnderflow;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectBool;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
+import net.sf.eps2pgf.ps.objects.PSObjectName;
+import net.sf.eps2pgf.ps.objects.PSObjectNull;
+import net.sf.eps2pgf.ps.objects.PSObjectOperator;
+import net.sf.eps2pgf.ps.resources.Encoding;
 import net.sf.eps2pgf.util.ArrayStack;
 
 /**

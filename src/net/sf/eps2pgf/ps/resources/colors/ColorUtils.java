@@ -20,12 +20,12 @@
 
 package net.sf.eps2pgf.ps.resources.colors;
 
-import net.sf.eps2pgf.ps.PSObject;
-import net.sf.eps2pgf.ps.PSObjectArray;
-import net.sf.eps2pgf.ps.PSObjectName;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectName;
 
 /**
  * This class offers several static methods to handle different aspect

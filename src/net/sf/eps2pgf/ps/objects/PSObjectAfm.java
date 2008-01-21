@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps;
+package net.sf.eps2pgf.ps.objects;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +27,9 @@ import java.util.List;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.StringInputStream;
+import net.sf.eps2pgf.ps.GstateStack;
+import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;

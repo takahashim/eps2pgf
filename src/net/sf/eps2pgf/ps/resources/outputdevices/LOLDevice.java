@@ -7,9 +7,9 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 import net.sf.eps2pgf.ps.GraphicsState;
-import net.sf.eps2pgf.ps.PSObjectDict;
-import net.sf.eps2pgf.ps.PSObjectMatrix;
 import net.sf.eps2pgf.ps.Path;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
+import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 
 /**

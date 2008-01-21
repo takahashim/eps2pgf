@@ -18,9 +18,11 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps;
+package net.sf.eps2pgf.ps.resources.shadings;
 
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
 
 /**
  * Represent radial (type 3) shading dictionary.

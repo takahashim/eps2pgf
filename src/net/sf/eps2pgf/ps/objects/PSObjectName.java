@@ -18,7 +18,9 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps;
+package net.sf.eps2pgf.ps.objects;
+
+import net.sf.eps2pgf.ps.Interpreter;
 
 /**
  * PostScript object: name.

@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps;
+package net.sf.eps2pgf.ps.resources;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,6 +36,11 @@ import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
+import net.sf.eps2pgf.ps.objects.PSObjectFont;
+import net.sf.eps2pgf.ps.objects.PSObjectName;
+import net.sf.eps2pgf.ps.objects.PSObjectString;
 
 /**
  * Manages font resources and serves as FontDirectory.

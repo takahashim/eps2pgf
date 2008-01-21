@@ -34,8 +34,8 @@ import net.sf.eps2pgf.io.TextReplacements;
 import net.sf.eps2pgf.ps.DSCHeader;
 import net.sf.eps2pgf.ps.Header;
 import net.sf.eps2pgf.ps.Interpreter;
-import net.sf.eps2pgf.ps.PSObjectFile;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.objects.PSObjectFile;
 
 /**
  * Object that converts Encapsulated PostScript (EPS) to Portable Graphics

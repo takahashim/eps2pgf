@@ -32,18 +32,18 @@ import net.sf.eps2pgf.ps.Curveto;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Lineto;
 import net.sf.eps2pgf.ps.Moveto;
-import net.sf.eps2pgf.ps.PSObjectArray;
-import net.sf.eps2pgf.ps.PSObjectDict;
-import net.sf.eps2pgf.ps.PSObjectMatrix;
-import net.sf.eps2pgf.ps.PSObjectReal;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.PathSection;
-import net.sf.eps2pgf.ps.RadialShading;
-import net.sf.eps2pgf.ps.Shading;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
+import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
+import net.sf.eps2pgf.ps.objects.PSObjectReal;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
+import net.sf.eps2pgf.ps.resources.shadings.RadialShading;
+import net.sf.eps2pgf.ps.resources.shadings.Shading;
 
 /**
  * Writes PGF files.
