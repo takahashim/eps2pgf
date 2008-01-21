@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 
 import com.martiansoftware.jsap.JSAPResult;
 
-import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.util.Eps2pgfFormatter;
 import net.sf.eps2pgf.util.Eps2pgfHandler;
 

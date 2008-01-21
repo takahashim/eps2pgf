@@ -28,12 +28,12 @@ import net.sf.eps2pgf.Options;
 import net.sf.eps2pgf.Options.TextMode;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.TextReplacements.Rule;
-import net.sf.eps2pgf.io.devices.OutputDevice;
-import net.sf.eps2pgf.postscript.GstateStack;
-import net.sf.eps2pgf.postscript.PSObjectArray;
-import net.sf.eps2pgf.postscript.PSObjectFont;
-import net.sf.eps2pgf.postscript.PSObjectString;
-import net.sf.eps2pgf.postscript.errors.PSError;
+import net.sf.eps2pgf.ps.GstateStack;
+import net.sf.eps2pgf.ps.PSObjectArray;
+import net.sf.eps2pgf.ps.PSObjectFont;
+import net.sf.eps2pgf.ps.PSObjectString;
+import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
 
 /**
  *

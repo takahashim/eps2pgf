@@ -22,7 +22,7 @@ package net.sf.eps2pgf.util;
 
 import java.util.ArrayList;
 
-import net.sf.eps2pgf.postscript.errors.PSErrorStackUnderflow;
+import net.sf.eps2pgf.ps.errors.PSErrorStackUnderflow;
 
 /**
  * Stack implementation using an ArrayList.

@@ -29,7 +29,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-import net.sf.eps2pgf.postscript.Interpreter;
+import net.sf.eps2pgf.ps.Interpreter;
 
 /**
  * This class contains some test to test the PostScript parser.
