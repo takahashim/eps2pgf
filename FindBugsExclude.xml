@@ -20,7 +20,7 @@ limitations under the License.
 -->
 <FindBugsFilter>
 	<Match>
-		<Class name="net.sf.eps2pgf.postscript.PSObjectString"></Class>
+		<Class name="net.sf.eps2pgf.ps.objects.PSObjectString"></Class>
 		<Or>
 			<Method name="parseBase85"></Method>
 			<Method name="parseHex"></Method></Or>
