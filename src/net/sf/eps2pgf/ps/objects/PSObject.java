@@ -18,11 +18,12 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps;
+package net.sf.eps2pgf.ps.objects;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;

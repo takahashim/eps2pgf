@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps;
+package net.sf.eps2pgf.ps.objects;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +27,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.eps2pgf.io.PSStringInputStream;
+import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.ps.Parser;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;

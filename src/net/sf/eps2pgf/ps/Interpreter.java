@@ -44,6 +44,22 @@ import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.errors.PSErrorUnmatchedMark;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectBool;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
+import net.sf.eps2pgf.ps.objects.PSObjectFile;
+import net.sf.eps2pgf.ps.objects.PSObjectFont;
+import net.sf.eps2pgf.ps.objects.PSObjectInt;
+import net.sf.eps2pgf.ps.objects.PSObjectMark;
+import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
+import net.sf.eps2pgf.ps.objects.PSObjectName;
+import net.sf.eps2pgf.ps.objects.PSObjectNull;
+import net.sf.eps2pgf.ps.objects.PSObjectOperator;
+import net.sf.eps2pgf.ps.objects.PSObjectReal;
+import net.sf.eps2pgf.ps.objects.PSObjectString;
+import net.sf.eps2pgf.ps.resources.Encoding;
+import net.sf.eps2pgf.ps.resources.FontManager;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.colors.RGB;
 import net.sf.eps2pgf.ps.resources.filters.EexecDecode;
@@ -216,7 +232,7 @@ public class Interpreter {
      * 
      * @return The current dictionary stack.
      */
-    DictStack getDictStack() {
+    public DictStack getDictStack() {
         return dictStack;
     }
 

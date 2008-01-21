@@ -22,9 +22,9 @@ package net.sf.eps2pgf.testsuite.pstests;
 
 import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.ps.Interpreter;
-import net.sf.eps2pgf.ps.PSObject;
-import net.sf.eps2pgf.ps.PSObjectBool;
-import net.sf.eps2pgf.ps.PSObjectFile;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectBool;
+import net.sf.eps2pgf.ps.objects.PSObjectFile;
 import net.sf.eps2pgf.util.ArrayStack;
 
 /**

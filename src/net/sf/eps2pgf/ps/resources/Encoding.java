@@ -18,10 +18,12 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps;
+package net.sf.eps2pgf.ps.resources;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import net.sf.eps2pgf.ps.objects.PSObjectName;
 
 /** Some tools to work with character encoding in PostScript documents.
  *

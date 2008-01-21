@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps;
+package net.sf.eps2pgf.ps.objects;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,6 +39,8 @@ import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.resources.Encoding;
+import net.sf.eps2pgf.ps.resources.FontManager;
 
 /**
  * Wrapper around a font dictionary. This class provides methods to handle the
@@ -222,7 +224,7 @@ public class PSObjectFont extends PSObjectDict {
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    boolean assertValidFont() throws PSError, ProgramError {
+    public boolean assertValidFont() throws PSError, ProgramError {
         boolean alreadyValid = true;
         
         String fontname = getFontName();
@@ -588,7 +590,7 @@ public class PSObjectFont extends PSObjectDict {
      * 
      * @return New font ID
      */
-    int setFID() {
+    public int setFID() {
         int fid = getFID();
         if (fid < 0) {
             fid = nextFID++;

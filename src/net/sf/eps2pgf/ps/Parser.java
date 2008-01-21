@@ -26,6 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectInt;
+import net.sf.eps2pgf.ps.objects.PSObjectName;
+import net.sf.eps2pgf.ps.objects.PSObjectReal;
+import net.sf.eps2pgf.ps.objects.PSObjectString;
 
 /**
  * Reads PostScript code and converts it to a queue of PostScript objects.

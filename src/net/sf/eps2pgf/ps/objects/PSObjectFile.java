@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps;
+package net.sf.eps2pgf.ps.objects;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.eps2pgf.io.StringInputStream;
+import net.sf.eps2pgf.ps.Parser;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
@@ -222,7 +223,7 @@ public class PSObjectFile extends PSObject {
     /**
      * @return the inStr
      */
-    InputStream getStream() {
+    public InputStream getStream() {
         return inStr;
     }
 
