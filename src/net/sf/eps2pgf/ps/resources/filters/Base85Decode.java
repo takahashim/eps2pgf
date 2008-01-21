@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps.filters;
+package net.sf.eps2pgf.ps.resources.filters;
 
 import java.io.InputStream;
 import java.io.IOException;

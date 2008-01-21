@@ -34,8 +34,8 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.ps.filters.Base85Decode;
-import net.sf.eps2pgf.ps.filters.HexDecode;
+import net.sf.eps2pgf.ps.resources.filters.Base85Decode;
+import net.sf.eps2pgf.ps.resources.filters.HexDecode;
 
 /**
  * String PostScript object.

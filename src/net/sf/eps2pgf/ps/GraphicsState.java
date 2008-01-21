@@ -23,12 +23,12 @@ package net.sf.eps2pgf.ps;
 import java.io.IOException;
 
 import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.ps.colors.ColorUtils;
-import net.sf.eps2pgf.ps.colors.PSColor;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorNoCurrentPoint;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.ps.resources.colors.ColorUtils;
+import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
 
 /**

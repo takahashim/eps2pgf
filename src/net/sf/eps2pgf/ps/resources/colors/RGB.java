@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps.colors;
+package net.sf.eps2pgf.ps.resources.colors;
 
 import net.sf.eps2pgf.ps.PSObjectArray;
 import net.sf.eps2pgf.ps.PSObjectName;

@@ -40,10 +40,10 @@ import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.PathSection;
 import net.sf.eps2pgf.ps.RadialShading;
 import net.sf.eps2pgf.ps.Shading;
-import net.sf.eps2pgf.ps.colors.PSColor;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.resources.colors.PSColor;
 
 /**
  * Writes PGF files.

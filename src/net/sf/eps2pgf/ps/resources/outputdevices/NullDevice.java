@@ -24,7 +24,7 @@ import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.PSObjectDict;
 import net.sf.eps2pgf.ps.PSObjectMatrix;
 import net.sf.eps2pgf.ps.Path;
-import net.sf.eps2pgf.ps.colors.PSColor;
+import net.sf.eps2pgf.ps.resources.colors.PSColor;
 
 /**
  * Discards all output written to this device.
