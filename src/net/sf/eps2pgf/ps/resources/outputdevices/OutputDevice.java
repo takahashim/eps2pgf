@@ -35,7 +35,7 @@ import net.sf.eps2pgf.ps.resources.colors.PSColor;
  * Interface for exporters (e.g. PGF and TikZ)
  * @author Paul Wagenaars
  */
-public interface OutputDevice {
+public interface OutputDevice extends Cloneable {
     
     /**
      * Implements PostScript clip operator.
@@ -52,6 +52,13 @@ public interface OutputDevice {
             throws IOException, PSErrorUnimplemented;
     
     /**
+     * Returns a exact deep copy of this output device.
+     * 
+     * @return Deep copy of this object.
+     */
+    OutputDevice clone();
+    
+    /**
      * Returns a <b>copy</b> default transformation matrix (converts user space
      * coordinates to device space).
      * 
@@ -63,12 +70,10 @@ public interface OutputDevice {
      * Initialize before any other methods are called. Normally, this method
      * writes a header.
      * 
-     * @param gstate the gstate
-     * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    void init(GraphicsState gstate) throws PSError, IOException;
+    void init() throws PSError, IOException;
     
     /**
      * Finalize writing. Normally, this method writes a footer.

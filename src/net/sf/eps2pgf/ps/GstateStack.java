@@ -20,6 +20,8 @@
 
 package net.sf.eps2pgf.ps;
 
+import java.io.IOException;
+
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSErrorStackUnderflow;
 import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
@@ -52,10 +54,12 @@ public class GstateStack {
      * Pushes a copy of the current graphics state on the stack.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void saveGstate() throws ProgramError {
+    public void saveGstate() throws ProgramError, IOException {
         try {
             stack.push(current().clone());
+            current().getDevice().startScope();
         } catch (CloneNotSupportedException e) {
             throw new ProgramError("Clone method not yet implemented.");
         }
@@ -65,8 +69,9 @@ public class GstateStack {
      * Restores the topmost graphics state from the stack.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void restoreGstate() throws ProgramError {
+    public void restoreGstate() throws ProgramError, IOException {
         // If the stack is empty we do nothing.
         if (stack.isEmpty()) {
             return;
@@ -74,6 +79,7 @@ public class GstateStack {
         
         try {
             setCurrent(stack.pop());
+            current().getDevice().endScope();
         } catch (PSErrorStackUnderflow e) {
             ProgramError pe = new ProgramError("Stack underflow shouldn't"
                     + " happen here.");

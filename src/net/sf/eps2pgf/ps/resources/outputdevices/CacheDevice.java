@@ -86,6 +86,26 @@ public class CacheDevice implements OutputDevice {
     }
     
     /**
+     * Returns a exact deep copy of this output device.
+     * 
+     * @return Deep copy of this object.
+     */
+    @Override
+    public CacheDevice clone() {
+        CacheDevice copy;
+        try {
+            copy = (CacheDevice) super.clone();
+            if (pathBbox != null) {
+                copy.pathBbox = pathBbox.clone();
+            }
+        } catch (CloneNotSupportedException e) {
+            /* this exception shouldn't happen. */
+            copy = null;
+        }
+        return copy;
+    }
+
+    /**
      * Returns a <b>copy</b> default transformation matrix (converts user space
      * coordinates to device space).
      * 
@@ -98,10 +118,8 @@ public class CacheDevice implements OutputDevice {
     /**
      * Initialize before any other methods are called. Normally, this method
      * writes a header.
-     * 
-     * @param gstate The current graphics state.
      */
-    public void init(final GraphicsState gstate) {
+    public void init() {
     }
     
     /**
