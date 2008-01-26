@@ -11,17 +11,17 @@ Introduction
 Eps2pgf is a PostScript interpreter that converts Encapsulated PostScript
 (EPS) figures to the Portable Graphics Format (PGF)
 <http://sourceforge.net/projects/pgf/>. PGF/TikZ is a TeX macro package for
-describing graphics. It support several back-end drivers, including pdfTeX
+generating graphics. It support several back-end drivers, including pdfTeX
 and Dvips. The major advantage of Eps2pgf is that all texts are typeset by
 TeX, giving you all the powerful typesetting features and a uniform look of
 the final document. It has several options to control how text in figures is
-handled: (i) accurately reproduce text labels (with same font size and
-formatting as in EPS figure), (ii) direct copying of text labels (text is
-interpreted as TeX code), or (iii) PSfrag-compatible replacement of text
-labels, either using a separate file with tags, or using tags embedded in
-the text labels.
+handled: (i) reproduce text labels accurately (with same font size and
+formatting as in EPS figure), (ii) copy text labels verbatim (text in EPS
+figure is TeX code), or (iii) replace text labels using PSfrag-compatible
+rules from a separate file with tags, or using tags embedded in the text
+labels.
 
-The goal of Eps2pgf to support all PostScript figures created by programs
+The goal of Eps2pgf is to support all PostScript figures created by programs
 regularly used by TeX users to create figures, such as MATLAB, Mathematica
 and Maple. If you encounter a figure that Eps2pgf fails to process, please
 report it using the bug tracker
@@ -39,15 +39,15 @@ See the user manual doc\eps2pgf_manual.pdf.
 Building
 ----------------------------------------------------------------------------
 Building Eps2pgf from source requires Apache Ant <http://ant.apache.org/>,
-and a Java Development Kit, such as the Sun's JDK <http://java.sun.com/>.
-To build Eps2pgf run Ant from the base directory:
+and a Java Development Kit (e.g. Sun's JDK <http://java.sun.com/>). To build
+Eps2pgf run Ant from the base directory:
 
     ant <target>
     
 Replace <target> by one of the following targets:
     - jar  - Builds the jar and prepares the distribution directory. After
              compilation the directory 'dist_root' contains the complete
-             Eps2pgf distribution)
+             Eps2pgf distribution.
     - test - Run a test suite with small synthetic PostScript tests and the
              test figures found in the 'testsuite\test_figures' directory.
     - zip  - Prepares the distribution directory ('jar' target) and zips it.
