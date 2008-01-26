@@ -48,20 +48,19 @@ import net.sf.eps2pgf.ps.resources.shadings.Shading;
 /**
  * Writes PGF files.
  * 
- *TODO: make output devices non-static
- * 
  * @author Paul Wagenaars
  */
 public class PGFDevice implements OutputDevice {
+    
     /** Coordinate format (used to format X- and Y-coordinates). */
     static final DecimalFormat COOR_FORMAT = new DecimalFormat("#.###", 
             new DecimalFormatSymbols(Locale.US));
     
-    /** Length format (used to format linewidth, dash, etc...). */
+    /** Length format (used to format line width, dash, etc...). */
     static final DecimalFormat LENGTH_FORMAT = new DecimalFormat("#.###", 
             new DecimalFormatSymbols(Locale.US));
     
-    /** Font size format (used to set fontsize in pt). */
+    /** Font size format (used to set font size in pt). */
     static final DecimalFormat FONTSIZE_FORMAT = new DecimalFormat("#.##",
             new DecimalFormatSymbols(Locale.US));
     
@@ -72,11 +71,15 @@ public class PGFDevice implements OutputDevice {
     static final DecimalFormat COLOR_FORMAT = new DecimalFormat("#.######",
             new DecimalFormatSymbols(Locale.US));
     
+    
     /** Recursion depth of \begin{pgfscope}...\end{pgfscope} commands. */
     private static int scopeDepth = 0;
     
     /** Output file. */
     private Writer out;
+    
+    /** Maintains current status of current line width, color, etc... */
+    private PSObjectDict deviceStatus;
     
     /**
      * Creates a new instance of PGFExport.
@@ -84,6 +87,7 @@ public class PGFDevice implements OutputDevice {
      */
     public PGFDevice(final Writer wOut) {
         out = wOut;
+        deviceStatus = new PSObjectDict();
     }
     
     /**
@@ -113,20 +117,15 @@ public class PGFDevice implements OutputDevice {
      * Initialize before any other methods are called. Normally, this method
      * writes a header.
      * 
-     * @param gstate the gstate
-     * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void init(final GraphicsState gstate) throws PSError, IOException {
+    public void init() throws PSError, IOException {
         // Force setting the line width by setting the last width to an
         // impossible/negative value.
-        gstate.getDeviceData().setKey("pgf_last_linewidth",
-                                                new PSObjectReal(-1.0));
-        gstate.getDeviceData().setKey("pgf_last_dashpattern",
-                                                new PSObjectArray());
-        gstate.getDeviceData().setKey("pgf_last_dashoffset",
-                                                new PSObjectReal(0.0));
+        deviceStatus.setKey("pgf_last_linewidth", new PSObjectReal(-1.0));
+        deviceStatus.setKey("pgf_last_dashpattern", new PSObjectArray());
+        deviceStatus.setKey("pgf_last_dashoffset", new PSObjectReal(0.0));
         
         out.write("% Created by " + net.sf.eps2pgf.Main.getNameVersion() + " ");
         Date now = new Date();
@@ -223,6 +222,25 @@ public class PGFDevice implements OutputDevice {
         out.write("\\pgfusepath{clip}\n");
     }
     
+    /**
+     * Returns a exact deep copy of this output device.
+     * 
+     * @return Deep copy of this object.
+     */
+    @Override
+    public PGFDevice clone() {
+        PGFDevice copy;
+        try {
+            copy = (PGFDevice) super.clone();
+            copy.deviceStatus = deviceStatus.clone();
+            copy.out = out;  // output writer is not cloned
+        } catch (CloneNotSupportedException e) {
+            /* this exception shouldn't happen. */
+            copy = null;
+        }
+        return copy;
+    }
+
     /**
      * Fills a path using the non-zero rule.
      * See the PostScript manual (fill operator) for more info.
@@ -418,16 +436,14 @@ public class PGFDevice implements OutputDevice {
     /**
      * Implements PostScript operator setdash.
      * 
-     * @param gstate The gstate.
+     * @param gstate Current graphics state
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      */
     void updateDash(final GraphicsState gstate) throws IOException, PSError {
-        String lastPattern = gstate.getDeviceData().get("pgf_last_dashpattern")
-                                .isis();
-        double lastOffset = gstate.getDeviceData().get("pgf_last_dashoffset")
-                                .toReal();
+        String lastPattern = deviceStatus.get("pgf_last_dashpattern").isis();
+        double lastOffset = deviceStatus.get("pgf_last_dashoffset").toReal();
         
         double scaling = gstate.getCtm().getMeanScaling();
         PSObjectArray currentArray = new PSObjectArray();
@@ -453,8 +469,8 @@ public class PGFDevice implements OutputDevice {
                 out.write("}{" + LENGTH_FORMAT.format(1e-4 * currentOffset)
                         + "cm}\n");
             }
-            gstate.getDeviceData().setKey("pgf_last_dashpattern", currentArray);
-            gstate.getDeviceData().setKey("pgf_last_dashoffset",
+            deviceStatus.setKey("pgf_last_dashpattern", currentArray);
+            deviceStatus.setKey("pgf_last_dashoffset",
                     new PSObjectReal(currentOffset));
         }
     }
@@ -471,14 +487,13 @@ public class PGFDevice implements OutputDevice {
     void updateLinewidth(final GraphicsState gstate)
             throws PSError, IOException {
         
-        double lastWidth = gstate.getDeviceData().get("pgf_last_linewidth")
-                                                                    .toReal();
+        double lastWidth = deviceStatus.get("pgf_last_linewidth").toReal();
         double currentWidth = gstate.getLineWidth()
                                        * gstate.getCtm().getMeanScaling();
         if (Math.abs(currentWidth - lastWidth) > 1e-10) {
             out.write("\\pgfsetlinewidth{"
                     + LENGTH_FORMAT.format(1e-3 * currentWidth) + "mm}\n");
-            gstate.getDeviceData().setKey("pgf_last_linewidth",
+            deviceStatus.setKey("pgf_last_linewidth",
                     new PSObjectReal(currentWidth));
         }
         //TODO: Implement a similar update mechanism for other properties

@@ -45,6 +45,23 @@ public class NullDevice implements OutputDevice {
     }
     
     /**
+     * Returns a exact deep copy of this output device.
+     * 
+     * @return Deep copy of this object.
+     */
+    @Override
+    public NullDevice clone() {
+        NullDevice copy;
+        try {
+            copy = (NullDevice) super.clone();
+        } catch (CloneNotSupportedException e) {
+            /* this exception shouldn't happen. */
+            copy = null;
+        }
+        return copy;
+    }
+
+    /**
      * Returns a <b>copy</b> default transformation matrix (converts user space
      * coordinates to device space).
      * 
@@ -57,10 +74,8 @@ public class NullDevice implements OutputDevice {
     /**
      * Initialize before any other methods are called. Normally, this method
      * writes a header.
-     * 
-     * @param gstate The gstate.
      */
-    public void init(final GraphicsState gstate) {
+    public void init() {
         
     }
     

@@ -182,7 +182,7 @@ public class Interpreter {
         // Create dictionary stack
         setDictStack(new DictStack(this));
 
-        gstate.current().getDevice().init(gstate.current());
+        gstate.current().getDevice().init();
         
         gstate.current().setcolorspace(
                 new PSObjectName("DeviceGray", true), true);
@@ -1614,7 +1614,7 @@ public class Interpreter {
      */
     public void op_grestore() throws PSError, IOException, ProgramError {
         gstate.restoreGstate();
-        gstate.current().getDevice().endScope();
+        
     }
     
     /**
@@ -1626,7 +1626,6 @@ public class Interpreter {
      */
     public void op_gsave() throws PSError, IOException, ProgramError {
         gstate.saveGstate();
-        gstate.current().getDevice().startScope();
     }
     
     /**

@@ -29,7 +29,6 @@ import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
-import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFont;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 import net.sf.eps2pgf.ps.resources.colors.ColorUtils;
@@ -82,12 +81,6 @@ public class GraphicsState implements Cloneable {
     
     /** Reference to current output device. */
     private OutputDevice device;
-    
-    /**
-     * Dictionary that can be used by the output device to store information.
-     * The contents of this dictionary is output device specific.
-     */
-    private PSObjectDict deviceData = new PSObjectDict();
     
     /**
      * Creates a new default graphics state.
@@ -293,9 +286,7 @@ public class GraphicsState implements Cloneable {
         copy.ctm = ctm.clone();
         // dashoffset is primitive, it doesn't need to be cloned explicitly.
         copy.dashPattern = dashPattern.clone();
-        // deviceRef is not cloned explicitly because it's a reference.
-        //TODO: keeping the same deviceRef doesn't work across clones
-        copy.deviceData = deviceData.clone();
+        copy.device = device.clone();
         // flat is primitive, it doesn't need to be cloned explicitly.
         copy.font = font.clone();
         // linewidth is primitive, it doesn't need to be cloned explicitly.
@@ -821,13 +812,4 @@ public class GraphicsState implements Cloneable {
         return device;
     }
 
-    /**
-     * Gets the device data.
-     * 
-     * @return the deviceData
-     */
-    public PSObjectDict getDeviceData() {
-        return deviceData;
-    }
-    
 }

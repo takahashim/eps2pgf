@@ -58,6 +58,24 @@ public class LOLDevice implements OutputDevice {
     }
 
     /**
+     * Returns a exact deep copy of this output device.
+     * 
+     * @return Deep copy of this object.
+     */
+    @Override
+    public LOLDevice clone() {
+        LOLDevice copy;
+        try {
+            copy = (LOLDevice) super.clone();
+            copy.out = out;  // writer is not cloned
+        } catch (CloneNotSupportedException e) {
+            /* this exception shouldn't happen. */
+            copy = null;
+        }
+        return copy;
+    }
+
+    /**
      * Draws a red dot (useful for debugging, don't use otherwise).
      * 
      * @param x X-coordinate of dot.
@@ -137,10 +155,8 @@ public class LOLDevice implements OutputDevice {
     /**
      * Initialize before any other methods are called. Normally, this method
      * writes a header.
-     * 
-     * @param gstate the gstate
      */
-    public void init(final GraphicsState gstate) {
+    public void init() {
 
     }
 
