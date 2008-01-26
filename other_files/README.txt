@@ -8,61 +8,76 @@ Author: Paul Wagenaars <paul@wagenaars.org>
 ----------------------------------------------------------------------------
 Introduction
 ----------------------------------------------------------------------------
-Convert Encapsulated PostScript (EPS) graphics files to the Portable
-Graphics Format (PGF, http://sourceforge.net/projects/pgf/) for inclusion in
-LaTeX documents. Texts in the figure are typeset by LaTeX
+Eps2pgf is a PostScript interpreter that converts Encapsulated PostScript
+(EPS) figures to the Portable Graphics Format (PGF)
+<http://sourceforge.net/projects/pgf/>. PGF/TikZ is a TeX macro package for
+describing graphics. It support several back-end drivers, including pdfTeX
+and Dvips. The major advantage of Eps2pgf is that all texts are typeset by
+TeX, giving you all the powerful typesetting features and a uniform look of
+the final document. It has several options to control how text in figures is
+handled: (i) accurately reproduce text labels (with same font size and
+formatting as in EPS figure), (ii) direct copying of text labels (text is
+interpreted as TeX code), or (iii) PSfrag-compatible replacement of text
+labels, either using a separate file with tags, or using tags embedded in
+the text labels.
 
-The goal of Eps2pgf is to support all PostScript figures created by programs
-that used regularly by LaTeX users to create figures. That means that
-Eps2pgf does not necessarily support every possible PostScript operator, but
-you should never encounter a figure that Eps2pgf can not convert. If you
-encounter a figure that the latest version of Eps2pgf fails to process,
-please report it using the bug tracker:
+The goal of Eps2pgf to support all PostScript figures created by programs
+regularly used by TeX users to create figures, such as MATLAB, Mathematica
+and Maple. If you encounter a figure that Eps2pgf fails to process, please
+report it using the bug tracker
+<http://sourceforge.net/tracker/?group_id=188852&atid=926973>, or send it
+via email.
 
-  http://sourceforge.net/tracker/?group_id=188852&atid=926973
-  
-or send it to me via email so that I can improve Eps2pgf.
-----------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------
 Usage
 ----------------------------------------------------------------------------
-Run Eps2pgf (e.g. java -jar eps2pgf.jar) with the --help option to get
-information on how to convert an EPS file to PGF. After the PGF file has
-been created it can be included in a LaTeX document. A minimal example LaTeX
-document is listed below.
+See the user manual doc\eps2pgf_manual.pdf.
 
-\documentclass{article}
 
-\usepackage{pgf}
-
-\begin{document}
-  \begin{figure}
-    \centering
-    \input{figure.pgf}
-    \caption{Figure created by Eps2pgf}
-  \end{figure}	
-\end{document}
 ----------------------------------------------------------------------------
+Building
+----------------------------------------------------------------------------
+Building Eps2pgf from source requires Apache Ant <http://ant.apache.org/>,
+and a Java Development Kit, such as the Sun's JDK <http://java.sun.com/>.
+To build Eps2pgf run Ant from the base directory:
+
+    ant <target>
+    
+Replace <target> by one of the following targets:
+    - jar  - Builds the jar and prepares the distribution directory. After
+             compilation the directory 'dist_root' contains the complete
+             Eps2pgf distribution)
+    - test - Run a test suite with small synthetic PostScript tests and the
+             test figures found in the 'testsuite\test_figures' directory.
+    - zip  - Prepares the distribution directory ('jar' target) and zips it.
+
 
 ----------------------------------------------------------------------------
 Copyright and License
 ----------------------------------------------------------------------------
 See the files NOTICE.txt and LICENSE.txt. Or run Eps2pgf with the command
 line option '--version'.
-----------------------------------------------------------------------------
+
 
 ----------------------------------------------------------------------------
 Changelog
 ----------------------------------------------------------------------------
-v0.6.0 (2007-12-??)
-  - Added: PSfrag emulation
+v0.6.0 (2008-02-??)
+  - Added: feature #1856800 PSfrag emulation
+  - Added: feature #1856798 Interpret text labels directly as TeX
+  - Added: feature #1856794 Indexed color spaces
   - Added: support for embedded (non-bitmapped) type 3 fonts
   - Added: output device (LOLDevice) that writes only the text labels
   - Fixed: bug #1809102 (partially) Problems with Inkscape figure with text.
   - Fixed: bug #1807713 In some situations Eps2pgf produced lines that are
            too long. 
   - Fixed: bug #1874016 divison by zero in multiplication operator
+  - Fixed: bug #1859820 Improve error and info messages presented to the user
+  - Fixed: bug #1858099 assertValidFont is run multiple times on the same font
+  - Fixed: bug #1859810 Example figure from MathPSfrag package
+  - Changed: Lots of internal changes, making the design clearer, fixing style
+             issues, etc...
 
 v0.5.0 (2007-11-04)
   - Added: handling of binary headers found in some eps files
