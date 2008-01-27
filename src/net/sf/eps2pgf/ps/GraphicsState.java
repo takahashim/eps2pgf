@@ -75,6 +75,9 @@ public class GraphicsState implements Cloneable {
     /** Current line cap. */
     private int lineCap = 0;
     
+    /** Current line join. */
+    private int lineJoin = 0;
+    
     /** Current dash pattern. */
     private PSObjectArray dashPattern = new PSObjectArray();
     
@@ -826,6 +829,24 @@ public class GraphicsState implements Cloneable {
      */
     public int getLineCap() {
         return lineCap;
+    }
+
+    /**
+     * Sets the line join.
+     * 
+     * @param pLineJoin the lineJoin to set
+     */
+    public void setLineJoin(final int pLineJoin) {
+        lineJoin = pLineJoin;
+    }
+
+    /**
+     * Gets the current line join.
+     * 
+     * @return the lineJoin
+     */
+    public int getLineJoin() {
+        return lineJoin;
     }
 
 }

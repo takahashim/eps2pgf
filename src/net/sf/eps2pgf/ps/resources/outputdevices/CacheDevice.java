@@ -233,15 +233,6 @@ public class CacheDevice implements OutputDevice {
     }
     
     /**
-     * Implements PostScript operator setlinejoin.
-     * 
-     * @param join Line join parameter. 0: miter join, 1: round join, or
-     *             2: bevel join.
-     */
-    public void setlinejoin(final int join) {
-    }
-    
-    /**
      * Sets the miter limit.
      * 
      * @param num The miter limit.

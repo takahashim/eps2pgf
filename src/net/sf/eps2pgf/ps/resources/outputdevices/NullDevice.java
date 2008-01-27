@@ -144,14 +144,6 @@ public class NullDevice implements OutputDevice {
     }
     
     /**
-     * Implements PostScript operator setlinejoin.
-     * 
-     * @param join The join.
-     */
-    public void setlinejoin(final int join) {
-    }
-    
-    /**
      * Sets the miter limit.
      * 
      * @param num The num.

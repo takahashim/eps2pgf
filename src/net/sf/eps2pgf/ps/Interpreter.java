@@ -2723,7 +2723,7 @@ public class Interpreter {
      */
     public void op_setlinejoin() throws PSError, IOException {
         int join = getOpStack().pop().toNonNegInt();
-        gstate.current().getDevice().setlinejoin(join);
+        gstate.current().setLineJoin(join);
     }
    
     /**

@@ -25,7 +25,6 @@ import java.io.IOException;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.errors.PSError;
-import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
@@ -145,17 +144,6 @@ public interface OutputDevice extends Cloneable {
      * @throws PSError A PostScript error occurred.
      */
     void stroke(GraphicsState gstate) throws IOException, PSError;
-    
-    /**
-     * Implements PostScript operator setlinejoin.
-     * 
-     * @param join Line join parameter. 0: miter join, 1: round join, or
-     *             2: bevel join.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
-     */
-    void setlinejoin(int join) throws IOException, PSErrorRangeCheck;
     
     /**
      * Ends the current scope.

@@ -92,6 +92,10 @@ public class PGFDevice implements OutputDevice {
     static final PSObjectName KEY_LAST_LINECAP =
         new PSObjectName("/lastlinecap");
     
+    /** Key of last line join. */
+    static final PSObjectName KEY_LAST_LINEJOIN =
+        new PSObjectName("/lastlinejoin");
+    
     
     /** Recursion depth of \begin{pgfscope}...\end{pgfscope} commands. */
     private static int scopeDepth = 0;
@@ -148,6 +152,7 @@ public class PGFDevice implements OutputDevice {
         deviceStatus.setKey(KEY_LAST_DASHOFFSET, new PSObjectReal(0.0));
         deviceStatus.setKey(KEY_LAST_COLOR, new PSObjectArray());
         deviceStatus.setKey(KEY_LAST_LINECAP, new PSObjectInt(0));
+        deviceStatus.setKey(KEY_LAST_LINEJOIN, new PSObjectInt(0));
         
         out.write("% Created by " + net.sf.eps2pgf.Main.getNameVersion() + " ");
         Date now = new Date();
@@ -224,6 +229,7 @@ public class PGFDevice implements OutputDevice {
         updateDash(gstate);
         updateLinewidth(gstate);
         updateLinecap(gstate);
+        updateLinejoin(gstate);
         updateColor(gstate);
         writePath(gstate.getPath());
         out.write("\\pgfusepath{stroke}\n");
@@ -443,27 +449,34 @@ public class PGFDevice implements OutputDevice {
     }
     
     /**
-     * Implements PostScript operator setlinejoin.
+     * Updates the line join in the output.
      * 
-     * @param join Join type (see PostScript manual)
+     * @param gstate The current graphics state.
      * 
      * @throws IOException Unable to write output
-     * @throws PSErrorRangeCheck Invalid join type
+     * @throws PSError A PostScript error occurred.
      */
-    public void setlinejoin(final int join)
-            throws IOException, PSErrorRangeCheck {
-        switch (join) {
-            case 0:
-                out.write("\\pgfsetmiterjoin\n");
-                break;
-            case 1:
-                out.write("\\pgfsetroundjoin\n");
-                break;
-            case 2:
-                out.write("\\pgfsetbeveljoin\n");
-                break;
-            default:
-                throw new PSErrorRangeCheck();
+    private void updateLinejoin(final GraphicsState gstate)
+            throws IOException, PSError {
+        
+        int lastJoin = deviceStatus.get(KEY_LAST_LINEJOIN).toInt();
+        int join = gstate.getLineJoin();
+        
+        if (lastJoin != join) {
+            switch (join) {
+                case 0:
+                    out.write("\\pgfsetmiterjoin\n");
+                    break;
+                case 1:
+                    out.write("\\pgfsetroundjoin\n");
+                    break;
+                case 2:
+                    out.write("\\pgfsetbeveljoin\n");
+                    break;
+                default:
+                    throw new PSErrorRangeCheck();
+            }
+            deviceStatus.setKey(KEY_LAST_LINEJOIN, new PSObjectInt(join));
         }        
     }
     
