@@ -147,17 +147,6 @@ public interface OutputDevice extends Cloneable {
     void stroke(GraphicsState gstate) throws IOException, PSError;
     
     /**
-     * Implements PostScript operator setlinecap.
-     * 
-     * @param cap Line cap parameter. 0: butt cap, 1: round cap, or
-     *            2: projecting square cap.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
-     */
-    void setlinecap(int cap) throws IOException, PSErrorRangeCheck;
-    
-    /**
      * Implements PostScript operator setlinejoin.
      * 
      * @param join Line join parameter. 0: miter join, 1: round join, or

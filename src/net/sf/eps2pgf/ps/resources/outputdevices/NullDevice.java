@@ -144,14 +144,6 @@ public class NullDevice implements OutputDevice {
     }
     
     /**
-     * Implements PostScript operator setlinecap.
-     * 
-     * @param cap The cap.
-     */
-    public void setlinecap(final int cap) {
-    }
-    
-    /**
      * Implements PostScript operator setlinejoin.
      * 
      * @param join The join.

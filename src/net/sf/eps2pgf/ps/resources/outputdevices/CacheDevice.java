@@ -233,15 +233,6 @@ public class CacheDevice implements OutputDevice {
     }
     
     /**
-     * Implements PostScript operator setlinecap.
-     * 
-     * @param cap Line cap parameter. 0: butt cap, 1: round cap, or
-     *            2: projecting square cap.
-     */
-    public void setlinecap(final int cap) {
-    }
-    
-    /**
      * Implements PostScript operator setlinejoin.
      * 
      * @param join Line join parameter. 0: miter join, 1: round join, or
