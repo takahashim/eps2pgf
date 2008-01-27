@@ -10,7 +10,6 @@ import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
-import net.sf.eps2pgf.ps.resources.colors.PSColor;
 
 /**
  * Device that writes only the labels to the output.
@@ -108,9 +107,9 @@ public class LOLDevice implements OutputDevice {
      * the output document. The even-odd rule is used to determine which point
      * are inside the path.
      * 
-     * @param clipPath Path to use for clipping
+     * @param gstate Current graphics state.
      */
-    public void eoclip(final Path clipPath) {
+    public void eoclip(final GraphicsState gstate) {
 
     }
 
@@ -118,9 +117,9 @@ public class LOLDevice implements OutputDevice {
      * Fills a path using the even-odd rule.
      * See the PostScript manual (fill operator) for more info.
      * 
-     * @param path the path
+     * @param gstate Current graphics state.
      */
-    public void eofill(final Path path) {
+    public void eofill(final GraphicsState gstate) {
 
     }
 
@@ -139,9 +138,9 @@ public class LOLDevice implements OutputDevice {
      * Fills a path using the non-zero rule
      * See the PostScript manual (fill operator) for more info.
      * 
-     * @param path the path
+     * @param gstate Current graphics state.
      */
-    public void fill(final Path path) {
+    public void fill(final GraphicsState gstate) {
 
     }
 
@@ -157,15 +156,6 @@ public class LOLDevice implements OutputDevice {
      * writes a header.
      */
     public void init() {
-
-    }
-
-    /**
-     * Sets the current color in gray, rgb or cmyk.
-     * 
-     * @param color The color.
-     */
-    public void setColor(final PSColor color) {
 
     }
 
@@ -220,12 +210,14 @@ public class LOLDevice implements OutputDevice {
      *               t - top, c - center, B - baseline b - bottom
      *               l - left, c - center, r - right
      *               e.g. Br = baseline,right
+     * @param gstate Current graphics state.
      *               
      * @throws IOException Unable to write output
      */
     public void show(final String text, final double[] position,
-            final double angle, final double fontsize, final String anchor)
-            throws IOException {
+            final double angle, final double fontsize, final String anchor,
+            final GraphicsState gstate) throws IOException {
+        
         out.write(String.format("\\overlaylabel(%s,%s)[%s][%s]{%s}\n",
                 FLOAT_FORMAT.format(position[0]),
                 FLOAT_FORMAT.format(position[1]),

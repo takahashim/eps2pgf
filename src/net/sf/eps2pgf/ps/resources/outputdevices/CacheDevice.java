@@ -25,7 +25,6 @@ import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.errors.PSErrorNoCurrentPoint;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
-import net.sf.eps2pgf.ps.resources.colors.PSColor;
 
 /**
  * Cache device, used to create glyphs.
@@ -154,11 +153,11 @@ public class CacheDevice implements OutputDevice {
      * Fills a path using the non-zero rule.
      * See the PostScript manual (fill operator) for more info.
      * 
-     * @param path the path
+     * @param gstate Current graphics state.
      */
-    public void fill(final Path path) {
+    public void fill(final GraphicsState gstate) {
         try {
-            this.mergeBbox(path.boundingBox());
+            this.mergeBbox(gstate.getPath().boundingBox());
         } catch (PSErrorNoCurrentPoint e) {
             // do nothing
         }
@@ -169,20 +168,20 @@ public class CacheDevice implements OutputDevice {
      * the output document. The even-odd rule is used to determine which point
      * are inside the path.
      * 
-     * @param clipPath Path to use for clipping
+     * @param gstate Current graphics state.
      */
-    public void eoclip(final Path clipPath) {
+    public void eoclip(final GraphicsState gstate) {
     }
 
     /**
      * Fills a path using the even-odd rule.
      * See the PostScript manual (fill operator) for more info.
      * 
-     * @param path the path
+     * @param gstate Current graphics state.
      */
-    public void eofill(final Path path) {
+    public void eofill(final GraphicsState gstate) {
         try {
-            this.mergeBbox(path.boundingBox());
+            this.mergeBbox(gstate.getPath().boundingBox());
         } catch (PSErrorNoCurrentPoint e) {
             // do nothing
         }
@@ -252,14 +251,6 @@ public class CacheDevice implements OutputDevice {
     }
     
     /**
-     * Sets the current color in gray, rgb or cmyk.
-     * 
-     * @param color The color.
-     */
-    public void setColor(final PSColor color) {
-    }
-    
-    /**
      * Sets the miter limit.
      * 
      * @param num The miter limit.
@@ -290,9 +281,11 @@ public class CacheDevice implements OutputDevice {
      *               t - top, c - center, B - baseline b - bottom
      *               l - left, c - center, r - right
      *               e.g. Br = baseline,right
+     * @param gstate Current graphics state.
      */
     public void show(final String text, final double[] position,
-            final double angle, final double fontsize, final String anchor) {
+            final double angle, final double fontsize, final String anchor,
+            final GraphicsState gstate) {
     }
     
     /**

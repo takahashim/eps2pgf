@@ -572,7 +572,6 @@ public class GraphicsState implements Cloneable {
      */
     public void setcolor(final double[] newColor) throws IOException, PSError {
         color.setColor(newColor);
-        device.setColor(color);
     }
     
     /**
@@ -580,18 +579,13 @@ public class GraphicsState implements Cloneable {
      * 
      * @param obj Object describing the color space. Should be a literal name or
      *            an array starting with a literal name.
-     * @param writeDevice Write new current color to output device?
      * 
      * @throws PSError A PostScript error has occurred.
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void setcolorspace(final PSObject obj, final boolean writeDevice)
-            throws PSError, IOException {
-        this.color = ColorUtils.autoSetColorSpace(obj);
+    public void setcolorspace(final PSObject obj) throws PSError, IOException {
         
-        if (writeDevice) {
-            this.device.setColor(this.color);
-        }
+        color = ColorUtils.autoSetColorSpace(obj);
     }
     
     /**

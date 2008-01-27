@@ -40,6 +40,7 @@ import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
+import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectReal;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.shadings.RadialShading;
@@ -70,6 +71,21 @@ public class PGFDevice implements OutputDevice {
      */
     static final DecimalFormat COLOR_FORMAT = new DecimalFormat("#.######",
             new DecimalFormatSymbols(Locale.US));
+    
+    /** Key of last color. */
+    static final PSObjectName KEY_LAST_COLOR = new PSObjectName("/lastcolor");
+    
+    /** Key of last line width. */
+    static final PSObjectName KEY_LAST_LINEWIDTH =
+        new PSObjectName("/lastlinewidth");
+    
+    /** Key of last dash pattern. */
+    static final PSObjectName KEY_LAST_DASHPATTERN =
+        new PSObjectName("/lastdashpattern");
+    
+    /** Key of last dash offset. */
+    static final PSObjectName KEY_LAST_DASHOFFSET =
+        new PSObjectName("/lastdashpattern");
     
     
     /** Recursion depth of \begin{pgfscope}...\end{pgfscope} commands. */
@@ -121,11 +137,11 @@ public class PGFDevice implements OutputDevice {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void init() throws PSError, IOException {
-        // Force setting the line width by setting the last width to an
-        // impossible/negative value.
-        deviceStatus.setKey("pgf_last_linewidth", new PSObjectReal(-1.0));
-        deviceStatus.setKey("pgf_last_dashpattern", new PSObjectArray());
-        deviceStatus.setKey("pgf_last_dashoffset", new PSObjectReal(0.0));
+        
+        deviceStatus.setKey(KEY_LAST_LINEWIDTH, new PSObjectReal(-1.0));
+        deviceStatus.setKey(KEY_LAST_DASHPATTERN, new PSObjectArray());
+        deviceStatus.setKey(KEY_LAST_DASHOFFSET, new PSObjectReal(0.0));
+        deviceStatus.setKey(KEY_LAST_COLOR, new PSObjectArray());
         
         out.write("% Created by " + net.sf.eps2pgf.Main.getNameVersion() + " ");
         Date now = new Date();
@@ -201,6 +217,7 @@ public class PGFDevice implements OutputDevice {
     public void stroke(final GraphicsState gstate) throws IOException, PSError {
         updateDash(gstate);
         updateLinewidth(gstate);
+        updateColor(gstate);
         writePath(gstate.getPath());
         out.write("\\pgfusepath{stroke}\n");
     }
@@ -245,31 +262,33 @@ public class PGFDevice implements OutputDevice {
      * Fills a path using the non-zero rule.
      * See the PostScript manual (fill operator) for more info.
      * 
-     * @param path the path
+     * @param gstate Current graphics state.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     *                              (yet) implemented.
+     * @throws PSError A PostScript error occurred.
      */
-    public void fill(final Path path) throws IOException, PSErrorUnimplemented {
-        writePath(path);
+    public void fill(final GraphicsState gstate) throws IOException, PSError {
+        updateColor(gstate);
+        writePath(gstate.getPath());
         out.write("\\pgfusepath{fill}\n");
     }
-        
+    
     /**
      * Set the current clipping path in the graphics state as clipping path in
      * the output document. The even-odd rule is used to determine which point
      * are inside the path.
      * 
-     * @param clipPath Path to use for clipping
+     * @param gstate The current graphics state.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     *                              (yet) implemented.
+     * (yet) implemented.
+     * @throws PSError A PostScript error occurred.
      */
-    public void eoclip(final Path clipPath)
-            throws IOException, PSErrorUnimplemented {
-        writePath(clipPath);
+    public void eoclip(final GraphicsState gstate)
+            throws IOException, PSError {
+        
+        updateColor(gstate);
+        writePath(gstate.getClippingPath());
         out.write("\\pgfseteorule\\pgfusepath{clip}\\pgfsetnonzerorule\n");
     }
     
@@ -277,15 +296,16 @@ public class PGFDevice implements OutputDevice {
      * Fills a path using the even-odd rule.
      * See the PostScript manual (fill operator) for more info.
      * 
-     * @param path the path
+     * @param gstate The current graphics state.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     * (yet) implemented.
+     * @throws PSError A PostScript error occurred.
      */
-    public void eofill(final Path path)
-            throws IOException, PSErrorUnimplemented {
-        writePath(path);
+    public void eofill(final GraphicsState gstate)
+            throws IOException, PSError {
+        
+        updateColor(gstate);
+        writePath(gstate.getPath());
         out.write("\\pgfseteorule\\pgfusepath{fill}\\pgfsetnonzerorule\n");
     }
     
@@ -300,6 +320,8 @@ public class PGFDevice implements OutputDevice {
      */
     public void shfill(final PSObjectDict dict, final GraphicsState gstate)
             throws PSError, IOException {
+        
+        updateColor(gstate);
         Shading shading = Shading.newShading(dict);
         if (shading instanceof RadialShading) {
             radialShading((RadialShading) shading, gstate);
@@ -434,16 +456,18 @@ public class PGFDevice implements OutputDevice {
     }
     
     /**
-     * Implements PostScript operator setdash.
+     * Updates dash pattern in PGF output.
      * 
      * @param gstate Current graphics state
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      */
-    void updateDash(final GraphicsState gstate) throws IOException, PSError {
-        String lastPattern = deviceStatus.get("pgf_last_dashpattern").isis();
-        double lastOffset = deviceStatus.get("pgf_last_dashoffset").toReal();
+    private void updateDash(final GraphicsState gstate)
+            throws IOException, PSError {
+        
+        String lastPattern = deviceStatus.get(KEY_LAST_DASHPATTERN).isis();
+        double lastOffset = deviceStatus.get(KEY_LAST_DASHOFFSET).toReal();
         
         double scaling = gstate.getCtm().getMeanScaling();
         PSObjectArray currentArray = new PSObjectArray();
@@ -469,8 +493,8 @@ public class PGFDevice implements OutputDevice {
                 out.write("}{" + LENGTH_FORMAT.format(1e-4 * currentOffset)
                         + "cm}\n");
             }
-            deviceStatus.setKey("pgf_last_dashpattern", currentArray);
-            deviceStatus.setKey("pgf_last_dashoffset",
+            deviceStatus.setKey(KEY_LAST_DASHPATTERN, currentArray);
+            deviceStatus.setKey(KEY_LAST_DASHOFFSET,
                     new PSObjectReal(currentOffset));
         }
     }
@@ -484,16 +508,17 @@ public class PGFDevice implements OutputDevice {
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    void updateLinewidth(final GraphicsState gstate)
+    private void updateLinewidth(final GraphicsState gstate)
             throws PSError, IOException {
         
-        double lastWidth = deviceStatus.get("pgf_last_linewidth").toReal();
+        double lastWidth = deviceStatus.get(KEY_LAST_LINEWIDTH).toReal();
         double currentWidth = gstate.getLineWidth()
                                        * gstate.getCtm().getMeanScaling();
+        
         if (Math.abs(currentWidth - lastWidth) > 1e-10) {
             out.write("\\pgfsetlinewidth{"
                     + LENGTH_FORMAT.format(1e-3 * currentWidth) + "mm}\n");
-            deviceStatus.setKey("pgf_last_linewidth",
+            deviceStatus.setKey(KEY_LAST_LINEWIDTH,
                     new PSObjectReal(currentWidth));
         }
         //TODO: Implement a similar update mechanism for other properties
@@ -535,22 +560,45 @@ public class PGFDevice implements OutputDevice {
     }
 
     /**
-     * Sets the current color in gray, RGB or CMYK.
+     * Updates the current color in gray, RGB or CMYK in the PGF output.
      * 
-     * @param color Depending on the length of the array. If it has one
-     * parameter it is a gray value, if it has three parameters it are RGB
-     * values and if it has four parameters it are CMYK values.
+     * @param gstate Current graphics state.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    public void setColor(final PSColor color) throws IOException {
-        if (color.getNrComponents() >= 4) {
+    private void updateColor(final GraphicsState gstate)
+            throws IOException, PSError {
+        
+        // Check whether current color is the same as the last color
+        PSObjectArray lastColor = deviceStatus.get(KEY_LAST_COLOR).toArray();
+        PSColor color = gstate.getColor();
+        int n = color.getNrComponents();
+        boolean equal = true;
+        if (n != lastColor.length()) {
+            equal = false;
+        } else {
+            for (int i = 0; i < n; i++) {
+                if (Math.abs(lastColor.get(i).toReal() - color.getLevel(i))
+                        > 1e-6) {
+                    
+                    equal = false;
+                    break;
+                }
+            }            
+        }
+        if (equal) {
+            // Last color and current color are equal. There is nothing to do.
+            return;
+        }
+        
+        if (n >= 4) {
             out.write("\\definecolor{eps2pgf_color}{cmyk}{"
                     + COLOR_FORMAT.format(color.getLevel(0))
                     + "," + COLOR_FORMAT.format(color.getLevel(1))
                     + "," + COLOR_FORMAT.format(color.getLevel(2))
                     + "," + COLOR_FORMAT.format(color.getLevel(3)) + "}");
-        } else if (color.getNrComponents() == 3) {
+        } else if (n == 3) {
             out.write("\\definecolor{eps2pgf_color}{rgb}{"
                     + COLOR_FORMAT.format(color.getLevel(0))
                     + "," + COLOR_FORMAT.format(color.getLevel(1))
@@ -562,6 +610,12 @@ public class PGFDevice implements OutputDevice {
         
         out.write("\\pgfsetstrokecolor{eps2pgf_color}");
         out.write("\\pgfsetfillcolor{eps2pgf_color}\n");
+        
+        PSObjectArray newColor = new PSObjectArray();
+        for (int i = 0; i < n; i++) {
+            newColor.addToEnd(new PSObjectReal(color.getLevel(i)));
+        }
+        deviceStatus.setKey(KEY_LAST_COLOR, newColor);
     }
 
     /**
@@ -570,18 +624,23 @@ public class PGFDevice implements OutputDevice {
      * @param text Exact text to draw
      * @param position Text anchor point in [micrometer, micrometer]
      * @param angle Text angle in degrees
-     * @param pFontsize in PostScript pt (= 1/72 inch). If fontsize is NaN, the
-     *        font size is not set and completely determined by LaTeX.
+     * @param pFontsize in PostScript pt (= 1/72 inch). If font size is NaN, the
+     * font size is not set and completely determined by LaTeX.
      * @param anchor String with two characters:
-     *               t - top, c - center, B - baseline b - bottom
-     *               l - left, c - center, r - right
-     *               e.g. Br = baseline,right
-     *               
+     * t - top, c - center, B - baseline b - bottom
+     * l - left, c - center, r - right
+     * e.g. Br = baseline,right
+     * @param gstate The current graphics state.
+     * 
      * @throws IOException Unable to write output
+     * @throws PSError A PostScript error occurred.
      */
     public void show(final String text, final double[] position,
-            final double angle, final double pFontsize, final String anchor)
-            throws IOException {
+            final double angle, final double pFontsize, final String anchor,
+            final GraphicsState gstate) throws IOException, PSError {
+        
+        updateColor(gstate);
+        
         String x = COOR_FORMAT.format(1e-4 * position[0]);
         String y = COOR_FORMAT.format(1e-4 * position[1]);
         
