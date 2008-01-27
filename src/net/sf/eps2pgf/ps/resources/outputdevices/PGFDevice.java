@@ -96,6 +96,10 @@ public class PGFDevice implements OutputDevice {
     static final PSObjectName KEY_LAST_LINEJOIN =
         new PSObjectName("/lastlinejoin");
     
+    /** Key of last miter limit. */
+    static final PSObjectName KEY_LAST_MITERLIMIT =
+        new PSObjectName("/lastmiterlimit");
+    
     
     /** Recursion depth of \begin{pgfscope}...\end{pgfscope} commands. */
     private static int scopeDepth = 0;
@@ -153,6 +157,7 @@ public class PGFDevice implements OutputDevice {
         deviceStatus.setKey(KEY_LAST_COLOR, new PSObjectArray());
         deviceStatus.setKey(KEY_LAST_LINECAP, new PSObjectInt(0));
         deviceStatus.setKey(KEY_LAST_LINEJOIN, new PSObjectInt(0));
+        deviceStatus.setKey(KEY_LAST_MITERLIMIT, new PSObjectReal(10.0));
         
         out.write("% Created by " + net.sf.eps2pgf.Main.getNameVersion() + " ");
         Date now = new Date();
@@ -227,9 +232,10 @@ public class PGFDevice implements OutputDevice {
      */
     public void stroke(final GraphicsState gstate) throws IOException, PSError {
         updateDash(gstate);
-        updateLinewidth(gstate);
-        updateLinecap(gstate);
-        updateLinejoin(gstate);
+        updateLineWidth(gstate);
+        updateLineCap(gstate);
+        updateLineJoin(gstate);
+        updateMiterLimit(gstate);
         updateColor(gstate);
         writePath(gstate.getPath());
         out.write("\\pgfusepath{stroke}\n");
@@ -425,7 +431,7 @@ public class PGFDevice implements OutputDevice {
      * @throws IOException Unable to write output
      * @throws PSError A PostScript error occurred.
      */
-    private void updateLinecap(final GraphicsState gstate)
+    private void updateLineCap(final GraphicsState gstate)
             throws IOException, PSError {
         
         int cap = gstate.getLineCap();
@@ -456,7 +462,7 @@ public class PGFDevice implements OutputDevice {
      * @throws IOException Unable to write output
      * @throws PSError A PostScript error occurred.
      */
-    private void updateLinejoin(final GraphicsState gstate)
+    private void updateLineJoin(final GraphicsState gstate)
             throws IOException, PSError {
         
         int lastJoin = deviceStatus.get(KEY_LAST_LINEJOIN).toInt();
@@ -533,7 +539,7 @@ public class PGFDevice implements OutputDevice {
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private void updateLinewidth(final GraphicsState gstate)
+    private void updateLineWidth(final GraphicsState gstate)
             throws PSError, IOException {
         
         double lastWidth = deviceStatus.get(KEY_LAST_LINEWIDTH).toReal();
@@ -546,20 +552,26 @@ public class PGFDevice implements OutputDevice {
             deviceStatus.setKey(KEY_LAST_LINEWIDTH,
                     new PSObjectReal(currentWidth));
         }
-        //TODO: Implement a similar update mechanism for other properties
-        //      such as color, linejoin, linecap, miterlimit
-        
     }
     
     /**
      * Sets the miter limit.
      * 
-     * @param miterLimit The miter limit.
+     * @param gstate The current graphics state.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    public void setmiterlimit(final double miterLimit) throws IOException {
-        out.write("\\pgfsetmiterlimit{" + miterLimit + "}\n");
+    private void updateMiterLimit(final GraphicsState gstate)
+            throws IOException, PSError {
+        
+        double lastLimit = deviceStatus.get(KEY_LAST_MITERLIMIT).toReal();
+        double limit = gstate.getMiterLimit();
+        
+        if (Math.abs(lastLimit - limit) > 1e-6) {
+            out.write("\\pgfsetmiterlimit{" + limit + "}\n");
+            deviceStatus.setKey(KEY_LAST_MITERLIMIT, new PSObjectReal(limit));
+        }
     }
     
    /**

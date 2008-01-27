@@ -78,6 +78,9 @@ public class GraphicsState implements Cloneable {
     /** Current line join. */
     private int lineJoin = 0;
     
+    /** Current liter limit. */
+    private double miterLimit = 10.0;
+    
     /** Current dash pattern. */
     private PSObjectArray dashPattern = new PSObjectArray();
     
@@ -847,6 +850,24 @@ public class GraphicsState implements Cloneable {
      */
     public int getLineJoin() {
         return lineJoin;
+    }
+
+    /**
+     * Sets the current miter limit.
+     * 
+     * @param pMiterLimit the miterLimit to set
+     */
+    public void setMiterLimit(final double pMiterLimit) {
+        miterLimit = pMiterLimit;
+    }
+
+    /**
+     * Sets the miter limit.
+     * 
+     * @return the miterLimit
+     */
+    public double getMiterLimit() {
+        return miterLimit;
     }
 
 }

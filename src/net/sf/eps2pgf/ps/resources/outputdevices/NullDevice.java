@@ -144,14 +144,6 @@ public class NullDevice implements OutputDevice {
     }
     
     /**
-     * Sets the miter limit.
-     * 
-     * @param num The num.
-     */
-    public void setmiterlimit(final double num) {
-    }
-    
-    /**
      * Starts a new scope.
      */
     public void startScope() {

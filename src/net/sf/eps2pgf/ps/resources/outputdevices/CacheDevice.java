@@ -233,14 +233,6 @@ public class CacheDevice implements OutputDevice {
     }
     
     /**
-     * Sets the miter limit.
-     * 
-     * @param num The miter limit.
-     */
-    public void setmiterlimit(final double num) {
-    }
-    
-    /**
      * Starts a new scope.
      */
     public void startScope() {

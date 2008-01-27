@@ -2757,11 +2757,12 @@ public class Interpreter {
      */
     public void op_setmiterlimit() throws PSErrorStackUnderflow,
             PSErrorTypeCheck, PSErrorRangeCheck, IOException {
+        
         double num = getOpStack().pop().toReal();
         if (num < 1.0) {
             throw new PSErrorRangeCheck();
         }
-        gstate.current().getDevice().setmiterlimit(num);
+        gstate.current().setMiterLimit(num);
     }
     
     /**
