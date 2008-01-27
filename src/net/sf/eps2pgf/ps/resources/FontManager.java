@@ -56,9 +56,6 @@ public final class FontManager extends PSObjectDict {
     private static final PSObjectName DEFAULT_FONT =
                                           new PSObjectName("Times-Roman", true);
     
-    /** Directory with font resources. */
-    private static File resourceDir;
-    
     /** Some fonts are substituted by another font. This list describes this. */
     private static Properties fontSubstitutions;
     
@@ -72,14 +69,11 @@ public final class FontManager extends PSObjectDict {
     private static final Logger LOG =
                                     Logger.getLogger("net.sourceforge.eps2pgf");
     
-    /** Name of directory containing font resources. */
-    private static final String RESOURCE_DIR_NAME = "resources";
-    
     /** Name of directory (within resource dir) with afm files. */
-    private static final String AFM_DIR_NAME = "afm";
+    public static final String AFM_DIR_NAME = "afm";
     
     /** Name of directory (within resource dir) with font descriptions. */
-    private static final String FONTDESC_DIR_NAME = "fontdescriptions";
+    public static final String FONTDESC_DIR_NAME = "fontdescriptions";
     
     /** Name of directory (within resource dir) with TeX strings. */
     private static final String TEXSTRINGS_DIR_NAME = "texstrings";
@@ -132,42 +126,9 @@ public final class FontManager extends PSObjectDict {
      */
     public static void initialize() throws ProgramError {
         if (!alreadyInitialized) {
-            //TODO: move this findResourceDirectory algorithm to its own method.
-            // Try to find the resource dir in the current directory, ...
-            File userDir = new File(System.getProperty("user.dir"));
-
-            // ..., or relative to the class path
-            String fullClassPath = System.getProperty("java.class.path");
-            int index = fullClassPath.indexOf(';');
-            File classPath;
-            if (index == -1) {
-                classPath = new File(fullClassPath);
-            } else {
-                classPath = new File(fullClassPath.substring(0, index));
-            }
-            if (!(classPath.isAbsolute())) {
-                classPath = new File(userDir, classPath.getPath()); 
-            }
-            if (classPath.isFile()) {
-                classPath = classPath.getParentFile();
-            }
             
-            // ..., or in the dist_root directory in the current directory.
-            File distRoot = new File(userDir, "dist_root");
-
-            resourceDir = findResourceDirInPath(classPath);
-            if (resourceDir == null) {
-                resourceDir = findResourceDirInPath(userDir);
-            }
-            if (resourceDir == null) {
-                resourceDir = findResourceDirInPath(distRoot);
-            }
-            if (resourceDir == null) {
-                throw new ProgramError("Unable to find resource dir.");
-            }
-            
-            fontSubstitutions = loadFontSubstitutions(new File(resourceDir,
-                    "fontSubstitution.xml"));
+            fontSubstitutions = loadFontSubstitutions(
+                    new File(Utils.getResourceDir(), "fontSubstitution.xml"));
             allTexStrings = loadAllTexstrings();
             
             alreadyInitialized = true;
@@ -250,39 +211,6 @@ public final class FontManager extends PSObjectDict {
     }
     
     /**
-     * Try to find the resource in the current directory or its parent
-     * directories.
-     * 
-     * @param pDir The directory path to search.
-     * 
-     * @return the file
-     */
-    private static File findResourceDirInPath(final File pDir) {
-        File dir = pDir;
-        File returnDir = null;
-        
-        while (dir != null) {
-            // Check whether this dir has a valid resource subdir
-            // It just checks for a "resources" directory with two known
-            // subdirectories.
-            returnDir = new File(dir, RESOURCE_DIR_NAME);
-            if (returnDir.exists()) {
-                File afmDir = new File(returnDir, AFM_DIR_NAME);
-                if (afmDir.exists()) {
-                    File fontDescDir = new File(returnDir, FONTDESC_DIR_NAME);
-                    if (fontDescDir.exists()) {
-                        break;
-                    }
-                }
-            }
-            returnDir = null;
-            dir = dir.getParentFile();
-        }
-        
-        return returnDir;
-    }
-    
-    /**
      * Search the font substitution list for a font.
      * 
      * @return If the requested font is found in the substitution list the
@@ -320,8 +248,9 @@ public final class FontManager extends PSObjectDict {
     private PSObjectFont loadFont(final PSObject fontKey)
             throws PSError, ProgramError {
         String fontName = fontKey.toString();
-        LOG.info("Loading " + fontName + " font from " + resourceDir);
-        PSObjectFont font = new PSObjectFont(resourceDir, fontName);
+        LOG.info("Loading " + fontName + " font from "
+                + Utils.getResourceDir());
+        PSObjectFont font = new PSObjectFont(Utils.getResourceDir(), fontName);
         
         // Now the font is loaded, add it to the fonts list so that it
         // doesn't need to loaded again.
@@ -363,7 +292,9 @@ public final class FontManager extends PSObjectDict {
      */
     private static Map<String, Properties> loadAllTexstrings()
             throws ProgramError {
-        File texStringsDir = new File(resourceDir, TEXSTRINGS_DIR_NAME);
+        
+        File texStringsDir = new File(Utils.getResourceDir(),
+                TEXSTRINGS_DIR_NAME);
         File[] texStringFiles = texStringsDir.listFiles();
         Map<String, Properties> texStrings = new HashMap<String, Properties>();
         

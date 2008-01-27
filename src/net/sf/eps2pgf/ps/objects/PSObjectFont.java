@@ -147,7 +147,7 @@ public class PSObjectFont extends PSObjectDict {
         
         super();
         
-        File fontFile = new File(resourceDir, "fontdescriptions"
+        File fontFile = new File(resourceDir, FontManager.FONTDESC_DIR_NAME
                 + File.separator + fontName + ".font");
 
         Properties props;
@@ -565,7 +565,7 @@ public class PSObjectFont extends PSObjectDict {
     public FontMetric loadAfm(final File resourceDir, final String fontName)
             throws PSErrorInvalidFont {
         
-        File afmFile = new File(resourceDir, "afm"
+        File afmFile = new File(resourceDir, FontManager.AFM_DIR_NAME
                 + File.separator + fontName + ".afm");
         
         FontMetric fontMetric;
