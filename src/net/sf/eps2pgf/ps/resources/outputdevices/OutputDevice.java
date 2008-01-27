@@ -173,15 +173,6 @@ public interface OutputDevice extends Cloneable {
     void drawRect(double[] lowerLeft, double[] upperRight) throws IOException;
 
     /**
-     * Sets the miter limit.
-     * 
-     * @param num The miter limit.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    void setmiterlimit(double num) throws IOException;
-    
-    /**
      * Draws text.
      * 
      * @param text Exact text to draw

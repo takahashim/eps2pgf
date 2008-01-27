@@ -160,15 +160,6 @@ public class LOLDevice implements OutputDevice {
     }
 
     /**
-     * Sets the miter limit.
-     * 
-     * @param num The miter limit.
-     */
-    public void setmiterlimit(final double num) {
-
-    }
-
-    /**
      * Shading fill (shfill PostScript operator).
      * 
      * @param dict Shading to use.
