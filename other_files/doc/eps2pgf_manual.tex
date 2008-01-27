@@ -1,0 +1,94 @@
+%
+% eps2pgf_manual.tex
+%
+% This file is part of Eps2pgf.
+%
+% Copyright 2008 Paul Wagenaars <paul@wagenaars.org>
+%
+% Licensed under the Apache License, Version 2.0 (the "License");
+% you may not use this file except in compliance with the License.
+% You may obtain a copy of the License at
+%
+%     http://www.apache.org/licenses/LICENSE-2.0
+%
+% Unless required by applicable law or agreed to in writing, software
+% distributed under the License is distributed on an "AS IS" BASIS,
+% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+% See the License for the specific language governing permissions and
+% limitations under the License.
+%
+
+\documentclass{article}
+
+\usepackage{hyperref}
+
+\title{Eps2pgf @VERSION@ User Manual}
+\author{Paul Wagenaars}
+\date{@BUILDDATE@}
+
+\makeatletter
+\hypersetup{
+    pdftitle={\@title},
+    pdfauthor={\@author}
+}
+\makeatother
+
+\newcommand{\cmdarg}[2]{
+    \par\indent\texttt{#1}
+    \smallskip
+    \par\indent\indent\parbox{10.9cm}{#2}
+    \medskip
+}
+
+\begin{document}
+    \maketitle
+    \tableofcontents
+
+    \section{Introduction}
+    Eps2pgf is a PostScript interpreter that converts \href{http://en.wikipedia.org/wiki/Encapsulated_PostScript}{Encapsulated PostScript} (EPS) figures to the \href{http://sourceforge.net/projects/pgf/}{Portable Graphics Format} (PGF). PGF/TikZ is a \TeX{} macro package for generating graphics. It support several back-end drivers, including pdf\TeX{} and Dvips. The major advantage of Eps2pgf is that all texts are typeset by \TeX, giving you all the powerful typesetting features and a uniform look of the final document. It has several options to control how text in figures is handled: (i) reproduce text labels accurately (with same font size and formatting as in EPS figure), (ii) copy text labels verbatim (text in EPS figure is \TeX{} code), or (iii) replace text labels using \href{http://www.ctan.org/tex-archive/help/Catalogue/entries/psfrag.html}{\textsf{PSfrag}}-compatible rules from a separate file with tags, or using tags embedded in the text labels.
+
+    The goal of Eps2pgf is to support all PostScript figures created by programs regularly used by \TeX{} users to create figures, such as MATLAB, Mathematica and Maple. If you encounter a figure that Eps2pgf fails to process, please report it using the bug tracker (\url{http://sourceforge.net/tracker/?group_id=188852&atid=926973}), or send it via email.
+
+    \section{Requirements}
+    \begin{itemize}
+        \item Java Runtime Environment (version 1.5 or higher)
+        \item \LaTeX{}, with the \textsf{pgf} package
+    \end{itemize}
+
+    \section{Command line arguments}
+
+    \noindent\texttt{java -jar eps2pgf <inputfile> -o <outputfilename>}
+
+    \medskip
+
+    \cmdarg{<inputfile>}{(Encapsulated) PostScript (EPS or PS) input file.}
+
+    \cmdarg{(-o|--output) <outputfilename>}{Write output to this file. (default: input file with \texttt{.pgf} extension)}
+
+    \noindent The following arguments are optional:
+
+    \medskip
+
+    \cmdarg{[(-m|--text-mode) <textmode>]}{
+        Text label handling. Accepted values: \texttt{exact} (text is reproduced as
+        closely as possible), or \texttt{directcopy} (text is directly copied to the
+        output and scanned for embedded \textsf{PSfrag} text replacement rules).
+        (default: \texttt{exact})
+    }
+
+    \cmdarg{[--text-replace <textreplacefile>]}{File containing \textsf{PSfrag} commands describing text replacements.}
+
+    \cmdarg{[--verbose]}{Display more information during the conversion.}
+
+    \cmdarg{[--version]}{Display version information.}
+
+    \cmdarg{[-h|--help]}{Display program usage.}
+
+
+    \section{Text replacements}
+    Eps2pgf offers \href{http://www.ctan.org/tex-archive/help/Catalogue/entries/psfrag.html}{\textsf{PSfrag}}-compatible replacement of text tags in EPS figures.
+
+    \section{Copyright and license}
+    See the files \texttt{NOTICE.txt} and \texttt{LICENSE.txt}. Or run Eps2pgf with the command line option \texttt{--version}.
+
+\end{document}
