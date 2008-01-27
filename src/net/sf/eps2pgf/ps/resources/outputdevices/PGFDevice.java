@@ -39,6 +39,7 @@ import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
+import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectReal;
@@ -86,6 +87,10 @@ public class PGFDevice implements OutputDevice {
     /** Key of last dash offset. */
     static final PSObjectName KEY_LAST_DASHOFFSET =
         new PSObjectName("/lastdashpattern");
+    
+    /** Key of last line cap. */
+    static final PSObjectName KEY_LAST_LINECAP =
+        new PSObjectName("/lastlinecap");
     
     
     /** Recursion depth of \begin{pgfscope}...\end{pgfscope} commands. */
@@ -142,6 +147,7 @@ public class PGFDevice implements OutputDevice {
         deviceStatus.setKey(KEY_LAST_DASHPATTERN, new PSObjectArray());
         deviceStatus.setKey(KEY_LAST_DASHOFFSET, new PSObjectReal(0.0));
         deviceStatus.setKey(KEY_LAST_COLOR, new PSObjectArray());
+        deviceStatus.setKey(KEY_LAST_LINECAP, new PSObjectInt(0));
         
         out.write("% Created by " + net.sf.eps2pgf.Main.getNameVersion() + " ");
         Date now = new Date();
@@ -217,6 +223,7 @@ public class PGFDevice implements OutputDevice {
     public void stroke(final GraphicsState gstate) throws IOException, PSError {
         updateDash(gstate);
         updateLinewidth(gstate);
+        updateLinecap(gstate);
         updateColor(gstate);
         writePath(gstate.getPath());
         out.write("\\pgfusepath{stroke}\n");
@@ -287,7 +294,6 @@ public class PGFDevice implements OutputDevice {
     public void eoclip(final GraphicsState gstate)
             throws IOException, PSError {
         
-        updateColor(gstate);
         writePath(gstate.getClippingPath());
         out.write("\\pgfseteorule\\pgfusepath{clip}\\pgfsetnonzerorule\n");
     }
@@ -408,25 +414,31 @@ public class PGFDevice implements OutputDevice {
     /**
      * Implements PostScript operator setlinecap.
      * 
-     * @param cap Cap type (see PostScript manual for info)
+     * @param gstate The current graphics state.
      * 
      * @throws IOException Unable to write output
-     * @throws PSErrorRangeCheck Invalid cap type
+     * @throws PSError A PostScript error occurred.
      */
-    public void setlinecap(final int cap)
-            throws IOException, PSErrorRangeCheck {
-        switch (cap) {
-            case 0:
-                out.write("\\pgfsetbuttcap\n");
-                break;
-            case 1:
-                out.write("\\pgfsetroundcap\n");
-                break;
-            case 2:
-                out.write("\\pgfsetrectcap\n");
-                break;
-            default:
-                throw new PSErrorRangeCheck();
+    private void updateLinecap(final GraphicsState gstate)
+            throws IOException, PSError {
+        
+        int cap = gstate.getLineCap();
+        int lastCap = deviceStatus.get(KEY_LAST_LINECAP).toInt();
+        if (cap != lastCap) {
+            switch (cap) {
+                case 0:
+                    out.write("\\pgfsetbuttcap\n");
+                    break;
+                case 1:
+                    out.write("\\pgfsetroundcap\n");
+                    break;
+                case 2:
+                    out.write("\\pgfsetrectcap\n");
+                    break;
+                default:
+                    throw new PSErrorRangeCheck();
+            }
+            deviceStatus.setKey(KEY_LAST_LINECAP, new PSObjectInt(cap));
         }
     }
     

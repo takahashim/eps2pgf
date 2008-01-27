@@ -72,6 +72,9 @@ public class GraphicsState implements Cloneable {
     /** Current line width (in user space coordinates). */
     private double lineWidth = 1.0;
     
+    /** Current line cap. */
+    private int lineCap = 0;
+    
     /** Current dash pattern. */
     private PSObjectArray dashPattern = new PSObjectArray();
     
@@ -290,6 +293,7 @@ public class GraphicsState implements Cloneable {
         // flat is primitive, it doesn't need to be cloned explicitly.
         copy.font = font.clone();
         // linewidth is primitive, it doesn't need to be cloned explicitly.
+        // linecap is primitive, is doesn't need to be cloned explicitly.
         copy.path = path.clone();
         copy.position = position.clone();
         
@@ -804,6 +808,24 @@ public class GraphicsState implements Cloneable {
      */
     public OutputDevice getDevice() {
         return device;
+    }
+
+    /**
+     * Sets the line cap.
+     * 
+     * @param pLineCap the lineCap to set
+     */
+    public void setLineCap(final int pLineCap) {
+        lineCap = pLineCap;
+    }
+
+    /**
+     * Gets the current line cap.
+     * 
+     * @return the lineCap
+     */
+    public int getLineCap() {
+        return lineCap;
     }
 
 }

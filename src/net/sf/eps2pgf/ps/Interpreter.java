@@ -2712,7 +2712,7 @@ public class Interpreter {
      */
     public void op_setlinecap() throws PSError, IOException {
         int cap = getOpStack().pop().toNonNegInt();
-        gstate.current().getDevice().setlinecap(cap);
+        gstate.current().setLineCap(cap);
     }
    
     /**
