@@ -24,7 +24,6 @@ import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
-import net.sf.eps2pgf.ps.resources.colors.PSColor;
 
 /**
  * Discards all output written to this device.
@@ -90,27 +89,27 @@ public class NullDevice implements OutputDevice {
      * Fills a path using the non-zero rule
      * See the PostScript manual (fill operator) for more info.
      * 
-     * @param path The path.
+     * @param gstate Current graphics state.
      */
-    public void fill(final Path path) {
+    public void fill(final GraphicsState gstate) {
         
     }
     
     /**
      * Implements 'eoclip'.
      * 
-     * @param clipPath The clip path.
+     * @param gstate Current graphics state.
      */
-    public void eoclip(final Path clipPath) {
+    public void eoclip(final GraphicsState gstate) {
     }
 
     /**
      * Fills a path using the even-odd rule
      * See the PostScript manual (fill operator) for more info.
      * 
-     * @param path The path.
+     * @param gstate Current graphics state.
      */
-    public void eofill(final Path path) {
+    public void eofill(final GraphicsState gstate) {
     }
     
     /**
@@ -161,14 +160,6 @@ public class NullDevice implements OutputDevice {
     }
     
     /**
-     * Sets the current color in gray, rgb or cmyk.
-     * 
-     * @param color The color.
-     */
-    public void setColor(final PSColor color) {
-    }
-    
-    /**
      * Sets the miter limit.
      * 
      * @param num The num.
@@ -194,11 +185,13 @@ public class NullDevice implements OutputDevice {
      * @param text The text.
      * @param position The position.
      * @param angle The angle.
-     * @param fontsize The fontsize.
+     * @param fontsize The font size.
      * @param anchor The anchor.
+     * @param gstate Current graphics state.
      */
     public void show(final String text, final double[] position,
-            final double angle, final double fontsize, final String anchor) {
+            final double angle, final double fontsize, final String anchor,
+            final GraphicsState gstate) {
         
     }
     

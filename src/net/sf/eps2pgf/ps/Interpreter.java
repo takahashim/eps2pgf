@@ -184,8 +184,7 @@ public class Interpreter {
 
         gstate.current().getDevice().init();
         
-        gstate.current().setcolorspace(
-                new PSObjectName("DeviceGray", true), true);
+        gstate.current().setcolorspace(new PSObjectName("DeviceGray", true));
         
         // An eps-file defines a bounding box. Set this bounding box as the
         // default clipping path.
@@ -1312,13 +1311,12 @@ public class Interpreter {
     /**
      * PostScript op: eoclip.
      * 
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     * (yet) implemented.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    public void op_eoclip() throws PSErrorUnimplemented, IOException {
+    public void op_eoclip() throws PSError, IOException {
         gstate.current().clip();
-        gstate.current().getDevice().eoclip(gstate.current().getClippingPath());
+        gstate.current().getDevice().eoclip(gstate.current());
     }
     
     /**
@@ -1328,7 +1326,7 @@ public class Interpreter {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void op_eofill() throws PSError, IOException {
-        gstate.current().getDevice().eofill(gstate.current().getPath());
+        gstate.current().getDevice().eofill(gstate.current());
         op_newpath();
     }
     
@@ -1447,7 +1445,7 @@ public class Interpreter {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void op_fill() throws PSError, IOException {
-        gstate.current().getDevice().fill(gstate.current().getPath());
+        gstate.current().getDevice().fill(gstate.current());
         op_newpath();
     }
     
@@ -2611,8 +2609,7 @@ public class Interpreter {
         double m = getOpStack().pop().toReal();
         double c = getOpStack().pop().toReal();
         double[] cmykValues = {c, m, y, k};
-        gstate.current().setcolorspace(new PSObjectName("DeviceCMYK", true),
-                                                                         false);
+        gstate.current().setcolorspace(new PSObjectName("DeviceCMYK", true));
         gstate.current().setcolor(cmykValues);
     }
     
@@ -2639,7 +2636,7 @@ public class Interpreter {
      */
     public void op_setcolorspace() throws PSError, IOException {
         PSObject arrayOrName = getOpStack().pop();
-        gstate.current().setcolorspace(arrayOrName, true);
+        gstate.current().setcolorspace(arrayOrName);
     }
    
     /**
@@ -2688,8 +2685,7 @@ public class Interpreter {
      */
     public void op_setgray() throws PSError, IOException {
         double[] num = { getOpStack().pop().toReal() };
-        gstate.current().setcolorspace(new PSObjectName("DeviceGray", true),
-                                                                         false);
+        gstate.current().setcolorspace(new PSObjectName("DeviceGray", true));
         gstate.current().setcolor(num);
     }
     
@@ -2704,8 +2700,7 @@ public class Interpreter {
         double saturaration = getOpStack().pop().toReal();
         double hue = getOpStack().pop().toReal();
         double[] rgbValues = RGB.convertHSBtoRGB(hue, saturaration, brightness);
-        gstate.current().setcolorspace(new PSObjectName("DeviceRGB", true),
-                                                                         false);
+        gstate.current().setcolorspace(new PSObjectName("DeviceRGB", true));
         gstate.current().setcolor(rgbValues);
     }
    
@@ -2780,8 +2775,7 @@ public class Interpreter {
         double green = getOpStack().pop().toReal();
         double red = getOpStack().pop().toReal();
         double[] rgbValues = {red, green, blue};
-        gstate.current().setcolorspace(new PSObjectName("DeviceRGB", true),
-                                                                         false);
+        gstate.current().setcolorspace(new PSObjectName("DeviceRGB", true));
         gstate.current().setcolor(rgbValues);
     }
     

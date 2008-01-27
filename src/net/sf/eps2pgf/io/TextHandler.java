@@ -25,8 +25,8 @@ import java.io.IOException;
 import org.fontbox.util.BoundingBox;
 
 import net.sf.eps2pgf.Options;
-import net.sf.eps2pgf.Options.TextMode;
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.Options.TextMode;
 import net.sf.eps2pgf.io.TextReplacements.Rule;
 import net.sf.eps2pgf.ps.GstateStack;
 import net.sf.eps2pgf.ps.errors.PSError;
@@ -284,14 +284,16 @@ public class TextHandler {
             textPos[1] = pos[1] + dpos[1];
             
             if ((replaceRule == null) && (textMode == TextMode.EXACT)) {
-                exp.show(text, textPos, angle, fontsize, texRefPoint);
+                exp.show(text, textPos, angle, fontsize, texRefPoint,
+                        gstate.current());
             } else if ((replaceRule == null)
                     && (textMode == TextMode.DIRECT_COPY)) {
-                exp.show(text, textPos, angle, Double.NaN, texRefPoint);
+                exp.show(text, textPos, angle, Double.NaN, texRefPoint,
+                        gstate.current());
             } else {
                 exp.show(replaceRule.getTexText(), textPos,
                         angle + replaceRule.getRotation(), Double.NaN,
-                        texRefPoint);
+                        texRefPoint, gstate.current());
             }
         }
 

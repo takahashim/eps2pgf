@@ -29,7 +29,6 @@ import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
-import net.sf.eps2pgf.ps.resources.colors.PSColor;
 
 /**
  * Interface for exporters (e.g. PGF and TikZ)
@@ -86,38 +85,35 @@ public interface OutputDevice extends Cloneable {
      * Fills a path using the non-zero rule.
      * See the PostScript manual (fill operator) for more info.
      * 
-     * @param path the path
+     * @param gstate Current graphics state.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     *                              (yet) implemented.
+     * @throws PSError A PostScript error occurred.
      */
-    void fill(Path path) throws IOException, PSErrorUnimplemented;
+    void fill(GraphicsState gstate) throws IOException, PSError;
 
     /**
      * Set the current clipping path in the graphics state as clipping path in
      * the output document. The even-odd rule is used to determine which point
      * are inside the path.
      * 
-     * @param clipPath Path to use for clipping
+     * @param gstate Current graphics state.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     *                              (yet) implemented.
+     * @throws PSError A PostScript error occurred.
      */
-    void eoclip(Path clipPath) throws IOException, PSErrorUnimplemented;
+    void eoclip(GraphicsState gstate) throws IOException, PSError;
     
     /**
      * Fills a path using the even-odd rule.
      * See the PostScript manual (fill operator) for more info.
      * 
-     * @param path the path
+     * @param gstate The current graphics state.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     * (yet) implemented.
+     * @throws PSError A PostScript error occurred.
      */
-    void eofill(Path path) throws IOException, PSErrorUnimplemented;
+    void eofill(GraphicsState gstate) throws IOException, PSError;
     
     /**
      * Internal Eps2pgf command: eps2pgfgetmetrics
@@ -200,15 +196,6 @@ public interface OutputDevice extends Cloneable {
     void drawRect(double[] lowerLeft, double[] upperRight) throws IOException;
 
     /**
-     * Sets the current color in gray, rgb or cmyk.
-     * 
-     * @param color The color.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    void setColor(PSColor color) throws IOException;
-    
-    /**
      * Sets the miter limit.
      * 
      * @param num The miter limit.
@@ -224,16 +211,19 @@ public interface OutputDevice extends Cloneable {
      * @param position Text anchor point in [micrometer, micrometer]
      * @param angle Text angle in degrees
      * @param fontsize in PostScript pt (= 1/72 inch). If fontsize is NaN, the
-     *        font size is not set and completely determined by LaTeX.
+     * font size is not set and completely determined by LaTeX.
      * @param anchor String with two characters:
-     *               t - top, c - center, B - baseline b - bottom
-     *               l - left, c - center, r - right
-     *               e.g. Br = baseline,right
-     *               
+     * t - top, c - center, B - baseline b - bottom
+     * l - left, c - center, r - right
+     * e.g. Br = baseline,right
+     * @param gstate Current graphics state.
+     * 
      * @throws IOException Unable to write output
+     * @throws PSError A PostScript error occurred.
      */
     void show(String text, double[] position, double angle,
-            double fontsize, String anchor) throws IOException;    
+            double fontsize, String anchor, final GraphicsState gstate)
+            throws IOException, PSError;
 
     /**
      * Starts a new scope.
