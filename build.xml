@@ -43,10 +43,13 @@ limitations under the License.
 	<target name="clean">
 		<delete dir="${build.dir}" />
 		<delete dir="${temp.build.dir}" />
+		<delete dir="${doc.temp.build.dir}" />
 		<delete dir="${test-build.dir}" />
+		
 		<delete file="${jar.file}" />
 		<delete file="${zip.file}" />
 		<delete file="${dist.dir}/${readme.file}" />
+		<delete file="${doc.dist.dir}/${manual.file}" />
 	</target>
 	
 	<!-- Compile target -->
@@ -66,8 +69,6 @@ limitations under the License.
 			classpathref="classpath.path"
 			target="1.5"
 		/>
-		
-		<delete dir="${temp.build.dir}" />
 	</target>
 
 	<!-- Create jar file & create other files in dist dir -->
@@ -88,7 +89,7 @@ limitations under the License.
 	</target>
 	
 	<!-- Create zip file -->
-	<target name="zip" depends="jar,test">
+	<target name="zip" depends="jar,test,doc">
 		<zip
 			destfile="${zip.file}"
 			basedir="${dist.dir}"
@@ -122,6 +123,71 @@ limitations under the License.
 			<test name="net.sf.eps2pgf.testsuite.figures.AllFigures"
 				todir="${test-build.dir}" />
 		</junit>
+	</target>
+	
+	<!-- Generate documentation -->
+	<target name="doc" depends="jar">
+		<mkdir dir="${doc.temp.build.dir}" />
+		
+		<copy file="${doc.src.dir}/${manual.basename}.tex" todir="${doc.temp.build.dir}" />
+		<copy file="${doc.src.dir}/demo_figure.eps" todir="${doc.temp.build.dir}" />
+		<copy file="${doc.src.dir}/demo_figure.pdf" todir="${doc.temp.build.dir}" />
+		<copy file="${doc.src.dir}/demo_figure_textreplace.tex" todir="${doc.temp.build.dir}" />
+
+		<replace dir="${doc.temp.build.dir}" token="@VERSION@" value="${app.version}" />
+		<replace dir="${doc.temp.build.dir}" token="@BUILDDATE@" value="${NOW}" />
+		
+		<java
+			jar="${jar.file}"
+			fork="yes"
+			timeout="30000"
+			>
+			<arg value="${doc.temp.build.dir}/demo_figure.eps" />
+			<arg value="--output" />
+			<arg value="${doc.temp.build.dir}/demo_figure_std.pgf" />
+		</java>
+		
+		<java
+			jar="${jar.file}"
+			fork="yes"
+			timeout="30000"
+			>
+			<arg value="${doc.temp.build.dir}/demo_figure.eps" />
+			<arg value="--output" />
+			<arg value="${doc.temp.build.dir}/demo_figure_repl.pgf" />
+			<arg value="--text-mode" />
+			<arg value="directcopy" />
+			<arg value="--text-replace" />
+			<arg value="${doc.temp.build.dir}/demo_figure_textreplace.tex" />
+		</java>
+		
+		<exec
+			executable="pdflatex"
+			dir="${doc.temp.build.dir}"
+			outputproperty="tex.out"
+			>
+			<arg value="${manual.basename}.tex" />
+		</exec>
+		<exec
+			executable="pdflatex"
+			dir="${doc.temp.build.dir}"
+			outputproperty="tex.out"
+			>
+			<arg value="${manual.basename}.tex" />
+		</exec>
+		<exec
+			executable="pdflatex"
+			dir="${doc.temp.build.dir}"
+			outputproperty="tex.out"
+			>
+			<arg value="${manual.basename}.tex" />
+		</exec>
+		
+		<copy
+			file="${doc.temp.build.dir}/${manual.file}"
+			todir="${doc.dist.dir}"
+		/>
+		
 	</target>
 
 </project>

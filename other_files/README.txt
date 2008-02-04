@@ -13,16 +13,15 @@ Eps2pgf is a PostScript interpreter that converts Encapsulated PostScript
 <http://sourceforge.net/projects/pgf/>. PGF/TikZ is a TeX macro package for
 generating graphics. It support several back-end drivers, including pdfTeX
 and Dvips. The major advantage of Eps2pgf is that all texts are typeset by
-TeX, giving you all the powerful typesetting features and a uniform look of
-the final document. It has several options to control how text in figures is
-handled: (i) reproduce text labels accurately (with same font size and
+LaTeX, giving you all the powerful typesetting features and a uniform look
+of the final document. It has several options to control how text in figures
+is handled: (i) reproduce text labels accurately (with same font size and
 formatting as in EPS figure), (ii) copy text labels verbatim (text in EPS
-figure is TeX code), or (iii) replace text labels using PSfrag-compatible
-rules from a separate file with tags, or using tags embedded in the text
-labels.
+figure is LaTeX code), or (iii) replace text labels using PSfrag-compatible
+rules from a separate file, or using tags embedded in the text labels.
 
 The goal of Eps2pgf is to support all PostScript figures created by programs
-regularly used by TeX users to create figures, such as MATLAB, Mathematica
+regularly used by LaTeX users to create figures, such as MATLAB, Mathematica
 and Maple. If you encounter a figure that Eps2pgf fails to process, please
 report it using the bug tracker
 <http://sourceforge.net/tracker/?group_id=188852&atid=926973>, or send it
@@ -32,7 +31,8 @@ via email.
 ----------------------------------------------------------------------------
 Usage
 ----------------------------------------------------------------------------
-See the user manual doc\eps2pgf_manual.pdf.
+See the user manual doc\eps2pgf_manual.pdf, or run Eps2pgf with the command
+line argument '--help'.
 
 
 ----------------------------------------------------------------------------
@@ -69,6 +69,7 @@ v0.6.0 (2008-02-??)
   - Added: feature #1856794 Indexed color spaces
   - Added: support for embedded (non-bitmapped) type 3 fonts
   - Added: output device (LOLDevice) that writes only the text labels
+  - Added: user manual
   - Fixed: bug #1809102 (partially) Problems with Inkscape figure with text.
   - Fixed: bug #1807713 In some situations Eps2pgf produced lines that are
            too long. 
