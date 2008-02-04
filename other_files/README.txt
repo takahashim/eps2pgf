@@ -63,7 +63,7 @@ line option '--version'.
 ----------------------------------------------------------------------------
 Changelog
 ----------------------------------------------------------------------------
-v0.6.0 (2008-02-??)
+v0.6.0 (2008-02-04)
   - Added: feature #1856800 PSfrag emulation
   - Added: feature #1856798 Interpret text labels directly as TeX
   - Added: feature #1856794 Indexed color spaces
