@@ -92,15 +92,23 @@ public final class Parser {
         int stringDepth = 0;
         int readChar;
         char chr = '\000';
-        char prevChr;
+        char prevChr = '\000';
         String lastTwo;
         
         int charsThisConvert = 0;
         while ((readChar = in.read()) != -1) {
             charsThisConvert++;
             
-            prevChr = chr;
+            // Escaped backslashes should not be treated as special characters.
+            // Therefore, we replace escaped backslashes in 'prevChr' with \000
+            // Note: \134 (octal) is the code of the backslash in ASCII.
+            if ((chr == '\134') && (prevChr == '\134')) {
+                prevChr = '\000';
+            } else {
+                prevChr = chr;
+            }
             chr = (char) readChar;
+            
             if (charsThisConvert > 1) {
                 lastTwo = Character.toString(prevChr) + Character.toString(chr);
             } else {

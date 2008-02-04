@@ -110,4 +110,11 @@ public class ParserPSTest {
         assertTrue(Common.testString(interp, cmd));
     }
 
+    /** Parser test. @throws Exception the exception */
+    @Test
+    public void parserTest8() throws Exception {
+        String cmd = "(\\\\) (\\134) eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
 }
