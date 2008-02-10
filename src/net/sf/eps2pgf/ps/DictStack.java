@@ -23,6 +23,7 @@ package net.sf.eps2pgf.ps;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import net.sf.eps2pgf.Main;
 import net.sf.eps2pgf.ps.errors.PSErrorDictStackUnderflow;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
@@ -32,9 +33,11 @@ import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectBool;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
+import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectNull;
 import net.sf.eps2pgf.ps.objects.PSObjectOperator;
+import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.Encoding;
 import net.sf.eps2pgf.util.ArrayStack;
 
@@ -250,6 +253,17 @@ public class DictStack {
         
         // add other operators
         systemdict.setKey("currentpacking", new PSObjectBool(false));
+        systemdict.setKey("languagelevel", new PSObjectInt(3));
+        String version = Main.APP_VERSION;
+        systemdict.setKey("version", new PSObjectString(version));
+        int revision = 0;
+        try {
+            revision = Integer.parseInt(version.replace(".", "0"));
+        } catch (NumberFormatException e) {
+            /* empty block */
+        }
+        systemdict.setKey("revision", new PSObjectInt(revision));
+        systemdict.setKey("serialnumber", new PSObjectInt(0));
     }
 
     /**

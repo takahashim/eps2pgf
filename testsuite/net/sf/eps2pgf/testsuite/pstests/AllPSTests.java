@@ -39,6 +39,7 @@ import org.junit.runners.Suite;
     ControlPSTest.class,
     PathPSTest.class,
     CoordinatesPSTest.class,
+    MiscPSTest.class,
     GraphicsPSTest.class,
     OutputPSTest.class,
     FilePSTest.class

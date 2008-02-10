@@ -25,9 +25,11 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.logging.Logger;
 
+import net.sf.eps2pgf.Main;
 import net.sf.eps2pgf.Options;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.PSStringInputStream;
@@ -103,6 +105,9 @@ public class Interpreter {
     /** Log information. */
     private final Logger log = Logger.getLogger("net.sourceforge.eps2pgf");
     
+    /** Initialization time of interpreter. (milliseconds since 1970). */
+    private long initializationTime;
+    
     /**
      * Creates a new instance of interpreter.
      * 
@@ -175,6 +180,9 @@ public class Interpreter {
      * @throws ProgramError the program error
      */
     void initialize() throws IOException, PSError, ProgramError {
+        // Initialization time of interpreter
+        initializationTime = System.currentTimeMillis();
+        
         // Initialize character encodings and fonts
         Encoding.initialize();
         fontDirectory = new FontManager();
@@ -2175,6 +2183,13 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: product.
+     */
+    public void op_product() {
+        getOpStack().push(new PSObjectString(Main.APP_NAME));
+    }
+    
+    /**
      * PostScript op: pstack.
      */
     public void op_pstack() {
@@ -2281,6 +2296,19 @@ public class Interpreter {
         
         getOpStack().push(substring);
         getOpStack().push(new PSObjectBool(bool));
+    }
+    
+    /**
+     * PostScript op: realtime.
+     */
+    public void op_realtime() {
+        // Get the number of milliseconds since midnight
+        Calendar now = Calendar.getInstance();
+        int realtime = now.get(Calendar.HOUR_OF_DAY);
+        realtime = 60 * realtime + now.get(Calendar.MINUTE);
+        realtime = 60 * realtime + now.get(Calendar.SECOND);
+        realtime = 1000 * realtime + now.get(Calendar.MILLISECOND);
+        getOpStack().push(new PSObjectInt(realtime));
     }
     
     /**
@@ -3100,6 +3128,15 @@ public class Interpreter {
         dict.checkAccess(false, false, true);
         
         dict.undef(key);
+    }
+    
+    /**
+     * PostScript op: usertime.
+     */
+    public void op_usertime() {
+        long currentTime = System.currentTimeMillis();
+        int userTime = (int) (currentTime - initializationTime);
+        getOpStack().push(new PSObjectInt(userTime));
     }
     
     /**

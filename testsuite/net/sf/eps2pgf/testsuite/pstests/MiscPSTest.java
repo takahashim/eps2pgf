@@ -1,5 +1,5 @@
 /*
- * PackedArrayPSTest.java
+ * MiscPSTest.java
  *
  * This file is part of Eps2pgf.
  *
@@ -34,7 +34,7 @@ import net.sf.eps2pgf.ps.Interpreter;
 /**
  * This class contains some test to test the PostScript handling.
  */
-public class PackedArrayPSTest {
+public class MiscPSTest {
     
     /** The PostScript interpreter. */
     private Interpreter interp = null;
@@ -61,15 +61,50 @@ public class PackedArrayPSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void packedArrayTest1Array() throws Exception {
-        String cmd = "currentpacking false eq";
+    public void miscTest1Array() throws Exception {
+        String cmd = "version type /stringtype eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void packedArrayTest2Array() throws Exception {
-        String cmd = "true setpacking count 0 eq currentpacking";
+    public void miscTest2Array() throws Exception {
+        String cmd = "realtime type /integertype eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void miscTest3Array() throws Exception {
+        String cmd = "usertime type /integertype eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void miscTest4Array() throws Exception {
+        String cmd = "languagelevel type /integertype eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void miscTest5Array() throws Exception {
+        String cmd = "product type /stringtype eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void miscTest6Array() throws Exception {
+        String cmd = "revision type /integertype eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void miscTest7Array() throws Exception {
+        String cmd = "serialnumber type /integertype eq";
         assertTrue(Common.testString(interp, cmd));
     }
 

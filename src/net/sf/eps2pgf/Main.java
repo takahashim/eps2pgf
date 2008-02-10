@@ -41,13 +41,13 @@ import net.sf.eps2pgf.util.Eps2pgfHandler;
 public final class Main {
     
     /** Application name. */
-    private static final String APP_NAME = "Eps2pgf";
+    public static final String APP_NAME = "Eps2pgf";
     
     /** Application version. */
-    private static final String APP_VERSION = "@VERSION@";
+    public static final String APP_VERSION = "@VERSION@";
     
     /** Date application was build. */
-    private static final String APP_BUILD_DATE = "@BUILDDATE@";
+    public static final String APP_BUILD_DATE = "@BUILDDATE@";
     
     /** Handles program options. */
     private static Options opts = new Options();
