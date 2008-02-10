@@ -1894,6 +1894,9 @@ public class Interpreter {
     public void op_load() throws PSError {
         PSObject key = getOpStack().pop();
         PSObjectDict definedInDict = getDictStack().where(key);
+        if (definedInDict == null) {
+            throw new PSErrorUndefined("--load-- (" + key.isis() + ")");
+        }
         definedInDict.checkAccess(false, true, false);
         
         PSObject value = getDictStack().lookup(key);
