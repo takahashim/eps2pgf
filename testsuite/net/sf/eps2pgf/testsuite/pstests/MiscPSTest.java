@@ -61,49 +61,49 @@ public class MiscPSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest1Array() throws Exception {
+    public void miscTest1() throws Exception {
         String cmd = "version type /stringtype eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest2Array() throws Exception {
+    public void miscTest2() throws Exception {
         String cmd = "realtime type /integertype eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest3Array() throws Exception {
+    public void miscTest3() throws Exception {
         String cmd = "usertime type /integertype eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest4Array() throws Exception {
+    public void miscTest4() throws Exception {
         String cmd = "languagelevel type /integertype eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest5Array() throws Exception {
+    public void miscTest5() throws Exception {
         String cmd = "product type /stringtype eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest6Array() throws Exception {
+    public void miscTest6() throws Exception {
         String cmd = "revision type /integertype eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest7Array() throws Exception {
+    public void miscTest7() throws Exception {
         String cmd = "serialnumber type /integertype eq";
         assertTrue(Common.testString(interp, cmd));
     }

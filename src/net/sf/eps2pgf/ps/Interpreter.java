@@ -1043,6 +1043,13 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: currentstrokeadjust.
+     */
+    public void op_currentstrokeadjust() {
+        getOpStack().push(new PSObjectBool(gstate.current().getStrokeAdjust()));
+    }
+    
+    /**
      * PostScript op: curveto.
      * 
      * @throws PSError A PostScript error occurred.
@@ -2833,6 +2840,19 @@ public class Interpreter {
         getOpStack().pop();  // pop proc/halftone
         getOpStack().pop();  // pop angle
         getOpStack().pop();  // pop frequency
+    }
+    
+    /**
+     * PostScript op: setstrokeadjust.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
+    public void op_setstrokeadjust() throws PSErrorTypeCheck,
+            PSErrorStackUnderflow {
+        
+        boolean bool = getOpStack().pop().toBool();
+        gstate.current().setStrokeAdjust(bool);
     }
    
     /**

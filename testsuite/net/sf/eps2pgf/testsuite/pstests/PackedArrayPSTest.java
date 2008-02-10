@@ -61,14 +61,14 @@ public class PackedArrayPSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void packedArrayTest1Array() throws Exception {
+    public void packedArrayTest1() throws Exception {
         String cmd = "currentpacking false eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void packedArrayTest2Array() throws Exception {
+    public void packedArrayTest2() throws Exception {
         String cmd = "true setpacking count 0 eq currentpacking";
         assertTrue(Common.testString(interp, cmd));
     }

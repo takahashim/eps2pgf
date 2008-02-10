@@ -87,6 +87,9 @@ public class GraphicsState implements Cloneable {
     /** Current dash offset. */
     private double dashOffset = 0.0;
     
+    /** Current stroke adjustment. */
+    private boolean strokeAdjust = true;
+    
     
     /** Reference to current output device. */
     private OutputDevice device;
@@ -299,9 +302,10 @@ public class GraphicsState implements Cloneable {
         // flat is primitive, it doesn't need to be cloned explicitly.
         copy.font = font.clone();
         // linewidth is primitive, it doesn't need to be cloned explicitly.
-        // linecap is primitive, is doesn't need to be cloned explicitly.
+        // linecap is primitive, it doesn't need to be cloned explicitly.
         copy.path = path.clone();
         copy.position = position.clone();
+        // strokeAdjust is primitive, it doesn't need to be cloned explicitly.
         
         return copy;
     }
@@ -868,6 +872,24 @@ public class GraphicsState implements Cloneable {
      */
     public double getMiterLimit() {
         return miterLimit;
+    }
+
+    /**
+     * Sets the stroke adjustment.
+     * 
+     * @param pStrokeAdjust The new stroke adjustment.
+     */
+    public void setStrokeAdjust(final boolean pStrokeAdjust) {
+        strokeAdjust = pStrokeAdjust;
+    }
+
+    /**
+     * Gets the current stroke adjustment.
+     * 
+     * @return The stroke adjustment.
+     */
+    public boolean getStrokeAdjust() {
+        return strokeAdjust;
     }
 
 }

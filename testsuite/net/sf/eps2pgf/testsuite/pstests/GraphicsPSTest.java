@@ -311,5 +311,15 @@ public class GraphicsPSTest {
             + " 2 setlinewidth 0.5 0.5 scale currentlinewidth 2 eq";
         assertTrue(Common.testString(interp, cmd));
     }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void graphicsTest29() throws Exception {
+        String cmd = "true setstrokeadjust currentstrokeadjust"
+            + " false setstrokeadjust currentstrokeadjust false eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+    
+    
 
 }
