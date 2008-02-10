@@ -3214,4 +3214,46 @@ public class Interpreter {
         getOpStack().push(obj1.xor(obj2));
     }
     
+    /**
+     * PostScript op: xshow.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_xshow() throws PSError, IOException, ProgramError {
+        log.info("xshow operator encoutered. xshow is not implemented, "
+                + "instead the normal show is used.");
+        getOpStack().pop(); // read the numarray/string object
+        op_show();
+    }
+    
+    /**
+     * PostScript op: xyshow.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_xyshow() throws PSError, IOException, ProgramError {
+        log.info("xyshow operator encoutered. xyshow is not implemented, "
+                + "instead the normal show is used.");
+        getOpStack().pop(); // read the numarray/string object
+        op_show();
+    }
+    
+    /**
+     * PostScript op: yshow.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_yshow() throws PSError, IOException, ProgramError {
+        log.info("yshow operator encoutered. yshow is not implemented, "
+                + "instead the normal show is used.");
+        getOpStack().pop(); // read the numarray/string object
+        op_show();
+    }
+    
 }
