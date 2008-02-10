@@ -2766,6 +2766,20 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: setpacking.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
+    public void op_setpacking() throws PSErrorStackUnderflow,
+            PSErrorTypeCheck {
+        
+        boolean bool = getOpStack().pop().toBool();
+        PSObjectDict systemDict = dictStack.lookup("systemdict").toDict();
+        systemDict.setKey("currentpacking", new PSObjectBool(bool));
+    }
+    
+    /**
      * PostScript op: setrgbcolor.
      * 
      * @throws PSError A PostScript error occurred.

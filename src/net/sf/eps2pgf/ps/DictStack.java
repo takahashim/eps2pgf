@@ -246,7 +246,10 @@ public class DictStack {
                 new PSObjectArray(encodingVector));
         encodingVector = Encoding.getStandardVector();
         systemdict.setKey("StandardEncoding",
-                new PSObjectArray(encodingVector));        
+                new PSObjectArray(encodingVector));
+        
+        // add other operators
+        systemdict.setKey("currentpacking", new PSObjectBool(false));
     }
 
     /**

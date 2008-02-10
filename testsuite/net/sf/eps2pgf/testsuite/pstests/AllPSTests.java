@@ -33,6 +33,7 @@ import org.junit.runners.Suite;
     TypePSTest.class,
     StackPSTest.class,
     ArrayPSTest.class,
+    PackedArrayPSTest.class,
     StringPSTest.class,
     DictPSTest.class,
     ControlPSTest.class,
