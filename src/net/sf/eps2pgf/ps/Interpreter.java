@@ -2594,6 +2594,26 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: selectfont.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_selectfont() throws PSError, ProgramError {
+        PSObject obj = getOpStack().pop();
+        op_findfont();
+        getOpStack().push(obj);
+        if ((obj instanceof PSObjectInt) || (obj instanceof PSObjectReal)) {
+            op_scalefont();
+        } else if (obj instanceof PSObjectArray) {
+            op_makefont();
+        } else {
+            throw new PSErrorTypeCheck();
+        }
+        op_setfont();
+    }
+    
+    /**
      * PostScript op: setcachedevice.
      * 
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
