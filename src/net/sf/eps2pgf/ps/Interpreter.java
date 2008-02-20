@@ -2328,25 +2328,7 @@ public class Interpreter {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void op_rectclip() throws PSError, IOException {
-        PSObject heightObj = getOpStack().pop();
-        if ((heightObj instanceof PSObjectArray)
-                || (heightObj instanceof PSObjectString)) {
-            throw new PSErrorUnimplemented("rectclip operator not fully "
-                    + "implemented");
-        }
-        double height = heightObj.toReal();
-        double width = getOpStack().pop().toReal();
-        double y = getOpStack().pop().toReal();
-        double x = getOpStack().pop().toReal();
-        
-        // rectclip implemented in PostScript. See PostScript manual for
-        // the code below.
-        op_newpath();
-        gstate.current().moveto(x, y);
-        gstate.current().rlineto(width, 0);
-        gstate.current().rlineto(0, height);
-        gstate.current().rlineto(-width, 0);
-        op_closepath();
+        rectPath();
         op_clip();
         op_newpath();
     }
@@ -2359,29 +2341,43 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_rectfill() throws PSError, IOException, ProgramError {
-        PSObject heightObj = getOpStack().pop();
-        if ((heightObj instanceof PSObjectArray)
-                || (heightObj instanceof PSObjectString)) {
-            throw new PSErrorUnimplemented("rectclip operator not fully "
-                    + "implemented");
-        }
-        double height = heightObj.toReal();
-        double width = getOpStack().pop().toReal();
-        double y = getOpStack().pop().toReal();
-        double x = getOpStack().pop().toReal();
-        
-        // rectfill implemented in PostScript. See PostScript manual for
-        // the code below.
         op_gsave();
-        op_newpath();
-        gstate.current().moveto(x, y);
-        gstate.current().rlineto(width, 0);
-        gstate.current().rlineto(0, height);
-        gstate.current().rlineto(-width, 0);
-        op_closepath();
+        rectPath();
         op_fill();
         op_grestore();
-    }    
+    }
+    
+    /**
+     * PostScript op: rectstroke.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public void op_rectstroke() throws PSError, ProgramError, IOException {
+        op_gsave();
+        
+        // Check whether the top-most object is a matrix
+        PSObjectMatrix matrix = null;
+        try {
+            matrix = getOpStack().peek().toMatrix();
+            getOpStack().pop();
+        } catch (PSErrorTypeCheck e) {
+            /* apparently the first object is not a matrix */
+        } catch (PSErrorRangeCheck e) {
+            /* apparently the first object is not a matrix */
+        }
+        
+        rectPath();
+        
+        if (matrix != null) {
+            getOpStack().push(matrix);
+            op_concat();
+        }
+        
+        op_stroke();
+        op_grestore();
+    }
     
     /**
      * PostScript op: repeat.
@@ -3274,6 +3270,70 @@ public class Interpreter {
                 + "instead the normal show is used.");
         getOpStack().pop(); // read the numarray/string object
         op_show();
+    }
+    
+    /**
+     * Code common to all rect* operators. It starts with 'newpath' and ends
+     * with 'closepath'.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    private void rectPath() throws PSError {
+        op_newpath();
+        PSObject obj = getOpStack().pop();
+        if ((obj instanceof PSObjectInt) || (obj instanceof PSObjectReal)) {
+            double height = obj.toReal();
+            double width = getOpStack().pop().toReal();
+            double y = getOpStack().pop().toReal();
+            double x = getOpStack().pop().toReal();
+            rectPathSingle(x, y, width, height);
+        } else if (obj instanceof PSObjectArray) {
+            PSObjectArray numarray = obj.toArray();
+            if ((numarray.length() % 4) != 0) {
+                throw new PSErrorRangeCheck();
+            }
+            int nrRect = numarray.length() / 4;
+            for (int i = 0; i < nrRect; i++) {
+                double x = numarray.get(4 * i).toReal();
+                double y = numarray.get(4 * i + 1).toReal();
+                double width = numarray.get(4 * i + 2).toReal();
+                double height = numarray.get(4 * i + 3).toReal();
+                rectPathSingle(x, y, width, height);
+            }
+        } else if (obj instanceof PSObjectString) {
+            PSObjectString numstring = obj.toPSString();
+            int nrRect = numstring.numstringLength() / 4;
+            for (int i = 0; i < nrRect; i++) {
+                double x = numstring.numstringGet(4 * i);
+                double y = numstring.numstringGet(4 * i + 1);
+                double width = numstring.numstringGet(4 * i + 2);
+                double height = numstring.numstringGet(4 * i + 3);
+                rectPathSingle(x, y, width, height);
+            }
+        } else {
+            throw new PSErrorTypeCheck();
+        }
+        
+    }
+    
+    /**
+     * Appends a single rectangle to the current path.
+     * 
+     * @param x The X-coordinate of lower-left corner.
+     * @param y The Y-coordinate of lower-left corner.
+     * @param width The width.
+     * @param height The height.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    private void rectPathSingle(final double x, final double y,
+            final double width, final double height) throws PSError {
+        
+        gstate.current().moveto(x, y);
+        gstate.current().rlineto(width, 0.0);
+        gstate.current().rlineto(0.0, height);
+        gstate.current().rlineto(-width, 0.0);
+        op_closepath();
     }
     
 }

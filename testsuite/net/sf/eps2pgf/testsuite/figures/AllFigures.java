@@ -159,6 +159,12 @@ public final class AllFigures {
 
     /** Test. @throws Exception the exception */
     @Test
+    public void rect_test() throws Exception {
+        assertTrue(Common.testFigure(conv, "rect_test.eps"));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
     public void rproject1() throws Exception {
         assertTrue(Common.testFigure(conv, "rproject1.eps"));
     }

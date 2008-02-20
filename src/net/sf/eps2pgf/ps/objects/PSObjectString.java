@@ -781,5 +781,90 @@ public class PSObjectString extends PSObject {
     public String type() {
         return "stringtype";
     }
+    
+    /**
+     * Treat this string as an encoded number string and get the length.
+     * 
+     * @return The number of number in this string.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public int numstringLength() throws PSError {
+        // Check first byte
+        if (get(0) != 149) {
+            throw new PSErrorTypeCheck();
+        }
+        
+        int numRepr = get(1);
+        int len;
+        if (numRepr < 128) {
+            len = (get(2) << 8) | get(3);
+        } else {
+            len = (get(3) << 8) | get(2);
+        }
+        return len;
+    }
+    
+    /**
+     * Treat this string as an encoded number string and get a number.
+     * 
+     * @param i The index of the number.
+     * 
+     * @return The requested number from the number string.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public double numstringGet(final int i) throws PSError {
+        // Check first byte
+        if (get(0) != 149) {
+            throw new PSErrorTypeCheck();
+        }        
+        int numRepr = get(1);
+        boolean lsbLast;
+        if (numRepr < 128) {
+            lsbLast = true;
+        } else {
+            lsbLast = false;
+            numRepr -= 128;
+        }
+        
+        double num;
+        if (numRepr < 32) {
+            int numint;
+            if (lsbLast) {
+                numint = (get(4 * i + 4) << 24) | (get(4 * i + 5) << 16)
+                        | (get(4 * i + 6) << 8) | get(4 * i + 7);
+            } else {
+                numint = (get(4 * i + 7) << 24) | (get(4 * i + 6) << 16)
+                        | (get(4 * i + 5) << 8) | get(4 * i + 4);
+            }
+            num = ((double) numint) / Math.pow(2.0, numRepr);
+        } else if (numRepr < 48) {
+            short numint;
+            if (lsbLast) {
+                numint = (short) ((short) (get(2 * i + 4) << 8)
+                        | get(2 * i + 5));
+            } else {
+                numint = (short) ((short) (get(2 * i + 5) << 8)
+                        | get(2 * i + 4));
+            }
+            num = ((double) numint) / Math.pow(2.0, numRepr - 32.0);
+        } else if (numRepr < 50) {
+            // See http://babbage.cs.qc.edu/IEEE-754/Decimal.html for easy
+            // converted from real to hex.
+            int numint;
+            if (lsbLast) {
+                numint = (get(4 * i + 4) << 24) | (get(4 * i + 5) << 16)
+                        | (get(4 * i + 6) << 8) | get(4 * i + 7);
+            } else {
+                numint = (get(4 * i + 7) << 24) | (get(4 * i + 6) << 16)
+                        | (get(4 * i + 5) << 8) | get(4 * i + 4);
+            }
+            num = (double) Float.intBitsToFloat(numint);
+        } else {
+            throw new PSErrorTypeCheck();
+        }
+        return num;
+    }
 
 }
