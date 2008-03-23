@@ -117,4 +117,11 @@ public class ParserPSTest {
         assertTrue(Common.testString(interp, cmd));
     }
 
+    /** Parser test. @throws Exception the exception */
+    @Test
+    public void parserTest9() throws Exception {
+        String cmd = "<~abc~>(\311\211) eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
 }

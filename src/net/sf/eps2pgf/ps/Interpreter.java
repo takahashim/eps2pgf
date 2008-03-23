@@ -20,8 +20,12 @@
 
 package net.sf.eps2pgf.ps;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -32,6 +36,7 @@ import java.util.logging.Logger;
 import net.sf.eps2pgf.Main;
 import net.sf.eps2pgf.Options;
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.io.EpsImageCreator;
 import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.TextHandler;
 import net.sf.eps2pgf.io.TextReplacements;
@@ -65,6 +70,7 @@ import net.sf.eps2pgf.ps.resources.FontManager;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.colors.RGB;
 import net.sf.eps2pgf.ps.resources.filters.EexecDecode;
+import net.sf.eps2pgf.ps.resources.filters.Filter;
 import net.sf.eps2pgf.ps.resources.outputdevices.CacheDevice;
 import net.sf.eps2pgf.ps.resources.outputdevices.LOLDevice;
 import net.sf.eps2pgf.ps.resources.outputdevices.NullDevice;
@@ -101,6 +107,9 @@ public class Interpreter {
     
     /** Font directory. */
     private FontManager fontDirectory;
+    
+    /** User-defined options. */
+    private Options options;
     
     /** Log information. */
     private final Logger log = Logger.getLogger("net.sourceforge.eps2pgf");
@@ -142,6 +151,8 @@ public class Interpreter {
         
         this.header = fileHeader;
         
+        options = opts;
+        
         // Text handler
         this.textHandler = new TextHandler(this.gstate, textReplace,
                 opts.getTextmode());
@@ -165,6 +176,8 @@ public class Interpreter {
         // "Infinite" bounding box (square box from (-10m,-10m) to (10m,10m))
         double[] bbox = {-28346.46, -28346.46, 28346.46, 28346.46};
         header = new DSCHeader(bbox);
+        
+        options = new Options();
 
         // Text handler
         textHandler = new TextHandler(gstate);
@@ -1465,6 +1478,31 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: filter.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_filter() throws PSError {
+        PSObjectName filterName = getOpStack().pop().toName();
+        PSObjectArray params = new PSObjectArray();
+        int n = Filter.getNrParamOperands(filterName);
+        for (int i = 0; i < n; i++) {
+            params.addToEnd(getOpStack().pop());
+        }
+        PSObjectDict dict = null;
+        PSObjectFile data;
+        PSObject obj = getOpStack().pop();
+        if (obj instanceof PSObjectDict) {
+            dict = obj.toDict();
+            data = getOpStack().pop().toFile();
+        } else {
+            data = obj.toFile();
+        }
+        PSObjectFile file = Filter.filter(data, dict, params, filterName);
+        getOpStack().push(file);
+    }
+    
+    /**
      * PostScript op: findfont.
      * 
      * @throws PSError A PostScript error occurred.
@@ -1742,9 +1780,54 @@ public class Interpreter {
      * PostScript op: image.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_image() throws PSError {
-        throw new PSErrorUnimplemented("operator: image");
+    public void op_image() throws PSError, ProgramError {
+        PSObject dictOrDataSrc = getOpStack().pop();
+        PSObjectDict dict;
+        if (dictOrDataSrc instanceof PSObjectDict) {
+            // We have the one argument image operand
+            // dict image �
+            dict = dictOrDataSrc.toDict();
+        } else {
+            // We have the five argument image operand
+            // width height bits/sample matrix datasrc image �
+            PSObjectMatrix matrix = getOpStack().pop().toMatrix();
+            int bitsPerSample = getOpStack().pop().toInt();
+            int height = getOpStack().pop().toInt();
+            int width = getOpStack().pop().toInt();
+            
+            dict = new PSObjectDict();
+            dict.setKey(Image.IMAGE_TYPE, new PSObjectInt(1));
+            dict.setKey(Image.WIDTH, new PSObjectInt(width));
+            dict.setKey(Image.HEIGHT, new PSObjectInt(height));
+            dict.setKey(Image.IMAGE_MATRIX, matrix);
+            dict.setKey(Image.DATA_SOURCE, dictOrDataSrc);
+            dict.setKey(Image.BITS_PER_COMPONENT,
+                    new PSObjectInt(bitsPerSample));
+            double[] decode = {0.0, 1.0};
+            dict.setKey(Image.DATA_SOURCE, new PSObjectArray(decode));
+        }
+        Image image = new Image(dict, gstate.current());
+        String filename = options.getOutputFile().getName();
+        String basename;
+        int dot = filename.lastIndexOf('.');
+        if (dot >= 0) {
+            basename = filename.substring(0, dot);
+        } else {
+            basename = filename;
+        }
+        File epsFile = new File(options.getOutputFile().getParent(), 
+                basename + "-image1.eps");
+        try {
+            OutputStream out = new FileOutputStream(epsFile);
+            EpsImageCreator.writeEpsImage(out, image);
+            out.close();
+        } catch (FileNotFoundException e) {
+            throw new PSErrorIOError();
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
     
     /**

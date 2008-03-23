@@ -1,5 +1,5 @@
 /*
- * HexDecode.java
+ * ASCIIHexDecode.java
  *
  * This file is part of Eps2pgf.
  *
@@ -27,18 +27,18 @@ import java.io.IOException;
  * Hex decoding wrappper around an InputStream.
  * @author Paul Wagenaars
  */
-public class HexDecode extends InputStream {
+public class ASCIIHexDecode extends InputStream {
     
     /** Encoded characters are read from this stream. */
     private InputStream in;
     
     
     /**
-     * Creates a new instance of HexDecode.
+     * Creates a new instance of ASCIIHexDecode.
      * 
      * @param pIn <code>InputStream</code> from which hex data will be read.
      */
-    public HexDecode(final InputStream pIn) {
+    public ASCIIHexDecode(final InputStream pIn) {
         in = pIn;
     }
     

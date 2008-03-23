@@ -1,9 +1,9 @@
 /*
- * EexecDecode.java
+ * RunLengthDecode.java
  *
  * This file is part of Eps2pgf.
  *
- * Copyright 2007, 2008 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2008 Paul Wagenaars <paul@wagenaars.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,84 +22,62 @@ package net.sf.eps2pgf.ps.resources.filters;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
- * Applies eexec decryption to an InputStream. See "Adobe Type 1 Font Format"
- * for for information on this encryption.
+ * Run-length decoding wrapper around an <code>InputStream</code>.
+ * 
  * @author Paul Wagenaars
  */
-public class EexecDecode extends InputStream {
-    /** <code>InputStream</code> from which encrypted data is read. */
+public class RunLengthDecode extends InputStream {
+    /** InputStream from which raw characters are read. */
     private InputStream in;
     
-    /** Number of random bytes at start of encrypted data. */
-    private int n;
+    /** This "character" indicates that the EOF (end-of-file) is encountered. */
+    private static final int EOF_CHAR = -1;
     
-    /** Random variable used for decryption. */
-    private int r;
-    
-    /** Random variable used for decryption. */
-    private int c1;
-    
-    /** Random variable used for decryption. */
-    private int c2;
-    
-    /** Value of R at the time of the last <code>mark()</code>. */
-    private int markedR;
-    
-    
-    /**
-     * Wrap a eexec decryption layer around and input stream.
-     * 
-     * @param pIn Stream from which encrypted data will be read
+    /** This "character" indicates that an IOException occurred at this point.
      */
-    public EexecDecode(final InputStream pIn) {
-        in = new ASCIIHexDecode(pIn);
-        n = 4;
-        r = 55665;
-        c1 = 52845;
-        c2 = 22719;
+    private static final int IOEXCEPTION_CHAR = -2;
+    
+    /** This "character" indicates that the EOD (end-of-data) sequence is
+     * encountered. */
+    private static final int EOD_CHAR = -3;
+    
+    
+    /** Buffer with all decoded characters. */
+    private ArrayList<Integer> decodedChars;
+    
+    /** Pointer to next decoded character to be read. */
+    private int decodedPtr;
+    
+    /** Pointer in decoded character array during last mark(). */
+    private int lastMarkPtr = -1;
+    
+    /** 
+     * Creates a new instance of ASCII85Decode.
+     * 
+     * @param pIn <code>InputStream</code> from which base-85 encoded characters
+     * are read.
+     */
+    public RunLengthDecode(final InputStream pIn) {
+        in = pIn;
     }
     
     /**
-     * Wrap a eexec decryption layer around and input stream.
-     * 
-     * @param pIn Stream from which encrypted data will be read
-     */
-    /**
-     * @param pIn Input stream.
-     * @param password Password used from decryption.
-     * @param binaryInput Is the input binary.
-     */
-    public EexecDecode(final InputStream pIn, final int password,
-            final boolean binaryInput) {
-        
-        if (binaryInput) {
-            this.in = pIn;
-        } else {
-            this.in = new ASCIIHexDecode(pIn);
-        }
-        n = 4;
-        r = password;
-        c1 = 52845;
-        c2 = 22719;
-    }
-    
-    /**
-     * Estimate number of available characters.
-     * 
-     * @return Estimated number of available characters.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Gives an estimation of the number of bytes that can still be read. Due to
+     * the nature of base-85 encoding this is not guaranteed to be correct.
+     * @throws java.io.IOException An I/O error occurred.
+     * @return The number of bytes that can be read from this input stream
+     * without blocking.
      */
     @Override
     public int available() throws IOException {
-        return (in.available() - n);
+        return decodedChars.size() - decodedPtr;
     }
     
     /**
-     * Closes this input stream and releases any system resources associated
-     * with the stream.
+     * Closes this input stream.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
@@ -128,8 +106,7 @@ public class EexecDecode extends InputStream {
      */
     @Override
     public void mark(final int readlimit) {
-        in.mark(readlimit + n);
-        markedR = r;
+        lastMarkPtr = decodedPtr;
     }
     
     /**
@@ -142,7 +119,7 @@ public class EexecDecode extends InputStream {
      */
     @Override
     public boolean markSupported() {
-        return in.markSupported();
+        return true;
     }
     
     /**
@@ -160,26 +137,64 @@ public class EexecDecode extends InputStream {
     @Override
     public int read() throws IOException {
         if (in == null) {
-            return -1;
-        }
-
-        int c = in.read();
-        if (c == -1) {
-            return -1;
-        } else if (c > 255) {
             throw new IOException();
         }
-        
-        int t = r >>> 8;
-        int p = (c ^ t);
-        r = ((c + r) * c1 + c2) & 0x0000FFFF;
-        
-        if (n > 0) {
-            n--;
-            p = this.read();
+        if (decodedChars == null) {
+            decodedChars = readAndDecodeAllChars(in);
+            decodedPtr = 0;
         }
         
-        return p;
+        int c = decodedChars.get(decodedPtr);
+        if (c >= 0) {
+            decodedPtr++;
+            return c;
+        } else if ((c == EOD_CHAR) || (c == EOF_CHAR)) {
+            return -1;
+        } else {
+            throw new IOException();
+        }
+    }
+    
+    
+    /**
+     * Read all raw/encoded characters from a stream, decodes them and returns a
+     * list with all (decoded) character codes.
+     * 
+     * @param inStream The input stream.
+     * 
+     * @return List with all character codes.
+     */
+    private static ArrayList<Integer> readAndDecodeAllChars(
+            final InputStream inStream) {
+        
+        // Read all encoded characters from the input stream until EOD or EOF
+        // is reached.
+        ArrayList<Integer> rawChars = new ArrayList<Integer>();
+        int lengthByte;
+        
+        try {
+            while ((lengthByte = inStream.read()) != -1) {
+                if (lengthByte <= 127) {
+                    for (int i = 0; i < (lengthByte + 1); i++) {
+                        rawChars.add(inStream.read());
+                    }
+                } else if (lengthByte == 128) {
+                    rawChars.add(EOD_CHAR);
+                    break;
+                } else if (lengthByte <= 255) {
+                    int c = inStream.read();
+                    for (int i = 0; i < (257 - lengthByte); i++) {
+                        rawChars.add(c);
+                    }
+                }
+            }
+        } catch (IOException e)  {
+            rawChars.add(IOEXCEPTION_CHAR);
+        }
+        
+        rawChars.add(EOF_CHAR);
+        
+        return rawChars;
     }
     
     /**
@@ -190,11 +205,9 @@ public class EexecDecode extends InputStream {
      */
     @Override
     public void reset() throws IOException {
-        if (in == null) {
+        if (lastMarkPtr < 0) {
             throw new IOException();
         }
-        in.reset();
-        r = markedR;
+        decodedPtr = lastMarkPtr;
     }
-    
 }

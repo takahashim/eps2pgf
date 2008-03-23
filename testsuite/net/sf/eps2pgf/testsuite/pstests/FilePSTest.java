@@ -82,5 +82,24 @@ public class FilePSTest {
         assertTrue(Common.testString(interp, cmd));
     }
 
+    /** Test. @throws Exception the exception */
+    @Test
+    public void fileTest4() throws Exception {
+        String cmd = "currentfile /ASCII85Decode filter /RunLengthDecode filter"
+            + " 100 string readstring\n"
+            + "@fQ`D'c\\GJ0fVB&!!`uK*$Zpf3\"?/n#7_Ig,:YD_%L2t=%M]s..NB05#64u='c"
+            + "\\GC*#/qg!!`uK*%E0Q\n"
+            + "'b1HK#7_J'.O,oJ%L2t=%QH0m,9.F.#64un3&)m-*#/qg!.Y\n"
+            + "~> exch"
+            + "(\\000\\007\\016\\025\\034#*18?\\007\\000\\007\\016\\025\\034#*1"
+            + "8\\016\\007\\000\\007\\016\\025\\034#*1\\025\\016\\007\\000\\007"
+            + "\\016\\025\\034#*\\034\\025\\016\\007\\000\\007\\016\\025\\034##"
+            + "\\034\\025\\016\\007\\000\\007\\016\\025\\034*#\\034\\025\\016"
+            + "\\007\\000\\007\\016\\0251*#\\034\\025\\016\\007\\000\\007\\0168"
+            + "1*#\\034\\025\\016\\007\\000\\007?81*#\\034\\025\\016\\007\\000)"
+            + "\neq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
 
 }

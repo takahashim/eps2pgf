@@ -35,8 +35,8 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.ps.resources.filters.Base85Decode;
-import net.sf.eps2pgf.ps.resources.filters.HexDecode;
+import net.sf.eps2pgf.ps.resources.filters.ASCII85Decode;
+import net.sf.eps2pgf.ps.resources.filters.ASCIIHexDecode;
 
 /**
  * String PostScript object.
@@ -441,8 +441,90 @@ public class PSObjectString extends PSObject {
      */
     @Override
     public String isis() {
-        return "(" + toString() + ")";
+        // Determine whether to use to normal or the hex version.
+        int nrPrint = 0;
+        int nrNonPrint = 0;
+        try {
+            for (int i = 0; i < length(); i++) {
+                int c = get(i);
+                if ((c >= 32) && (c <= 127)) {
+                    nrPrint++;
+                } else {
+                    nrNonPrint++;
+                }
+            }
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen
+        }
+        if ((nrNonPrint > 5) && ((2 * nrNonPrint) >= nrPrint)) {
+            return isisHex();
+        } else {
+            return isisNormal();
+        }
     }
+    
+    /**
+     * Return PostScript text representation of this object. See the
+     * PostScript manual under the == operator
+     * 
+     * @return PostScript representation of this object.
+     */
+    private String isisNormal() {
+        StringBuilder str = new StringBuilder();
+        String rawString = toString();
+        str.append('(');
+        for (int i = 0; i < rawString.length(); i++) {
+            char c = rawString.charAt(i);
+            if (c == '(') {
+                str.append("\\(");
+            } else if (c == ')') {
+                str.append("\\)");
+            } else if (c == '\\') {
+                str.append("\\\\");
+            } else if ((c >= 32) && (c <= 126)) {
+                // Printable character
+                str.append(c);
+            } else if (c == '\r') {
+                str.append("\\r");
+            } else if (c == '\n') {
+                str.append("\\n");
+            } else if (c == '\t') {
+                str.append("\\t");
+            } else if (c == '\b') {
+                str.append("\\b");
+            } else if (c == '\f') {
+                str.append("\\f");
+            } else {
+                // Non-printable character -> use octal code
+                str.append('\\');
+                str.append(Integer.toOctalString(c));
+            }
+        }
+        str.append(')');
+        return str.toString();
+    }
+    
+    /**
+     * Return hex string representation of this object. See the
+     * PostScript manual under the == operator
+     * 
+     * @return Hex string of this object.
+     */
+    private String isisHex() {
+        StringBuilder str = new StringBuilder();
+        String rawString = toString();
+        str.append("<\n");
+        for (int i = 0; i < rawString.length(); i++) {
+            int c = rawString.charAt(i);
+            str.append(String.format("%02x", c));
+            if ((i % 40) == 39) {
+                str.append('\n');
+            }
+        }
+        str.append("\n>");
+        return str.toString();
+    }
+    
     
     /**
      * Check whether a string is a PostScript string.
@@ -564,7 +646,7 @@ public class PSObjectString extends PSObject {
      */
     public String parseBase85(final String str) throws PSErrorIOError {
         InputStream stringStream = new StringInputStream(str);
-        InputStream inStream = new Base85Decode(stringStream);
+        InputStream inStream = new ASCII85Decode(stringStream);
         
         StringBuilder parsedStr = new StringBuilder();
         int c;
@@ -590,7 +672,7 @@ public class PSObjectString extends PSObject {
      */
     public String parseHex(final String str) throws PSErrorIOError {
         InputStream stringStream = new StringInputStream(str);
-        InputStream inStream = new HexDecode(stringStream);
+        InputStream inStream = new ASCIIHexDecode(stringStream);
         
         StringBuilder parsedStr = new StringBuilder();
         int c;

@@ -1,5 +1,5 @@
 /*
- * Base85Decode.java
+ * ASCII85Decode.java
  *
  * This file is part of Eps2pgf.
  *
@@ -22,39 +22,59 @@ package net.sf.eps2pgf.ps.resources.filters;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * ASCII Base-85 decoding wrapper around an <code>InputStream</code>.
  * 
  * @author Paul Wagenaars
  */
-public class Base85Decode extends InputStream {
-    /** InputStream from which base-85 encoded data is read. */
+public class ASCII85Decode extends InputStream {
+    /** InputStream from which raw characters are read. */
     private InputStream in;
     
-    /** Five byte block of raw bytes. */
-    private long[] raw;
+    /** This "character" indicates that the EOF (end-of-file) is encountered. */
+    private static final int EOF_CHAR = -1;
+    
+    /** This "character" indicates that an IOException occurred at this point.
+     */
+    private static final int IOEXCEPTION_CHAR = -2;
+    
+    /** This "character" indicates that the EOD (end-of-data) sequence is
+     * encountered. */
+    private static final int EOD_CHAR = -3;
+    
+    
+    /** Buffer with all raw (encoded) characters. */
+    private ArrayList<Integer> rawChars;
+    
+    /** Pointer to next raw character to be read. */
+    private int rawPtr;
+    
+    /** Pointer in raw character array during last mark(). */
+    private int lastMarkPtr = -1;
     
     /** Four byte block of decoded bytes. */
     private int[] decoded;
     
-    /** Pointer to next char to be read from. */
-    private int nextChar;
+    /** Pointer to next decoded char to be read from. */
+    private int decodedPtr;
     
     /** Number of valid decoded characters. */
     private int goodChars;
     
     /** 
-     * Creates a new instance of Base85Decode.
+     * Creates a new instance of ASCII85Decode.
      * 
      * @param pIn <code>InputStream</code> from which base-85 encoded characters
      * are read.
      */
-    public Base85Decode(final InputStream pIn) {
+    public ASCII85Decode(final InputStream pIn) {
         in = pIn;
-        raw = new long[5];
         decoded = new int[4];
-        nextChar = 999;
+        decodedPtr = 5;
+        goodChars = 0;
+
     }
     
     /**
@@ -66,14 +86,13 @@ public class Base85Decode extends InputStream {
      */
     @Override
     public int available() throws IOException {
-        int n = in.available();
+        int n = rawChars.size() - rawPtr;
         n = (n * 4) / 5;
         return n;
     }
     
     /**
-     * Closes this input stream and releases any system resources associated
-     * with the stream.
+     * Closes this input stream.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
@@ -83,7 +102,7 @@ public class Base85Decode extends InputStream {
     }
     
     /**
-     * Decode chararacters.
+     * Decode characters.
      * 
      * @param rawBytes The raw bytes.
      * @param decodedBytes The decoded bytes.
@@ -92,10 +111,12 @@ public class Base85Decode extends InputStream {
      */
     private static void decodeChars(final long[] rawBytes,
             final int[] decodedBytes) throws IOException {
+        
         long d = 0;
         for (int j = 0; j < 5; j++) {
             d = 85L * d + rawBytes[j] - 33L;
         }
+        
         if (d >= 256L * 256L * 256L * 256L) {
             throw new IOException();
         }
@@ -125,7 +146,7 @@ public class Base85Decode extends InputStream {
      */
     @Override
     public void mark(final int readlimit) {
-        in.mark(readlimit);
+        lastMarkPtr = rawPtr;
     }
     
     /**
@@ -138,7 +159,7 @@ public class Base85Decode extends InputStream {
      */
     @Override
     public boolean markSupported() {
-        return in.markSupported();
+        return true;
     }
     
     /**
@@ -156,29 +177,69 @@ public class Base85Decode extends InputStream {
     @Override
     public int read() throws IOException {
         if (in == null) {
-            return -1;
+            throw new IOException();
+        }
+        if (rawChars == null) {
+            rawChars = readAllRawChars(in);
+            rawPtr = 0;
         }
         
-        if (nextChar >= goodChars) {
-            int goodRawChars = readNextFiveChars(in, raw);
+        if (decodedPtr >= goodChars) {
+            long[] raw = new long[5];
+            int goodRawChars = getNextFiveChars(raw);            
             if (goodRawChars < 2) {
                 return -1;
             }
+            
             decodeChars(raw, decoded);
-            nextChar = 0;
+            decodedPtr = 0;
             goodChars = goodRawChars - 1;
         }
         
-        int c = decoded[nextChar];
-        nextChar++;
-        return c;
+        return decoded[decodedPtr++];
+    }
+    
+    
+    /**
+     * Read all raw/encoded characters from a stream and return a list with all
+     * character codes.
+     * 
+     * @param inStream The input stream.
+     * 
+     * @return List with all character codes.
+     */
+    private static ArrayList<Integer> readAllRawChars(
+            final InputStream inStream) {
+        
+        // Read all encoded characters from the input stream until EOD or EOF
+        // is reached.
+        ArrayList<Integer> rawChars = new ArrayList<Integer>();
+        int c;
+        
+        try {
+            while ((c = inStream.read()) != -1) {
+                // Check for end-of-data (EOD = ~>)
+                if (c == 62) {
+                    int lastChar = rawChars.get(rawChars.size() - 1);
+                    if (lastChar == 126) {
+                        rawChars.set(rawChars.size() - 1, EOD_CHAR);
+                        break;
+                    }
+                }
+                rawChars.add(c);
+            }
+        } catch (IOException e)  {
+            rawChars.add(IOEXCEPTION_CHAR);
+        }
+        rawChars.add(EOF_CHAR);
+        
+        return rawChars;
     }
     
     /**
-     * Read the next five characters from the input stream. This will skip
+     * Read the next five characters from raw character buffer. This will skip
      * whitespace.
      * 
-     * @param in The input stream from which characters are read.
      * @param c Store characters in this buffer.
      * 
      * @return Returns number of characters correctly written. If this is less
@@ -188,16 +249,17 @@ public class Base85Decode extends InputStream {
      * @throws IOException An invalid character encountered or and I/O error
      * occurred.
      */
-    private static int readNextFiveChars(final InputStream in, final long[] c)
+    private int getNextFiveChars(final long[] c)
             throws IOException {
+        
         int ptr = 0;
-        int goodChars = 0;
+        int goodCharsRead = 0;
         
         while (ptr < 5) {
-            int chr = in.read();
+            int chr = rawChars.get(rawPtr++);
             if ((chr >= '!') && (chr <= 'u')) {
                 c[ptr++] = chr;
-                goodChars++;
+                goodCharsRead++;
             } else if ((ptr == 0) && (chr == 'z')) {
                 c[0] = '!';
                 c[1] = '!';
@@ -205,10 +267,11 @@ public class Base85Decode extends InputStream {
                 c[3] = '!';
                 c[4] = '!';
                 ptr = 5;
-                goodChars = 5;
-            } else if (chr == -1) {
+                goodCharsRead = 5;
+            } else if ((chr == EOF_CHAR) || (chr == EOD_CHAR)) {
+                rawPtr--;
                 if (ptr > 0) {
-                    c[ptr++] = '!';
+                    c[ptr++] = '/';
                 } else {
                     return -1;
                 }
@@ -220,7 +283,7 @@ public class Base85Decode extends InputStream {
                 throw new IOException();
             }
         }
-        return goodChars;
+        return goodCharsRead;
     }
     
     /**
@@ -231,10 +294,10 @@ public class Base85Decode extends InputStream {
      */
     @Override
     public void reset() throws IOException {
-        if (in == null) {
+        if (lastMarkPtr < 0) {
             throw new IOException();
         }
-        in.reset();
-        nextChar = 5;
+        rawPtr = lastMarkPtr;
+        decodedPtr = 5;
     }
 }
