@@ -190,7 +190,7 @@ public class LOLDevice implements OutputDevice {
             final double angle, final double fontsize, final String anchor,
             final GraphicsState gstate) throws IOException {
         
-        out.write(String.format("\\overlaylabel(%s,%s)[%s][%s]{%s}\n",
+        out.write(String.format("\\overlaylabel(%s,%s)[%s][%s]{%s}%%\n",
                 FLOAT_FORMAT.format(position[0]),
                 FLOAT_FORMAT.format(position[1]),
                 anchor,
