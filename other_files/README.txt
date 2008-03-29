@@ -63,6 +63,11 @@ line option '--version'.
 ----------------------------------------------------------------------------
 Changelog
 ----------------------------------------------------------------------------
+v0.7.0 (2008-04-??)
+  - Added: feature #1856797 Bitmap images
+  - Fixed: feature #1917088 add a percent character at the each of each line
+           in the LOLDevice output.
+
 v0.6.0 (2008-02-04)
   - Added: feature #1856800 PSfrag emulation
   - Added: feature #1856798 Interpret text labels directly as TeX
