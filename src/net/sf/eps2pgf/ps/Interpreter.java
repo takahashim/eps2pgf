@@ -20,12 +20,8 @@
 
 package net.sf.eps2pgf.ps;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -36,7 +32,6 @@ import java.util.logging.Logger;
 import net.sf.eps2pgf.Main;
 import net.sf.eps2pgf.Options;
 import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.io.EpsImageCreator;
 import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.TextHandler;
 import net.sf.eps2pgf.io.TextReplacements;
@@ -67,6 +62,8 @@ import net.sf.eps2pgf.ps.objects.PSObjectReal;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.Encoding;
 import net.sf.eps2pgf.ps.resources.FontManager;
+import net.sf.eps2pgf.ps.resources.colors.CMYK;
+import net.sf.eps2pgf.ps.resources.colors.Gray;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.colors.RGB;
 import net.sf.eps2pgf.ps.resources.filters.EexecDecode;
@@ -134,11 +131,13 @@ public class Interpreter {
             final TextReplacements textReplace)
             throws ProgramError, PSError, IOException {
         
+        options = opts;        
+
         // Create graphics state stack with output device
         OutputDevice output;
         switch (opts.getOutputType()) {
             case PGF:
-                output = new PGFDevice(outputWriter);
+                output = new PGFDevice(outputWriter, options);
                 break;
             case LOL:
                 output = new LOLDevice(outputWriter);
@@ -150,8 +149,6 @@ public class Interpreter {
         this.gstate = new GstateStack(output);
         
         this.header = fileHeader;
-        
-        options = opts;
         
         // Text handler
         this.textHandler = new TextHandler(this.gstate, textReplace,
@@ -790,6 +787,68 @@ public class Interpreter {
         if (startPos != null) {
             gstate.current().moveto(startPos[0], startPos[1]);
         }
+    }
+    
+    /**
+     * PostScript op: colorimage.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public void op_colorimage() throws PSError, ProgramError, IOException {
+        // Number of color components
+        PSColor colorSpace;
+        int ncomp = getOpStack().pop().toInt();
+        if (ncomp == 1) {
+            colorSpace = new Gray();
+        } else if (ncomp == 3) {
+            colorSpace = new RGB();
+        } else if (ncomp == 4) {
+            colorSpace = new CMYK();
+        } else {
+            throw new PSErrorRangeCheck();
+        }
+        
+        // Does it have multiple data sources?
+        boolean multi = getOpStack().pop().toBool();
+        
+        // Get the data source(s)
+        PSObject dataSource;
+        if (multi) {
+            PSObject[] sources = new PSObject[ncomp];
+            for (int i = (ncomp - 1); i >= 0; i++) {
+                sources[i] = getOpStack().pop();
+            }
+            dataSource = new PSObjectArray(sources);
+        } else {
+            dataSource = getOpStack().pop();
+        }
+        
+        // Read last four arguments
+        PSObjectMatrix matrix = getOpStack().pop().toMatrix();
+        int bitsPerComponent = getOpStack().pop().toInt();
+        int height = getOpStack().pop().toInt();
+        int width = getOpStack().pop().toInt();
+        
+        // Construct an image dictionary
+        PSObjectDict dict = new PSObjectDict();
+        dict.setKey(Image.IMAGE_TYPE, new PSObjectInt(1));
+        dict.setKey(Image.WIDTH, new PSObjectInt(width));
+        dict.setKey(Image.HEIGHT, new PSObjectInt(height));
+        dict.setKey(Image.IMAGE_MATRIX, matrix);
+        dict.setKey(Image.DATA_SOURCE, dataSource);
+        dict.setKey(Image.BITS_PER_COMPONENT,
+                new PSObjectInt(bitsPerComponent));        
+        double[] decode = new double[2 * ncomp];
+        for (int i = 0; i < ncomp; i++) {
+            decode[2 * i] = 0.0;
+            decode[2 * i + 1] = 1.0;
+        }
+        dict.setKey(Image.DECODE, new PSObjectArray(decode));
+        
+        Image image = new Image(dict, this, colorSpace);
+        gstate.current().getDevice().image(image);
     }
     
     /**
@@ -1781,17 +1840,21 @@ public class Interpreter {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void op_image() throws PSError, ProgramError {
+    public void op_image() throws PSError, ProgramError, IOException {
         PSObject dictOrDataSrc = getOpStack().pop();
         PSObjectDict dict;
+        
+        PSColor colorSpace;
         if (dictOrDataSrc instanceof PSObjectDict) {
             // We have the one argument image operand
-            // dict image �
+            // dict image.
             dict = dictOrDataSrc.toDict();
+            colorSpace = gstate.current().getColor();
         } else {
             // We have the five argument image operand
-            // width height bits/sample matrix datasrc image �
+            // width height bits/sample matrix datasrc image.
             PSObjectMatrix matrix = getOpStack().pop().toMatrix();
             int bitsPerSample = getOpStack().pop().toInt();
             int height = getOpStack().pop().toInt();
@@ -1806,28 +1869,12 @@ public class Interpreter {
             dict.setKey(Image.BITS_PER_COMPONENT,
                     new PSObjectInt(bitsPerSample));
             double[] decode = {0.0, 1.0};
-            dict.setKey(Image.DATA_SOURCE, new PSObjectArray(decode));
+            dict.setKey(Image.DECODE, new PSObjectArray(decode));
+            colorSpace = new Gray();
         }
-        Image image = new Image(dict, gstate.current());
-        String filename = options.getOutputFile().getName();
-        String basename;
-        int dot = filename.lastIndexOf('.');
-        if (dot >= 0) {
-            basename = filename.substring(0, dot);
-        } else {
-            basename = filename;
-        }
-        File epsFile = new File(options.getOutputFile().getParent(), 
-                basename + "-image1.eps");
-        try {
-            OutputStream out = new FileOutputStream(epsFile);
-            EpsImageCreator.writeEpsImage(out, image);
-            out.close();
-        } catch (FileNotFoundException e) {
-            throw new PSErrorIOError();
-        } catch (IOException e) {
-            throw new PSErrorIOError();
-        }
+        
+        Image image = new Image(dict, this, colorSpace);
+        gstate.current().getDevice().image(image);
     }
     
     /**
@@ -2355,7 +2402,26 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_readhexstring() throws PSError {
-        throw new PSErrorUnimplemented("operator: readhexstring");
+        PSObjectString string = getOpStack().pop().toPSString();
+        string.checkAccess(false, true, false);
+        if (string.length() == 0) {
+            throw new PSErrorRangeCheck();
+        }
+        
+        PSObject nextObj = getOpStack().peek();
+        if (!(nextObj instanceof PSObjectFile)) {
+            throw new PSErrorTypeCheck();
+        }
+        nextObj.checkAccess(false, false, true);
+        getOpStack().push(new PSObjectName("/ASCIIHexDecode"));
+        op_filter();
+        PSObjectFile file = getOpStack().pop().toFile();
+        
+        PSObjectString substring = file.readstring(string);
+        boolean bool = (string.length() == substring.length());
+        
+        getOpStack().push(substring);
+        getOpStack().push(new PSObjectBool(bool));
     }
     
     /**
@@ -3417,6 +3483,15 @@ public class Interpreter {
         gstate.current().rlineto(0.0, height);
         gstate.current().rlineto(-width, 0.0);
         op_closepath();
+    }
+
+    /**
+     * Get the graphics state stack.
+     * 
+     * @return The graphics state stack.
+     */
+    public GstateStack getGstate() {
+        return gstate;
     }
     
 }

@@ -153,13 +153,10 @@ public class ASCIIHexDecode extends InputStream {
                 c -= 55;
             } else if ((c >= 97) && (c <= 102)) {
                 c -= 87;
-            } else if ((c == 0) || (c == 9) || (c == 10) || (c == 12)
-                    || (c == 13) || (c == 32)) {
-                continue;
             } else if (c == -1) {
                 // nothing to to
             } else {
-                throw new IOException();
+                continue;
             }
             break;
         }

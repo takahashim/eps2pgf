@@ -23,6 +23,7 @@ package net.sf.eps2pgf.ps.resources.outputdevices;
 import java.io.IOException;
 
 import net.sf.eps2pgf.ps.GraphicsState;
+import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
@@ -146,13 +147,6 @@ public interface OutputDevice extends Cloneable {
     void stroke(GraphicsState gstate) throws IOException, PSError;
     
     /**
-     * Ends the current scope.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    void endScope() throws IOException;
-    
-    /**
      * Draws a red dot (useful for debugging, don't use otherwise).
      * 
      * @param x X-coordinate of dot.
@@ -199,5 +193,22 @@ public interface OutputDevice extends Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     void startScope() throws IOException;
+    
+    /**
+     * Ends the current scope.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    void endScope() throws IOException;
+    
+    /**
+     * Adds a bitmap image to the output.
+     * 
+     * @param img The bitmap image to add.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
+     */
+    void image(final Image img) throws PSError, IOException;
     
 }

@@ -20,7 +20,10 @@
 
 package net.sf.eps2pgf.ps.resources.outputdevices;
 
+import java.io.IOException;
+
 import net.sf.eps2pgf.ps.GraphicsState;
+import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.errors.PSErrorNoCurrentPoint;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
@@ -280,4 +283,24 @@ public class CacheDevice implements OutputDevice {
     public void drawRect(final double[] lowerLeft, final double[] upperRight) {
     }
     
+    /**
+     * Adds a bitmap image to the output.
+     * 
+     * @param img The bitmap image to add.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public void image(final Image img) throws IOException {
+        double[] imgBbox = new double[4];
+        double[][] imgCorners = img.getDeviceBbox();
+        imgBbox[0] = Math.min(imgCorners[0][0], Math.min(imgCorners[1][0],
+                Math.min(imgCorners[2][0], imgCorners[3][0])));
+        imgBbox[1] = Math.min(imgCorners[0][1], Math.min(imgCorners[1][1],
+                Math.min(imgCorners[2][1], imgCorners[3][1])));
+        imgBbox[2] = Math.max(imgCorners[0][0], Math.max(imgCorners[1][0],
+                Math.max(imgCorners[2][0], imgCorners[3][0])));
+        imgBbox[3] = Math.max(imgCorners[0][1], Math.max(imgCorners[1][1],
+                Math.max(imgCorners[2][1], imgCorners[3][1])));
+        mergeBbox(imgBbox);
+    }
 }

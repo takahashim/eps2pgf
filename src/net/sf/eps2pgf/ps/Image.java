@@ -75,6 +75,10 @@ public class Image {
     public static final PSObjectName INTERPOLATE =
         new PSObjectName("/Interpolate");
     
+    /** (Eps2pgf specific) key of ColorSpace entry in dictionary. */
+    public static final PSObjectName COLORSPACE =
+        new PSObjectName("/ColorSpace");
+    
     /** Index of lower-left corner. */
     private static final int LL = 0;
     
@@ -157,39 +161,40 @@ public class Image {
     
     /** Vector describing a single pixel along the "vertical" axis. */
     private double[] vectorVert = new double[2];
-    
-    
+
     /**
      * Creates a new ImageHandler object.
      * 
      * @param dict The image dictionary.
-     * @param gstate The current graphics state.
+     * @param interp Interpreter to which this image belongs.
+     * @param pColorSpace The current color space.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public Image(final PSObjectDict dict, final GraphicsState gstate)
-            throws PSError, ProgramError {
+    public Image(final PSObjectDict dict, final Interpreter interp,
+            final PSColor pColorSpace) throws PSError, ProgramError {
         
         // Get some information from the graphics state.
         try {
-            ctm = gstate.getCtm().clone();
-            colorSpace = gstate.getColor().clone();
+            ctm = interp.getGstate().current().getCtm().clone();
+            colorSpace = pColorSpace.clone();
         } catch (CloneNotSupportedException e) {
-            throw new ProgramError("Clone not properly implemented.");
+            throw new ProgramError("CloneNotSupported exception should not be"
+                    + " thrown.");
         }
         
         int imageType = dict.get(IMAGE_TYPE).toInt();
         try {
             switch (imageType) {
                 case 1:
-                    loadType1Image(dict);
+                    loadType1Image(dict, interp);
                     break;
                 case 3:
                     throw new PSErrorUnimplemented("Bitmap images of type 3.");
                     // break;
                 case 4:
-                    throw new PSErrorUnimplemented("Bitmap images of type 3.");
+                    throw new PSErrorUnimplemented("Bitmap images of type 4.");
                     // break;
                 default:
                     throw new PSErrorRangeCheck();
@@ -203,12 +208,15 @@ public class Image {
      * Loads type 1 bitmap.
      * 
      * @param dict The dictionary describing the image.
+     * @param interp Interpreter to which this image belongs.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    private void loadType1Image(final PSObjectDict dict)
-            throws PSError, IOException {
+    private void loadType1Image(final PSObjectDict dict,
+            final  Interpreter interp) throws PSError, ProgramError,
+            IOException {
         
         // Read bitmap dimensions
         imgWidthPx = dict.get(WIDTH).toInt();
@@ -248,9 +256,17 @@ public class Image {
             } else if (dataSource instanceof PSObjectString) {
                 throw new PSErrorUnimplemented("Reading (bitmap) image data"
                         + " from a string.");
+            } else if (dataSource instanceof PSObjectArray) {
+                if (multipleSources) {
+                    throw new PSErrorUnimplemented("Reading bitmap data from"
+                            + " multiple data sources.");
+                } else {
+                    loadDataFromProcedure((PSObjectArray) dataSource,
+                            imgWidthPx, imgHeightPx, nrInputValues, interp);
+                }
             } else {
                 throw new PSErrorUnimplemented("Reading (bitmap) image data"
-                        + " from other source than a file.");
+                        + " from other " + dataSource);
             }
         }
         
@@ -347,6 +363,38 @@ public class Image {
         int bytesRead = in.getStream().read(data);
         if (bytesRead != (height * bytesPerLine)) {
             throw new PSErrorRangeCheck();
+        }
+    }
+    
+    /**
+     * Loads data from a procedure data source.
+     * 
+     * @param proc Procedure that must produce the data.
+     * @param width The width in pixels.
+     * @param height The height in pixels.
+     * @param nrComponents Number of components per pixel.
+     * appropriate for the color space.
+     * @param interp Interpreter in which the procedure in executed.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSError A PostScript error occurred.
+     */
+    private void loadDataFromProcedure(final PSObjectArray proc,
+            final int width, final int height, final int nrComponents,
+            final Interpreter interp) throws ProgramError, PSError {
+        
+        bytesPerLine = (int) Math.ceil(((double) width)
+                * ((double) nrComponents) * ((double) bitsPerComponent) / 8.0);
+        data = new byte[height * bytesPerLine];
+        
+        int bytesRead = 0;
+        while (bytesRead < height * bytesPerLine) {
+            interp.runObject(proc);
+            PSObjectString dataStr = interp.getOpStack().pop().toPSString();
+            for (int i = 0; i < dataStr.length(); i++) {
+                data[bytesRead] = (byte) dataStr.get(i);
+                bytesRead++;
+            }
         }
     }
     
@@ -598,5 +646,14 @@ public class Image {
         }
         
         return values;
+    }
+
+    /**
+     * Return the bounding box in device space.
+     * 
+     * @return Two dimensional array with coordinates of all four corners.
+     */
+    public double[][] getDeviceBbox() {
+        return deviceBbox.clone();
     }
 }

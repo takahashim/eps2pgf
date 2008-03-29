@@ -20,7 +20,10 @@
 
 package net.sf.eps2pgf.ps.resources.outputdevices;
 
+import java.io.IOException;
+
 import net.sf.eps2pgf.ps.GraphicsState;
+import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
@@ -191,4 +194,14 @@ public class NullDevice implements OutputDevice {
         
     }
     
+    /**
+     * Adds a bitmap image to the output.
+     * 
+     * @param img The bitmap image to add.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public void image(final Image img) throws IOException {
+        /* empty block */
+    }
 }

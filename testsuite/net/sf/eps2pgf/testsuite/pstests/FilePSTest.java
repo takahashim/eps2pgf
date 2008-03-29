@@ -100,6 +100,16 @@ public class FilePSTest {
             + "\neq";
         assertTrue(Common.testString(interp, cmd));
     }
+    
+    /** Test. @throws Exception the exception. */
+    @Test
+    public void fileTest5Readhexstring() throws Exception {
+        String cmd = "currentfile 4 string readhexstring 1aBf90f6 exch"
+            + " (\032\277\220\366) eq\n";
+        cmd += "currentfile 6 string readhexstring 123456>notexecutedFexch"
+            + " (\0224V\356\316\337) eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
 
 
 }

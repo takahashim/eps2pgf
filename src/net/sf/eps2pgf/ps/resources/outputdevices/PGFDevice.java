@@ -1,9 +1,9 @@
 /*
- * PGFExport.java
+ * PGFDevice.java
  *
  * This file is part of Eps2pgf.
  *
- * Copyright 2007, 2008 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2008 Paul Wagenaars <paul@wagenaars.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,30 @@
 
 package net.sf.eps2pgf.ps.resources.outputdevices;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Date;
 import java.util.Locale;
 
+import net.sf.eps2pgf.Options;
+import net.sf.eps2pgf.io.EpsImageCreator;
 import net.sf.eps2pgf.ps.Closepath;
 import net.sf.eps2pgf.ps.Curveto;
 import net.sf.eps2pgf.ps.GraphicsState;
+import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Lineto;
 import net.sf.eps2pgf.ps.Moveto;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.PathSection;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
@@ -110,13 +119,23 @@ public class PGFDevice implements OutputDevice {
     /** Maintains current status of current line width, color, etc... */
     private PSObjectDict deviceStatus;
     
+    /** Program options (may also contain options for this device). */
+    private Options options;
+    
+    /** Number of next bitmap image. */
+    private int nextImage = 1;
+    
     /**
      * Creates a new instance of PGFExport.
+     * 
      * @param wOut Writer to where the PGF code will be written.
+     * @param pOptions Program options (may also contain options for this
+     * device).
      */
-    public PGFDevice(final Writer wOut) {
+    public PGFDevice(final Writer wOut, final Options pOptions) {
         out = wOut;
         deviceStatus = new PSObjectDict();
+        options = pOptions;
     }
     
     /**
@@ -270,6 +289,7 @@ public class PGFDevice implements OutputDevice {
             copy = (PGFDevice) super.clone();
             copy.deviceStatus = deviceStatus.clone();
             copy.out = out;  // output writer is not cloned
+            copy.options = options;  // program options are not cloned
         } catch (CloneNotSupportedException e) {
             /* this exception shouldn't happen. */
             copy = null;
@@ -751,4 +771,34 @@ public class PGFDevice implements OutputDevice {
                 + "cm}}\\pgfusepath{stroke}\\end{pgfscope}\n");
     }
 
+    /**
+     * Adds a bitmap image to the output.
+     * 
+     * @param img The bitmap image to add.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
+     */
+    public void image(final Image img) throws PSError, IOException {
+        String filename = options.getOutputFile().getName();
+        String basename;
+        int dot = filename.lastIndexOf('.');
+        if (dot >= 0) {
+            basename = filename.substring(0, dot);
+        } else {
+            basename = filename;
+        }
+        File epsFile = new File(options.getOutputFile().getParent(), 
+                basename + "-image" + nextImage++ + ".eps");
+        try {
+            OutputStream epsOut = new BufferedOutputStream(
+                    new FileOutputStream(epsFile));
+            EpsImageCreator.writeEpsImage(epsOut, img, epsFile.getName());
+            epsOut.close();
+        } catch (FileNotFoundException e) {
+            throw new PSErrorIOError();
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
+    }
 }

@@ -53,19 +53,19 @@ public final class EpsImageCreator {
      * @param out OutputStream to which EPS image is written.
      * @param img Bitmap image to must be converted to EPS and written to the
      * OutputStream.
+     * @param title Title of figure (used in EPS header)
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      */
-    public static void writeEpsImage(final OutputStream out, final Image img)
-            throws IOException, PSError {
+    public static void writeEpsImage(final OutputStream out, final Image img,
+            final String title) throws IOException, PSError {
         
-        writeHeader(out, img);
+        writeHeader(out, img, title);
         writeScaling(out, img);
         writeColorSpace(out, img);
         writeImageDict(out, img);
         writeImageData(out, img);
-        
         
         String footer = "\n%%EOF";
         out.write(footer.getBytes());
@@ -77,16 +77,17 @@ public final class EpsImageCreator {
      * @param out OutputStream to which EPS image is written.
      * @param img Bitmap image to must be converted to EPS and written to the
      * OutputStream.
+     * @param title Title of figure (used in EPS header)
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private static void writeHeader(final OutputStream out, final Image img)
-            throws IOException {
+    private static void writeHeader(final OutputStream out, final Image img,
+            final String title) throws IOException {
         
         StringBuilder header = new StringBuilder();
         header.append("%!PS-Adobe-3.0 EPSF-3.0\n");
         header.append("%%Creator: " + Main.getNameVersion() + "\n");
-        header.append("%%Title: Eps2pgf bitmap image\n");
+        header.append("%%Title: " + title + "\n");
         header.append("%%CreationDate: ");
         Calendar now = Calendar.getInstance();
         Formatter fmt = new Formatter(header);
