@@ -31,6 +31,7 @@ import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
+import net.sf.eps2pgf.ps.resources.filters.ASCII85Encode;
 
 /**
  * This class takes bitmap image and writes it to an OutputStream.
@@ -187,7 +188,7 @@ public final class EpsImageCreator {
         
         dict.append("/Interpolate " + img.getInterpolate() + "\n");
         
-        dict.append("/DataSource currentfile\n");
+        dict.append("/DataSource currentfile /ASCII85Decode filter\n");
         
         dict.append(">>\nimage\n");
         out.write(dict.toString().getBytes());
@@ -196,15 +197,17 @@ public final class EpsImageCreator {
     /**
      * Write the binary image data to the EPS file.
      * 
-     * @param out OutputStream to which EPS image is written.
+     * @param charOut OutputStream to which EPS image is written.
      * @param img Bitmap image to must be converted to EPS and written to the
      * OutputStream.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      */
-    private static void writeImageData(final OutputStream out,
+    private static void writeImageData(final OutputStream charOut,
             final Image img) throws IOException, PSError {
+        
+        OutputStream out = new ASCII85Encode(charOut);
 
         int width = img.getOutputWidthPx();
         int height = img.getOutputHeightPx();
@@ -239,6 +242,8 @@ public final class EpsImageCreator {
                         bitsInBuffer);
             }
         }
+        
+        out.close();
     }
     
     /**
@@ -257,9 +262,7 @@ public final class EpsImageCreator {
         
         int currentBits = bitsInBuffer;
         while (currentBits >= 8) {
-            byte[] data = new byte[1];
-            data[0] = (byte) (0xff & (bitBuffer >> (currentBits - 8)));
-            out.write(data);
+            out.write(0xff & (bitBuffer >> (currentBits - 8)));
             currentBits -= 8;
         }
         
