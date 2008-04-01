@@ -65,7 +65,7 @@ public class ASCII85Encode extends OutputStream {
      */
     @Override
     public void write(final int arg0) throws IOException {
-        buffer[bufferSize++] = arg0;
+        buffer[bufferSize++] = arg0 & 0xff;
         if (bufferSize == 4) {
             encodeAndWriteBuffer();
         }

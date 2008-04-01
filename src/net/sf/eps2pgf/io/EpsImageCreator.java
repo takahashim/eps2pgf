@@ -32,6 +32,7 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.filters.ASCII85Encode;
+import net.sf.eps2pgf.ps.resources.filters.FlateEncode;
 
 /**
  * This class takes bitmap image and writes it to an OutputStream.
@@ -188,7 +189,9 @@ public final class EpsImageCreator {
         
         dict.append("/Interpolate " + img.getInterpolate() + "\n");
         
-        dict.append("/DataSource currentfile /ASCII85Decode filter\n");
+        dict.append("/DataSource currentfile"
+                + " /ASCII85Decode filter"
+                + " /FlateDecode filter\n");
         
         dict.append(">>\nimage\n");
         out.write(dict.toString().getBytes());
@@ -207,8 +210,9 @@ public final class EpsImageCreator {
     private static void writeImageData(final OutputStream charOut,
             final Image img) throws IOException, PSError {
         
-        OutputStream out = new ASCII85Encode(charOut);
-
+        OutputStream ascii85Out = new ASCII85Encode(charOut);
+        OutputStream out = new FlateEncode(ascii85Out);
+        
         int width = img.getOutputWidthPx();
         int height = img.getOutputHeightPx();
         int n = img.getBitsPerComponent();
@@ -244,6 +248,7 @@ public final class EpsImageCreator {
         }
         
         out.close();
+        ascii85Out.close();
     }
     
     /**
