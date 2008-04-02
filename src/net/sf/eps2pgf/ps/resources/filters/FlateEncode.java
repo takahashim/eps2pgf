@@ -22,59 +22,43 @@ package net.sf.eps2pgf.ps.resources.filters;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 
 /**
  * FlateEncode filter.
  * 
  * @author Paul Wagenaars
  */
-public class FlateEncode extends OutputStream {
+public class FlateEncode extends DeflaterOutputStream {
     
-    /** Output stream to which compressed bytes are written. */
-    private OutputStream out;
-    
-    /** Buffer with uncompressed bytes. */
-    private ArrayList<Byte> buffer = new ArrayList<Byte>();
+    /** Indicates whether this filter is closed. */
+    private boolean isClosed = false;
     
     /**
      * Creates a new FlateEncode filter.
      * 
-     * @param pOut The output stream to which encoded bytes are written.
+     * @param out The output stream to which encoded bytes are written.
      */
-    public FlateEncode(final OutputStream pOut) {
-        out = pOut;
+    public FlateEncode(final OutputStream out) {
+        super(out, new Deflater(Deflater.BEST_COMPRESSION));
     }
     
     /**
-     * Write a single byte to this output stream.
+     * Compress a single byte and write it to the output stream.
      * 
-     * @param b The byte to write.
+     * @param b The byte.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
     public void write(final int b) throws IOException {
-        if (out == null) {
+        if (isClosed) {
             throw new IOException();
         }
-        buffer.add((byte) (b & 0xff));
+        super.write(b);
     }
     
-    /**
-     * Flushes all data in buffers, is possible.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    @Override
-    public void flush() throws IOException {
-        if (out == null) {
-            throw new IOException();
-        }
-        out.flush();
-    }
-
     /**
      * Closes this filter. Note that this function does not close the output
      * stream.
@@ -83,24 +67,8 @@ public class FlateEncode extends OutputStream {
      */
     @Override
     public void close() throws IOException {
-        byte[] inputData = new byte[buffer.size()];
-        for (int i = 0; i < inputData.length; i++) {
-            inputData[i] = (byte) (buffer.get(i) & 0xff);
-        }
-        buffer.clear();
-        
-        Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
-        deflater.setInput(inputData);
-        deflater.finish();
-        byte[] output = new byte[1024];
-        while (true) {
-            int compressedDataLength = deflater.deflate(output);
-            if (compressedDataLength == 0) {
-                break;
-            }
-            out.write(output, 0, compressedDataLength);
-        }
-        out = null;
+        finish();
+        isClosed = true;
     }
     
 }
