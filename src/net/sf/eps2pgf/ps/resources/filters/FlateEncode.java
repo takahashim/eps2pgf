@@ -45,6 +45,20 @@ public class FlateEncode extends DeflaterOutputStream {
     }
     
     /**
+     * Flushes this output stream and forces any buffered output bytes to be
+     * written out.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @Override
+    public void flush() throws IOException {
+        if (isClosed) {
+            throw new IOException();
+        }
+        super.flush();
+    }
+    
+    /**
      * Compress a single byte and write it to the output stream.
      * 
      * @param b The byte.
@@ -57,6 +71,42 @@ public class FlateEncode extends DeflaterOutputStream {
             throw new IOException();
         }
         super.write(b);
+    }
+    
+    /**
+     * Writes b.length bytes from the specified byte array to this output
+     * stream.
+     * 
+     * @param b The data.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @Override
+    public void write(final byte[] b) throws IOException {
+        if (isClosed) {
+            throw new IOException();
+        }
+        super.write(b);
+    }
+    
+    /**
+     * Writes len bytes from the specified byte array starting at offset off to
+     * this output stream.
+     * 
+     * @param b The data.
+     * @param off The start offset in the data.
+     * @param len The number of bytes to write.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @Override
+    public void write(final byte[] b, final int off, final int len)
+            throws IOException {
+        
+        if (isClosed) {
+            throw new IOException();
+        }
+        super.write(b, off, len);
     }
     
     /**
