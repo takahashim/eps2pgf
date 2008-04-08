@@ -62,24 +62,19 @@ public final class Filter {
             throws PSErrorUnimplemented, PSErrorTypeCheck {
         
         String name = filterName.toString();
-        PSObjectFile filterFile;
         
+        InputStream inStream = data.getStream();
+        InputStream filterStream;
         if (name.equals("ASCIIHexDecode")) {
-            InputStream inStream = data.getStream();
-            InputStream filterStream = new ASCIIHexDecode(inStream);
-            filterFile = new PSObjectFile(filterStream);
+            filterStream = new ASCIIHexDecode(inStream);
         } else if (name.equals("ASCII85Decode")) {
-            InputStream inStream = data.getStream();
-            InputStream filterStream = new ASCII85Decode(inStream);
-            filterFile = new PSObjectFile(filterStream);
+            filterStream = new ASCII85Decode(inStream);
         } else if (name.equals("LZWDecode")) {
             throw new PSErrorUnimplemented("Filter type: " + name);
         } else if (name.equals("FlateDecode")) {
-            throw new PSErrorUnimplemented("Filter type: " + name);
+            filterStream = new FlateDecode(inStream);
         } else if (name.equals("RunLengthDecode")) {
-            InputStream inStream = data.getStream();
-            InputStream filterStream = new RunLengthDecode(inStream);
-            filterFile = new PSObjectFile(filterStream);
+            filterStream = new RunLengthDecode(inStream);
         } else if (name.equals("CCITTFaxDecode")) {
             throw new PSErrorUnimplemented("Filter type: " + name);
         } else if (name.equals("DCTDecode")) {
@@ -108,7 +103,7 @@ public final class Filter {
             throw new PSErrorTypeCheck();
         }
         
-        return filterFile;
+        return new PSObjectFile(filterStream);
     }
     
     /**

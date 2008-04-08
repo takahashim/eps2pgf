@@ -360,7 +360,16 @@ public class Image {
         
         data = new byte[height * bytesPerLine];
             
-        int bytesRead = in.getStream().read(data);
+        int bytesRead = 0;
+        while (true) {
+            int nrNewBytes = in.getStream().read(data, bytesRead,
+                    data.length - bytesRead);
+            if (nrNewBytes == 0) {
+                break;
+            }
+            bytesRead += nrNewBytes;
+        }
+
         if (bytesRead != (height * bytesPerLine)) {
             throw new PSErrorRangeCheck();
         }
