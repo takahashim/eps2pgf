@@ -33,7 +33,8 @@ import java.util.Date;
 import java.util.Locale;
 
 import net.sf.eps2pgf.Options;
-import net.sf.eps2pgf.io.EpsImageCreator;
+import net.sf.eps2pgf.io.images.EpsImageCreator;
+import net.sf.eps2pgf.io.images.PdfImageCreator;
 import net.sf.eps2pgf.ps.Closepath;
 import net.sf.eps2pgf.ps.Curveto;
 import net.sf.eps2pgf.ps.GraphicsState;
@@ -788,13 +789,21 @@ public class PGFDevice implements OutputDevice {
         } else {
             basename = filename;
         }
+        basename += "-image" + nextImage++;
         File epsFile = new File(options.getOutputFile().getParent(), 
-                basename + "-image" + nextImage++ + ".eps");
+                basename + ".eps");
+        File pdfFile = new File(options.getOutputFile().getParent(), 
+                basename + ".pdf");
         try {
             OutputStream epsOut = new BufferedOutputStream(
                     new FileOutputStream(epsFile));
-            EpsImageCreator.writeEpsImage(epsOut, img, epsFile.getName());
+            EpsImageCreator.writeImage(epsOut, img, epsFile.getName());
             epsOut.close();
+            OutputStream pdfOut = new BufferedOutputStream(
+                    new FileOutputStream(pdfFile));
+            PdfImageCreator pdfImgCreator = new PdfImageCreator();
+            pdfImgCreator.writeImage(pdfOut, img, pdfFile.getName());
+            pdfOut.close();
         } catch (FileNotFoundException e) {
             throw new PSErrorIOError();
         } catch (IOException e) {

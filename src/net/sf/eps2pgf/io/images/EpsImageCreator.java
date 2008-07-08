@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.io;
+package net.sf.eps2pgf.io.images;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -27,6 +27,7 @@ import java.util.Calendar;
 import java.util.Formatter;
 
 import net.sf.eps2pgf.Main;
+import net.sf.eps2pgf.io.RandomAccessOutputStream;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
@@ -60,17 +61,25 @@ public final class EpsImageCreator {
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      */
-    public static void writeEpsImage(final OutputStream out, final Image img,
+    public static void writeImage(final OutputStream out, final Image img,
             final String title) throws IOException, PSError {
         
-        writeHeader(out, img, title);
-        writeScaling(out, img);
-        writeColorSpace(out, img);
-        writeImageDict(out, img);
-        writeImageData(out, img);
+        RandomAccessOutputStream outBuf = new RandomAccessOutputStream(out);
         
-        String footer = "\n%%EOF";
-        out.write(footer.getBytes());
+        writeHeader(outBuf, img, title);
+        writeScaling(outBuf, img);
+        writeColorSpace(outBuf, img);
+        writeImageDict(outBuf, img);
+
+        OutputStream ascii85Out = new ASCII85Encode(outBuf);
+        OutputStream flateOut = new FlateEncode(ascii85Out);
+        writeImageData(flateOut, img);
+        flateOut.close();
+        ascii85Out.close();
+        
+        outBuf.write("\n%%EOF");
+        
+        outBuf.close();
     }
     
     /**
@@ -83,27 +92,26 @@ public final class EpsImageCreator {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private static void writeHeader(final OutputStream out, final Image img,
-            final String title) throws IOException {
+    private static void writeHeader(final RandomAccessOutputStream out,
+            final Image img, final String title) throws IOException {
         
-        StringBuilder header = new StringBuilder();
-        header.append("%!PS-Adobe-3.0 EPSF-3.0\n");
-        header.append("%%Creator: " + Main.getNameVersion() + "\n");
-        header.append("%%Title: " + title + "\n");
-        header.append("%%CreationDate: ");
+        out.write("%!PS-Adobe-3.0 EPSF-3.0\n");
+        out.write("%%Creator: " + Main.getNameVersion() + "\n");
+        out.write("%%Title: " + title + "\n");
+        out.write("%%CreationDate: ");
         Calendar now = Calendar.getInstance();
-        Formatter fmt = new Formatter(header);
+        Formatter fmt = new Formatter();
         fmt.format("%1$tY-%1$tm-%1$td %1$tk:%1$tM:%1$tS\n", now);
-        header.append("%%LanguageLevel: 3\n");
+        out.write(fmt.toString());
+        out.write("%%LanguageLevel: 3\n");
         double width = img.getOutputWidthPt();
         double height = img.getOutputHeightPt();
-        header.append("%%BoundingBox: 0 0 " + (int) Math.ceil(width));
-        header.append(" " + (int) Math.ceil(height) + "\n");
+        out.write("%%BoundingBox: 0 0 " + (int) Math.ceil(width));
+        out.write(" " + (int) Math.ceil(height) + "\n");
         DecimalFormat format = new DecimalFormat("0.000");
-        header.append("%%HiResBoundingBox: 0.0 0.0 " + format.format(width)
+        out.write("%%HiResBoundingBox: 0.0 0.0 " + format.format(width)
                 + " " + format.format(height));
-        header.append("\n%%EndComments\n\n");
-        out.write(header.toString().getBytes());
+        out.write("\n%%EndComments\n\n");
     }
     
     /**
@@ -114,18 +122,16 @@ public final class EpsImageCreator {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private static void writeScaling(final OutputStream out, final Image img)
-            throws IOException {
+    private static void writeScaling(final RandomAccessOutputStream out,
+            final Image img) throws IOException {
         
         double width = img.getOutputWidthPt();
         double height = img.getOutputHeightPt();        
         DecimalFormat format = new DecimalFormat("0.###");
-        StringBuilder str = new StringBuilder();
-        str.append(format.format(width));
-        str.append(" ");
-        str.append(format.format(height));
-        str.append(" scale\n");
-        out.write(str.toString().getBytes());
+        out.write(format.format(width));
+        out.write(" ");
+        out.write(format.format(height));
+        out.write(" scale\n");
     }
     
     /**
@@ -139,14 +145,12 @@ public final class EpsImageCreator {
      * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
      * (yet) implemented.
      */
-    private static void writeColorSpace(final OutputStream out,
+    private static void writeColorSpace(final RandomAccessOutputStream out,
             final Image img) throws PSErrorUnimplemented, IOException {
         
         PSColor colorSpace = img.getColorSpace();
-        StringBuilder epsCode = new StringBuilder();
-        epsCode.append(colorSpace.getColorSpace().isis());
-        epsCode.append(" setcolorspace\n");
-        out.write(epsCode.toString().getBytes());
+        out.write(colorSpace.getColorSpace().isis());
+        out.write(" setcolorspace\n");
     }
     
     /**
@@ -158,60 +162,55 @@ public final class EpsImageCreator {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private static void writeImageDict(final OutputStream out,
+    private static void writeImageDict(final RandomAccessOutputStream out,
             final Image img) throws IOException {
         
-        StringBuilder dict = new StringBuilder();
-        dict.append("<<\n");
+        out.write("<<\n");
         
-        dict.append("/ImageType 1\n");
+        out.write("/ImageType 1\n");
         
         int width = img.getOutputWidthPx();
-        dict.append(String.format("/Width %d\n", width));
+        out.write(String.format("/Width %d\n", width));
         int height = img.getOutputHeightPx();
-        dict.append(String.format("/Height %d\n", height));
-        dict.append(String.format("/ImageMatrix [%d 0 0 %d 0 0]\n", width,
+        out.write(String.format("/Height %d\n", height));
+        out.write(String.format("/ImageMatrix [%d 0 0 %d 0 0]\n", width,
                 height));
         
-        dict.append(String.format("/BitsPerComponent %d\n",
+        out.write(String.format("/BitsPerComponent %d\n",
                 img.getBitsPerComponent()));
         
         double[] decode = img.getDecode();
-        dict.append("/Decode [");
+        out.write("/Decode [");
         for (int i = 0; i < decode.length; i++) {
             if (decode[i] == Math.round(decode[i])) {
-                dict.append(" " + (int) decode[i]);
+                out.write(" " + (int) decode[i]);
             } else {
-                dict.append(" " + decode[i]);
+                out.write(" " + decode[i]);
             }
         }
-        dict.append(" ]\n");
+        out.write(" ]\n");
         
-        dict.append("/Interpolate " + img.getInterpolate() + "\n");
+        out.write("/Interpolate " + img.getInterpolate() + "\n");
         
-        dict.append("/DataSource currentfile"
+        out.write("/DataSource currentfile"
                 + " /ASCII85Decode filter"
                 + " /FlateDecode filter\n");
         
-        dict.append(">>\nimage\n");
-        out.write(dict.toString().getBytes());
+        out.write(">>\nimage\n");
     }
     
     /**
      * Write the binary image data to the EPS file.
      * 
-     * @param charOut OutputStream to which EPS image is written.
+     * @param out OutputStream to which EPS image is written.
      * @param img Bitmap image to must be converted to EPS and written to the
      * OutputStream.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      */
-    private static void writeImageData(final OutputStream charOut,
+    public static void writeImageData(final OutputStream out,
             final Image img) throws IOException, PSError {
-        
-        OutputStream ascii85Out = new ASCII85Encode(charOut);
-        OutputStream out = new FlateEncode(ascii85Out);
         
         int width = img.getOutputWidthPx();
         int height = img.getOutputHeightPx();
@@ -246,9 +245,6 @@ public final class EpsImageCreator {
                         bitsInBuffer);
             }
         }
-        
-        out.close();
-        ascii85Out.close();
     }
     
     /**
