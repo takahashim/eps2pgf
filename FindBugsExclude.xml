@@ -24,4 +24,11 @@ limitations under the License.
 		<Or>
 			<Method name="parseBase85"></Method>
 			<Method name="parseHex"></Method></Or>
-		<Bug code="OS"></Bug></Match></FindBugsFilter>
+		<Bug code="OS"></Bug>
+	</Match>
+	<Match>
+		<Class name="net.sf.eps2pgf.io.TextHandler" />
+		<Method name="showText" />
+		<Bug code="NP" />
+	</Match>
+</FindBugsFilter>

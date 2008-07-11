@@ -1,5 +1,5 @@
 #FindBugs User Preferences
-#Sun Jan 13 17:58:58 CET 2008
+#Fri Jul 11 19:03:44 CEST 2008
 detectorAppendingToAnObjectOutputStream=AppendingToAnObjectOutputStream|true
 detectorBCPMethodReturnCheck=BCPMethodReturnCheck|false
 detectorBadAppletConstructor=BadAppletConstructor|false
@@ -16,6 +16,7 @@ detectorCloneIdiom=CloneIdiom|true
 detectorComparatorIdiom=ComparatorIdiom|true
 detectorConfusedInheritance=ConfusedInheritance|true
 detectorConfusionBetweenInheritedAndOuterMethod=ConfusionBetweenInheritedAndOuterMethod|true
+detectorCrossSiteScripting=CrossSiteScripting|true
 detectorDoInsideDoPrivileged=DoInsideDoPrivileged|true
 detectorDontCatchIllegalMonitorStateException=DontCatchIllegalMonitorStateException|true
 detectorDontUseEnum=DontUseEnum|true
@@ -119,6 +120,8 @@ detectorSuspiciousThreadInterrupted=SuspiciousThreadInterrupted|true
 detectorSwitchFallthrough=SwitchFallthrough|true
 detectorSynchronizationOnSharedBuiltinConstant=SynchronizationOnSharedBuiltinConstant|true
 detectorSynchronizeAndNullCheckField=SynchronizeAndNullCheckField|true
+detectorSynchronizeOnClassLiteralNotGetClass=SynchronizeOnClassLiteralNotGetClass|true
+detectorSynchronizingOnContentsOfFieldToProtectField=SynchronizingOnContentsOfFieldToProtectField|true
 detectorTestASM=TestASM|false
 detectorTestDataflowAnalysis=TestDataflowAnalysis|false
 detectorTestingGround=TestingGround|false
@@ -139,5 +142,5 @@ detectorXMLFactoryBypass=XMLFactoryBypass|true
 detector_threshold=2
 effort=default
 excludefilter0=FindBugsExclude.xml
-filter_settings=Medium|MALICIOUS_CODE,STYLE,BAD_PRACTICE,CORRECTNESS,I18N,PERFORMANCE,MT_CORRECTNESS|false
+filter_settings=Medium|BAD_PRACTICE,CORRECTNESS,I18N,MALICIOUS_CODE,MT_CORRECTNESS,PERFORMANCE,SECURITY,STYLE|false
 filter_settings_neg=|
