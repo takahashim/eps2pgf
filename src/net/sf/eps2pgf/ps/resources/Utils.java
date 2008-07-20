@@ -93,7 +93,7 @@ public final class Utils {
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public static File getResourceDir() throws ProgramError {
+    public static synchronized File getResourceDir() throws ProgramError {
         if (resourceDir != null) {
             return resourceDir;
         }
