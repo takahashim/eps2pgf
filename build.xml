@@ -33,7 +33,6 @@ limitations under the License.
 	<path id="test-classpath.path">
 		<path refid="classpath.path" />
 		<pathelement location="${build.dir}" />
-		<fileset dir="${testsuite.dir}" includes="junit*.jar" />
 	</path>
 	<manifestclasspath property="jar.classpath" jarfile="${jar.file}">
 		<classpath refid="classpath.path" />
