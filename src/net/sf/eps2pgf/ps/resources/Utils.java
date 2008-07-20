@@ -21,6 +21,7 @@
 package net.sf.eps2pgf.ps.resources;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
 
@@ -39,6 +40,10 @@ public final class Utils {
      * Resource directory.
      */
     private static File resourceDir = null;
+    
+    /** The log. */
+    private static final Logger LOG
+                                  = Logger.getLogger("net.sourceforge.eps2pgf");
     
     /**
      * "Hidden" constructor.
@@ -95,10 +100,13 @@ public final class Utils {
         
         // Try to find the resource dir in the current directory, ...
         File userDir = new File(System.getProperty("user.dir"));
+        LOG.info("Current directory = " + userDir.toString());
 
         // ..., or relative to the class path
         String fullClassPath = System.getProperty("java.class.path");
-        int index = fullClassPath.indexOf(';');
+        LOG.info("Java class path = " + fullClassPath);
+        String pathSeparator = System.getProperty("path.separator");
+        int index = fullClassPath.indexOf(pathSeparator);
         File classPath;
         if (index == -1) {
             classPath = new File(fullClassPath);
@@ -126,6 +134,7 @@ public final class Utils {
             throw new ProgramError("Unable to find resource directory.");
         }
 
+        LOG.info("Resource directory = " + resourceDir);
         return resourceDir;
     }
 
