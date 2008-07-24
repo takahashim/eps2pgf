@@ -619,11 +619,39 @@ public class Image {
     public double[] getPixelInputValues(final int x, final int y)
             throws PSError {
         
+        int[] intValues = getPixelInputIntValues(x, y);
+        int nrValues = intValues.length;
+        double[] values = new double[nrValues];
+        
+        for (int v = 0; v < nrValues; v++) {
+            double dmin = decode[2 * v];
+            double dmax = decode[2 * v + 1];
+            values[v] = dmin + ((double) intValues[v]) * (dmax - dmin)
+                    / (Math.pow(2.0, (double) bitsPerComponent) - 1.0);
+        }
+        
+        return values;
+    }
+    
+    /**
+     * Get the color information (integer input values) of a single pixel. The
+     * decode array is not yet applied to the values.
+     * 
+     * @param x The x-coordinate (pixels in device space)
+     * @param y The y-coordinate (pixels in device space)
+     * 
+     * @return Array with color component values.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public int[] getPixelInputIntValues(final int x, final int y)
+            throws PSError {
+        
         int[] deviceCoor = {x, y};
         int[] imgCoor = convertCoorDeviceToImg(deviceCoor);
         
         int nrValues = colorSpace.getNrInputValues();
-        double[] values = new double[nrValues];
+        int[] values = new int[nrValues];
         for (int v = 0; v < nrValues; v++) {
             int bitMsb = 8 * bytesPerLine * imgCoor[1]
                     + bitsPerComponent * nrValues * imgCoor[0]
@@ -648,10 +676,7 @@ public class Image {
                 throw new PSErrorUnimplemented("More than 16 bit per component"
                         + " is not supported in bitmap images.");
             }
-            double dmin = decode[2 * v];
-            double dmax = decode[2 * v + 1];
-            values[v] = dmin + ((double) intValue) * (dmax - dmin)
-                    / (Math.pow(2.0, (double) bitsPerComponent) - 1.0);
+            values[v] = intValue;
         }
         
         return values;

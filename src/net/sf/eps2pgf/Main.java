@@ -30,6 +30,8 @@ import java.util.logging.Logger;
 import com.martiansoftware.jsap.JSAPResult;
 
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.objects.PSObjectInt;
+import net.sf.eps2pgf.ps.objects.PSObjectReal;
 import net.sf.eps2pgf.util.Eps2pgfFormatter;
 import net.sf.eps2pgf.util.Eps2pgfHandler;
 
@@ -122,7 +124,10 @@ public final class Main {
         
         Converter cnv = new Converter(opts);
         try {
+            long start = System.currentTimeMillis();
             cnv.convert();
+            long stop = System.currentTimeMillis();
+            LOG.fine("Total time: " + Long.toString(stop - start) + " ms\n");
         } catch (IOException e) {
             LOG.severe("Execution failed due to an error while reading "
                     + "from or writing to a file.");

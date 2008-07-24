@@ -216,19 +216,14 @@ public final class EpsImageCreator {
         int height = img.getOutputHeightPx();
         int n = img.getBitsPerComponent();
         int nrComponents = img.getColorSpace().getNrInputValues();
-        double[] decode = img.getDecode();
         int bitBuffer = 0;
         int bitsInBuffer = 0;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                double[] components = img.getPixelInputValues(x, y);
+                int[] components = img.getPixelInputIntValues(x, y);
                 for (int v = 0; v < nrComponents; v++) {
-                    double tmp = components[v] - decode[2 * v];
-                    tmp *= Math.pow(2.0, (double) n) - 1.0;
-                    tmp /= decode[2 * v + 1] - decode[2 * v];
-                    
                     bitBuffer <<= n;
-                    bitBuffer |= (int) Math.round(tmp);
+                    bitBuffer |= components[v];
                     bitsInBuffer += n;
                     
                     bitsInBuffer = writeBytesFromBuffer(out, bitBuffer,
