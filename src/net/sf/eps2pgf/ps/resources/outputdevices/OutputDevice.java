@@ -22,6 +22,7 @@ package net.sf.eps2pgf.ps.resources.outputdevices;
 
 import java.io.IOException;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Path;
@@ -208,7 +209,8 @@ public interface OutputDevice extends Cloneable {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    void image(final Image img) throws PSError, IOException;
+    void image(final Image img) throws PSError, IOException, ProgramError;
     
 }

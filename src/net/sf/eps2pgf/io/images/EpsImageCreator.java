@@ -20,6 +20,7 @@
 
 package net.sf.eps2pgf.io.images;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
@@ -73,7 +74,9 @@ public final class EpsImageCreator {
 
         OutputStream ascii85Out = new ASCII85Encode(outBuf);
         OutputStream flateOut = new FlateEncode(ascii85Out);
-        writeImageData(flateOut, img);
+        OutputStream bufOut = new BufferedOutputStream(flateOut);
+        writeImageData(bufOut, img);
+        bufOut.close();
         flateOut.close();
         ascii85Out.close();
         
@@ -216,8 +219,10 @@ public final class EpsImageCreator {
         int height = img.getOutputHeightPx();
         int n = img.getBitsPerComponent();
         int nrComponents = img.getColorSpace().getNrInputValues();
+        
         int bitBuffer = 0;
         int bitsInBuffer = 0;
+        
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int[] components = img.getPixelInputIntValues(x, y);
@@ -255,10 +260,11 @@ public final class EpsImageCreator {
      */
     private static int writeBytesFromBuffer(final OutputStream out,
             final int bitBuffer, final int bitsInBuffer) throws IOException {
-        
+
         int currentBits = bitsInBuffer;
         while (currentBits >= 8) {
-            out.write(0xff & (bitBuffer >> (currentBits - 8)));
+            int byteVal = 0xff & (bitBuffer >> (currentBits - 8));
+            out.write(byteVal);
             currentBits -= 8;
         }
         

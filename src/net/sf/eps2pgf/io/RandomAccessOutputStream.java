@@ -208,16 +208,13 @@ public class RandomAccessOutputStream extends ByteArrayOutputStream {
     }
     
     /**
-     * Writes all buffered data to the target output stream. After writing the
-     * buffered data the buffer is reset. The flushed contents can not be
-     * changed anymore. 
+     * This function doesn do anything. The data is not written to the output
+     * stream until this RandomAccessOutputStream is closed.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
     public void flush() throws IOException {
-        seek(maxCount);
-        super.writeTo(targetOut);
-        reset();
+        // empty block
     }
 }

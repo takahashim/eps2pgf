@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import net.sf.eps2pgf.Options;
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.images.EpsImageCreator;
 import net.sf.eps2pgf.io.images.PdfImageCreator;
 import net.sf.eps2pgf.ps.Closepath;
@@ -779,8 +780,11 @@ public class PGFDevice implements OutputDevice {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void image(final Image img) throws PSError, IOException {
+    public void image(final Image img)
+            throws PSError, IOException, ProgramError {
+        
         String filename = options.getOutputFile().getName();
         String basename;
         int dot = filename.lastIndexOf('.');

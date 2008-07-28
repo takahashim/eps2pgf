@@ -20,6 +20,7 @@
 
 package net.sf.eps2pgf.io.images;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.UUID;
 
 import net.sf.eps2pgf.Main;
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.RandomAccessOutputStream;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.errors.PSError;
@@ -67,12 +69,11 @@ public final class PdfImageCreator {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void writeImage(final OutputStream out, final Image img,
-            final String title) throws IOException, PSError {
+            final String title) throws IOException, PSError, ProgramError {
 
-        System.out.println("Creating PDF image.");
-        
         RandomAccessOutputStream outBuf = new RandomAccessOutputStream(out);
         
         outBuf.write("%PDF-1.2\n");
@@ -127,9 +128,10 @@ public final class PdfImageCreator {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     private void writePageTree(final RandomAccessOutputStream out,
-            final Image img) throws IOException, PSError {
+            final Image img) throws IOException, PSError, ProgramError {
         
         // Append Page Tree node
         xrefTable.add(out.getPointer());
@@ -170,7 +172,8 @@ public final class PdfImageCreator {
         int streamStart = out.getPointer();
         out.write("q\n");
         out.write(String.format("%.3f 0 0 -%.3f 0 %.3f cm\n",
-                img.getOutputWidthPt(), img.getOutputHeightPt(), img.getOutputHeightPt()));
+                img.getOutputWidthPt(), img.getOutputHeightPt(),
+                img.getOutputHeightPt()));
         out.write("/Img Do\n");
         out.write("Q\n");
         int streamEnd = out.getPointer();
@@ -189,9 +192,10 @@ public final class PdfImageCreator {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     private void writeImageXObject(final RandomAccessOutputStream out,
-            final Image img) throws IOException, PSError {
+            final Image img) throws IOException, PSError, ProgramError {
         
         PSColor colorSpace = img.getColorSpace();
         
@@ -232,14 +236,16 @@ public final class PdfImageCreator {
         int streamStart = out.getPointer();
         OutputStream ascii85Out = new ASCII85Encode(out);
         OutputStream flateOut = new FlateEncode(ascii85Out);
-        EpsImageCreator.writeImageData(flateOut, img);
+        OutputStream bufOut = new BufferedOutputStream(flateOut);
+        EpsImageCreator.writeImageData(bufOut, img);
+        bufOut.close();
         flateOut.close();
         ascii85Out.close();
+        
         int streamEnd = out.getPointer();
         out.seek(streamLengthPos);
         out.write(String.format("%d", streamEnd - streamStart));
-        out.seek(streamEnd);        
-        
+        out.seek(streamEnd);                
         out.write("endstream\nendobj\n");
     }
     
