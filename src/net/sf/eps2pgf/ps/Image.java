@@ -690,4 +690,29 @@ public class Image {
     public double[][] getDeviceBbox() {
         return deviceBbox.clone();
     }
+
+    /**
+     * Gets the corner map.
+     * List with mappings between corners of image as it appears in the output
+     * and the corners of the image in image space (deviceBbox).
+     * [LL LR UR UL]
+     * index LL: index in deviceBbox array of the lower-left corner as it
+     * appears in the output, index LR: lower-right, index UR: upper-right, and
+     * index UL: upper-left corner.
+     * 
+     * @return the cornerMap
+     */
+    public int[] getCornerMap() {
+        return cornerMap.clone();
+    }
+    
+    /**
+     * Gets the angle of the image.
+     * Angle between line lower-left-to-lower-right and horizontal line.
+     * Definition of lower-left and lower-right corners follow cornerMap.
+     * @return The angle (in degrees)
+     */
+    public double getAngle() {
+        return angle / Math.PI * 180.0;
+    }
 }

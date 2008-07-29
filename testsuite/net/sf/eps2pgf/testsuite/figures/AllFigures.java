@@ -181,4 +181,10 @@ public final class AllFigures {
         assertTrue(Common.testFigure(conv, "tiger.eps"));
     }
 
+    /** Test. @throws Exception the exception */
+    @Test
+    public void matlab_bitmap1() throws Exception {
+        assertTrue(Common.testFigure(conv, "matlab_bitmap1.eps"));
+    }
+
 }

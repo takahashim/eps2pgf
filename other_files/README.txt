@@ -63,7 +63,7 @@ line option '--version'.
 ----------------------------------------------------------------------------
 Changelog
 ----------------------------------------------------------------------------
-v0.7.0 (2008-04-??)
+v0.7.0 (2008-08-??)
   - Added: feature #1856797 Bitmap images
   - Fixed: feature #1917088 add a percent character at the each of each line
            in the LOLDevice output.

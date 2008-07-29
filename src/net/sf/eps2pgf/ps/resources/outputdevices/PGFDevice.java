@@ -808,6 +808,22 @@ public class PGFDevice implements OutputDevice {
             PdfImageCreator pdfImgCreator = new PdfImageCreator();
             pdfImgCreator.writeImage(pdfOut, img, pdfFile.getName());
             pdfOut.close();
+            double[][] bbox = img.getDeviceBbox();
+            int[] cornerMap = img.getCornerMap();
+            double llx = bbox[cornerMap[0]][0];
+            double lly = bbox[cornerMap[0]][1];
+            double lrx = bbox[cornerMap[1]][0];
+            double lry = bbox[cornerMap[1]][1];
+            double ulx = bbox[cornerMap[3]][0];
+            double uly = bbox[cornerMap[3]][1];
+            double angle = img.getAngle();
+            double x = Math.min(Math.min(llx, ulx), lrx);
+            double y = Math.min(Math.min(lly, uly), lry);
+            String xStr = COOR_FORMAT.format(1e-4 * x);
+            String yStr = COOR_FORMAT.format(1e-4 * y);
+            out.write(String.format("\\pgftext[at=\\pgfpoint{%scm}{%scm},left,"
+                    + "bottom]{\\includegraphics[angle=%f]{%s}}\n",
+                    xStr, yStr, angle, basename));
         } catch (FileNotFoundException e) {
             throw new PSErrorIOError();
         } catch (IOException e) {
