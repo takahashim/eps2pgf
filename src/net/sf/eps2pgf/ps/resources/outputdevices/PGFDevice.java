@@ -215,13 +215,13 @@ public class PGFDevice implements OutputDevice {
                 if (i < (path.getSections().size() - 1)) {
                     String x = COOR_FORMAT.format(1e-4 * section.getParam(0));
                     String y = COOR_FORMAT.format(1e-4 * section.getParam(1));
-                    out.write("\\pgfpathmoveto{\\pgfpoint{" + x + "cm}{" + y
+                    out.write("\\pgfpathmoveto{\\pgfqpoint{" + x + "cm}{" + y
                             + "cm}}\n");
                 }
             } else if (section instanceof Lineto) {
                 String x = COOR_FORMAT.format(1e-4 * section.getParam(0));
                 String y = COOR_FORMAT.format(1e-4 * section.getParam(1));
-                out.write("\\pgfpathlineto{\\pgfpoint{" + x + "cm}{" + y
+                out.write("\\pgfpathlineto{\\pgfqpoint{" + x + "cm}{" + y
                         + "cm}}\n");
             } else if (section instanceof Curveto) {
                 String x1 = COOR_FORMAT.format(1e-4 * section.getParam(0));
@@ -231,9 +231,9 @@ public class PGFDevice implements OutputDevice {
                 String x3 = COOR_FORMAT.format(1e-4 * section.getParam(4));
                 String y3 = COOR_FORMAT.format(1e-4 * section.getParam(5));
                 out.write("\\pgfpathcurveto");
-                out.write("{\\pgfpoint{" + x1 + "cm}{" + y1 + "cm}}");
-                out.write("{\\pgfpoint{" + x2 + "cm}{" + y2 + "cm}}");
-                out.write("{\\pgfpoint{" + x3 + "cm}{" + y3 + "cm}}\n");
+                out.write("{\\pgfqpoint{" + x1 + "cm}{" + y1 + "cm}}");
+                out.write("{\\pgfqpoint{" + x2 + "cm}{" + y2 + "cm}}");
+                out.write("{\\pgfqpoint{" + x3 + "cm}{" + y3 + "cm}}\n");
             } else if (section instanceof Closepath) {
                 out.write("\\pgfpathclose\n");
             } else {
@@ -401,7 +401,7 @@ public class PGFDevice implements OutputDevice {
         }
         
         startScope();
-        out.write("\\pgfdeclareradialshading{eps2pgfshading}{\\pgfpoint{");
+        out.write("\\pgfdeclareradialshading{eps2pgfshading}{\\pgfqpoint{");
         out.write(COOR_FORMAT.format(1e-4 * (coor0[0] - coor1[0]) / xScale)
                 + "cm}{");
         out.write(COOR_FORMAT.format(1e-4 * (coor0[1] - coor1[1]) / yScale)
@@ -428,7 +428,7 @@ public class PGFDevice implements OutputDevice {
         }
         out.write("}");
         out.write("\\pgflowlevelobj{");
-        out.write("\\pgftransformshift{\\pgfpoint{");
+        out.write("\\pgftransformshift{\\pgfqpoint{");
         out.write(LENGTH_FORMAT.format(1e-4 * coor1[0]) + "cm}{");
         out.write(LENGTH_FORMAT.format(1e-4 * coor1[1]) + "cm}}");
         if (Math.abs(angle) > 1e-10) {
@@ -749,7 +749,7 @@ public class PGFDevice implements OutputDevice {
      */
     public void drawDot(final double x, final double y) throws IOException {
         out.write("\\begin{pgfscope}\\pgfsetfillcolor{red}\\pgfpathcircle{"
-                + "\\pgfpoint{" + 1e-4 * x + "cm}{" + 1e-4 * y
+                + "\\pgfqpoint{" + 1e-4 * x + "cm}{" + 1e-4 * y
                 + "cm}}{0.5pt}\\pgfusepath{fill}\\end{pgfscope}\n");
     }
     
@@ -766,9 +766,9 @@ public class PGFDevice implements OutputDevice {
     public void drawRect(final double[] lowerLeft, final double[] upperRight)
             throws IOException {
         out.write("\\begin{pgfscope}\\pgfsetstrokecolor{blue}"
-                + "\\pgfsetlinewidth{0.1pt}\\pgfpathrectangle{\\pgfpoint{"
+                + "\\pgfsetlinewidth{0.1pt}\\pgfpathrectangle{\\pgfqpoint{"
                 + 1e-4 * lowerLeft[0] + "cm}{" + 1e-4 * lowerLeft[1]
-                + "cm}}{\\pgfpoint{" + 1e-4 * (upperRight[0] - lowerLeft[0])
+                + "cm}}{\\pgfqpoint{" + 1e-4 * (upperRight[0] - lowerLeft[0])
                 + "cm}{" + 1e-4 * (upperRight[1] - lowerLeft[1])
                 + "cm}}\\pgfusepath{stroke}\\end{pgfscope}\n");
     }
@@ -821,7 +821,7 @@ public class PGFDevice implements OutputDevice {
             double y = Math.min(Math.min(lly, uly), lry);
             String xStr = COOR_FORMAT.format(1e-4 * x);
             String yStr = COOR_FORMAT.format(1e-4 * y);
-            out.write(String.format("\\pgftext[at=\\pgfpoint{%scm}{%scm},left,"
+            out.write(String.format("\\pgftext[at=\\pgfqpoint{%scm}{%scm},left,"
                     + "bottom]{\\includegraphics[angle=%f]{%s}}\n",
                     xStr, yStr, angle, basename));
         } catch (FileNotFoundException e) {

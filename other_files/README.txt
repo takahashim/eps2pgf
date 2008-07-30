@@ -65,6 +65,7 @@ Changelog
 ----------------------------------------------------------------------------
 v0.7.0 (2008-08-??)
   - Added: feature #1856797 Bitmap images
+  - Added: feature #1952604 Improve compilation speed
   - Fixed: feature #1917088 add a percent character at the each of each line
            in the LOLDevice output.
 
