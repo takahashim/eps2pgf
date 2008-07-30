@@ -767,6 +767,26 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: cliprestore.
+     * 
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * (yet) implemented.
+     */
+    public void op_cliprestore() throws PSErrorUnimplemented {
+        throw new PSErrorUnimplemented("PostScript operator 'cliprestore'");
+    }
+    
+    /**
+     * PostScript op: clipsave.
+     * 
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * (yet) implemented.
+     */
+    public void op_clipsave() throws PSErrorUnimplemented {
+        throw new PSErrorUnimplemented("PostScript operator 'clipsave'");
+    }
+    
+    /**
      * PostScript op: closefile.
      * 
      * @throws PSError A PostScript error occurred.
@@ -1290,6 +1310,18 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: defineresource.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_defineresource() throws PSError {
+        //PSObjectName category = getOpStack().pop().toName();
+        //PSObject instance = getOpStack().pop();
+        //PSObject key = getOpStack().pop();
+        throw new PSErrorUnimplemented("PostScript operator: 'defineresource'");
+    }
+    
+    /**
      * PostScript op: dict.
      * 
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
@@ -1570,6 +1602,17 @@ public class Interpreter {
     public void op_findfont() throws PSError, ProgramError {
         PSObject key = getOpStack().pop();
         getOpStack().push(fontDirectory.findFont(key));
+    }
+    
+    /**
+     * PostScript op: findresource.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_findresource() throws PSError {
+        //PSObjectName category = getOpStack().pop().toName();
+        //PSObject key = getOpStack().pop();
+        throw new PSErrorUnimplemented("PostScript operator: 'findresource'");
     }
     
     /**
@@ -2545,7 +2588,14 @@ public class Interpreter {
         } catch (PSErrorInvalidExit e) {
             // 'exit' operator called from within this loop
         }
-    }    
+    }
+    
+    /**
+     * PostScript op: resourcestatus.
+     */
+    public void op_resourcestatus() throws PSError {
+        throw new PSErrorUnimplemented("PostScript operator: 'resourcestatus'");
+    }
     
     /**
      * PostScript op: restore.
