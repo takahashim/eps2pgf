@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.ps.resources;
+package net.sf.eps2pgf.ps.resources.fonts;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,6 +41,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFont;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
+import net.sf.eps2pgf.ps.resources.Utils;
 
 /**
  * Manages font resources and serves as FontDirectory.
@@ -370,4 +371,18 @@ public final class FontManager extends PSObjectDict {
         }
         return getTexStringDict(matchName);
     }
+    
+    /**
+     * Checks whether a specific font type is supported or not.
+     * 
+     * @param fontType The font type.
+     * 
+     * @return True, if the font type is supported.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public boolean fontTypeStatus(final int fontType) throws PSError {
+        throw new PSErrorUnimplemented("Checking font type status");
+    }
+    
 }

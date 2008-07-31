@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.resources.fonts.FontManager;
 
 /**
  * Class with some utilities related to resource handling.

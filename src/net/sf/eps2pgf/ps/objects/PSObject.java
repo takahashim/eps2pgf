@@ -180,7 +180,7 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * 
      * @param obj Object from which attributes are copied.
      */
-    void copyCommonAttributes(final PSObject obj) {
+    protected void copyCommonAttributes(final PSObject obj) {
         setAccess(obj.getAccess());
         literal = obj.literal;
     }

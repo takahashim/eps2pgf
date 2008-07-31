@@ -40,7 +40,8 @@ import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.resources.Encoding;
-import net.sf.eps2pgf.ps.resources.FontManager;
+import net.sf.eps2pgf.ps.resources.fonts.FontManager;
+import net.sf.eps2pgf.ps.resources.fonts.PSObjectFontMetrics;
 
 /**
  * Wrapper around a font dictionary. This class provides methods to handle the
@@ -190,7 +191,7 @@ public class PSObjectFont extends PSObjectDict {
         setKey(KEY_TEXSTRINGS, FontManager.getTexStringDict(texStringName));
         
         FontMetric fontMetrics = loadAfm(resourceDir, fontName);
-        setKey(KEY_AFM, new PSObjectAfm(fontMetrics));
+        setKey(KEY_AFM, new PSObjectFontMetrics(fontMetrics));
         
         // An AFM file does not specify CharStrings. Instead, we make a fake
         // entry.
@@ -275,7 +276,7 @@ public class PSObjectFont extends PSObjectDict {
             // Apparently there are no metrics. Try to extract it from the 
             // character descriptions.
             alreadyValid = false;
-            setKey(KEY_AFM, new PSObjectAfm(this));
+            setKey(KEY_AFM, new PSObjectFontMetrics(this));
             LOG.fine("Creating font metrics for font " + getFontName());
         }
         

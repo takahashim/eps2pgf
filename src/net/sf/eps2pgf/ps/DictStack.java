@@ -241,7 +241,8 @@ public class DictStack {
         systemdict.setKey("userdict", userdict);
         systemdict.setKey("globaldict", globaldict);
         systemdict.setKey("statusdict", new PSObjectDict());
-        systemdict.setKey("FontDirectory", interp.getFontDirectory());
+        systemdict.setKey("FontDirectory",
+                interp.getResourceManager().getFontManager());
         
         // add encoding vectors
         PSObjectName[] encodingVector = Encoding.getISOLatin1Vector();

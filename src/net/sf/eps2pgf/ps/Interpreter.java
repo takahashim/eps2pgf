@@ -61,13 +61,14 @@ import net.sf.eps2pgf.ps.objects.PSObjectOperator;
 import net.sf.eps2pgf.ps.objects.PSObjectReal;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.Encoding;
-import net.sf.eps2pgf.ps.resources.FontManager;
+import net.sf.eps2pgf.ps.resources.ResourceManager;
 import net.sf.eps2pgf.ps.resources.colors.CMYK;
 import net.sf.eps2pgf.ps.resources.colors.Gray;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.colors.RGB;
 import net.sf.eps2pgf.ps.resources.filters.EexecDecode;
 import net.sf.eps2pgf.ps.resources.filters.Filter;
+import net.sf.eps2pgf.ps.resources.fonts.FontManager;
 import net.sf.eps2pgf.ps.resources.outputdevices.CacheDevice;
 import net.sf.eps2pgf.ps.resources.outputdevices.LOLDevice;
 import net.sf.eps2pgf.ps.resources.outputdevices.NullDevice;
@@ -102,8 +103,8 @@ public class Interpreter {
     /** Default clipping path. */
     private Path defaultClippingPath;
     
-    /** Font directory. */
-    private FontManager fontDirectory;
+    /** Resource manager. */
+    private ResourceManager resourceManager;
     
     /** User-defined options. */
     private Options options;
@@ -195,7 +196,7 @@ public class Interpreter {
         
         // Initialize character encodings and fonts
         Encoding.initialize();
-        fontDirectory = new FontManager();
+        resourceManager = new ResourceManager();
         
         // Create dictionary stack
         setDictStack(new DictStack(this));
@@ -269,13 +270,6 @@ public class Interpreter {
      */
     public ArrayStack<PSObject> getOpStack() {
         return opStack;
-    }
-
-    /**
-     * @return The FontDirectory
-     */
-    public FontManager getFontDirectory() {
-        return fontDirectory;
     }
 
     /**
@@ -1306,7 +1300,8 @@ public class Interpreter {
     public void op_definefont() throws PSError, ProgramError {
         PSObjectFont font = getOpStack().pop().toFont();
         PSObject key = getOpStack().pop();
-        getOpStack().push(fontDirectory.defineFont(key, font));
+        FontManager fontManager = resourceManager.getFontManager();
+        getOpStack().push(fontManager.defineFont(key, font));
     }
     
     /**
@@ -1601,7 +1596,8 @@ public class Interpreter {
      */
     public void op_findfont() throws PSError, ProgramError {
         PSObject key = getOpStack().pop();
-        getOpStack().push(fontDirectory.findFont(key));
+        FontManager fontManager = resourceManager.getFontManager();
+        getOpStack().push(fontManager.findFont(key));
     }
     
     /**
@@ -2592,9 +2588,16 @@ public class Interpreter {
     
     /**
      * PostScript op: resourcestatus.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
     public void op_resourcestatus() throws PSError {
-        throw new PSErrorUnimplemented("PostScript operator: 'resourcestatus'");
+        PSObjectName category = getOpStack().pop().toName();
+        PSObject key = getOpStack().pop();
+        PSObjectArray ret = resourceManager.resourceStatus(category, key);
+        for (int i = 0; i < ret.size(); i++) {
+            getOpStack().push(ret.get(i));
+        }
     }
     
     /**
@@ -3544,4 +3547,12 @@ public class Interpreter {
         return gstate;
     }
     
+    /**
+     * Get the resource manager.
+     * 
+     * @return the resource manager.
+     */
+    public ResourceManager getResourceManager() {
+        return resourceManager;
+    }
 }
