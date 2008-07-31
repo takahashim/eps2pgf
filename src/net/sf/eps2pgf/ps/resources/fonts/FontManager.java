@@ -37,8 +37,11 @@ import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectBool;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFont;
+import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.Utils;
@@ -375,14 +378,34 @@ public final class FontManager extends PSObjectDict {
     /**
      * Checks whether a specific font type is supported or not.
      * 
-     * @param fontType The font type.
+     * @param key Key describing font type. It should be a number.
      * 
-     * @return True, if the font type is supported.
+     * @return [0 0 true] if font type is supported, [false] if type is not
+     * supported.
      * 
      * @throws PSError A PostScript error occurred.
      */
-    public boolean fontTypeStatus(final int fontType) throws PSError {
-        throw new PSErrorUnimplemented("Checking font type status");
+    public PSObjectArray fontTypeStatus(final PSObject key) throws PSError {
+
+        String name = String.format("net.sf.eps2pgf.ps.resources.fonts.Type%d",
+                key.toInt());
+        
+        boolean supported;
+        try {
+            Class.forName(name);
+            supported = true;
+        } catch (ClassNotFoundException e) {
+            supported = false;
+        }
+
+        PSObjectArray ret = new PSObjectArray();
+        if (supported) {
+            ret.addToEnd(new PSObjectInt(0));
+            ret.addToEnd(new PSObjectInt(0));
+        }
+        ret.addToEnd(new PSObjectBool(supported));
+        
+        return ret;
     }
     
 }

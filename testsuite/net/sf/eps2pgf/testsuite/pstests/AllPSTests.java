@@ -42,7 +42,8 @@ import org.junit.runners.Suite;
     MiscPSTest.class,
     GraphicsPSTest.class,
     OutputPSTest.class,
-    FilePSTest.class
+    FilePSTest.class,
+    ResourcePSTest.class
 })
 
 public class AllPSTests {

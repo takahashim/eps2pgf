@@ -25,7 +25,6 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
-import net.sf.eps2pgf.ps.objects.PSObjectBool;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.resources.fonts.FontManager;
 
@@ -67,11 +66,10 @@ public final class ResourceManager {
     public PSObjectArray resourceStatus(final PSObjectName category,
             final PSObject key) throws PSError {
         
-        PSObjectArray ret = new PSObjectArray();
+        PSObjectArray ret;
         
         if (category.eq(CAT_FONTTYPE)) {
-            boolean supported = fontManager.fontTypeStatus(key.toInt());
-            ret.addToEnd(new PSObjectBool(supported));
+            ret = fontManager.fontTypeStatus(key);
         } else {
             throw new PSErrorUnimplemented("Checking resources of type: "
                     + category.isis());
