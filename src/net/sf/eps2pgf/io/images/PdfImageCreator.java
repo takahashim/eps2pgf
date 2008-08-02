@@ -234,8 +234,8 @@ public final class PdfImageCreator {
         out.write(">>\nstream\n");
         
         int streamStart = out.getPointer();
-        OutputStream ascii85Out = new ASCII85Encode(out);
-        OutputStream flateOut = new FlateEncode(ascii85Out);
+        OutputStream ascii85Out = new ASCII85Encode(out, null);
+        OutputStream flateOut = new FlateEncode(ascii85Out, null);
         OutputStream bufOut = new BufferedOutputStream(flateOut);
         EpsImageCreator.writeImageData(bufOut, img);
         bufOut.close();

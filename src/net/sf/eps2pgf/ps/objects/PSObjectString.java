@@ -94,10 +94,10 @@ public class PSObjectString extends PSObject {
      * @param pStr The value of the new PSObjectString will have this value
      * @param isPostScript Interpret the string as PostScript string?
      * 
-     * @throws PSErrorIOError the PS error io error
+     * @throws PSError A PostScript error occurred.
      */
     public PSObjectString(final String pStr, final boolean isPostScript)
-            throws PSErrorIOError {
+            throws PSError {
         
         String str = pStr;
         if (isPostScript) {
@@ -642,11 +642,12 @@ public class PSObjectString extends PSObject {
      * 
      * @return Decoded string
      * 
-     * @throws PSErrorIOError Invalid base85 string.
+     * @throws PSError A PostScript error occurred.
      */
-    public String parseBase85(final String str) throws PSErrorIOError {
+    public String parseBase85(final String str) throws PSError {
         InputStream stringStream = new StringInputStream(str);
-        InputStream inStream = new ASCII85Decode(stringStream);
+        PSObjectDict dict = new PSObjectDict();
+        InputStream inStream = new ASCII85Decode(stringStream, dict);
         
         StringBuilder parsedStr = new StringBuilder();
         int c;
@@ -668,11 +669,12 @@ public class PSObjectString extends PSObject {
      * 
      * @return Decoded string
      * 
-     * @throws PSErrorIOError the PS error io error
+     * @throws PSError A PostScript error occurred.
      */
-    public String parseHex(final String str) throws PSErrorIOError {
+    public String parseHex(final String str) throws PSError {
         InputStream stringStream = new StringInputStream(str);
-        InputStream inStream = new ASCIIHexDecode(stringStream);
+        PSObjectDict dict = new PSObjectDict();
+        InputStream inStream = new ASCIIHexDecode(stringStream, dict);
         
         StringBuilder parsedStr = new StringBuilder();
         int c;

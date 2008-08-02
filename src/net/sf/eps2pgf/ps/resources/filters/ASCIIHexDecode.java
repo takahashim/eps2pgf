@@ -23,6 +23,10 @@ package net.sf.eps2pgf.ps.resources.filters;
 import java.io.InputStream;
 import java.io.IOException;
 
+import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
+
 /**
  * Hex decoding wrappper around an InputStream.
  * @author Paul Wagenaars
@@ -32,14 +36,30 @@ public class ASCIIHexDecode extends InputStream {
     /** Encoded characters are read from this stream. */
     private InputStream in;
     
+    /** CloseSource parameter. */
+    private boolean closeSource;
+    
     
     /**
      * Creates a new instance of ASCIIHexDecode.
      * 
      * @param pIn <code>InputStream</code> from which hex data will be read.
+     * @param dict The parameter dictionary.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public ASCIIHexDecode(final InputStream pIn) {
+    public ASCIIHexDecode(final InputStream pIn, final PSObjectDict dict)
+           throws PSError {
+        
         in = pIn;
+        
+        PSObject obj = dict.lookup(Filter.KEY_CLOSESOURCE);
+        if (obj != null) {
+            closeSource = obj.toBool();
+        } else {
+            closeSource = false;
+        }
+
     }
     
     /**
@@ -66,6 +86,9 @@ public class ASCIIHexDecode extends InputStream {
      */
     @Override
     public void close() throws IOException {
+        if (closeSource) {
+            in.close();
+        }
         in = null;
     }
     

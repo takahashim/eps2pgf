@@ -24,6 +24,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.InflaterInputStream;
 
+import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
+
 /**
  * FlateEncode filter.
  * 
@@ -34,13 +38,29 @@ public class FlateDecode extends InflaterInputStream {
     /** Indicates whether this filter is closed. */
     private boolean isClosed = false;
     
+    /** CloseSource parameter. */
+    private boolean closeSource;
+    
     /**
      * Creates a new FlateDecode filter.
      * 
      * @param in The source input stream.
+     * @param dict The parameter dictionary.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public FlateDecode(final InputStream in) {
+    public FlateDecode(final InputStream in, final PSObjectDict dict)
+            throws PSError {
+        
         super(in);
+        
+        PSObject obj = dict.lookup(Filter.KEY_CLOSESOURCE);
+        if (obj != null) {
+            closeSource = obj.toBool();
+        } else {
+            closeSource = false;
+        }
+
     }
     
     /**
@@ -106,6 +126,9 @@ public class FlateDecode extends InflaterInputStream {
      */
     @Override
     public void close() throws IOException {
+        if (closeSource) {
+            super.close();
+        }
         isClosed = true;
     }
     

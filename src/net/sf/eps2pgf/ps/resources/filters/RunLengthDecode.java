@@ -24,6 +24,10 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
+
 /**
  * Run-length decoding wrapper around an <code>InputStream</code>.
  * 
@@ -54,14 +58,29 @@ public class RunLengthDecode extends InputStream {
     /** Pointer in decoded character array during last mark(). */
     private int lastMarkPtr = -1;
     
-    /** 
+    /** CloseSource parameter. */
+    private boolean closeSource;
+    
+    /**
      * Creates a new instance of ASCII85Decode.
      * 
      * @param pIn <code>InputStream</code> from which base-85 encoded characters
      * are read.
+     * @param dict The parameter dictionary.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public RunLengthDecode(final InputStream pIn) {
+    public RunLengthDecode(final InputStream pIn, final PSObjectDict dict)
+            throws PSError {
+        
         in = pIn;
+        
+        PSObject obj = dict.lookup(Filter.KEY_CLOSESOURCE);
+        if (obj != null) {
+            closeSource = obj.toBool();
+        } else {
+            closeSource = false;
+        }
     }
     
     /**
@@ -83,6 +102,9 @@ public class RunLengthDecode extends InputStream {
      */
     @Override
     public void close() throws IOException {
+        if (closeSource) {
+            in.close();
+        }
         in = null;
     }
     

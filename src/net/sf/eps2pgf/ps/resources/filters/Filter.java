@@ -39,9 +39,13 @@ import net.sf.eps2pgf.util.ArrayStack;
  */
 public final class Filter {
     
-    /** Key of closeSource field in parameter dictionary. */
+    /** Key of CloseSource field in parameter dictionary. */
     public static final PSObjectName KEY_CLOSESOURCE =
         new PSObjectName("/CloseSource");
+    
+    /** Key of CloseTarget field in parameter dictionary. */
+    public static final PSObjectName KEY_CLOSETARGET =
+        new PSObjectName("/CloseTarget");
     
     /** Name of ASCIIHexDecode filter. */
     public static final PSObjectName FILTER_ASCIIHEXDECODE =
@@ -249,13 +253,13 @@ public final class Filter {
         
         InputStream filteredStream;
         if (name.eq(FILTER_ASCIIHEXDECODE)) {
-            filteredStream = new ASCIIHexDecode(inStream);
+            filteredStream = new ASCIIHexDecode(inStream, paramDict);
         } else if (name.eq(FILTER_ASCII85DECODE)) {
-            filteredStream = new ASCII85Decode(inStream);
+            filteredStream = new ASCII85Decode(inStream, paramDict);
         } else if (name.eq(FILTER_FLATEDECODE)) {
-            filteredStream = new FlateDecode(inStream);
+            filteredStream = new FlateDecode(inStream, paramDict);
         } else if (name.eq(FILTER_RUNLENGTHDECODE)) {
-            filteredStream = new RunLengthDecode(inStream);
+            filteredStream = new RunLengthDecode(inStream, paramDict);
         } else if (name.eq(FILTER_SUBFILEDECODE)) {
             filteredStream = new SubFileDecode(inStream, paramDict);
         } else {

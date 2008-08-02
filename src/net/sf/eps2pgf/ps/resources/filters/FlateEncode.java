@@ -25,6 +25,10 @@ import java.io.OutputStream;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
+import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
+
 /**
  * FlateEncode filter.
  * 
@@ -35,13 +39,31 @@ public class FlateEncode extends DeflaterOutputStream {
     /** Indicates whether this filter is closed. */
     private boolean isClosed = false;
     
+    /** CloseTarget parameter. */
+    private boolean closeTarget;
+    
     /**
      * Creates a new FlateEncode filter.
      * 
      * @param out The output stream to which encoded bytes are written.
+     * @param dict The parameter dictionary.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public FlateEncode(final OutputStream out) {
+    public FlateEncode(final OutputStream out, final PSObjectDict dict)
+            throws PSError {
+        
         super(out, new Deflater(Deflater.BEST_COMPRESSION));
+        
+        PSObject obj = null;
+        if (dict != null) {
+            obj = dict.lookup(Filter.KEY_CLOSETARGET);
+        }
+        if (obj != null) {
+            closeTarget = obj.toBool();
+        } else {
+            closeTarget = false;
+        }
     }
     
     /**
@@ -118,6 +140,10 @@ public class FlateEncode extends DeflaterOutputStream {
     @Override
     public void close() throws IOException {
         finish();
+        
+        if (closeTarget) {
+            super.close();
+        }
         isClosed = true;
     }
     

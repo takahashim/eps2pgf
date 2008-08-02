@@ -23,6 +23,9 @@ package net.sf.eps2pgf.ps.resources.filters;
 import java.io.InputStream;
 import java.io.IOException;
 
+import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
+
 /**
  * Applies eexec decryption to an InputStream. See "Adobe Type 1 Font Format"
  * for for information on this encryption.
@@ -52,9 +55,12 @@ public class EexecDecode extends InputStream {
      * Wrap a eexec decryption layer around and input stream.
      * 
      * @param pIn Stream from which encrypted data will be read
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public EexecDecode(final InputStream pIn) {
-        in = new ASCIIHexDecode(pIn);
+    public EexecDecode(final InputStream pIn) throws PSError {
+        PSObjectDict dict = new PSObjectDict();
+        in = new ASCIIHexDecode(pIn, dict);
         n = 4;
         r = 55665;
         c1 = 52845;
@@ -65,19 +71,19 @@ public class EexecDecode extends InputStream {
      * Wrap a eexec decryption layer around and input stream.
      * 
      * @param pIn Stream from which encrypted data will be read
-     */
-    /**
-     * @param pIn Input stream.
-     * @param password Password used from decryption.
-     * @param binaryInput Is the input binary.
+     * @param password The password.
+     * @param binaryInput The binary input.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
     public EexecDecode(final InputStream pIn, final int password,
-            final boolean binaryInput) {
+            final boolean binaryInput) throws PSError {
         
         if (binaryInput) {
             this.in = pIn;
         } else {
-            this.in = new ASCIIHexDecode(pIn);
+            PSObjectDict dict = new PSObjectDict();
+            this.in = new ASCIIHexDecode(pIn, dict);
         }
         n = 4;
         r = password;

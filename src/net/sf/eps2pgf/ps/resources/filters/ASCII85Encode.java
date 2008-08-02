@@ -23,6 +23,10 @@ package net.sf.eps2pgf.ps.resources.filters;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
+
 /**
  * Implements the ASCII base-85 encoding filter.
  * 
@@ -45,13 +49,31 @@ public class ASCII85Encode extends OutputStream {
     /** Number of characters in current line. */
     private int currentLineLength = 0;
     
+    /** CloseTarget parameter. */
+    private boolean closeTarget;
+    
     /**
      * Creates a new ASCII85Encode filter.
      * 
-     * @param pOut The output stream to which encoded bytes are written. 
+     * @param pOut The output stream to which encoded bytes are written.
+     * @param dict The parameter dictionary.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public ASCII85Encode(final OutputStream pOut) {
+    public ASCII85Encode(final OutputStream pOut, final PSObjectDict dict)
+            throws PSError {
+        
         out = pOut;
+        
+        PSObject obj = null;
+        if (dict != null) {
+            obj = dict.lookup(Filter.KEY_CLOSETARGET);
+        }
+        if (obj != null) {
+            closeTarget = obj.toBool();
+        } else {
+            closeTarget = false;
+        }
     }
     
 
@@ -157,6 +179,10 @@ public class ASCII85Encode extends OutputStream {
         encodeAndWriteBuffer();
         String data = "\n~>\n";
         out.write(data.getBytes());
+        
+        if (closeTarget) {
+            out.close();
+        }
         out = null;
     }
 

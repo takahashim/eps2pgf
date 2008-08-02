@@ -72,8 +72,8 @@ public final class EpsImageCreator {
         writeColorSpace(outBuf, img);
         writeImageDict(outBuf, img);
 
-        OutputStream ascii85Out = new ASCII85Encode(outBuf);
-        OutputStream flateOut = new FlateEncode(ascii85Out);
+        OutputStream ascii85Out = new ASCII85Encode(outBuf, null);
+        OutputStream flateOut = new FlateEncode(ascii85Out, null);
         OutputStream bufOut = new BufferedOutputStream(flateOut);
         writeImageData(bufOut, img);
         bufOut.close();
