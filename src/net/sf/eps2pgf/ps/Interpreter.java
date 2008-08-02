@@ -1569,22 +1569,10 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_filter() throws PSError {
-        PSObjectName filterName = getOpStack().pop().toName();
-        PSObjectArray params = new PSObjectArray();
-        int n = Filter.getNrParamOperands(filterName);
-        for (int i = 0; i < n; i++) {
-            params.addToEnd(getOpStack().pop());
-        }
-        PSObjectDict dict = null;
-        PSObjectFile data;
-        PSObject obj = getOpStack().pop();
-        if (obj instanceof PSObjectDict) {
-            dict = obj.toDict();
-            data = getOpStack().pop().toFile();
-        } else {
-            data = obj.toFile();
-        }
-        PSObjectFile file = Filter.filter(data, dict, params, filterName);
+        PSObjectName name = getOpStack().pop().toName();
+        PSObjectDict paramDict = Filter.getParameters(name, getOpStack());
+        PSObject sourceOrTarget = getOpStack().pop();
+        PSObjectFile file = Filter.filter(name, paramDict, sourceOrTarget);
         getOpStack().push(file);
     }
     

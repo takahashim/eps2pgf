@@ -36,9 +36,12 @@ import net.sf.eps2pgf.ps.resources.fonts.FontManager;
  */
 public final class ResourceManager {
     
-    /** The Constant CAT_FONTTYPE. */
+    /** Key of /FontType resource category. */
     private static final PSObjectName CAT_FONTTYPE
                                                 = new PSObjectName("FontType");
+    
+    /** Key of /Filter resource category. */
+    private static final PSObjectName CAT_FILTER = new PSObjectName("Filter");
     
     /** Font manager. */
     private FontManager fontManager;
@@ -70,6 +73,9 @@ public final class ResourceManager {
         
         if (category.eq(CAT_FONTTYPE)) {
             ret = fontManager.fontTypeStatus(key);
+        } else if (category.eq(CAT_FILTER)) {
+            //TODO implement this in the same way as for /FontType resources
+            throw new PSErrorUnimplemented("Checking status of /Filter");
         } else {
             throw new PSErrorUnimplemented("Checking resources of type: "
                     + category.isis());

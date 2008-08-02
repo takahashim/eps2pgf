@@ -61,21 +61,21 @@ public class FilePSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void fileTest1Currentfile() throws Exception {
+    public void fileTest1_Currentfile() throws Exception {
         String cmd = "currentfile type /filetype eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void fileTest2Readstring() throws Exception {
+    public void fileTest2_Readstring() throws Exception {
         String cmd = "currentfile (abc) readstring  123 pop exch ( 12) eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void fileTest3Readstring() throws Exception {
+    public void fileTest3_Readstring() throws Exception {
         String cmd = "{currentfile () readstring} stopped"
             + " count 1 roll"
             + " 1 1 count 3 sub {pop pop} for";
@@ -103,7 +103,7 @@ public class FilePSTest {
     
     /** Test. @throws Exception the exception. */
     @Test
-    public void fileTest5Readhexstring() throws Exception {
+    public void fileTest5_Readhexstring() throws Exception {
         String cmd = "currentfile 4 string readhexstring 1aBf90f6 exch"
             + " (\032\277\220\366) eq\n";
         cmd += "currentfile 6 string readhexstring 123456>notexecutedFexch"
@@ -111,5 +111,48 @@ public class FilePSTest {
         assertTrue(Common.testString(interp, cmd));
     }
 
+    /** Test. @throws Exception the exception. */
+    @Test
+    public void fileTest6_SubFileDecode() throws Exception {
+        String cmd = "currentfile 0 (TheEnd) /SubFileDecode filter 99 string"
+            + " readstring blablaTheEndfalse eq 2 1 roll (blabla) eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception. */
+    @Test
+    public void fileTest7_SubFileDecode() throws Exception {
+        String cmd = "currentfile << /Foo (bar) >> 1 (TheEnd) /SubFileDecode"
+            + " filter 99 string"
+            + " readstring blablaTheEndfalse eq 2 1 roll (blablaTheEnd) eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception. */
+    @Test
+    public void fileTest8_SubFileDecode() throws Exception {
+        String cmd = "currentfile 6 () /SubFileDecode filter 99 string"
+            + " readstring blablafalse eq 2 1 roll (blabla) eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception. */
+    @Test
+    public void fileTest9_SubFileDecode() throws Exception {
+        String cmd = "currentfile 2 (TheEnd) /SubFileDecode filter 99 string"
+            + " readstring blaTheEndblaTheEnd false eq 2 1 roll"
+            + " (blaTheEndblaTheEnd) eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception. */
+    @Test
+    public void fileTest10_SubFileDecode() throws Exception {
+        String cmd = "currentfile << /EODCount 2 /EODString (TheEnd) >>"
+            + " /SubFileDecode filter 99 string"
+            + " readstring blaTheEndblaTheEnd false eq 2 1 roll"
+            + " (blaTheEndblaTheEnd) eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
 
 }
