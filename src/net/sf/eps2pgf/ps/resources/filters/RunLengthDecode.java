@@ -92,7 +92,11 @@ public class RunLengthDecode extends InputStream {
      */
     @Override
     public int available() throws IOException {
-        return decodedChars.size() - decodedPtr;
+        if (in != null) {
+            return decodedChars.size() - decodedPtr;
+        } else {
+            throw new IOException();
+        }
     }
     
     /**

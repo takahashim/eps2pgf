@@ -3120,6 +3120,22 @@ public class Interpreter {
         x = Math.sqrt(x);
         getOpStack().push(new PSObjectReal(x));
     }
+    
+    /**
+     * PostScript op: status.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_status() throws PSError {
+        PSObject obj = getOpStack().pop();
+        if (obj instanceof PSObjectFile) {
+            boolean status = ((PSObjectFile) obj).status();
+            getOpStack().push(new PSObjectBool(status));
+        } else {
+            throw new PSErrorUnimplemented("'status' operator of non-file"
+                    + " object.");
+        }
+    }
    
     /**
      * PostScript op: stop.

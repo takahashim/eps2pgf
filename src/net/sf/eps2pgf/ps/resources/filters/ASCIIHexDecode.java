@@ -74,9 +74,13 @@ public class ASCIIHexDecode extends InputStream {
      */
     @Override
     public int available() throws IOException {
-        int n = in.available();
-        n = (n + 1) / 2;
-        return n;
+        if (in != null) {
+            int n = in.available();
+            n = (n + 1) / 2;
+            return n;
+        } else {
+            throw new IOException();
+        }
     }
     
     /**

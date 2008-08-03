@@ -105,9 +105,13 @@ public class ASCII85Decode extends InputStream {
      */
     @Override
     public int available() throws IOException {
-        int n = rawChars.size() - rawPtr;
-        n = (n * 4) / 5;
-        return n;
+        if (in != null) {
+            int n = rawChars.size() - rawPtr;
+            n = (n * 4) / 5;
+            return n;
+        } else {
+            throw new IOException();
+        }
     }
     
     /**

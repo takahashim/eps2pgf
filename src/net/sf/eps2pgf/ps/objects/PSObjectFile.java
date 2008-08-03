@@ -74,7 +74,7 @@ public class PSObjectFile extends PSObject {
      */
     public void closefile() throws PSErrorIOError {
         try {
-            getStream().close();
+            inStr.close();
         } catch (IOException e) {
             throw new PSErrorIOError();
         }
@@ -88,7 +88,7 @@ public class PSObjectFile extends PSObject {
      */
     @Override
     public PSObjectFile dup() {
-        PSObjectFile dupFile = new PSObjectFile(getStream());
+        PSObjectFile dupFile = new PSObjectFile(inStr);
         dupFile.copyCommonAttributes(this);
         return dupFile;
     }
@@ -148,7 +148,7 @@ public class PSObjectFile extends PSObject {
         int length = n;
         try {
             for (int i = 0; i < n; i++) {
-                int chr = getStream().read();
+                int chr = inStr.read();
                 if (chr == -1) {
                     length = i;
                     break;
@@ -162,6 +162,21 @@ public class PSObjectFile extends PSObject {
             // this can never happen
         }
         return null;
+    }
+    
+    /**
+     * Checks whether this file is open or closed.
+     * 
+     * @return True, if file is open. False if file is closed.
+     */
+    public boolean status() {
+        int available;
+        try {
+            available = inStr.available();
+        } catch (IOException e) {
+            available = 0;
+        }
+        return (available > 0);
     }
     
     /**
@@ -187,7 +202,7 @@ public class PSObjectFile extends PSObject {
     public List<PSObject> token() throws PSError {
         PSObject any;
         try {
-            any = Parser.convertSingle(getStream());
+            any = Parser.convertSingle(inStr);
         } catch (IOException e) {
             throw new PSErrorIOError();
         }

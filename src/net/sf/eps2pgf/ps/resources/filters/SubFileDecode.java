@@ -147,7 +147,11 @@ public class SubFileDecode extends InputStream {
      */
     @Override
     public int available() throws IOException {
-        return source.available();
+        if (source != null) {
+            return source.available();
+        } else {
+            throw new IOException();
+        }
     }
     
     

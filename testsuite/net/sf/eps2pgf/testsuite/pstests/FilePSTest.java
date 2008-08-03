@@ -155,4 +155,13 @@ public class FilePSTest {
         assertTrue(Common.testString(interp, cmd));
     }
 
+    /** Test. @throws Exception the exception. */
+    @Test
+    public void fileTest11_Status() throws Exception {
+        String cmd = "currentfile /ASCIIHexDecode filter dup dup status 3 1"
+            + " roll closefile status false eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    
 }
