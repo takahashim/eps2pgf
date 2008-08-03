@@ -67,7 +67,7 @@ import net.sf.eps2pgf.ps.resources.colors.Gray;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.colors.RGB;
 import net.sf.eps2pgf.ps.resources.filters.EexecDecode;
-import net.sf.eps2pgf.ps.resources.filters.Filter;
+import net.sf.eps2pgf.ps.resources.filters.FilterManager;
 import net.sf.eps2pgf.ps.resources.fonts.FontManager;
 import net.sf.eps2pgf.ps.resources.outputdevices.CacheDevice;
 import net.sf.eps2pgf.ps.resources.outputdevices.LOLDevice;
@@ -1570,9 +1570,11 @@ public class Interpreter {
      */
     public void op_filter() throws PSError {
         PSObjectName name = getOpStack().pop().toName();
-        PSObjectDict paramDict = Filter.getParameters(name, getOpStack());
+        PSObjectDict paramDict =
+            FilterManager.getParameters(name, getOpStack());
         PSObject sourceOrTarget = getOpStack().pop();
-        PSObjectFile file = Filter.filter(name, paramDict, sourceOrTarget);
+        PSObjectFile file =
+            FilterManager.filter(name, paramDict, sourceOrTarget);
         getOpStack().push(file);
     }
     

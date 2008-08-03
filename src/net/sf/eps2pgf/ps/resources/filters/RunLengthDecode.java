@@ -75,7 +75,7 @@ public class RunLengthDecode extends InputStream {
         
         in = pIn;
         
-        PSObject obj = dict.lookup(Filter.KEY_CLOSESOURCE);
+        PSObject obj = dict.lookup(FilterManager.KEY_CLOSESOURCE);
         if (obj != null) {
             closeSource = obj.toBool();
         } else {

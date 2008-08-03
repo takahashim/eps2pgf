@@ -67,7 +67,7 @@ public class ASCII85Encode extends OutputStream {
         
         PSObject obj = null;
         if (dict != null) {
-            obj = dict.lookup(Filter.KEY_CLOSETARGET);
+            obj = dict.lookup(FilterManager.KEY_CLOSETARGET);
         }
         if (obj != null) {
             closeTarget = obj.toBool();

@@ -119,7 +119,7 @@ public class SubFileDecode extends InputStream {
         }
         
         // CloseSource field
-        obj = dict.lookup(Filter.KEY_CLOSESOURCE);
+        obj = dict.lookup(FilterManager.KEY_CLOSESOURCE);
         if (obj != null) {
             closeSource = obj.toBool();
         } else {

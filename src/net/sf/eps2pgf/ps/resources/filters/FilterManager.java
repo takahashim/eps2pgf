@@ -1,5 +1,5 @@
 /*
- * Filter.java
+ * FilterManager.java
  * 
  * This file is part of Eps2pgf.
  *
@@ -27,6 +27,7 @@ import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectBool;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFile;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
@@ -37,7 +38,7 @@ import net.sf.eps2pgf.util.ArrayStack;
 /**
  * Utility class for the creation of encode and decode filters.
  */
-public final class Filter {
+public final class FilterManager {
     
     /** Key of CloseSource field in parameter dictionary. */
     public static final PSObjectName KEY_CLOSESOURCE =
@@ -75,7 +76,7 @@ public final class Filter {
     /**
      * "Hidden" constructor.
      */
-    private Filter() {
+    private FilterManager() {
         /* empty block */
     }
     
@@ -288,5 +289,38 @@ public final class Filter {
         throw new PSErrorUnimplemented("Encode filters");
     }
 
+    /**
+     * Checks whether a specific filter is supported or not.
+     * 
+     * @param key Key describing filter.
+     * 
+     * @return [0 0 true] if filter is supported, [false] if filter is not
+     * supported.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public static PSObjectArray filterStatus(final PSObject key)
+            throws PSError {
+
+        String name = String.format("net.sf.eps2pgf.ps.resources.filters.%s",
+                key.toString());
+        
+        boolean supported;
+        try {
+            Class.forName(name);
+            supported = true;
+        } catch (ClassNotFoundException e) {
+            supported = false;
+        }
+
+        PSObjectArray ret = new PSObjectArray();
+        if (supported) {
+            ret.addToEnd(new PSObjectInt(0));
+            ret.addToEnd(new PSObjectInt(0));
+        }
+        ret.addToEnd(new PSObjectBool(supported));
+        
+        return ret;
+    }
     
 }

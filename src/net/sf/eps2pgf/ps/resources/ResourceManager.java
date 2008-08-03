@@ -26,6 +26,7 @@ import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
+import net.sf.eps2pgf.ps.resources.filters.FilterManager;
 import net.sf.eps2pgf.ps.resources.fonts.FontManager;
 
 /**
@@ -74,8 +75,7 @@ public final class ResourceManager {
         if (category.eq(CAT_FONTTYPE)) {
             ret = fontManager.fontTypeStatus(key);
         } else if (category.eq(CAT_FILTER)) {
-            //TODO implement this in the same way as for /FontType resources
-            throw new PSErrorUnimplemented("Checking status of /Filter");
+            ret = FilterManager.filterStatus(key);
         } else {
             throw new PSErrorUnimplemented("Checking resources of type: "
                     + category.isis());

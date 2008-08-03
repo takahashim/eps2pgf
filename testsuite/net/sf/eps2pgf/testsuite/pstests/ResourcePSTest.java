@@ -61,15 +61,24 @@ public class ResourcePSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void resourceTest1Resourcestatus() throws Exception {
+    public void resourceTest1_Resourcestatus() throws Exception {
         String cmd = "999 /FontType resourcestatus false eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void resourceTest2Resourcestatus() throws Exception {
+    public void resourceTest2_Resourcestatus() throws Exception {
         String cmd = "1 /FontType resourcestatus 3 1 roll 0 eq 3 1 roll 0 eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void resourceTest3_Resourcestatus() throws Exception {
+        String cmd = "/ASCII85Decode /Filter resourcestatus"
+            + " 3 1 roll 0 eq 3 1 roll 0 eq"
+            + " /DoesntExist /Filter resourcestatus false eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
