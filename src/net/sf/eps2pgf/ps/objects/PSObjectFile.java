@@ -72,7 +72,7 @@ public class PSObjectFile extends PSObject {
      * 
      * @throws PSErrorIOError the PS error io error
      */
-    public void closefile() throws PSErrorIOError {
+    public void closeFile() throws PSErrorIOError {
         try {
             inStr.close();
         } catch (IOException e) {
@@ -107,6 +107,32 @@ public class PSObjectFile extends PSObject {
             return eq((PSObjectFile) obj);
         } else {
             return false;
+        }
+    }
+    
+    /**
+     * PostScript operator: flushfile
+     * If file is an input file, flushfile reads and discards data from that
+     * file until the end-of-file indication is encountered. flushfile does not
+     * close the file, unless it is a decoding filter file.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void flushFile() throws PSError {
+        try {
+            while (true) {
+                int value = inStr.read();
+                if (value < 0) {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
+        
+        String name = inStr.toString();
+        if (name.contains("eps2pgf") && name.contains("Decode")) {
+            closeFile();
         }
     }
     

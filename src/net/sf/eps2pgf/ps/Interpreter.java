@@ -787,7 +787,7 @@ public class Interpreter {
      */
     public void op_closefile() throws PSError {
         PSObjectFile file = getOpStack().pop().toFile();
-        file.closefile();
+        file.closeFile();
     }
     
     /**
@@ -1618,6 +1618,16 @@ public class Interpreter {
     public void op_floor() throws PSErrorStackUnderflow, PSErrorTypeCheck {
         PSObject obj = getOpStack().pop();
         getOpStack().push(obj.floor());
+    }
+    
+    /**
+     * PostScript op: flushfile.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_flushfile() throws PSError {
+        PSObjectFile file = getOpStack().pop().toFile();
+        file.flushFile();
     }
     
     /**

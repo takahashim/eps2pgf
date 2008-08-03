@@ -162,6 +162,16 @@ public class FilePSTest {
             + " roll closefile status false eq";
         assertTrue(Common.testString(interp, cmd));
     }
+    
+    
+    /** Test. @throws Exception the exception. */
+    @Test
+    public void fileTest12_Flushfile() throws Exception {
+        String cmd = "currentfile 0 (%%End) /SubFileDecode filter dup flushfile"
+            + " %%End status false eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+    
 
     
 }
