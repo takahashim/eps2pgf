@@ -255,13 +255,14 @@ public class DictStack {
         // add other operators
         systemdict.setKey("currentpacking", new PSObjectBool(false));
         systemdict.setKey("languagelevel", new PSObjectInt(3));
+        
         String version = Main.APP_VERSION;
         systemdict.setKey("version", new PSObjectString(version));
-        int revision = 0;
+        int revision;
         try {
             revision = Integer.parseInt(version.replace(".", "0"));
         } catch (NumberFormatException e) {
-            /* empty block */
+            revision = 0;
         }
         systemdict.setKey("revision", new PSObjectInt(revision));
         systemdict.setKey("serialnumber", new PSObjectInt(0));

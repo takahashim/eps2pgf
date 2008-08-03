@@ -635,9 +635,9 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * 
      * @return Integer representation of this object.
      * 
-     * @throws PSErrorTypeCheck This object has no integer representation.
+     * @throws PSError A PostScript error occurred.
      */
-    public int cvi() throws PSErrorTypeCheck {
+    public int cvi() throws PSError {
         throw new PSErrorTypeCheck();
     }
     
@@ -660,9 +660,9 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * 
      * @return the double
      * 
-     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    public double cvr() throws PSErrorTypeCheck {
+    public double cvr() throws PSError {
         throw new PSErrorTypeCheck();
     }
     

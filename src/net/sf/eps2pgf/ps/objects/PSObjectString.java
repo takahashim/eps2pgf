@@ -215,10 +215,10 @@ public class PSObjectString extends PSObject {
      * 
      * @return the int
      * 
-     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSError A PostScript error occurred.
      */
     @Override
-    public int cvi() throws PSErrorTypeCheck {
+    public int cvi() throws PSError {
         PSObjectReal ro = new PSObjectReal(value.toString());
         return ro.cvi();
     }
@@ -237,10 +237,10 @@ public class PSObjectString extends PSObject {
      * 
      * @return This object converted to double.
      * 
-     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSError A PostScript error occurred.
      */
     @Override
-    public double cvr() throws PSErrorTypeCheck {
+    public double cvr() throws PSError {
         PSObjectReal ro = new PSObjectReal(value.toString());
         return ro.toReal();
     }

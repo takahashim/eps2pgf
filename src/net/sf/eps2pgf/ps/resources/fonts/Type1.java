@@ -35,6 +35,7 @@ import net.sf.eps2pgf.ps.GstateStack;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
+import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
@@ -42,6 +43,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFont;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
+import net.sf.eps2pgf.ps.objects.PSObjectNull;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.filters.EexecDecode;
 import net.sf.eps2pgf.ps.resources.outputdevices.NullDevice;
@@ -124,11 +126,20 @@ final class Type1 {
         int nrSubrs = pSubrs.size();
         List<List<PSObject>> subrList = new ArrayList<List<PSObject>>(nrSubrs);
         for (int i = 0; i < nrSubrs; i++) {
-            PSObjectString inString = pSubrs.get(i).toPSString();
-            StringInputStream inStream = new StringInputStream(inString
-                                                                   .toString());
-            InputStream decodedStream = new EexecDecode(inStream, 4330, true);
-            List<PSObject> subroutine = decodeCharString(decodedStream);
+            PSObject inObj = pSubrs.get(i);
+            List<PSObject> subroutine;
+            if (inObj instanceof PSObjectString) {
+                PSObjectString inString = pSubrs.get(i).toPSString();
+                StringInputStream inStream =
+                    new StringInputStream(inString.toString());
+                InputStream decodedStream = new EexecDecode(inStream, 4330,
+                        true);
+                subroutine = decodeCharString(decodedStream);
+            } else if (inObj instanceof PSObjectNull) {
+                subroutine = new ArrayList<PSObject>();
+            } else {
+                throw new PSErrorTypeCheck();
+            }
             subrList.add(subroutine);
         }
         return subrList;

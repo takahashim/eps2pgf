@@ -82,6 +82,7 @@ public class PSObjectFontMetrics extends PSObject implements Cloneable {
      */
     public PSObjectFontMetrics(final PSObjectDict fontDict)
             throws PSError, ProgramError {
+        
         int fontType;
         try {
             fontType = fontDict.get("FontType").toInt();

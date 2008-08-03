@@ -20,6 +20,7 @@
 
 package net.sf.eps2pgf.ps.objects;
 
+import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 
@@ -36,9 +37,15 @@ public class PSObjectReal extends PSObject {
      * Creates a new instance of PSObjectReal.
      * 
      * @param str String with valid real.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public PSObjectReal(final String str) {
-        this.value = Double.parseDouble(str);
+    public PSObjectReal(final String str) throws PSError {
+        try {
+            this.value = Double.parseDouble(str);
+        } catch (NumberFormatException e) {
+            throw new PSErrorTypeCheck();
+        }
     }
     
     /**
