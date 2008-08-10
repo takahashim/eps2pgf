@@ -111,6 +111,13 @@ public class PGFDevice implements OutputDevice {
     static final PSObjectName KEY_LAST_MITERLIMIT =
         new PSObjectName("/lastmiterlimit");
     
+    /**
+     * Standard color transformations. Since PGF does not support all
+     * colorspaces that PostScript supports
+     */
+    
+    
+    
     
     /** Recursion depth of \begin{pgfscope}...\end{pgfscope} commands. */
     private static int scopeDepth = 0;

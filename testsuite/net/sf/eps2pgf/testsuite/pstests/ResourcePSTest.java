@@ -81,5 +81,24 @@ public class ResourcePSTest {
             + " /DoesntExist /Filter resourcestatus false eq";
         assertTrue(Common.testString(interp, cmd));
     }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void resourceTest4_Resourcestatus() throws Exception {
+        String cmd = "/DeviceGray /ColorSpaceFamily resourcestatus"
+            + " 3 1 roll pop pop"
+            + " /DeviceRGB /ColorSpaceFamily resourcestatus 3 1 roll pop pop"
+            + " /DeviceCMYK /ColorSpaceFamily resourcestatus 3 1 roll pop pop"
+            + " /DoesntExist /ColorSpaceFamily resourcestatus false eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void resourceTest5_Defineresource() throws Exception {
+        String cmd = "/TheKey [/DeviceGray] /ColorSpace defineresource"
+            + " pop true";
+        assertTrue(Common.testString(interp, cmd));
+    }
 
 }

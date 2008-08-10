@@ -137,6 +137,16 @@ public abstract class PSColor implements Cloneable {
     }
     
     /**
+     * Gets the preferred color space to be used by output devices. Since output
+     * devices generally do not support all the color spaces that PostScript
+     * uses, the PSColor must specify which color space is preferred. It must be
+     * either: "Gray", "RGB" or "CMYK".
+     * 
+     * @return String with either "Gray", "RGB" or "CMYK".
+     */
+    public abstract String getPreferredColorSpace();
+    
+    /**
      * Gets a single color level.
      * 
      * @param i Index of color component to get.

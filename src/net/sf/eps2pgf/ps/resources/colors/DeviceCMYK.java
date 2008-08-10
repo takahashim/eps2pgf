@@ -30,7 +30,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectName;
  * @author Wagenaars
  *
  */
-public class CMYK extends PSColor {
+public class DeviceCMYK extends PSColor {
     
     /** Default color is black. */
     private static final double[] DEFAULT_LEVELS = {0.0, 0.0, 0.0, 1.0};
@@ -38,7 +38,7 @@ public class CMYK extends PSColor {
     /**
      * Instantiates a new CMYK color.
      */
-    public CMYK() {
+    public DeviceCMYK() {
         try {
             setColor(DEFAULT_LEVELS);
         } catch (PSErrorRangeCheck e) {
@@ -54,8 +54,8 @@ public class CMYK extends PSColor {
      * @throws CloneNotSupportedException Clone not supported by this object.
      */
     @Override
-    public CMYK clone() throws CloneNotSupportedException {
-        CMYK copy = (CMYK) super.clone();
+    public DeviceCMYK clone() throws CloneNotSupportedException {
+        DeviceCMYK copy = (DeviceCMYK) super.clone();
         return copy;
     }
 
@@ -101,7 +101,7 @@ public class CMYK extends PSColor {
     @Override
     public double[] getHSB() {
         double[] rgb = getRGB();
-        return RGB.convertRGBtoHSB(rgb[0], rgb[1], rgb[2]);
+        return DeviceRGB.convertRGBtoHSB(rgb[0], rgb[1], rgb[2]);
     }
 
     /**
@@ -127,6 +127,19 @@ public class CMYK extends PSColor {
     @Override
     public int getNrInputValues() {
         return getNrComponents();
+    }
+    
+    /**
+     * Gets the preferred color space to be used by output devices. Since output
+     * devices generally do not support all the color spaces that PostScript
+     * uses, the PSColor must specify which color space is preferred. It must be
+     * either: "Gray", "RGB" or "CMYK".
+     * 
+     * @return Always returns "CMYK".
+     */
+    @Override
+    public String getPreferredColorSpace() {
+        return "CMYK";
     }
 
     /**

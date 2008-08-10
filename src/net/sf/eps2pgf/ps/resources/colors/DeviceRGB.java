@@ -30,7 +30,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectName;
  * @author Wagenaars
  *
  */
-public class RGB extends PSColor {
+public class DeviceRGB extends PSColor {
 
     /** Default color is black. */
     private static final double[] DEFAULT_LEVELS = {0.0, 0.0, 0.0};
@@ -38,7 +38,7 @@ public class RGB extends PSColor {
     /**
      * Instantiates a new RGB color.
      */
-    public RGB() {
+    public DeviceRGB() {
         try {
             setColor(DEFAULT_LEVELS);
         } catch (PSErrorRangeCheck e) {
@@ -54,8 +54,8 @@ public class RGB extends PSColor {
      * @throws CloneNotSupportedException Clone not supported by this object.
      */
     @Override
-    public RGB clone() throws CloneNotSupportedException {
-        RGB copy = (RGB) super.clone();
+    public DeviceRGB clone() throws CloneNotSupportedException {
+        DeviceRGB copy = (DeviceRGB) super.clone();
         return copy;
     }
 
@@ -143,6 +143,19 @@ public class RGB extends PSColor {
     @Override
     public int getNrInputValues() {
         return getNrComponents();
+    }
+
+    /**
+     * Gets the preferred color space to be used by output devices. Since output
+     * devices generally do not support all the color spaces that PostScript
+     * uses, the PSColor must specify which color space is preferred. It must be
+     * either: "Gray", "RGB" or "CMYK".
+     * 
+     * @return Always returns "RGB".
+     */
+    @Override
+    public String getPreferredColorSpace() {
+        return "RGB";
     }
 
     /**

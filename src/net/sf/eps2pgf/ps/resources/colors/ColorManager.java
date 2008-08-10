@@ -31,12 +31,12 @@ import net.sf.eps2pgf.ps.objects.PSObjectName;
  * This class offers several static methods to handle different aspect
  * of colors.
  */
-public final class ColorUtils {
+public final class ColorManager {
     
     /**
      * "Hidden" constructor.
      */
-    private ColorUtils() {
+    private ColorManager() {
         /* empty block */
     }
     
@@ -63,16 +63,39 @@ public final class ColorUtils {
         }
 
         if (spaceName.equals("DeviceGray")) {
-            return new Gray();
+            return new DeviceGray();
         } else if (spaceName.equals("DeviceRGB")) {
-            return new RGB();
+            return new DeviceRGB();
         } else if (spaceName.equals("DeviceCMYK")) {
-            return new CMYK();
+            return new DeviceCMYK();
         } else if (spaceName.equals("Indexed")) {
             return new Indexed(obj);
         } else {
             throw new PSErrorUndefined();
         }
 
+    }
+    
+    /**
+     * Checks whether a specific color space is supported or not.
+     * 
+     * @param key Key describing color space family.
+     * 
+     * @return true if supported, false otherwise.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public static boolean colorSpaceFamilyStatus(final PSObject key)
+            throws PSError {
+
+        String name = String.format("net.sf.eps2pgf.ps.resources.colors.%s",
+                key.toString());
+        
+        try {
+            Class.forName(name);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }

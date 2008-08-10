@@ -27,7 +27,6 @@ import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
-import net.sf.eps2pgf.ps.objects.PSObjectBool;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFile;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
@@ -294,33 +293,23 @@ public final class FilterManager {
      * 
      * @param key Key describing filter.
      * 
-     * @return [0 0 true] if filter is supported, [false] if filter is not
+     * @return true if filter is supported, false if filter is not
      * supported.
      * 
      * @throws PSError A PostScript error occurred.
      */
-    public static PSObjectArray filterStatus(final PSObject key)
+    public static boolean filterStatus(final PSObject key)
             throws PSError {
 
         String name = String.format("net.sf.eps2pgf.ps.resources.filters.%s",
                 key.toString());
         
-        boolean supported;
         try {
             Class.forName(name);
-            supported = true;
+            return true;
         } catch (ClassNotFoundException e) {
-            supported = false;
+            return false;
         }
-
-        PSObjectArray ret = new PSObjectArray();
-        if (supported) {
-            ret.addToEnd(new PSObjectInt(0));
-            ret.addToEnd(new PSObjectInt(0));
-        }
-        ret.addToEnd(new PSObjectBool(supported));
-        
-        return ret;
     }
     
 }

@@ -65,7 +65,7 @@ public class Indexed extends PSColor {
         PSObjectArray colorArray = (PSObjectArray) obj;
         
         // Extract base color space
-        currentColor = ColorUtils.autoSetColorSpace(colorArray.get(1));
+        currentColor = ColorManager.autoSetColorSpace(colorArray.get(1));
         
         // Extract the hival.
         hival = colorArray.get(2).toInt();
@@ -211,6 +211,20 @@ public class Indexed extends PSColor {
     @Override
     public int getNrInputValues() {
         return 1;
+    }
+
+    /**
+     * Gets the preferred color space to be used by output devices. Since output
+     * devices generally do not support all the color spaces that PostScript
+     * uses, the PSColor must specify which color space is preferred. It must be
+     * either: "Gray", "RGB" or "CMYK".
+     * 
+     * @return Returns the preferred color space of the color space that is used
+     * to specify the indexed colors.
+     */
+    @Override
+    public String getPreferredColorSpace() {
+        return currentColor.getPreferredColorSpace();
     }
 
     /**

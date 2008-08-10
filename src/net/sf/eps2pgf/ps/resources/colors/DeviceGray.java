@@ -27,7 +27,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectName;
 /**
  * Gray color.
  */
-public class Gray extends PSColor {
+public class DeviceGray extends PSColor {
     
     /** Default color is black. */
     private static final double[] DEFAULT_LEVELS = {0.0};
@@ -35,7 +35,7 @@ public class Gray extends PSColor {
     /**
      * Instantiates a new gray color.
      */
-    public Gray() {
+    public DeviceGray() {
         try {
             setColor(DEFAULT_LEVELS);
         } catch (PSErrorRangeCheck e) {
@@ -51,8 +51,8 @@ public class Gray extends PSColor {
      * @throws CloneNotSupportedException Clone not supported by this object.
      */
     @Override
-    public Gray clone() throws CloneNotSupportedException {
-        Gray copy = (Gray) super.clone();
+    public DeviceGray clone() throws CloneNotSupportedException {
+        DeviceGray copy = (DeviceGray) super.clone();
         return copy;
     }
 
@@ -100,7 +100,7 @@ public class Gray extends PSColor {
      */
     @Override
     public double[] getHSB() {
-        return RGB.convertRGBtoHSB(getLevel(0), getLevel(0), getLevel(0));
+        return DeviceRGB.convertRGBtoHSB(getLevel(0), getLevel(0), getLevel(0));
     }
 
     /**
@@ -126,6 +126,19 @@ public class Gray extends PSColor {
     @Override
     public int getNrInputValues() {
         return getNrComponents();
+    }
+
+    /**
+     * Gets the preferred color space to be used by output devices. Since output
+     * devices generally do not support all the color spaces that PostScript
+     * uses, the PSColor must specify which color space is preferred. It must be
+     * either: "Gray", "RGB" or "CMYK".
+     * 
+     * @return Always returns "Gray".
+     */
+    @Override
+    public String getPreferredColorSpace() {
+        return "Gray";
     }
 
     /**

@@ -62,10 +62,10 @@ import net.sf.eps2pgf.ps.objects.PSObjectReal;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.Encoding;
 import net.sf.eps2pgf.ps.resources.ResourceManager;
-import net.sf.eps2pgf.ps.resources.colors.CMYK;
-import net.sf.eps2pgf.ps.resources.colors.Gray;
+import net.sf.eps2pgf.ps.resources.colors.DeviceCMYK;
+import net.sf.eps2pgf.ps.resources.colors.DeviceGray;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
-import net.sf.eps2pgf.ps.resources.colors.RGB;
+import net.sf.eps2pgf.ps.resources.colors.DeviceRGB;
 import net.sf.eps2pgf.ps.resources.filters.EexecDecode;
 import net.sf.eps2pgf.ps.resources.filters.FilterManager;
 import net.sf.eps2pgf.ps.resources.fonts.FontManager;
@@ -815,11 +815,11 @@ public class Interpreter {
         PSColor colorSpace;
         int ncomp = getOpStack().pop().toInt();
         if (ncomp == 1) {
-            colorSpace = new Gray();
+            colorSpace = new DeviceGray();
         } else if (ncomp == 3) {
-            colorSpace = new RGB();
+            colorSpace = new DeviceRGB();
         } else if (ncomp == 4) {
-            colorSpace = new CMYK();
+            colorSpace = new DeviceCMYK();
         } else {
             throw new PSErrorRangeCheck();
         }
@@ -1300,20 +1300,23 @@ public class Interpreter {
     public void op_definefont() throws PSError, ProgramError {
         PSObjectFont font = getOpStack().pop().toFont();
         PSObject key = getOpStack().pop();
-        FontManager fontManager = resourceManager.getFontManager();
-        getOpStack().push(fontManager.defineFont(key, font));
+        PSObject obj = resourceManager.defineResource(ResourceManager.CAT_FONT,
+                key, font);
+        getOpStack().push(obj);
     }
     
     /**
      * PostScript op: defineresource.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_defineresource() throws PSError {
-        //PSObjectName category = getOpStack().pop().toName();
-        //PSObject instance = getOpStack().pop();
-        //PSObject key = getOpStack().pop();
-        throw new PSErrorUnimplemented("PostScript operator: 'defineresource'");
+    public void op_defineresource() throws PSError, ProgramError {
+        PSObjectName category = getOpStack().pop().toName();
+        PSObject instance = getOpStack().pop();
+        PSObject key = getOpStack().pop();
+        PSObject obj = resourceManager.defineResource(category, key, instance);
+        getOpStack().push(obj);
     }
     
     /**
@@ -1909,7 +1912,7 @@ public class Interpreter {
                     new PSObjectInt(bitsPerSample));
             double[] decode = {0.0, 1.0};
             dict.setKey(Image.DECODE, new PSObjectArray(decode));
-            colorSpace = new Gray();
+            colorSpace = new DeviceGray();
         }
         
         Image image = new Image(dict, this, colorSpace);
@@ -2955,7 +2958,8 @@ public class Interpreter {
         double brightness = getOpStack().pop().toReal();
         double saturaration = getOpStack().pop().toReal();
         double hue = getOpStack().pop().toReal();
-        double[] rgbValues = RGB.convertHSBtoRGB(hue, saturaration, brightness);
+        double[] rgbValues = DeviceRGB.convertHSBtoRGB(hue, saturaration,
+                brightness);
         gstate.current().setcolorspace(new PSObjectName("DeviceRGB", true));
         gstate.current().setcolor(rgbValues);
     }

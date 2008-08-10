@@ -31,7 +31,7 @@ import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectFont;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
-import net.sf.eps2pgf.ps.resources.colors.ColorUtils;
+import net.sf.eps2pgf.ps.resources.colors.ColorManager;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
 
@@ -599,7 +599,7 @@ public class GraphicsState implements Cloneable {
      */
     public void setcolorspace(final PSObject obj) throws PSError, IOException {
         
-        color = ColorUtils.autoSetColorSpace(obj);
+        color = ColorManager.autoSetColorSpace(obj);
     }
     
     /**
