@@ -23,6 +23,7 @@ package net.sf.eps2pgf.ps.objects;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
@@ -766,14 +767,15 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * official 'token' operator. This method will always return a result.
      * 
      * @return List with one or more objects. The following are possible:
-     *         1 object : { "false boolean" }
-     *         2 objects: { "next token", "true boolean" }
-     *         3 objects: { "remainder of this object", "next token",
-     *                      "true boolean" }
+     * 1 object : { "false boolean" }
+     * 2 objects: { "next token", "true boolean" }
+     * 3 objects: { "remainder of this object", "next token",
+     * "true boolean" }
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public List<PSObject> token() throws PSError {
+    public List<PSObject> token() throws PSError, ProgramError {
         List<PSObject> list = new ArrayList<PSObject>(3);
         list.add(0, null);
         list.add(1, this);

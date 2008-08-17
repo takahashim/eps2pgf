@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import com.martiansoftware.jsap.JSAPResult;
 
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.errors.QuitOpExecuted;
 import net.sf.eps2pgf.util.Eps2pgfFormatter;
 import net.sf.eps2pgf.util.Eps2pgfHandler;
 
@@ -129,6 +130,8 @@ public final class Main {
         } catch (ParseException e) {
             LOG.severe("Execution failed due to an error while parsing the text"
                     + " replacements file.");
+        } catch (QuitOpExecuted e) {
+            /* empty block */
         } catch (PSError e) {
             LOG.severe("Execution failed due to a PostScript error in the input"
                     + " file.");

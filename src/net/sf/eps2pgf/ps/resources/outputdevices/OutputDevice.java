@@ -90,8 +90,9 @@ public interface OutputDevice extends Cloneable {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    void fill(GraphicsState gstate) throws IOException, PSError;
+    void fill(GraphicsState gstate) throws IOException, PSError, ProgramError;
 
     /**
      * Set the current clipping path in the graphics state as clipping path in
@@ -113,8 +114,9 @@ public interface OutputDevice extends Cloneable {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    void eofill(GraphicsState gstate) throws IOException, PSError;
+    void eofill(GraphicsState gstate) throws IOException, PSError, ProgramError;
     
     /**
      * Internal Eps2pgf command: eps2pgfgetmetrics
@@ -133,9 +135,10 @@ public interface OutputDevice extends Cloneable {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     void shfill(PSObjectDict dict, GraphicsState gstate)
-            throws PSError, IOException;
+            throws PSError, IOException, ProgramError;
 
     /**
      * Implements PostScript stroke operator.
@@ -144,8 +147,9 @@ public interface OutputDevice extends Cloneable {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    void stroke(GraphicsState gstate) throws IOException, PSError;
+    void stroke(GraphicsState gstate) throws IOException, PSError, ProgramError;
     
     /**
      * Draws a red dot (useful for debugging, don't use otherwise).
@@ -183,10 +187,11 @@ public interface OutputDevice extends Cloneable {
      * 
      * @throws IOException Unable to write output
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     void show(String text, double[] position, double angle,
             double fontsize, String anchor, final GraphicsState gstate)
-            throws IOException, PSError;
+            throws IOException, PSError, ProgramError;
 
     /**
      * Starts a new scope.

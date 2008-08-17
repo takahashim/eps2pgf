@@ -583,8 +583,11 @@ public class GraphicsState implements Cloneable {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void setcolor(final double[] newColor) throws IOException, PSError {
+    public void setcolor(final double[] newColor)
+            throws IOException, PSError, ProgramError {
+        
         color.setColor(newColor);
     }
     
@@ -592,12 +595,14 @@ public class GraphicsState implements Cloneable {
      * Sets the current color space.
      * 
      * @param obj Object describing the color space. Should be a literal name or
-     *            an array starting with a literal name.
+     * an array starting with a literal name.
      * 
      * @throws PSError A PostScript error has occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void setcolorspace(final PSObject obj) throws PSError, IOException {
+    public void setcolorspace(final PSObject obj)
+            throws PSError, IOException, ProgramError {
         
         color = ColorManager.autoSetColorSpace(obj);
     }

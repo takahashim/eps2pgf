@@ -187,4 +187,10 @@ public final class AllFigures {
         assertTrue(Common.testFigure(conv, "matlab_bitmap1.eps"));
     }
 
+    /** Test. @throws Exception the exception */
+    @Test
+    public void ciebased_colorspace() throws Exception {
+        assertTrue(Common.testFigure(conv, "CIEBased.eps"));
+    }
+
 }

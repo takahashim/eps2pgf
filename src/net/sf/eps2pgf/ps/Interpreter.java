@@ -46,6 +46,7 @@ import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.errors.PSErrorUnmatchedMark;
+import net.sf.eps2pgf.ps.errors.QuitOpExecuted;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectBool;
@@ -282,6 +283,8 @@ public class Interpreter {
     public void start() throws ProgramError, PSError, IOException {
         try {
             run();
+        } catch (QuitOpExecuted e) {
+            /* empty block */
         } catch (PSError e) {
             log.severe("A PostScript error occurred.");
             log.severe("    Type: " + e.getMessage());
@@ -1106,8 +1109,9 @@ public class Interpreter {
      * PostScript op: currentscreen.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_currentscreen() throws PSError {
+    public void op_currentscreen() throws PSError, ProgramError {
         // this operator is not really meaningfull for Eps2pgf. Therefore it
         // just returns some values.
         getOpStack().push(new PSObjectReal(150.0));
@@ -1441,8 +1445,9 @@ public class Interpreter {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_eofill() throws PSError, IOException {
+    public void op_eofill() throws PSError, IOException, ProgramError {
         gstate.current().getDevice().eofill(gstate.current());
         op_newpath();
     }
@@ -1560,8 +1565,9 @@ public class Interpreter {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_fill() throws PSError, IOException {
+    public void op_fill() throws PSError, IOException, ProgramError {
         gstate.current().getDevice().fill(gstate.current());
         op_newpath();
     }
@@ -2409,6 +2415,15 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: quit.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_quit() throws PSError {
+        throw new QuitOpExecuted();
+    }
+    
+    /**
      * PostScript op: rcheck.
      * 
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
@@ -2861,8 +2876,9 @@ public class Interpreter {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_setcmykcolor() throws PSError, IOException {
+    public void op_setcmykcolor() throws PSError, IOException, ProgramError {
         double k = getOpStack().pop().toReal();
         double y = getOpStack().pop().toReal();
         double m = getOpStack().pop().toReal();
@@ -2877,8 +2893,9 @@ public class Interpreter {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_setcolor() throws PSError, IOException {
+    public void op_setcolor() throws PSError, IOException, ProgramError {
         int n = gstate.current().getColor().getNrInputValues();
         double[] newColor = new double[n];
         for (int i = 0; i < n; i++) {
@@ -2892,8 +2909,9 @@ public class Interpreter {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_setcolorspace() throws PSError, IOException {
+    public void op_setcolorspace() throws PSError, IOException, ProgramError {
         PSObject arrayOrName = getOpStack().pop();
         gstate.current().setcolorspace(arrayOrName);
     }
@@ -2941,8 +2959,9 @@ public class Interpreter {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_setgray() throws PSError, IOException {
+    public void op_setgray() throws PSError, IOException, ProgramError {
         double[] num = { getOpStack().pop().toReal() };
         gstate.current().setcolorspace(new PSObjectName("DeviceGray", true));
         gstate.current().setcolor(num);
@@ -2953,8 +2972,9 @@ public class Interpreter {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_sethsbcolor() throws PSError, IOException {
+    public void op_sethsbcolor() throws PSError, IOException, ProgramError {
         double brightness = getOpStack().pop().toReal();
         double saturaration = getOpStack().pop().toReal();
         double hue = getOpStack().pop().toReal();
@@ -3044,8 +3064,9 @@ public class Interpreter {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_setrgbcolor() throws PSError, IOException {
+    public void op_setrgbcolor() throws PSError, IOException, ProgramError {
         double blue = getOpStack().pop().toReal();
         double green = getOpStack().pop().toReal();
         double red = getOpStack().pop().toReal();
@@ -3085,8 +3106,9 @@ public class Interpreter {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_shfill() throws PSError, IOException {
+    public void op_shfill() throws PSError, IOException, ProgramError {
         PSObjectDict dict = getOpStack().pop().toDict();
         gstate.current().getDevice().shfill(dict, gstate.current());
     }
@@ -3222,8 +3244,9 @@ public class Interpreter {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_stroke() throws PSError, IOException {
+    public void op_stroke() throws PSError, IOException, ProgramError {
         gstate.current().getDevice().stroke(gstate.current());
         op_newpath();
     }
@@ -3288,8 +3311,9 @@ public class Interpreter {
      * PostScript op: token.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_token() throws PSError {
+    public void op_token() throws PSError, ProgramError {
         PSObject obj = getOpStack().pop();
         obj.checkAccess(false, true, false);
         

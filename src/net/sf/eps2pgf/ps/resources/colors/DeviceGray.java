@@ -20,7 +20,8 @@
 
 package net.sf.eps2pgf.ps.resources.colors;
 
-import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 
@@ -28,6 +29,10 @@ import net.sf.eps2pgf.ps.objects.PSObjectName;
  * Gray color.
  */
 public class DeviceGray extends PSColor {
+    
+    /** Name of this color space family. */
+    public static final PSObjectName FAMILYNAME
+        = new PSObjectName("/DeviceGray");
     
     /** Default color is black. */
     private static final double[] DEFAULT_LEVELS = {0.0};
@@ -38,7 +43,9 @@ public class DeviceGray extends PSColor {
     public DeviceGray() {
         try {
             setColor(DEFAULT_LEVELS);
-        } catch (PSErrorRangeCheck e) {
+        } catch (PSError e) {
+            // this can never happen
+        } catch (ProgramError e) {
             // this can never happen
         }
     }

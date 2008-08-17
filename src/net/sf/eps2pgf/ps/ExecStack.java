@@ -22,6 +22,7 @@ package net.sf.eps2pgf.ps;
 
 import java.util.List;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.objects.PSObject;
@@ -59,12 +60,13 @@ public class ExecStack {
      * stack.
      * 
      * @return Returns next token. Returns <code>null</code> when there are no
-     *         more tokens left on the top item on the stack. This empty top
-     *         item is popped and <code>null</code> is returned.
-     *         
+     * more tokens left on the top item on the stack. This empty top
+     * item is popped and <code>null</code> is returned.
+     * 
      * @throws PSError There was a PostScript error retrieving the next token.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObject getNextToken() throws PSError {
+    public PSObject getNextToken() throws PSError, ProgramError {
         // Check for empty stack
         if (stack.size() == 0) {
             return null;

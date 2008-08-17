@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
@@ -58,9 +59,11 @@ public final class Parser {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public static List<PSObject> convertAll(final InputStream in)
-            throws IOException, PSError {
+            throws IOException, PSError, ProgramError {
+        
         List<PSObject> seq = new ArrayList<PSObject>();
         PSObject obj;
         while ((obj = convertSingle(in)) != null) {
@@ -79,9 +82,11 @@ public final class Parser {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public static PSObject convertSingle(final InputStream in)
-            throws IOException, PSError {
+            throws IOException, PSError, ProgramError {
+        
         StringBuilder strSoFar = new StringBuilder();
         boolean inComment = false;
         boolean inString = false;
@@ -290,9 +295,11 @@ public final class Parser {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    static PSObject convertToPSObject(final String str) throws IOException,
-            PSError {
+    static PSObject convertToPSObject(final String str)
+            throws IOException, PSError, ProgramError {
+        
         if (PSObjectInt.isType(str)) {
             return new PSObjectInt(str);
         } else if (PSObjectReal.isType(str)) {

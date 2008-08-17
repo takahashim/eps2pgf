@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.ps.Parser;
@@ -827,9 +828,10 @@ public class PSObjectString extends PSObject {
      * 'token' operator for more info.
      * 
      * @throws PSError Unable to read a token from this object
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public List<PSObject> token() throws PSError {
+    public List<PSObject> token() throws PSError, ProgramError {
         InputStream inStream = new PSStringInputStream(this);
         PSObject any;
         try {

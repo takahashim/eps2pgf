@@ -20,7 +20,8 @@
 
 package net.sf.eps2pgf.ps.resources.colors;
 
-import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 
@@ -32,6 +33,10 @@ import net.sf.eps2pgf.ps.objects.PSObjectName;
  */
 public class DeviceRGB extends PSColor {
 
+    /** Name of this color space family. */
+    public static final PSObjectName FAMILYNAME
+        = new PSObjectName("/DeviceRGB");
+    
     /** Default color is black. */
     private static final double[] DEFAULT_LEVELS = {0.0, 0.0, 0.0};
     
@@ -41,7 +46,9 @@ public class DeviceRGB extends PSColor {
     public DeviceRGB() {
         try {
             setColor(DEFAULT_LEVELS);
-        } catch (PSErrorRangeCheck e) {
+        } catch (PSError e) {
+            // this can never happen
+        } catch (ProgramError e) {
             // this can never happen
         }
     }
@@ -66,26 +73,7 @@ public class DeviceRGB extends PSColor {
      */
     @Override
     public double[] getCMYK() {
-        // First step: convert RGB to CMY
-        double c = 1.0 - getLevel(0);
-        double m = 1.0 - getLevel(1);
-        double y = 1.0 - getLevel(2);
-        
-        // Second step: generate black component and alter the other components
-        // to produce a better approximation of the original color.
-        // See http://en.wikipedia.org/wiki/CMYK_color_model#Mapping_RGB_to_CMYK
-        // And http://www.easyrgb.com/math.html
-        double k = Math.min(c, Math.min(m, y));
-        if (Math.abs(k - 1.0) < 1e-10) {
-            c = 0;  m = 0;  y = 0;
-        } else {
-            c = (c - k) / (1 - k);
-            m = (m - k) / (1 - k);
-            y = (y - k) / (1 - k);
-        }
-        
-        double[] cmyk = {c, m, y, k};
-        return cmyk;
+        return convertRGBtoCMYK(getLevel(0), getLevel(1), getLevel(2));
     }
     
     /**
@@ -254,4 +242,36 @@ public class DeviceRGB extends PSColor {
         return hsb;
     }
 
+    /**
+     * Convert an color in RGB to CMYK.
+     * 
+     * @param r red value
+     * @param g green value
+     * @param b blue value
+     * 
+     * @return array with c, m, y and k levels.
+     */
+    public static double[] convertRGBtoCMYK(final double r, final double g,
+            final double b) {
+        // First step: convert RGB to CMY
+        double c = 1.0 - r;
+        double m = 1.0 - g;
+        double y = 1.0 - b;
+        
+        // Second step: generate black component and alter the other components
+        // to produce a better approximation of the original color.
+        // See http://en.wikipedia.org/wiki/CMYK_color_model#Mapping_RGB_to_CMYK
+        // And http://www.easyrgb.com/math.html
+        double k = Math.min(c, Math.min(m, y));
+        if (Math.abs(k - 1.0) < 1e-10) {
+            c = 0;  m = 0;  y = 0;
+        } else {
+            c = (c - k) / (1 - k);
+            m = (m - k) / (1 - k);
+            y = (y - k) / (1 - k);
+        }
+        
+        double[] cmyk = {c, m, y, k};
+        return cmyk;
+    }
 }

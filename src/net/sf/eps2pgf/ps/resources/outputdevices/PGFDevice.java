@@ -54,6 +54,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectReal;
+import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.shadings.RadialShading;
 import net.sf.eps2pgf.ps.resources.shadings.Shading;
@@ -110,6 +111,10 @@ public class PGFDevice implements OutputDevice {
     /** Key of last miter limit. */
     static final PSObjectName KEY_LAST_MITERLIMIT =
         new PSObjectName("/lastmiterlimit");
+    
+    /** Key of last color space. */
+    static final PSObjectName KEY_LAST_COLSPACE =
+        new PSObjectName("/lastcolorspace");
     
     /**
      * Standard color transformations. Since PGF does not support all
@@ -183,6 +188,7 @@ public class PGFDevice implements OutputDevice {
         deviceStatus.setKey(KEY_LAST_DASHPATTERN, new PSObjectArray());
         deviceStatus.setKey(KEY_LAST_DASHOFFSET, new PSObjectReal(0.0));
         deviceStatus.setKey(KEY_LAST_COLOR, new PSObjectArray());
+        deviceStatus.setKey(KEY_LAST_COLSPACE, new PSObjectString(""));
         deviceStatus.setKey(KEY_LAST_LINECAP, new PSObjectInt(0));
         deviceStatus.setKey(KEY_LAST_LINEJOIN, new PSObjectInt(0));
         deviceStatus.setKey(KEY_LAST_MITERLIMIT, new PSObjectReal(10.0));
@@ -257,8 +263,11 @@ public class PGFDevice implements OutputDevice {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void stroke(final GraphicsState gstate) throws IOException, PSError {
+    public void stroke(final GraphicsState gstate)
+            throws IOException, PSError, ProgramError {
+        
         updateDash(gstate);
         updateLineWidth(gstate);
         updateLineCap(gstate);
@@ -314,8 +323,11 @@ public class PGFDevice implements OutputDevice {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void fill(final GraphicsState gstate) throws IOException, PSError {
+    public void fill(final GraphicsState gstate)
+            throws IOException, PSError, ProgramError {
+        
         updateColor(gstate);
         writePath(gstate.getPath());
         out.write("\\pgfusepath{fill}\n");
@@ -347,9 +359,10 @@ public class PGFDevice implements OutputDevice {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void eofill(final GraphicsState gstate)
-            throws IOException, PSError {
+            throws IOException, PSError, ProgramError {
         
         updateColor(gstate);
         writePath(gstate.getPath());
@@ -364,9 +377,10 @@ public class PGFDevice implements OutputDevice {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void shfill(final PSObjectDict dict, final GraphicsState gstate)
-            throws PSError, IOException {
+            throws PSError, IOException, ProgramError {
         
         updateColor(gstate);
         Shading shading = Shading.newShading(dict);
@@ -632,16 +646,23 @@ public class PGFDevice implements OutputDevice {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     private void updateColor(final GraphicsState gstate)
-            throws IOException, PSError {
+            throws IOException, PSError, ProgramError {
         
-        // Check whether current color is the same as the last color
+        // Check whether current color and color space is the same as the last
+        // color and color space.
         PSObjectArray lastColor = deviceStatus.get(KEY_LAST_COLOR).toArray();
+        String lastColspace = deviceStatus.get(KEY_LAST_COLSPACE).toString();
         PSColor color = gstate.getColor();
+        String colspace = color.toString();
+        colspace = colspace.substring(colspace.lastIndexOf('.') + 1,
+                colspace.lastIndexOf('@'));
+        
         int n = color.getNrComponents();
         boolean equal = true;
-        if (n != lastColor.length()) {
+        if (!colspace.equals(lastColspace)) {
             equal = false;
         } else {
             for (int i = 0; i < n; i++) {
@@ -658,20 +679,27 @@ public class PGFDevice implements OutputDevice {
             return;
         }
         
-        if (n >= 4) {
+        String prefColSpace = color.getPreferredColorSpace();
+        if (prefColSpace.equals("CMYK")) {
+            double[] cmyk = color.getCMYK();
             out.write("\\definecolor{eps2pgf_color}{cmyk}{"
-                    + COLOR_FORMAT.format(color.getLevel(0))
-                    + "," + COLOR_FORMAT.format(color.getLevel(1))
-                    + "," + COLOR_FORMAT.format(color.getLevel(2))
-                    + "," + COLOR_FORMAT.format(color.getLevel(3)) + "}");
-        } else if (n == 3) {
+                    + COLOR_FORMAT.format(cmyk[0])
+                    + "," + COLOR_FORMAT.format(cmyk[1])
+                    + "," + COLOR_FORMAT.format(cmyk[2])
+                    + "," + COLOR_FORMAT.format(cmyk[3]) + "}");
+        } else if (prefColSpace.equals("RGB")) {
+            double[] rgb = color.getRGB();
             out.write("\\definecolor{eps2pgf_color}{rgb}{"
-                    + COLOR_FORMAT.format(color.getLevel(0))
-                    + "," + COLOR_FORMAT.format(color.getLevel(1))
-                    + "," + COLOR_FORMAT.format(color.getLevel(2)) + "}");
-        } else {
+                    + COLOR_FORMAT.format(rgb[0])
+                    + "," + COLOR_FORMAT.format(rgb[1])
+                    + "," + COLOR_FORMAT.format(rgb[2]) + "}");
+        } else if (prefColSpace.equals("Gray")) {
+            double gray = color.getGray();
             out.write("\\definecolor{eps2pgf_color}{gray}{"
-                    + COLOR_FORMAT.format(color.getLevel(0)) + "}");
+                    + COLOR_FORMAT.format(gray) + "}");
+        } else {
+            throw new ProgramError("Invalid preferred color space: "
+                    + prefColSpace);
         }
         
         out.write("\\pgfsetstrokecolor{eps2pgf_color}");
@@ -682,6 +710,7 @@ public class PGFDevice implements OutputDevice {
             newColor.addToEnd(new PSObjectReal(color.getLevel(i)));
         }
         deviceStatus.setKey(KEY_LAST_COLOR, newColor);
+        deviceStatus.setKey(KEY_LAST_COLSPACE, new PSObjectString(colspace));
     }
 
     /**
@@ -700,10 +729,12 @@ public class PGFDevice implements OutputDevice {
      * 
      * @throws IOException Unable to write output
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void show(final String text, final double[] position,
             final double angle, final double pFontsize, final String anchor,
-            final GraphicsState gstate) throws IOException, PSError {
+            final GraphicsState gstate)
+            throws IOException, PSError, ProgramError {
         
         updateColor(gstate);
         

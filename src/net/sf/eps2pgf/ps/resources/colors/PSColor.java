@@ -20,6 +20,8 @@
 
 package net.sf.eps2pgf.ps.resources.colors;
 
+import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 
@@ -106,9 +108,12 @@ public abstract class PSColor implements Cloneable {
      * 
      * @param components the new color
      * 
-     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void setColor(final double[] components) throws PSErrorRangeCheck {
+    public void setColor(final double[] components)
+            throws PSError, ProgramError {
+        
         int nrComponents = getNrInputValues();
         if (components.length != nrComponents) {
             throw new PSErrorRangeCheck();
@@ -128,7 +133,7 @@ public abstract class PSColor implements Cloneable {
      * @param i Index of color component to set.
      * @param componentLevel the levels to set
      */
-    private void setLevel(final int i, final double componentLevel) {
+    protected void setLevel(final int i, final double componentLevel) {
         if (levels == null) {
             levels = new double[getNrComponents()];
         }

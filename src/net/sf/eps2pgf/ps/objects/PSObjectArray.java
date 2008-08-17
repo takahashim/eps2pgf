@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Parser;
@@ -99,10 +100,10 @@ public class PSObjectArray extends PSObject {
      * 
      * @param pStr String representing a valid procedure (executable array)
      * 
-     * @throws IOException Unable to read the string
      * @throws PSError PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectArray(final String pStr) throws IOException, PSError {
+    public PSObjectArray(final String pStr) throws ProgramError, PSError {
         String str = pStr;
         
         // quick check whether it is a literal or executable array
@@ -116,9 +117,15 @@ public class PSObjectArray extends PSObject {
         
         InputStream inStream = new PSStringInputStream(new PSObjectString(str));
         
-        this.setArray(Parser.convertAll(inStream));
-        this.setCount(this.getArray().size());
-        this.setOffset(0);
+        try {
+            this.setArray(Parser.convertAll(inStream));
+            this.setCount(this.getArray().size());
+            this.setOffset(0);
+        } catch (IOException e) {
+            throw new ProgramError("An IOException occured in"
+                    + " PSObjectArray(String)");
+        }
+        
     }
     
     /**

@@ -20,6 +20,7 @@
 
 package net.sf.eps2pgf.ps.resources.colors;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
@@ -45,31 +46,36 @@ public final class ColorManager {
      * color in this color space.
      * 
      * @param obj PostScript object describing the color space. See
-     *            the PostScript manual on the possible types and
-     *            values of this object.
+     * the PostScript manual on the possible types and
+     * values of this object.
      * 
      * @return the default color for the specified color space.
      * 
      * @throws PSError a PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public static PSColor autoSetColorSpace(final PSObject obj) throws PSError {
-        String spaceName;
+    public static PSColor autoSetColorSpace(final PSObject obj)
+            throws PSError, ProgramError {
+        
+        PSObjectName spaceName;
         if (obj instanceof PSObjectName) {
-            spaceName = ((PSObjectName) obj).toString();
+            spaceName = (PSObjectName) obj;
         } else if (obj instanceof PSObjectArray) {
-            spaceName = ((PSObjectArray) obj).get(0).toName().toString();
+            spaceName = ((PSObjectArray) obj).get(0).toName();
         } else {
             throw new PSErrorTypeCheck();
         }
 
-        if (spaceName.equals("DeviceGray")) {
+        if (spaceName.eq(DeviceGray.FAMILYNAME)) {
             return new DeviceGray();
-        } else if (spaceName.equals("DeviceRGB")) {
+        } else if (spaceName.eq(DeviceRGB.FAMILYNAME)) {
             return new DeviceRGB();
-        } else if (spaceName.equals("DeviceCMYK")) {
+        } else if (spaceName.eq(DeviceCMYK.FAMILYNAME)) {
             return new DeviceCMYK();
-        } else if (spaceName.equals("Indexed")) {
+        } else if (spaceName.eq(Indexed.FAMILYNAME)) {
             return new Indexed(obj);
+        } else if (spaceName.eq(CIEBasedABC.FAMILYNAME)) {
+            return new CIEBasedABC(obj.toArray());
         } else {
             throw new PSErrorUndefined();
         }

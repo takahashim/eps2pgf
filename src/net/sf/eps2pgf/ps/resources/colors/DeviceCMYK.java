@@ -20,7 +20,8 @@
 
 package net.sf.eps2pgf.ps.resources.colors;
 
-import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 
@@ -32,6 +33,10 @@ import net.sf.eps2pgf.ps.objects.PSObjectName;
  */
 public class DeviceCMYK extends PSColor {
     
+    /** Name of this color space family. */
+    public static final PSObjectName FAMILYNAME
+        = new PSObjectName("/DeviceCMYK");
+    
     /** Default color is black. */
     private static final double[] DEFAULT_LEVELS = {0.0, 0.0, 0.0, 1.0};
     
@@ -41,7 +46,9 @@ public class DeviceCMYK extends PSColor {
     public DeviceCMYK() {
         try {
             setColor(DEFAULT_LEVELS);
-        } catch (PSErrorRangeCheck e) {
+        } catch (PSError e) {
+            // this can never happen
+        } catch (ProgramError e) {
             // this can never happen
         }
     }

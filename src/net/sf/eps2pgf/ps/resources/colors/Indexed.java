@@ -20,6 +20,7 @@
 
 package net.sf.eps2pgf.ps.resources.colors;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
@@ -34,6 +35,10 @@ import net.sf.eps2pgf.ps.objects.PSObjectString;
  * Implements Indexed color space.
  */
 public class Indexed extends PSColor {
+    
+    /** Name of this color space family. */
+    public static final PSObjectName FAMILYNAME
+        = new PSObjectName("/Indexed");
     
     /** Integer specifying the maximum valid index value. */
     private int hival;
@@ -54,8 +59,9 @@ public class Indexed extends PSColor {
      * @param obj Object describing this color
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public Indexed(final PSObject obj) throws PSError {
+    public Indexed(final PSObject obj) throws PSError, ProgramError {
         // Indexed color spaces must be defined using an array
         if (!(obj instanceof PSObjectArray)) {
             throw new PSErrorTypeCheck();
@@ -242,11 +248,12 @@ public class Indexed extends PSColor {
      * 
      * @param components the new color
      * 
-     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
     public void setColor(final double[] components)
-            throws PSErrorRangeCheck {
+            throws PSError, ProgramError {
         
         if (components.length != 1) {
             throw new PSErrorRangeCheck();

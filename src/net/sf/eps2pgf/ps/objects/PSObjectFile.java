@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.ps.Parser;
 import net.sf.eps2pgf.ps.errors.PSError;
@@ -219,13 +220,14 @@ public class PSObjectFile extends PSObject {
      * Reads characters from this object, interpreting them as PostScript
      * code, until it has scanned and constructed an entire object.
      * 
-     * @throws PSError Unable to read a token from this object.
-     * 
      * @return List with one or more objects. See PostScript manual under the
      * 'token' operator for more info.
+     * 
+     * @throws PSError Unable to read a token from this object.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public List<PSObject> token() throws PSError {
+    public List<PSObject> token() throws PSError, ProgramError {
         PSObject any;
         try {
             any = Parser.convertSingle(inStr);
