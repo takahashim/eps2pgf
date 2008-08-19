@@ -76,6 +76,8 @@ public final class ColorManager {
             return new Indexed(obj);
         } else if (spaceName.eq(CIEBasedABC.FAMILYNAME)) {
             return new CIEBasedABC(obj.toArray());
+        } else if (spaceName.eq(CIEBasedA.FAMILYNAME)) {
+                return new CIEBasedA(obj.toArray());
         } else {
             throw new PSErrorUndefined();
         }

@@ -1,6 +1,11 @@
 %!PS-Adobe-3.0 EPSF-3.0
 %%BoundingBox: 0 0 100 100
 
+/width 10 def
+/length width 2.5 mul def
+/draw {0 width translate 0 0 moveto length 0 lineto stroke} bind def
+width setlinewidth
+
 [ /CIEBasedABC	
 << /DecodeLMN
 [ { dup 0.03928 le
@@ -17,43 +22,42 @@ ifelse
 >>
 ] setcolorspace
 
-10 setlinewidth
-0 -5 translate
+0 width neg 2.0 div translate
 
-0.01 0.50 0.18 setcolor
-0 10 translate 0 0 moveto 100 0 rlineto stroke
+0.01 0.50 0.18 setcolor draw
+0.73 0.86 0.07 setcolor draw
+0.35 0.04 0.88 setcolor draw
+0.09 0.61 0.85 setcolor draw
+0.70 0.17 0.41 setcolor draw
+0.24 0.12 0.51 setcolor draw
+0.96 0.49 0.58 setcolor draw
+0.98 0.75 0.36 setcolor draw
+0.55 0.23 0.04 setcolor draw
+0.04 0.16 0.78 setcolor draw
 
-0.73 0.86 0.07 setcolor
-0 10 translate 0 0 moveto 100 0 rlineto stroke
+length width neg 10.0 mul translate
 
-0.35 0.04 0.88 setcolor
-0 10 translate 0 0 moveto 100 0 rlineto stroke
+[ /CIEBasedA
+<<
+	/RangeA [0.08 0.63]
+	/DecodeA {1.2 exp}
+	/MatrixA [0.68 0.28 0.26]
+	/RangeLMN [0.12 0.72 0.40 0.50 0.06 0.78]
+	/DecodeLMN [{} {1.1 exp} {0.9 exp}]
+	/MatrixLMN [0.47 0.63 0.54 0.06 0.78 0.19 0.20 0.99 0.06] 
+	/WhitePoint [1.0 1.0 1.0]
+>>
+] setcolorspace
 
-0.09 0.61 0.85 setcolor
-0 10 translate 0 0 moveto 100 0 rlineto stroke
-
-0.70 0.17 0.41 setcolor
-0 10 translate 0 0 moveto 100 0 rlineto stroke
-
-0.24 0.12 0.51 setcolor
-0 10 translate 0 0 moveto 100 0 rlineto stroke
-
-0.96 0.49 0.58 setcolor
-0 10 translate 0 0 moveto 100 0 rlineto stroke
-
-0.98 0.75 0.36 setcolor
-0 10 translate 0 0 moveto 100 0 rlineto stroke
-
-0.55 0.23 0.04 setcolor
-0 10 translate 0 0 moveto 100 0 rlineto stroke
-
-0.04 0.16 0.78 setcolor
-0 10 translate 0 0 moveto 100 0 rlineto stroke
-
-
-
-
-
-
+0.55 setcolor draw
+0.14 setcolor draw
+0.82 setcolor draw
+0.01 setcolor draw
+0.70 setcolor draw
+0.89 setcolor draw
+0.09 setcolor draw
+0.95 setcolor draw
+0.23 setcolor draw
+0.34 setcolor draw
 
 %%EOF

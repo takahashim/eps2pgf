@@ -163,4 +163,15 @@ public class DeviceCMYK extends PSColor {
         return rgb;
     }
 
+    /**
+     * Gets the color space family name.
+     * 
+     * @return Color space family name.
+     */
+    @Override
+    public PSObjectName getFamilyName() {
+        return FAMILYNAME;
+    }
+    
+
 }

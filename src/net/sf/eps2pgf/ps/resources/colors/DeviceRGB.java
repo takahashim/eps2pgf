@@ -89,6 +89,16 @@ public class DeviceRGB extends PSColor {
     }
 
     /**
+     * Gets the color space family name.
+     * 
+     * @return Color space family name.
+     */
+    @Override
+    public PSObjectName getFamilyName() {
+        return FAMILYNAME;
+    }
+    
+    /**
      * Gets the gray level equivalent of this color.
      * 
      * @return the gray level

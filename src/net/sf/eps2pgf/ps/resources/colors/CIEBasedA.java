@@ -1,5 +1,5 @@
 /*
- * CIEBasedABC.java
+ * CIEBasedA.java
  *
  * This file is part of Eps2pgf.
  *
@@ -35,33 +35,33 @@ import net.sf.eps2pgf.ps.objects.PSObjectName;
  * @author Paul Wagenaars
  *
  */
-public class CIEBasedABC extends CIEBased {
+public class CIEBasedA extends CIEBased {
     
     /** Color space family name. */
     public static final PSObjectName FAMILYNAME
-        = new PSObjectName("/CIEBasedABC");
+        = new PSObjectName("/CIEBasedA");
     
     /** RangeABC field name. */
-    private static final PSObjectName RANGEABC
-        = new PSObjectName("/RangeABC");
+    private static final PSObjectName RANGEA
+        = new PSObjectName("/RangeA");
     
     /** DecodeABC field name. */
-    private static final PSObjectName DECODEABC
-        = new PSObjectName("/DecodeABC");
+    private static final PSObjectName DECODEA
+        = new PSObjectName("/DecodeA");
     
     /** MatrixABC field name. */
-    private static final PSObjectName MATRIXABC
-        = new PSObjectName("/MatrixABC");
+    private static final PSObjectName MATRIXA
+        = new PSObjectName("/MatrixA");
     
     /**
-     * Define a new CIE-based ABC color space.
+     * Define a new CIE-based A color space.
      * 
      * @param arr The array describing the new color space.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public CIEBasedABC(final PSObjectArray arr) throws PSError, ProgramError {
+    public CIEBasedA(final PSObjectArray arr) throws PSError, ProgramError {
         if (!arr.get(0).eq(FAMILYNAME)) {
             throw new PSErrorTypeCheck();
         }
@@ -73,9 +73,10 @@ public class CIEBasedABC extends CIEBased {
      * Make sure that all entries in the dictionary are defined. If they are not
      * defined default values are added.
      * 
-     * @param dict The dictionary.
+     * @param dict The dictionary
      * 
-     * @return The checked dictionary.
+     * @return The checked dictionary. This is the exact same dictionary as the
+     * one passed to this method.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
@@ -83,30 +84,25 @@ public class CIEBasedABC extends CIEBased {
     private static PSObjectDict checkEntries(final PSObjectDict dict)
         throws PSError, ProgramError {
         
-        if (!dict.known(RANGEABC)) {
-            double[] defaultRange = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
-            dict.setKey(RANGEABC, new PSObjectArray(defaultRange));
+        if (!dict.known(RANGEA)) {
+            double[] defaultRange = {0.0, 1.0};
+            dict.setKey(RANGEA, new PSObjectArray(defaultRange));
         }
-        if (!dict.known(DECODEABC)) {
-            PSObjectArray defaultDecode = new PSObjectArray();
-            defaultDecode.addToEnd(new PSObjectArray("{}"));
-            defaultDecode.addToEnd(new PSObjectArray("{}"));
-            defaultDecode.addToEnd(new PSObjectArray("{}"));
-            dict.setKey(DECODEABC, defaultDecode);
+        if (!dict.known(DECODEA)) {
+            dict.setKey(DECODEA, new PSObjectArray("{}"));
         }
-        if (!dict.known(MATRIXABC)) {
-            double[] defaultMatrix
-                    =  {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
-            dict.setKey(MATRIXABC, new PSObjectArray(defaultMatrix));
+        if (!dict.known(MATRIXA)) {
+            double[] defaultMatrix =  {1.0, 1.0, 1.0};
+            dict.setKey(MATRIXA, new PSObjectArray(defaultMatrix));
         }
-        
+
         checkCommonEntries(dict);
         
         return dict;
     }
     
     /**
-     * Gets the color space family name.
+     * Gets the name of this color space family.
      * 
      * @return Color space family name.
      */
@@ -114,7 +110,7 @@ public class CIEBasedABC extends CIEBased {
     public PSObjectName getFamilyName() {
         return FAMILYNAME;
     }
-    
+
     /**
      * Gets the number of color components required to specify this color.
      * E.g. RGB has three and CMYK has four components.
@@ -123,7 +119,7 @@ public class CIEBasedABC extends CIEBased {
      */
     @Override
     public int getNrComponents() {
-        return 3;
+        return 1;
     }
 
     /**
@@ -137,7 +133,7 @@ public class CIEBasedABC extends CIEBased {
      */
     @Override
     public int getNrInputValues() {
-        return 3;
+        return 1;
     }
 
     /**
@@ -158,29 +154,30 @@ public class CIEBasedABC extends CIEBased {
         }
         
         PSObjectDict dict = getDict();
-        // Apply RangeABC and assign values to levels[]
-        PSObjectArray rangeAbc = dict.get(RANGEABC).toArray();
-        for (int i = 0; i < n; i++) {
-            double lowLim = rangeAbc.getReal(2 * i);
-            double upLim = rangeAbc.getReal(2 * i + 1);
-            setLevel(i, Math.max(lowLim, Math.min(upLim, components[i])));
-        }
         
-        // Apply the DecodeABC procedures
-        double[] decodedAbc = new double[n];
-        PSObjectArray decodeABC = dict.get(DECODEABC).toArray();
-        for (int i = 0; i < n; i++) {
-            PSObjectArray proc = decodeABC.get(i).toProc();
-            decodedAbc[i] = decode(getLevel(i), proc);
+        // Apply RangeA and assign values to levels[]
+        PSObjectArray rangeA = dict.get(RANGEA).toArray();
+        double lowLim = rangeA.getReal(0);
+        double upLim = rangeA.getReal(1);
+        setLevel(0, Math.max(lowLim, Math.min(upLim, components[0])));
+        
+        // Apply the DecodeA procedures
+        PSObjectArray decodeA = dict.get(DECODEA).toArray();
+        PSObjectArray proc;
+        if (decodeA.isLiteral()) {
+            proc = decodeA.get(0).toProc();
+        } else {
+            proc = decodeA.toProc();
         }
+        double decodedA = decode(getLevel(0), proc);
         
         // Apply MatrixABC
-        double[] lmnLevels = new double[n];
-        PSObjectArray matrixAbc = dict.get(MATRIXABC).toArray();
-        for (int i = 0; i < n; i++) {
-            lmnLevels[i] = matrixAbc.getReal(i) * decodedAbc[0]
-                           + matrixAbc.getReal(3 + i) * decodedAbc[1]
-                           + matrixAbc.getReal(6 + i) * decodedAbc[2];
+        double[] lmnLevels = new double[3];
+        PSObjectArray matrixAbc = dict.get(MATRIXA).toArray();
+        for (int i = 0; i < 3; i++) {
+            lmnLevels[i] = decodedA * matrixAbc.getReal(0)
+                           + decodedA * matrixAbc.getReal(1)
+                           + decodedA * matrixAbc.getReal(2);
         }
         
         setLmnColor(lmnLevels);

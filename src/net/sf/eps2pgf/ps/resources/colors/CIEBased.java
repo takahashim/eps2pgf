@@ -26,6 +26,8 @@ import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
+import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectReal;
 
 /**
@@ -39,11 +41,75 @@ import net.sf.eps2pgf.ps.objects.PSObjectReal;
  */
 public abstract class CIEBased extends PSColor {
     
-    /** Component levels in XYZ colorspace. */
+    /** RangeLMN field name. */
+    protected static final PSObjectName RANGELMN
+        = new PSObjectName("/RangeLMN");
+    
+    /** DecodeLMN field name. */
+    protected static final PSObjectName DECODELMN
+        = new PSObjectName("/DecodeLMN");
+    
+    /** MatrixLMN field name. */
+    protected static final PSObjectName MATRIXLMN
+        = new PSObjectName("/MatrixLMN");
+    
+    /** WhitePoint field name. */
+    protected static final PSObjectName WHITEPOINT
+        = new PSObjectName("/WhitePoint");
+    
+    /** BlackPoint field name. */
+    protected static final PSObjectName BLACKPOINT
+        = new PSObjectName("/BlackPoint");
+    
+    /** Color space dictionary. */
+    private PSObjectDict dict;
+    
+    /** Component levels in XYZ color space. */
     private double[] xyzLevels = new double[3];
     
     /** Interpreter in which decode procedures are executed. */
     private static Interpreter interp = null;
+    
+    
+    /**
+     * Make sure that all entries in the dictionary are defined. If they are not
+     * defined default values are added.
+     * 
+     * @param dict The dictionary.
+     * 
+     * @return The checked dictionary, this is the exact same dictionary as the
+     * one passed this method.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    protected static PSObjectDict checkCommonEntries(final PSObjectDict dict)
+        throws PSError, ProgramError {
+        
+        if (!dict.known(RANGELMN)) {
+            double[] defaultRange = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
+            dict.setKey(RANGELMN, new PSObjectArray(defaultRange));
+        }
+        if (!dict.known(DECODELMN)) {
+            PSObjectArray defaultDecode = new PSObjectArray();
+            defaultDecode.addToEnd(new PSObjectArray("{}"));
+            defaultDecode.addToEnd(new PSObjectArray("{}"));
+            defaultDecode.addToEnd(new PSObjectArray("{}"));
+            dict.setKey(DECODELMN, defaultDecode);
+        }
+        if (!dict.known(MATRIXLMN)) {
+            double[] defaultMatrix
+                    =  {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+            dict.setKey(MATRIXLMN, new PSObjectArray(defaultMatrix));
+        }
+        dict.get(WHITEPOINT).toArray();
+        if (!dict.known(BLACKPOINT)) {
+            double[] defaultBlack = {0.0, 0.0, 0.0};
+            dict.setKey(BLACKPOINT, new PSObjectArray(defaultBlack));
+        }
+        
+        return dict;
+    }
     
     /**
      * Run a decode procedure on an input value.
@@ -72,6 +138,19 @@ public abstract class CIEBased extends PSColor {
         interp.getExecStack().push(proc);
         interp.run();
         return interp.getOpStack().pop().toReal();
+    }
+    
+    /**
+     * Gets a PostScript array describing the color space of this color.
+     * 
+     * @return array describing color space.
+     */
+    @Override
+    public PSObjectArray getColorSpace() {
+        PSObjectArray colSpace = new PSObjectArray();
+        colSpace.addToEnd(getFamilyName());
+        colSpace.addToEnd(getDict());
+        return colSpace;
     }
 
     /**
@@ -168,12 +247,57 @@ public abstract class CIEBased extends PSColor {
         throws PSError, ProgramError;
     
     /**
-     * Set a single color component for the XYZ color space.
+     * Sets the color in LMN components. This method will convert them to XYZ
+     * and store those in the xyzLevels[] array.
      * 
-     * @param i Index of color component to set.
-     * @param componentLevel the levels to set
+     * @param lmnLevels The LMN levels.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    protected void setXyzLevel(final int i, final double componentLevel) {
-        xyzLevels[i] = componentLevel;
+    protected void  setLmnColor(final double[] lmnLevels)
+            throws PSError, ProgramError {
+        
+        // Apply RangeLMN
+        PSObjectArray rangeLmn = dict.get(RANGELMN).toArray();
+        for (int i = 0; i < 3; i++) {
+            double lowLim = rangeLmn.getReal(2 * i);
+            double upLim = rangeLmn.getReal(2 * i + 1);
+            lmnLevels[i] = Math.max(lowLim, Math.min(upLim, lmnLevels[i]));
+        }
+        
+        // Apply DecodeLMN
+        double[] decodedLmn = new double[3];
+        PSObjectArray decodeLMN = dict.get(DECODELMN).toArray();
+        for (int i = 0; i < 3; i++) {
+            PSObjectArray proc = decodeLMN.get(i).toProc();
+            decodedLmn[i] = decode(lmnLevels[i], proc);
+        }
+        
+        // Apply Matrix LMN
+        PSObjectArray matrixLmn = dict.get(MATRIXLMN).toArray();
+        for (int i = 0; i < 3; i++) {
+            xyzLevels[i] = decodedLmn[0] * matrixLmn.getReal(i)
+                           + decodedLmn[1] * matrixLmn.getReal(3 + i)
+                           + decodedLmn[2] * matrixLmn.getReal(6 + i);
+        }
+    }
+
+    /**
+     * Sets the color space dictionary.
+     * 
+     * @param newDict The new color space dictionary.
+     */
+    protected void setDict(final PSObjectDict newDict) {
+        dict = newDict;
+    }
+
+    /**
+     * Get the color space dictionary.
+     * 
+     * @return The color space dictionary.
+     */
+    protected PSObjectDict getDict() {
+        return dict;
     }
 }

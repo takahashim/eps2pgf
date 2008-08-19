@@ -24,6 +24,7 @@ import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectName;
 
 /**
  * The Interface PSColor.
@@ -62,7 +63,7 @@ public abstract class PSColor implements Cloneable {
      * @return array describing color space.
      */
     public abstract PSObjectArray getColorSpace();
-
+    
     /**
      * Gets the gray level equivalent of this color.
      * 
@@ -76,6 +77,13 @@ public abstract class PSColor implements Cloneable {
      * @return the HSB
      */
     public abstract double[] getHSB();
+    
+    /**
+     * Gets the name of this color space family.
+     * 
+     * @return Color space family name.
+     */
+    public abstract PSObjectName getFamilyName();
     
     /**
      * Gets the number of color components required to specify this color.
