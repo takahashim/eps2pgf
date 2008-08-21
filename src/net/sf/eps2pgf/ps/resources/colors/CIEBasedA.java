@@ -148,8 +148,7 @@ public class CIEBasedA extends CIEBased {
     public void setColor(final double[] components)
             throws PSError, ProgramError {
         
-        int n = getNrInputValues();
-        if (components.length != n) {
+        if (components.length != 1) {
             throw new PSErrorRangeCheck();
         }
         
@@ -172,15 +171,13 @@ public class CIEBasedA extends CIEBased {
         double decodedA = decode(getLevel(0), proc);
         
         // Apply MatrixABC
-        double[] lmnLevels = new double[3];
+        double[] lmn = new double[3];
         PSObjectArray matrixAbc = dict.get(MATRIXA).toArray();
         for (int i = 0; i < 3; i++) {
-            lmnLevels[i] = decodedA * matrixAbc.getReal(0)
-                           + decodedA * matrixAbc.getReal(1)
-                           + decodedA * matrixAbc.getReal(2);
+            lmn[i] = decodedA * matrixAbc.getReal(i);
         }
         
-        setLmnColor(lmnLevels);
+        setXyzLevels(lmnToXyz(lmn));
     }
 
 }

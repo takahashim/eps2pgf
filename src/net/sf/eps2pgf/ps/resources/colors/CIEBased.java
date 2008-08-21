@@ -247,15 +247,17 @@ public abstract class CIEBased extends PSColor {
         throws PSError, ProgramError;
     
     /**
-     * Sets the color in LMN components. This method will convert them to XYZ
-     * and store those in the xyzLevels[] array.
+     * Converts a color in LMN components to XYZ. For the conversion this method
+     * uses the dictionary associated with this color.
      * 
      * @param lmnLevels The LMN levels.
+     * 
+     * @return The XYZ levels.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    protected void  setLmnColor(final double[] lmnLevels)
+    protected double[]  lmnToXyz(final double[] lmnLevels)
             throws PSError, ProgramError {
         
         // Apply RangeLMN
@@ -275,12 +277,15 @@ public abstract class CIEBased extends PSColor {
         }
         
         // Apply Matrix LMN
+        double[] xyz = new double[3];
         PSObjectArray matrixLmn = dict.get(MATRIXLMN).toArray();
         for (int i = 0; i < 3; i++) {
-            xyzLevels[i] = decodedLmn[0] * matrixLmn.getReal(i)
+            xyz[i] = decodedLmn[0] * matrixLmn.getReal(i)
                            + decodedLmn[1] * matrixLmn.getReal(3 + i)
                            + decodedLmn[2] * matrixLmn.getReal(6 + i);
         }
+        
+        return xyz;
     }
 
     /**
@@ -299,5 +304,16 @@ public abstract class CIEBased extends PSColor {
      */
     protected PSObjectDict getDict() {
         return dict;
+    }
+    
+    /**
+     * Set the xyzLevels[].
+     * 
+     * @param newXyz The new XYZ levels.
+     */
+    protected void setXyzLevels(final double[] newXyz) {
+        for (int i = 0; i < 3; i++) {
+            xyzLevels[i] = newXyz[i];
+        }
     }
 }

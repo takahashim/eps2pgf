@@ -80,7 +80,7 @@ public class CIEBasedABC extends CIEBased {
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    private static PSObjectDict checkEntries(final PSObjectDict dict)
+    static PSObjectDict checkEntries(final PSObjectDict dict)
         throws PSError, ProgramError {
         
         if (!dict.known(RANGEABC)) {
@@ -153,37 +153,62 @@ public class CIEBasedABC extends CIEBased {
             throws PSError, ProgramError {
         
         int n = getNrInputValues();
+        
         if (components.length != n) {
             throw new PSErrorRangeCheck();
         }
         
-        PSObjectDict dict = getDict();
-        // Apply RangeABC and assign values to levels[]
-        PSObjectArray rangeAbc = dict.get(RANGEABC).toArray();
+        // Store the component values in the levels[] array
         for (int i = 0; i < n; i++) {
+            setLevel(i, components[i]);
+        }
+        
+        setXyzLevels(abcToXyz(components));
+    }
+    
+    /**
+     * Converts a color in ABC components to XYZ. For the conversion this method
+     * uses the dictionary associated with this color.
+     * 
+     * @param abc The ABC levels.
+     * 
+     * @return The XYZ levels.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    double[]  abcToXyz(final double[] abc)
+            throws PSError, ProgramError {
+
+        PSObjectDict dict = getDict();
+
+        // Apply RangeABC and assign values to levels[]
+        double[] rangedAbc = new double[3];
+        PSObjectArray rangeAbc = dict.get(RANGEABC).toArray();
+        for (int i = 0; i < 3; i++) {
             double lowLim = rangeAbc.getReal(2 * i);
             double upLim = rangeAbc.getReal(2 * i + 1);
-            setLevel(i, Math.max(lowLim, Math.min(upLim, components[i])));
+            rangedAbc[i] = Math.max(lowLim, Math.min(upLim, abc[i]));
         }
         
         // Apply the DecodeABC procedures
-        double[] decodedAbc = new double[n];
+        double[] decodedAbc = new double[3];
         PSObjectArray decodeABC = dict.get(DECODEABC).toArray();
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < 3; i++) {
             PSObjectArray proc = decodeABC.get(i).toProc();
             decodedAbc[i] = decode(getLevel(i), proc);
         }
         
         // Apply MatrixABC
-        double[] lmnLevels = new double[n];
+        double[] lmn = new double[3];
         PSObjectArray matrixAbc = dict.get(MATRIXABC).toArray();
-        for (int i = 0; i < n; i++) {
-            lmnLevels[i] = matrixAbc.getReal(i) * decodedAbc[0]
+        for (int i = 0; i < 3; i++) {
+            lmn[i] = matrixAbc.getReal(i) * decodedAbc[0]
                            + matrixAbc.getReal(3 + i) * decodedAbc[1]
                            + matrixAbc.getReal(6 + i) * decodedAbc[2];
         }
         
-        setLmnColor(lmnLevels);
+        return lmnToXyz(lmn);
     }
 
 }
