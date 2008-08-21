@@ -1,5 +1,5 @@
 /*
- * PSErrorUndefinedResult.java
+ * PSErrorUndefinedResource.java
  *
  * This file is part of Eps2pgf.
  *
@@ -24,7 +24,7 @@ package net.sf.eps2pgf.ps.errors;
  *
  * @author Paul Wagenaars
  */
-public class PSErrorUndefinedResult extends PSError {
+public class PSErrorUndefinedResource extends PSError {
     /** Serial version UID. */
     private static final long serialVersionUID = 1L;
 }

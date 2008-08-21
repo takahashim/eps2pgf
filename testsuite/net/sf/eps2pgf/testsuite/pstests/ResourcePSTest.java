@@ -101,4 +101,12 @@ public class ResourcePSTest {
         assertTrue(Common.testString(interp, cmd));
     }
 
+    /** Test. @throws Exception the exception */
+    @Test
+    public void resourceTest6_Findresource() throws Exception {
+        String cmd = "/test [ /DeviceGray ] /ColorSpace defineresource"
+            + " pop /test /ColorSpace findresource 0 get /DeviceGray eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
 }

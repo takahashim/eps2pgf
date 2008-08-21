@@ -1603,11 +1603,13 @@ public class Interpreter {
      * PostScript op: findresource.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_findresource() throws PSError {
-        //PSObjectName category = getOpStack().pop().toName();
-        //PSObject key = getOpStack().pop();
-        throw new PSErrorUnimplemented("PostScript operator: 'findresource'");
+    public void op_findresource() throws PSError, ProgramError {
+        PSObjectName category = getOpStack().pop().toName();
+        PSObject key = getOpStack().pop();
+        PSObject obj = resourceManager.findResource(category, key);
+        getOpStack().push(obj);
     }
     
     /**

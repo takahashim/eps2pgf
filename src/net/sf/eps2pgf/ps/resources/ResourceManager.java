@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.errors.PSErrorUndefinedResource;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
@@ -186,6 +187,7 @@ public final class ResourceManager {
             // Therefore control in handed over to it.
             return fontManager.defineFont(key, instance.toFont());
         } else if (category.eq(CAT_COLORSPACE)) {
+            // Check if it is a valid color space.
             ColorManager.autoSetColorSpace(instance);
         }
         
@@ -196,6 +198,37 @@ public final class ResourceManager {
         instance.readonly();
        
         return instance;
+    }
+    
+    /**
+     * Try to obtain a named resource in a specified category.
+     * This function implements the 'findresource' operator.
+     * 
+     * @param category The resource category.
+     * @param key The key of the named resource.
+     * 
+     * @return The requested resource.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public PSObject findResource(final PSObjectName category,
+            final PSObject key) throws PSError, ProgramError {
+        
+        PSObject obj = null;
+        
+        // Fonts are managed separately by the font manager.
+        if (category.eq(CAT_FONT)) {
+            obj = fontManager.findFont(key);
+        } else {
+            PSObjectDict catDict = resources.get(category).toDict();
+            obj = catDict.lookup(key);
+            if (obj == null) {
+                throw new PSErrorUndefinedResource();
+            }
+        }
+        
+        return obj;
     }
     
     /**
