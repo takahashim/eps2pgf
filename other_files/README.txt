@@ -66,8 +66,10 @@ Changelog
 v0.7.0 (2008-08-??)
   - Added: feature #1856797 Bitmap images
   - Added: feature #1952604 Improve compilation speed
+  - Added: support for CIEBasedA and CIEBasedABC color spaces
   - Fixed: feature #1917088 add a percent character at the each of each line
            in the LOLDevice output.
+  - Fixed: bug #1886475 Undefined operator in Quartz EPS
 
 v0.6.0 (2008-02-04)
   - Added: feature #1856800 PSfrag emulation

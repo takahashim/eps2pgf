@@ -85,6 +85,12 @@ public class PGFDevice implements OutputDevice {
     static final DecimalFormat COLOR_FORMAT = new DecimalFormat("#.######",
             new DecimalFormatSymbols(Locale.US));
     
+    /**
+     * Maintains current status of current line width, color, etc... 
+     * within the current scope.
+     */
+    private PSObjectDict scopeStatus;
+    
     /** Key of last color. */
     static final PSObjectName KEY_LAST_COLOR = new PSObjectName("/lastcolor");
     
@@ -116,22 +122,19 @@ public class PGFDevice implements OutputDevice {
     static final PSObjectName KEY_LAST_COLSPACE =
         new PSObjectName("/lastcolorspace");
     
+    
     /**
-     * Standard color transformations. Since PGF does not support all
-     * colorspaces that PostScript supports
+     * Maintains a dictionary with the device status. These are properties that
+     * are not influenced by scope.
      */
+    private PSObjectDict deviceStatus;
     
-    
-    
-    
-    /** Recursion depth of \begin{pgfscope}...\end{pgfscope} commands. */
-    private static int scopeDepth = 0;
+    /** Key of scope depth. */
+    static final PSObjectName KEY_SCOPE_DEPTH =
+        new PSObjectName("/scopedepth");
     
     /** Output file. */
     private Writer out;
-    
-    /** Maintains current status of current line width, color, etc... */
-    private PSObjectDict deviceStatus;
     
     /** Program options (may also contain options for this device). */
     private Options options;
@@ -148,6 +151,7 @@ public class PGFDevice implements OutputDevice {
      */
     public PGFDevice(final Writer wOut, final Options pOptions) {
         out = wOut;
+        scopeStatus = new PSObjectDict();
         deviceStatus = new PSObjectDict();
         options = pOptions;
     }
@@ -184,14 +188,16 @@ public class PGFDevice implements OutputDevice {
      */
     public void init() throws PSError, IOException {
         
-        deviceStatus.setKey(KEY_LAST_LINEWIDTH, new PSObjectReal(-1.0));
-        deviceStatus.setKey(KEY_LAST_DASHPATTERN, new PSObjectArray());
-        deviceStatus.setKey(KEY_LAST_DASHOFFSET, new PSObjectReal(0.0));
-        deviceStatus.setKey(KEY_LAST_COLOR, new PSObjectArray());
-        deviceStatus.setKey(KEY_LAST_COLSPACE, new PSObjectString(""));
-        deviceStatus.setKey(KEY_LAST_LINECAP, new PSObjectInt(0));
-        deviceStatus.setKey(KEY_LAST_LINEJOIN, new PSObjectInt(0));
-        deviceStatus.setKey(KEY_LAST_MITERLIMIT, new PSObjectReal(10.0));
+        scopeStatus.setKey(KEY_LAST_LINEWIDTH, new PSObjectReal(-1.0));
+        scopeStatus.setKey(KEY_LAST_DASHPATTERN, new PSObjectArray());
+        scopeStatus.setKey(KEY_LAST_DASHOFFSET, new PSObjectReal(0.0));
+        scopeStatus.setKey(KEY_LAST_COLOR, new PSObjectArray());
+        scopeStatus.setKey(KEY_LAST_COLSPACE, new PSObjectString(""));
+        scopeStatus.setKey(KEY_LAST_LINECAP, new PSObjectInt(0));
+        scopeStatus.setKey(KEY_LAST_LINEJOIN, new PSObjectInt(0));
+        scopeStatus.setKey(KEY_LAST_MITERLIMIT, new PSObjectReal(10.0));
+        
+        deviceStatus.setKey(KEY_SCOPE_DEPTH, new PSObjectInt(0));
         
         out.write("% Created by " + net.sf.eps2pgf.Main.getNameVersion() + " ");
         Date now = new Date();
@@ -204,7 +210,14 @@ public class PGFDevice implements OutputDevice {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void finish()  throws IOException {
+    public void finish() throws IOException {
+        int scopeDepth;
+        try {
+             scopeDepth = deviceStatus.get(KEY_SCOPE_DEPTH).toInt();
+        } catch (PSError e) {
+            /* this can never happen */
+            scopeDepth = -1;
+        }
         for (int i = 0; i < scopeDepth; i++) {
             out.write("\\end{pgfscope}\n");
         }
@@ -305,9 +318,10 @@ public class PGFDevice implements OutputDevice {
         PGFDevice copy;
         try {
             copy = (PGFDevice) super.clone();
-            copy.deviceStatus = deviceStatus.clone();
-            copy.out = out;  // output writer is not cloned
-            copy.options = options;  // program options are not cloned
+            copy.scopeStatus = scopeStatus.clone();
+            copy.out = out;                   // output writer is not cloned
+            copy.options = options;           // program options are not cloned
+            copy.deviceStatus = deviceStatus; // device status is not cloned
         } catch (CloneNotSupportedException e) {
             /* this exception shouldn't happen. */
             copy = null;
@@ -478,7 +492,7 @@ public class PGFDevice implements OutputDevice {
             throws IOException, PSError {
         
         int cap = gstate.getLineCap();
-        int lastCap = deviceStatus.get(KEY_LAST_LINECAP).toInt();
+        int lastCap = scopeStatus.get(KEY_LAST_LINECAP).toInt();
         if (cap != lastCap) {
             switch (cap) {
                 case 0:
@@ -493,7 +507,7 @@ public class PGFDevice implements OutputDevice {
                 default:
                     throw new PSErrorRangeCheck();
             }
-            deviceStatus.setKey(KEY_LAST_LINECAP, new PSObjectInt(cap));
+            scopeStatus.setKey(KEY_LAST_LINECAP, new PSObjectInt(cap));
         }
     }
     
@@ -508,7 +522,7 @@ public class PGFDevice implements OutputDevice {
     private void updateLineJoin(final GraphicsState gstate)
             throws IOException, PSError {
         
-        int lastJoin = deviceStatus.get(KEY_LAST_LINEJOIN).toInt();
+        int lastJoin = scopeStatus.get(KEY_LAST_LINEJOIN).toInt();
         int join = gstate.getLineJoin();
         
         if (lastJoin != join) {
@@ -525,7 +539,7 @@ public class PGFDevice implements OutputDevice {
                 default:
                     throw new PSErrorRangeCheck();
             }
-            deviceStatus.setKey(KEY_LAST_LINEJOIN, new PSObjectInt(join));
+            scopeStatus.setKey(KEY_LAST_LINEJOIN, new PSObjectInt(join));
         }        
     }
     
@@ -540,8 +554,8 @@ public class PGFDevice implements OutputDevice {
     private void updateDash(final GraphicsState gstate)
             throws IOException, PSError {
         
-        String lastPattern = deviceStatus.get(KEY_LAST_DASHPATTERN).isis();
-        double lastOffset = deviceStatus.get(KEY_LAST_DASHOFFSET).toReal();
+        String lastPattern = scopeStatus.get(KEY_LAST_DASHPATTERN).isis();
+        double lastOffset = scopeStatus.get(KEY_LAST_DASHOFFSET).toReal();
         
         double scaling = gstate.getCtm().getMeanScaling();
         PSObjectArray currentArray = new PSObjectArray();
@@ -567,8 +581,8 @@ public class PGFDevice implements OutputDevice {
                 out.write("}{" + LENGTH_FORMAT.format(1e-4 * currentOffset)
                         + "cm}\n");
             }
-            deviceStatus.setKey(KEY_LAST_DASHPATTERN, currentArray);
-            deviceStatus.setKey(KEY_LAST_DASHOFFSET,
+            scopeStatus.setKey(KEY_LAST_DASHPATTERN, currentArray);
+            scopeStatus.setKey(KEY_LAST_DASHOFFSET,
                     new PSObjectReal(currentOffset));
         }
     }
@@ -585,14 +599,14 @@ public class PGFDevice implements OutputDevice {
     private void updateLineWidth(final GraphicsState gstate)
             throws PSError, IOException {
         
-        double lastWidth = deviceStatus.get(KEY_LAST_LINEWIDTH).toReal();
+        double lastWidth = scopeStatus.get(KEY_LAST_LINEWIDTH).toReal();
         double currentWidth = gstate.getLineWidth()
                                        * gstate.getCtm().getMeanScaling();
         
         if (Math.abs(currentWidth - lastWidth) > 1e-10) {
             out.write("\\pgfsetlinewidth{"
                     + LENGTH_FORMAT.format(1e-3 * currentWidth) + "mm}\n");
-            deviceStatus.setKey(KEY_LAST_LINEWIDTH,
+            scopeStatus.setKey(KEY_LAST_LINEWIDTH,
                     new PSObjectReal(currentWidth));
         }
     }
@@ -608,12 +622,12 @@ public class PGFDevice implements OutputDevice {
     private void updateMiterLimit(final GraphicsState gstate)
             throws IOException, PSError {
         
-        double lastLimit = deviceStatus.get(KEY_LAST_MITERLIMIT).toReal();
+        double lastLimit = scopeStatus.get(KEY_LAST_MITERLIMIT).toReal();
         double limit = gstate.getMiterLimit();
         
         if (Math.abs(lastLimit - limit) > 1e-6) {
             out.write("\\pgfsetmiterlimit{" + limit + "}\n");
-            deviceStatus.setKey(KEY_LAST_MITERLIMIT, new PSObjectReal(limit));
+            scopeStatus.setKey(KEY_LAST_MITERLIMIT, new PSObjectReal(limit));
         }
     }
     
@@ -624,7 +638,13 @@ public class PGFDevice implements OutputDevice {
      */
     public void startScope() throws IOException {
         out.write("\\begin{pgfscope}\n");
-        scopeDepth++;
+        try {
+            int scopeDepth = deviceStatus.get(KEY_SCOPE_DEPTH).toInt();
+            scopeDepth++;
+            deviceStatus.setKey(KEY_SCOPE_DEPTH, new PSObjectInt(scopeDepth));
+        } catch (PSError e) {
+            /* this can never happen */
+        }
     }
     
     /**
@@ -633,9 +653,15 @@ public class PGFDevice implements OutputDevice {
      * @throws IOException There was an error write to the output
      */
     public void endScope() throws IOException {
-        if (scopeDepth > 0) {
-            out.write("\\end{pgfscope}\n");
-            scopeDepth--;
+        try {
+            int scopeDepth = deviceStatus.get(KEY_SCOPE_DEPTH).toInt();
+            if (scopeDepth > 0) {
+                out.write("\\end{pgfscope}\n");
+                scopeDepth--;
+            }
+            deviceStatus.setKey(KEY_SCOPE_DEPTH, new PSObjectInt(scopeDepth));
+        } catch (PSError e) {
+            /* this can never happen */
         }
     }
 
@@ -653,8 +679,8 @@ public class PGFDevice implements OutputDevice {
         
         // Check whether current color and color space is the same as the last
         // color and color space.
-        PSObjectArray lastColor = deviceStatus.get(KEY_LAST_COLOR).toArray();
-        String lastColspace = deviceStatus.get(KEY_LAST_COLSPACE).toString();
+        PSObjectArray lastColor = scopeStatus.get(KEY_LAST_COLOR).toArray();
+        String lastColspace = scopeStatus.get(KEY_LAST_COLSPACE).toString();
         PSColor color = gstate.getColor();
         String colspace = color.toString();
         colspace = colspace.substring(colspace.lastIndexOf('.') + 1,
@@ -709,8 +735,8 @@ public class PGFDevice implements OutputDevice {
         for (int i = 0; i < n; i++) {
             newColor.addToEnd(new PSObjectReal(color.getLevel(i)));
         }
-        deviceStatus.setKey(KEY_LAST_COLOR, newColor);
-        deviceStatus.setKey(KEY_LAST_COLSPACE, new PSObjectString(colspace));
+        scopeStatus.setKey(KEY_LAST_COLOR, newColor);
+        scopeStatus.setKey(KEY_LAST_COLSPACE, new PSObjectString(colspace));
     }
 
     /**
