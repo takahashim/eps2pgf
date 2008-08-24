@@ -252,7 +252,8 @@ public class PSObjectFont extends PSObjectDict {
                     {"Obli",      "\\textsl{", "}"},
                     {"Slanted",   "\\textsl{", "}"},
                     {"Italic",    "\\textit{", "}"},
-                    {"Ital",      "\\textit{", "}"}};
+                    {"Ital",      "\\textit{", "}"},
+                    {"CMMI",      "\\textit{", "}"}};
             String pre = "";
             String post = "";
             // Append an "X" to the font name to make sure that
