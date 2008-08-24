@@ -193,4 +193,10 @@ public final class AllFigures {
         assertTrue(Common.testFigure(conv, "CIEBased.eps"));
     }
 
+    /** Test. @throws Exception the exception */
+    @Test
+    public void quartz1() throws Exception {
+        assertTrue(Common.testFigure(conv, "quartz1.eps"));
+    }
+
 }
