@@ -107,5 +107,12 @@ public class MiscPSTest {
         String cmd = "serialnumber type /integertype eq";
         assertTrue(Common.testString(interp, cmd));
     }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void miscTest8() throws Exception {
+        String cmd = "letter a4 legal a3 true";
+        assertTrue(Common.testString(interp, cmd));
+    }
 
 }

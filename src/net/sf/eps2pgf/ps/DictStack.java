@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import net.sf.eps2pgf.Main;
+import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorDictStackUnderflow;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
@@ -35,7 +37,6 @@ import net.sf.eps2pgf.ps.objects.PSObjectBool;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
-import net.sf.eps2pgf.ps.objects.PSObjectNull;
 import net.sf.eps2pgf.ps.objects.PSObjectOperator;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.Encoding;
@@ -62,12 +63,15 @@ public class DictStack {
     
     
     /**
-     *  Create a new dictionary stack.
-     *  
-     *  @param interp The interpreter with which this dictionary stack is
-     *  associated.
+     * Create a new dictionary stack.
+     * 
+     * @param interp The interpreter with which this dictionary stack is
+     * associated.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public DictStack(final Interpreter interp) {
+    public DictStack(final Interpreter interp) throws PSError, ProgramError {
         fillSystemDict(interp);
         try {
             systemdict.readonly();
@@ -189,8 +193,15 @@ public class DictStack {
      * Fill the system dictionary with all operators and other values.
      * 
      * @param interp The interpreter.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    private void fillSystemDict(final Interpreter interp) {
+    private void fillSystemDict(final Interpreter interp)
+            throws PSError, ProgramError {
+
+        PSObjectArray emptyProc = new PSObjectArray("{}");
+
         // Add operators
         Method[] mthds = interp.getClass().getMethods();
         HashMap<String, String> replaceNames = new HashMap<String, String>();
@@ -226,12 +237,12 @@ public class DictStack {
         // Add $error dictionary
         PSObjectDict dollarerror = new PSObjectDict();
         dollarerror.setKey("newerror", new PSObjectBool(false));
-        dollarerror.setKey("errorname", new PSObjectNull());
-        dollarerror.setKey("command", new PSObjectNull());
-        dollarerror.setKey("errorinfo", new PSObjectNull());
-        dollarerror.setKey("ostack", new PSObjectNull());
-        dollarerror.setKey("estack", new PSObjectNull());
-        dollarerror.setKey("dstack", new PSObjectNull());
+        dollarerror.setKey("errorname", emptyProc);
+        dollarerror.setKey("command", emptyProc);
+        dollarerror.setKey("errorinfo", emptyProc);
+        dollarerror.setKey("ostack", emptyProc);
+        dollarerror.setKey("estack", emptyProc);
+        dollarerror.setKey("dstack", emptyProc);
         dollarerror.setKey("recordstacks", new PSObjectBool(true));
         dollarerror.setKey("binary", new PSObjectBool(false));
         systemdict.setKey("$error", dollarerror);
@@ -254,16 +265,16 @@ public class DictStack {
         
         // Add some dummy operators that set the page size. These are sometimes
         // used.
-        systemdict.setKey("11x17", new PSObjectNull());
-        systemdict.setKey("a3", new PSObjectNull());
-        systemdict.setKey("a4", new PSObjectNull());
-        systemdict.setKey("a4small", new PSObjectNull());
-        systemdict.setKey("b5", new PSObjectNull());
-        systemdict.setKey("ledger", new PSObjectNull());
-        systemdict.setKey("legal", new PSObjectNull());
-        systemdict.setKey("letter", new PSObjectNull());
-        systemdict.setKey("lettersmall", new PSObjectNull());
-        systemdict.setKey("note", new PSObjectNull());
+        systemdict.setKey("11x17", emptyProc);
+        systemdict.setKey("a3", emptyProc);
+        systemdict.setKey("a4", emptyProc);
+        systemdict.setKey("a4small", emptyProc);
+        systemdict.setKey("b5", emptyProc);
+        systemdict.setKey("ledger", emptyProc);
+        systemdict.setKey("legal", emptyProc);
+        systemdict.setKey("letter", emptyProc);
+        systemdict.setKey("lettersmall", emptyProc);
+        systemdict.setKey("note", emptyProc);
         
         // add other operators
         systemdict.setKey("currentpacking", new PSObjectBool(false));
