@@ -88,7 +88,7 @@ limitations under the License.
 	</target>
 	
 	<!-- Create zip file -->
-	<target name="zip" depends="jar,test,doc">
+	<target name="zip" depends="jar,doc">
 		<zip
 			destfile="${zip.file}"
 			basedir="${dist.dir}"
