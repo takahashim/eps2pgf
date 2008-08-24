@@ -157,7 +157,7 @@ public final class Main {
     public static void printVersionCopyright() {
         System.out.println(getNameVersion());
         System.out.println("");
-        System.out.println("Copyright 2007, 2008 Paul Wagenaars"
+        System.out.println("Copyright 2007-2008 Paul Wagenaars"
                 + " <paul@wagenaars.org>");
         System.out.println("");
         System.out.println("Licensed under the Apache License, Version 2.0 (the"
@@ -180,6 +180,7 @@ public final class Main {
         System.out.println("");
         System.out.println("See NOTICE.txt for more information and LICENSE.txt"
                 + " for the complete license.");
+        System.out.println("");
     }
 
     /**
