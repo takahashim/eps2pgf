@@ -1,0 +1,25 @@
+% -- content from the PSfragPrologue option --
+%auto-ignore (makes arXiv.org ignore this file)
+% This file replaces labels in an EPS graphic by LaTeX macros,
+% i.e. it should be accompanied by an EPS file (ex_auto-psfrag.eps). 
+\def\PFGstripminus-#1{#1}%
+\def\PFGshift(#1,#2)#3{\raisebox{#2}[\height][\depth]{\hbox{%
+  \ifdim#1<0pt\kern#1 #3\kern\PFGstripminus#1\else\kern#1 #3\kern-#1\fi}}}%
+\providecommand{\PFGstyle}{}%
+% -- end of PSfragPrologue option --
+%
+% psfrag replacement commands
+\psfrag{a3Cos2Sqrtx}[cr][cr]{$3 \sqrt[3]{\cos ^2\left(2 \sqrt{x}\right)}$}%
+\psfrag{localmaxim}[tc][tc]{local maximum}%
+\psfrag{S0}[tc][tc]{$0$}%
+\psfrag{S2Pi}[tc][tc]{$2 \pi $}%
+\psfrag{S3Pi2}[tc][tc]{$\frac{3 \pi }{2}$}%
+\psfrag{Sinx}[cl][cl]{$\sin (x)$}%
+\psfrag{SPi2}[tc][tc]{$\frac{\pi }{2}$}%
+\psfrag{SPi}[tc][tc]{$\pi $}%
+\psfrag{W0}[cr][cr]{$0$}%
+\psfrag{W11}[cr][cr]{$1$}%
+\psfrag{W21}[cr][cr]{$2$}%
+\psfrag{W31}[cr][cr]{$3$}%
+\psfrag{Wm11}[cr][cr]{$-1$}%
+%

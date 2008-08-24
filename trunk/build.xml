@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+build.xml
+
+This file is part of Eps2pgf.
+
+Copyright 2007, 2008 Paul Wagenaars <paul@wagenaars.org>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<project name="eps2pgf" basedir="." default="jar">
+	<property file="build.properties" />
+
+	<tstamp>
+		<format property="NOW" pattern="yyyy-MM-dd" />
+	</tstamp>
+
+	<!-- Specify some paths -->
+	<path id="classpath.path">
+		<fileset dir="${lib.dir}" includes="**/*.jar" />
+	</path>
+	<path id="test-classpath.path">
+		<path refid="classpath.path" />
+		<pathelement location="${build.dir}" />
+	</path>
+	<manifestclasspath property="jar.classpath" jarfile="${jar.file}">
+		<classpath refid="classpath.path" />
+	</manifestclasspath>
+	
+	<!-- Cleaning targets -->
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete dir="${temp.build.dir}" />
+		<delete dir="${doc.temp.build.dir}" />
+		<delete dir="${test-build.dir}" />
+		
+		<delete file="${jar.file}" />
+		<delete file="${zip.file}" />
+		<delete file="${dist.dir}/${readme.file}" />
+		<delete file="${doc.dist.dir}/${manual.file}" />
+	</target>
+	
+	<!-- Compile target -->
+	<target name="compile">
+		<mkdir dir="${temp.build.dir}" />
+		<copy todir="${temp.build.dir}">
+			<fileset dir="${src.dir}" />
+		</copy>
+		
+		<replace dir="${temp.build.dir}" token="@VERSION@" value="${app.version}" />
+		<replace dir="${temp.build.dir}" token="@BUILDDATE@" value="${NOW}" />
+
+		<mkdir dir="${build.dir}" />
+		<javac
+			srcdir="${temp.build.dir}"
+			destdir="${build.dir}"
+			classpathref="classpath.path"
+			target="1.5"
+		/>
+	</target>
+
+	<!-- Create jar file & create other files in dist dir -->
+	<target name="jar" depends="compile">
+		<jar destfile="${jar.file}" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="${base-class}" />
+				<attribute name="Class-path" value="${jar.classpath}" />
+				<attribute name="Version" value="${app.version}" />
+				<attribute name="Built-On" value="${NOW}" />
+			</manifest>
+		</jar>
+		
+		<copy file="${otherfiles.dir}/${readme.file}"
+			tofile="${dist.dir}/${readme.file}" />
+		<replace file="${dist.dir}/${readme.file}" token="@VERSION@"
+			value="${app.version}" />
+	</target>
+	
+	<!-- Create zip file -->
+	<target name="zip" depends="jar,doc">
+		<zip
+			destfile="${zip.file}"
+			basedir="${dist.dir}"
+			level="9"
+		/>
+	</target>
+	
+	<!-- Compile the test suite -->
+	<target name="test-compile" depends="compile">
+		<mkdir dir="${test-build.dir}" />
+		<javac
+			srcdir="${testsuite.dir}"
+			destdir="${test-build.dir}"
+			classpathref="test-classpath.path"
+			target="1.5"
+		/>		
+	</target>
+	
+	<!-- Run test suite -->
+	<target name="test" depends="test-compile">
+		<junit printsummary="yes" haltonfailure="yes">
+			<classpath>
+				<pathelement location="${test-build.dir}" />
+				<path refid="test-classpath.path" />
+			</classpath>
+			
+			<formatter type="brief" />
+			
+			<test name="net.sf.eps2pgf.testsuite.pstests.AllPSTests"
+				todir="${test-build.dir}" />
+			<test name="net.sf.eps2pgf.testsuite.figures.AllFigures"
+				todir="${test-build.dir}" />
+		</junit>
+	</target>
+	
+	<!-- Generate documentation -->
+	<target name="doc" depends="jar">
+		<mkdir dir="${doc.temp.build.dir}" />
+		
+		<copy file="${doc.src.dir}/${manual.basename}.tex" todir="${doc.temp.build.dir}" />
+		<copy file="${doc.src.dir}/demo_figure.eps" todir="${doc.temp.build.dir}" />
+		<copy file="${doc.src.dir}/demo_figure.pdf" todir="${doc.temp.build.dir}" />
+		<copy file="${doc.src.dir}/demo_figure_textreplace.tex" todir="${doc.temp.build.dir}" />
+
+		<replace dir="${doc.temp.build.dir}" token="@VERSION@" value="${app.version}" />
+		<replace dir="${doc.temp.build.dir}" token="@BUILDDATE@" value="${NOW}" />
+		
+		<java
+			jar="${jar.file}"
+			fork="yes"
+			timeout="30000"
+			>
+			<arg value="${doc.temp.build.dir}/demo_figure.eps" />
+			<arg value="--output" />
+			<arg value="${doc.temp.build.dir}/demo_figure_std.pgf" />
+		</java>
+		
+		<java
+			jar="${jar.file}"
+			fork="yes"
+			timeout="30000"
+			>
+			<arg value="${doc.temp.build.dir}/demo_figure.eps" />
+			<arg value="--output" />
+			<arg value="${doc.temp.build.dir}/demo_figure_repl.pgf" />
+			<arg value="--text-mode" />
+			<arg value="directcopy" />
+			<arg value="--text-replace" />
+			<arg value="${doc.temp.build.dir}/demo_figure_textreplace.tex" />
+		</java>
+		
+		<exec
+			executable="pdflatex"
+			dir="${doc.temp.build.dir}"
+			outputproperty="tex.out"
+			>
+			<arg value="${manual.basename}.tex" />
+		</exec>
+		<exec
+			executable="pdflatex"
+			dir="${doc.temp.build.dir}"
+			outputproperty="tex.out"
+			>
+			<arg value="${manual.basename}.tex" />
+		</exec>
+		<exec
+			executable="pdflatex"
+			dir="${doc.temp.build.dir}"
+			outputproperty="tex.out"
+			>
+			<arg value="${manual.basename}.tex" />
+		</exec>
+		
+		<copy
+			file="${doc.temp.build.dir}/${manual.file}"
+			todir="${doc.dist.dir}"
+		/>
+		
+	</target>
+
+</project>
