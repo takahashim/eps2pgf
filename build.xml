@@ -4,7 +4,7 @@ build.xml
 
 This file is part of Eps2pgf.
 
-Copyright 2007, 2008 Paul Wagenaars <paul@wagenaars.org>
+Copyright 2007-2008 Paul Wagenaars <paul@wagenaars.org>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,10 +30,12 @@ limitations under the License.
 	<path id="classpath.path">
 		<fileset dir="${lib.dir}" includes="**/*.jar" />
 	</path>
+	
 	<path id="test-classpath.path">
 		<path refid="classpath.path" />
 		<pathelement location="${build.dir}" />
 	</path>
+	
 	<manifestclasspath property="jar.classpath" jarfile="${jar.file}">
 		<classpath refid="classpath.path" />
 	</manifestclasspath>
@@ -88,7 +90,7 @@ limitations under the License.
 	</target>
 	
 	<!-- Create zip file -->
-	<target name="zip" depends="jar,doc">
+	<target name="zip" depends="jar,test,doc">
 		<zip
 			destfile="${zip.file}"
 			basedir="${dist.dir}"
