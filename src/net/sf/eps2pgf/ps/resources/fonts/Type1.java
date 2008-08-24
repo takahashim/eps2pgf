@@ -44,6 +44,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectFont;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectNull;
+import net.sf.eps2pgf.ps.objects.PSObjectReal;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.filters.EexecDecode;
 import net.sf.eps2pgf.ps.resources.outputdevices.NullDevice;
@@ -164,8 +165,8 @@ final class Type1 {
         InputStream decodedCharString =
             new EexecDecode(strInStream, 4330, true);
         List<PSObject> tokens = decodeCharString(decodedCharString);
-        int[] sb = new int[2];
-        int[] w = new int[2];
+        double[] sb = new double[2];
+        double[] w = new double[2];
         Path charPath = interpretCharString(fMetrics, tokens, sb, w);
         double[] bbox;
         if (charPath.getSections().size() > 1) {
@@ -176,8 +177,8 @@ final class Type1 {
         
         CharMetric charMetric = new CharMetric();
         charMetric.setName(charName);
-        charMetric.setWx(w[0]);
-        charMetric.setWy(w[1]);
+        charMetric.setWx((int) Math.round(w[0]));
+        charMetric.setWy((int) Math.round(w[1]));
         BoundingBox boundingBox = new BoundingBox();
         boundingBox.setLowerLeftX((float) bbox[0]);
         boundingBox.setLowerLeftY((float) bbox[1]);
@@ -292,8 +293,8 @@ final class Type1 {
      * @throws PSError A PostScript error occurred.
      */
     public static Path interpretCharString(final PSObjectFontMetrics fMetrics,
-            final List<PSObject> execStack, final int[] paramSb,
-            final int[] paramW) throws PSError {
+            final List<PSObject> execStack, final double[] paramSb,
+            final double[] paramW) throws PSError {
         
         GstateStack gstate = new GstateStack(new NullDevice());
         ArrayStack<PSObject> opStack = new ArrayStack<PSObject>();
@@ -306,73 +307,73 @@ final class Type1 {
             } else {
                 String cmd = obj.toName().toString();
                 if (cmd.equals("rlineto")) {
-                    int dy = opStack.pop().toInt();
-                    int dx = opStack.pop().toInt();
+                    double dy = opStack.pop().toReal();
+                    double dx = opStack.pop().toReal();
                     gstate.current().rlineto(dx, dy);
                 } else if (cmd.equals("hlineto")) {
-                    int dx = opStack.pop().toInt();
+                    double dx = opStack.pop().toReal();
                     gstate.current().rlineto(dx, 0);
                 } else if (cmd.equals("vlineto")) {
-                    int dy = opStack.pop().toInt();
+                    double dy = opStack.pop().toReal();
                     gstate.current().rmoveto(0, dy);
                 } else if (cmd.equals("rrcurveto")) {
-                    int dy3 = opStack.pop().toInt();
-                    int dx3 = opStack.pop().toInt();
-                    int dy2 = opStack.pop().toInt();
-                    int dx2 = opStack.pop().toInt();
-                    int dy1 = opStack.pop().toInt();
-                    int dx1 = opStack.pop().toInt();
+                    double dy3 = opStack.pop().toReal();
+                    double dx3 = opStack.pop().toReal();
+                    double dy2 = opStack.pop().toReal();
+                    double dx2 = opStack.pop().toReal();
+                    double dy1 = opStack.pop().toReal();
+                    double dx1 = opStack.pop().toReal();
                     gstate.current().rcurveto(dx1, dy1, (dx1 + dx2),
                             (dy1 + dy2), (dx1 + dx2 + dx3), (dy1 + dy2 + dy3));
                 } else if (cmd.equals("vhcurveto")) {
-                    int dy3 = 0;
-                    int dx3 = opStack.pop().toInt();
-                    int dy2 = opStack.pop().toInt();
-                    int dx2 = opStack.pop().toInt();
-                    int dy1 = opStack.pop().toInt();
-                    int dx1 = 0;
+                    double dy3 = 0;
+                    double dx3 = opStack.pop().toReal();
+                    double dy2 = opStack.pop().toReal();
+                    double dx2 = opStack.pop().toReal();
+                    double dy1 = opStack.pop().toReal();
+                    double dx1 = 0;
                     gstate.current().rcurveto(dx1, dy1, (dx1 + dx2),
                             (dy1 + dy2), (dx1 + dx2 + dx3), (dy1 + dy2 + dy3));
                 } else if (cmd.equals("hvcurveto")) {
-                    int dy3 = opStack.pop().toInt();
-                    int dx3 = 0;
-                    int dy2 = opStack.pop().toInt();
-                    int dx2 = opStack.pop().toInt();
-                    int dy1 = 0;
-                    int dx1 = opStack.pop().toInt();
+                    double dy3 = opStack.pop().toReal();
+                    double dx3 = 0;
+                    double dy2 = opStack.pop().toReal();
+                    double dx2 = opStack.pop().toReal();
+                    double dy1 = 0;
+                    double dx1 = opStack.pop().toReal();
                     gstate.current().rcurveto(dx1, dy1, (dx1 + dx2),
                             (dy1 + dy2), (dx1 + dx2 + dx3), (dy1 + dy2 + dy3));
                 } else if (cmd.equals("hstem")) {
                     // Not much to for this command, except for popping two
                     // values from the stack.
-                    opStack.pop().toInt();  // dy
-                    opStack.pop().toInt();  // y
+                    opStack.pop().toReal();  // dy
+                    opStack.pop().toReal();  // y
                 } else if (cmd.equals("vstem")) {
                     // Not much to for this command, except for popping two
                     // values from the stack.
-                    opStack.pop().toInt();  // dx
-                    opStack.pop().toInt();  // x
+                    opStack.pop().toReal();  // dx
+                    opStack.pop().toReal();  // x
                 } else if (cmd.equals("hsbw")) {
-                    int wx = opStack.pop().toInt();
-                    int sbx = opStack.pop().toInt();
+                    double wx = opStack.pop().toReal();
+                    double sbx = opStack.pop().toReal();
                     gstate.current().setPosition(sbx, 0);
                     paramSb[0] = sbx;
                     paramSb[1] = 0;
                     paramW[0] = wx;
                     paramW[1] = 0;
                 } else if (cmd.equals("rmoveto")) {
-                    int dy = opStack.pop().toInt();
-                    int dx = opStack.pop().toInt();
+                    double dy = opStack.pop().toReal();
+                    double dx = opStack.pop().toReal();
                     gstate.current().rmoveto(dx, dy);
                 } else if (cmd.equals("closepath")) {
                     gstate.current().getPath().closepath();
                 } else if (cmd.equals("endchar")) {
                     break;
                 } else if (cmd.equals("hmoveto")) {
-                    int dx = opStack.pop().toInt();
+                    double dx = opStack.pop().toReal();
                     gstate.current().rmoveto(dx, 0);
                 } else if (cmd.equals("vmoveto")) {
-                    int dy = opStack.pop().toInt();
+                    double dy = opStack.pop().toReal();
                     gstate.current().rmoveto(0, dy);
                 } else if (cmd.equals("hstem3")) {
                     // This doesn't do anything, just remove the argument from
@@ -397,6 +398,11 @@ final class Type1 {
                     // can also be ignored.
                 } else if (cmd.equals("callothersubr")) {
                     // Ignored, only required when rasterizing a font.
+                } else if (cmd.equals("div")) {
+                    double num1 = opStack.pop().toReal();
+                    double num2 = opStack.pop().toReal();
+                    double result = num1 / num2;
+                    opStack.push(new PSObjectReal(result));
                 } else {
                     System.out.println("-=-=- Unknown command: " + cmd);
                 }

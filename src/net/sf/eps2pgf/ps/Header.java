@@ -162,7 +162,6 @@ public final class Header {
         
         file.seek(startPosition);
         int[] dim = {sectionStart, sectionLength};
-        System.out.println("-=-=- " + dim[0] + " " + dim[1]);
         return dim;
     }
 }
