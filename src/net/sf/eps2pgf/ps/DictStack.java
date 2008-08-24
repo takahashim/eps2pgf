@@ -252,6 +252,19 @@ public class DictStack {
         systemdict.setKey("StandardEncoding",
                 new PSObjectArray(encodingVector));
         
+        // Add some dummy operators that set the page size. These are sometimes
+        // used.
+        systemdict.setKey("11x17", new PSObjectNull());
+        systemdict.setKey("a3", new PSObjectNull());
+        systemdict.setKey("a4", new PSObjectNull());
+        systemdict.setKey("a4small", new PSObjectNull());
+        systemdict.setKey("b5", new PSObjectNull());
+        systemdict.setKey("ledger", new PSObjectNull());
+        systemdict.setKey("legal", new PSObjectNull());
+        systemdict.setKey("letter", new PSObjectNull());
+        systemdict.setKey("lettersmall", new PSObjectNull());
+        systemdict.setKey("note", new PSObjectNull());
+        
         // add other operators
         systemdict.setKey("currentpacking", new PSObjectBool(false));
         systemdict.setKey("languagelevel", new PSObjectInt(3));
