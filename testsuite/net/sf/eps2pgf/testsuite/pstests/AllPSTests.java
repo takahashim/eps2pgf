@@ -43,7 +43,8 @@ import org.junit.runners.Suite;
     GraphicsPSTest.class,
     OutputPSTest.class,
     FilePSTest.class,
-    ResourcePSTest.class
+    ResourcePSTest.class,
+    VirtualMemoryPSTest.class
 })
 
 public class AllPSTests {

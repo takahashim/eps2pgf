@@ -255,6 +255,9 @@ public class DictStack {
         systemdict.setKey("FontDirectory",
                 interp.getResourceManager().getFontManager());
         
+        // VM allocation mode
+        systemdict.setKey("currentglobal", new PSObjectBool(false));
+        
         // add encoding vectors
         PSObjectName[] encodingVector = Encoding.getISOLatin1Vector();
         systemdict.setKey("ISOLatin1Encoding",

@@ -2955,6 +2955,20 @@ public class Interpreter {
         PSObjectFont font = getOpStack().pop().toFont();
         gstate.current().setFont(font);
     }
+    
+    /**
+     * PostScript op: setglobal.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_setglobal() throws PSError {
+        PSObject nextGlobal = opStack.pop();
+        if (!(nextGlobal instanceof PSObjectBool)) {
+            throw new PSErrorTypeCheck();
+        }
+        PSObjectDict systemDict = dictStack.lookup("systemdict").toDict();
+        systemDict.setKey("currentglobal", nextGlobal);
+    }
    
     /**
      * PostScript op: setgray.
