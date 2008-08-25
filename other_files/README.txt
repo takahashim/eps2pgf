@@ -63,6 +63,9 @@ line option '--version'.
 ----------------------------------------------------------------------------
 Changelog
 ----------------------------------------------------------------------------
+v0.8.0 (200?-??-??)
+  - Fixed: bug #2003425 Failed to convert PS figure created by dvips
+
 v0.7.0 (2008-08-24)
   - Added: feature #1856797 Bitmap images
   - Added: feature #1952604 Improve compilation speed
