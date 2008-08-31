@@ -49,6 +49,11 @@ import net.sf.eps2pgf.util.ArrayStack;
  * @author Paul Wagenaars
  */
 public class DictStack {
+    
+    /** Key to the internaldict as defined in the systemdict. */
+    public static final PSObjectName KEY_INTERNALDICT =
+        new PSObjectName("/eps2pgfinternaldict");
+    
     /** Dictionary stack (except for the permanent dictionaries). */
     private ArrayStack<PSObjectDict> dictStack = new ArrayStack<PSObjectDict>();
     
@@ -232,6 +237,7 @@ public class DictStack {
         // add errordict dictionary
         PSObjectDict errordict = new PSObjectDict();
         // dummy dictionary, error handling is not yet implemented
+        errordict.setKey("handleerror", new PSObjectArray("{stop}"));
         systemdict.setKey("errordict", errordict);
         
         // Add $error dictionary
@@ -254,6 +260,7 @@ public class DictStack {
         systemdict.setKey("statusdict", new PSObjectDict());
         systemdict.setKey("FontDirectory",
                 interp.getResourceManager().getFontManager());
+        systemdict.setKey(KEY_INTERNALDICT, new PSObjectDict());
         
         // VM allocation mode
         systemdict.setKey("currentglobal", new PSObjectBool(false));

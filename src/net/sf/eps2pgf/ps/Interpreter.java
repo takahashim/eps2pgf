@@ -38,6 +38,7 @@ import net.sf.eps2pgf.io.TextReplacements;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorDictStackUnderflow;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
+import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidExit;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidStop;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
@@ -1969,6 +1970,20 @@ public class Interpreter {
      */
     public void op_initmatrix() {
         gstate.current().initmatrix();
+    }
+    
+    /**
+     * PostScript op: internaldict.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_internaldict() throws PSError {
+        int nr = getOpStack().pop().toInt();
+        if (nr != 1183615869) {
+            throw new PSErrorInvalidAccess();
+        }
+        PSObjectDict systemdict = dictStack.lookup("systemdict").toDict();
+        getOpStack().push(systemdict.get(DictStack.KEY_INTERNALDICT));
     }
     
     /**
