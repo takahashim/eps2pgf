@@ -707,6 +707,15 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
+     * Sets the color rendering.
+     * 
+     * @param dict The new color rendering dictionary.
+     */
+    public void setColorRendering(final PSObjectDict dict) {
+        colorRendering = dict;
+    }
+    
+    /**
      * Sets the current color space.
      * 
      * @param obj Object describing the color space. Should be a literal name or
@@ -740,6 +749,15 @@ public class GraphicsState implements Cloneable {
             this.position[1] = Double.NaN;
         }
     }
+    
+    /**
+     * Set the black generation.
+     * 
+     * @param proc The black generation procedure.
+     */
+    public void setBlackGeneration(final PSObjectArray proc) {
+        blackGeneration = proc;
+    }
 
     /**
      * Sets the current transformation matrix (CTM).
@@ -756,6 +774,15 @@ public class GraphicsState implements Cloneable {
      */
     public PSObjectMatrix getCtm() {
         return ctm;
+    }
+    
+    /**
+     * Set the overprint.
+     * 
+     * @param pOverprint The overprint.
+     */
+    public void setOverprint(final boolean pOverprint) {
+        overprint = pOverprint;
     }
 
     /**
@@ -837,7 +864,7 @@ public class GraphicsState implements Cloneable {
      * 
      * @param pFlat the flat to set
      */
-    public void setFlat(final double pFlat) {
+    public void setFlatness(final double pFlat) {
         flatness = pFlat;
     }
 
@@ -848,6 +875,15 @@ public class GraphicsState implements Cloneable {
      */
     public void setFont(final PSObjectFont pFont) {
         font = pFont;
+    }
+    
+    /**
+     * Sets the halftone.
+     * 
+     * @param pHalftone The new halftone.
+     */
+    public void setHalftone(final PSObject pHalftone) {
+        halftone = pHalftone;
     }
 
     /**
@@ -984,6 +1020,15 @@ public class GraphicsState implements Cloneable {
     public double getMiterLimit() {
         return miterLimit;
     }
+    
+    /**
+     * Sets the smoothness.
+     * 
+     * @param pSmoothness The smoothness.
+     */
+    public void setSmoothness(final double pSmoothness) {
+        smoothness = pSmoothness;
+    }
 
     /**
      * Sets the stroke adjustment.
@@ -1001,6 +1046,24 @@ public class GraphicsState implements Cloneable {
      */
     public boolean getStrokeAdjust() {
         return strokeAdjust;
+    }
+    
+    /**
+     * Set the transfer procedure.
+     * 
+     * @param proc The new transfer procedure.
+     */
+    public void setTransfer(final PSObjectArray proc) {
+        transfer = proc;
+    }
+    
+    /**
+     * Set the undercolor removal.
+     * 
+     * @param proc The new undercolor removal procedure.
+     */
+    public void setUndercolorRemoval(final PSObjectArray proc) {
+        undercolorRemoval = proc;
     }
 
 }

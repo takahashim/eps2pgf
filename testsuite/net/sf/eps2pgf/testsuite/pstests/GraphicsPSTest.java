@@ -342,5 +342,19 @@ public class GraphicsPSTest {
         assertTrue(Common.testString(interp, cmd));
     }
     
+    /** Test. @throws Exception the exception */
+    @Test
+    public void graphicsTest31() throws Exception {
+        String cmd = "currentcolorrendering setcolorrendering true"
+            + " true setoverprint currentoverprint"
+            + " {} dup setblackgeneration currentblackgeneration eq"
+            + " {} dup setundercolorremoval currentundercolorremoval eq"
+            + " {} dup settransfer currenttransfer eq"
+            + " currenthalftone sethalftone true"
+            + " 0.398 setflat currentflat 0.398 sub abs 1e-5 lt"
+            + " 0.0783 setsmoothness currentsmoothness 0.0783 sub abs 1e-5 lt";
+        assertTrue(Common.testString(interp, cmd));
+    }
+    
 
 }

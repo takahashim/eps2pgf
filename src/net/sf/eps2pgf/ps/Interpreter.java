@@ -78,12 +78,14 @@ import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
 import net.sf.eps2pgf.ps.resources.outputdevices.PGFDevice;
 import net.sf.eps2pgf.util.ArrayStack;
 
+// TODO: Auto-generated Javadoc
 /**
  * Interprets a PostScript document and produces output.
  * 
  * @author Paul Wagenaars
  */
 public class Interpreter {
+    
     /** Operand stack (see PostScript manual for more info). */
     private ArrayStack<PSObject> opStack = new ArrayStack<PSObject>();
     
@@ -239,7 +241,7 @@ public class Interpreter {
     }
     
     /**
-     * Set the dictionary stack. 
+     * Set the dictionary stack.
      * 
      * @param pDictStack the dictStack to set
      */
@@ -2898,6 +2900,16 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: setblackgeneration.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_setblackgeneration() throws PSError {
+        PSObjectArray proc = getOpStack().pop().toProc();
+        gstate.current().setBlackGeneration(proc);
+    }
+    
+    /**
      * PostScript op: setcachedevice.
      * 
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
@@ -2971,6 +2983,16 @@ public class Interpreter {
         }
         gstate.current().setcolor(newColor);
     }
+    
+    /**
+     * PostScript op: setcolorrendering.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_setcolorrendering() throws PSError {
+        PSObjectDict dict = getOpStack().pop().toDict();
+        gstate.current().setColorRendering(dict);
+    }
    
     /**
      * PostScript op: setcolorspace.
@@ -3008,7 +3030,7 @@ public class Interpreter {
         double num = getOpStack().pop().toReal();
         num = Math.max(num, 0.2);
         num = Math.min(num, 100);
-        gstate.current().setFlat(num);
+        gstate.current().setFlatness(num);
     }
    
     /**
@@ -3047,6 +3069,16 @@ public class Interpreter {
         double[] num = { getOpStack().pop().toReal() };
         gstate.current().setcolorspace(new PSObjectName("DeviceGray", true));
         gstate.current().setcolor(num);
+    }
+    
+    /**
+     * PostScript op: sethalftone.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_sethalftone() throws PSError {
+        PSObject halftone = getOpStack().pop();
+        gstate.current().setHalftone(halftone);
     }
     
     /**
@@ -3128,6 +3160,16 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: setoverprint.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_setoverprint() throws PSError {
+        boolean overprint = getOpStack().pop().toBool();
+        gstate.current().setOverprint(overprint);
+    }
+    
+    /**
      * PostScript op: setpacking.
      * 
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
@@ -3171,6 +3213,16 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: setsmoothness.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_setsmoothness() throws PSError {
+        double smoothness = getOpStack().pop().toReal();
+        gstate.current().setSmoothness(smoothness);
+    }
+    
+    /**
      * PostScript op: setstrokeadjust.
      * 
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
@@ -3181,6 +3233,26 @@ public class Interpreter {
         
         boolean bool = getOpStack().pop().toBool();
         gstate.current().setStrokeAdjust(bool);
+    }
+    
+    /**
+     * PostScript op: settransfer.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_settransfer() throws PSError {
+        PSObjectArray proc = getOpStack().pop().toProc();
+        gstate.current().setTransfer(proc);
+    }
+    
+    /**
+     * PostScript op: setundercolorremoval.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_setundercolorremoval() throws PSError {
+        PSObjectArray proc = getOpStack().pop().toProc();
+        gstate.current().setUndercolorRemoval(proc);
     }
    
     /**
