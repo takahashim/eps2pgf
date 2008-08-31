@@ -105,7 +105,26 @@ public class ResourcePSTest {
     @Test
     public void resourceTest6_Findresource() throws Exception {
         String cmd = "/test [ /DeviceGray ] /ColorSpace defineresource"
-            + " pop /test /ColorSpace findresource 0 get /DeviceGray eq";
+            + " pop /test /ColorSpace findresource 0 get /DeviceGray eq"
+            + " /test /ColorSpace undefineresource";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void resourceTest7() throws Exception {
+        // Example 3.7 from PostScript reference
+        // plus some extra test by my.
+        String cmd = "currentglobal"
+            + " true setglobal"
+            + " /Generic /Category findresource"
+            + " dup length 1 add dict copy"
+            + " dup /InstanceType /dicttype put"
+            + " /Widget exch /Category defineresource pop"
+            + " setglobal"
+            
+            + "/testkey 10 dict /Widget defineresource pop"
+            + "/testkey /Widget resourcestatus 3 1 roll pop pop";
         assertTrue(Common.testString(interp, cmd));
     }
 

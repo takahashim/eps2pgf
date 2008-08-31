@@ -3432,6 +3432,17 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: undefineresource.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_undefineresource() throws PSError {
+        PSObjectName category = getOpStack().pop().toName();
+        PSObject key = getOpStack().pop();
+        resourceManager.undefineResource(category, key);
+    }
+    
+    /**
      * PostScript op: usertime.
      */
     public void op_usertime() {
