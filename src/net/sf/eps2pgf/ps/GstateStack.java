@@ -44,8 +44,10 @@ public class GstateStack {
      * Creates a new instance of GstateStack.
      * 
      * @param output The output device to be associated with the graphics state.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public GstateStack(final OutputDevice output) {
+    public GstateStack(final OutputDevice output) throws ProgramError {
         stack = new ArrayStack<GraphicsState>();
         setCurrent(new GraphicsState(this, output));
     }

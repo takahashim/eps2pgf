@@ -29,6 +29,7 @@ import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFont;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 import net.sf.eps2pgf.ps.resources.colors.ColorManager;
@@ -63,9 +64,6 @@ public class GraphicsState implements Cloneable {
     /** Current color. */
     private PSColor color;
     
-    /** Parameter describing the accuracy of flattening a path. */
-    private double flat = 1.0;
-    
     /** Current font. */
     private PSObjectFont font;
     
@@ -90,6 +88,32 @@ public class GraphicsState implements Cloneable {
     /** Current stroke adjustment. */
     private boolean strokeAdjust = true;
     
+    //
+    // Device dependent parameters
+    //
+    /** Current color rendering. */
+    private PSObjectDict colorRendering = new PSObjectDict();
+    
+    /** Current overprint. */
+    private boolean overprint = false;
+    
+    /** Current black generation function. */
+    private PSObjectArray blackGeneration;
+    
+    /** Current undercolor removal function. */
+    private PSObjectArray undercolorRemoval;
+    
+    /** Current transfer function to convert colors to device settings. */
+    private PSObjectArray transfer;
+    
+    /** Current halftone. */
+    private PSObject halftone = new PSObjectDict();
+    
+    /** Current flatness of curves. */
+    private double flatness = 1.0;
+    
+    /** Current smoothness. */
+    private double smoothness = 1e-3;
     
     /** Reference to current output device. */
     private OutputDevice device;
@@ -98,11 +122,13 @@ public class GraphicsState implements Cloneable {
      * Creates a new default graphics state.
      * 
      * @param parentGraphicsStack Pointer the graphics stack of which this
-     *                            object is part of.
+     * object is part of.
      * @param wDevice Output device.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public GraphicsState(final GstateStack parentGraphicsStack,
-            final OutputDevice wDevice) {
+            final OutputDevice wDevice) throws ProgramError {
 
         device = wDevice;
                 
@@ -110,6 +136,14 @@ public class GraphicsState implements Cloneable {
         path = new Path(parentGraphicsStack);
         clippingPath = new Path(parentGraphicsStack);
         font = new PSObjectFont();
+        
+        try {
+            blackGeneration = new PSObjectArray("{}");
+            undercolorRemoval = new PSObjectArray("{}");
+            transfer = new PSObjectArray("{}");
+        } catch (PSError e) {
+            // this can never happen
+        }
     }
     
     /**
@@ -298,7 +332,6 @@ public class GraphicsState implements Cloneable {
         copy.ctm = ctm.clone();
         // dashoffset is primitive, it doesn't need to be cloned explicitly.
         copy.dashPattern = dashPattern.clone();
-        copy.device = device.clone();
         // flat is primitive, it doesn't need to be cloned explicitly.
         copy.font = font.clone();
         // linewidth is primitive, it doesn't need to be cloned explicitly.
@@ -307,7 +340,89 @@ public class GraphicsState implements Cloneable {
         copy.position = position.clone();
         // strokeAdjust is primitive, it doesn't need to be cloned explicitly.
         
+        copy.colorRendering = colorRendering.clone();
+        // overprint is primitive, it doesn't need to be cloned explicitely.
+        copy.blackGeneration = blackGeneration.clone();
+        copy.undercolorRemoval = undercolorRemoval.clone();
+        copy.transfer = transfer.clone();
+        copy.halftone = halftone.clone();
+        // flatness is primitive, it doesn't need to be cloned explicitely.
+        // smoothness is primitive, it doesn't need to be cloned explicitely.
+        copy.device = device.clone();
+        
         return copy;
+    }
+    
+    /**
+     * Gets the current color rendering.
+     * 
+     * @return The current color rendering.
+     */
+    public PSObjectDict currentColorRendering() {
+        return colorRendering;
+    }
+    
+    /**
+     * Gets the current overprint.
+     * 
+     * @return The current overprint.
+     */
+    public boolean currentOverprint() {
+        return overprint;
+    }
+    
+    /**
+     * Gets the current black generation.
+     * 
+     * @return The current black generation.
+     */
+    public PSObjectArray currentBlackGeneration() {
+        return blackGeneration;
+    }
+    
+    /**
+     * Gets the current undercolor removal.
+     * 
+     * @return The current undercolor removal.
+     */
+    public PSObjectArray currentUndercolorRemoval() {
+        return undercolorRemoval;
+    }
+    
+    /**
+     * Gets the current transfer.
+     * 
+     * @return The current transfer.
+     */
+    public PSObjectArray currentTransfer() {
+        return transfer;
+    }
+    
+    /**
+     * Gets the current halftone.
+     * 
+     * @return The current halftone.
+     */
+    public PSObject currentHalftone() {
+        return halftone;
+    }
+    
+    /**
+     * Gets the current flatness.
+     * 
+     * @return The current flatness.
+     */
+    public double currentFlatness() {
+        return flatness;
+    }
+    
+    /**
+     * Gets the current smoothness.
+     * 
+     * @return The current smoothness.
+     */
+    public double currentSmoothness() {
+        return smoothness;
     }
     
     /**
@@ -409,7 +524,7 @@ public class GraphicsState implements Cloneable {
         // Maximum difference between normal and flattened path. Defined in
         // device space coordinates. Assume a device resolution of 1200 dpi.
         double deviceScale = this.device.defaultCTM().getMeanScaling();
-        double maxError = this.flat * 72.0 / 1200.0 * deviceScale;
+        double maxError = this.flatness * 72.0 / 1200.0 * deviceScale;
 
         this.path = this.path.flattenpath(maxError);
     }
@@ -723,16 +838,7 @@ public class GraphicsState implements Cloneable {
      * @param pFlat the flat to set
      */
     public void setFlat(final double pFlat) {
-        flat = pFlat;
-    }
-
-    /**
-     * Gets the flat parameter.
-     * 
-     * @return the flat
-     */
-    public double getFlat() {
-        return flat;
+        flatness = pFlat;
     }
 
     /**

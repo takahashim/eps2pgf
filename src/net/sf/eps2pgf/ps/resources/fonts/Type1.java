@@ -30,6 +30,7 @@ import org.fontbox.afm.CharMetric;
 import org.fontbox.afm.FontMetric;
 import org.fontbox.util.BoundingBox;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.ps.GstateStack;
 import net.sf.eps2pgf.ps.Path;
@@ -70,9 +71,10 @@ final class Type1 {
      * stored.
      * 
      * @throws PSError a PostScript error occurred
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public static void load(final PSObjectFontMetrics fMetrics,
-            final PSObjectDict fontDict) throws PSError {
+            final PSObjectDict fontDict) throws PSError, ProgramError {
         
         // Extract metrics information from character descriptions
         PSObjectDict charStrings;
@@ -156,10 +158,11 @@ final class Type1 {
      * @return Character metric
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public static CharMetric charString2CharMetric(
             final PSObjectFontMetrics fMetrics, final String charName,
-            final String charString) throws PSError {
+            final String charString) throws PSError, ProgramError {
         
         StringInputStream strInStream = new StringInputStream(charString);
         InputStream decodedCharString =
@@ -291,10 +294,11 @@ final class Type1 {
      * @return Path describing the character
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public static Path interpretCharString(final PSObjectFontMetrics fMetrics,
             final List<PSObject> execStack, final double[] paramSb,
-            final double[] paramW) throws PSError {
+            final double[] paramW) throws PSError, ProgramError {
         
         GstateStack gstate = new GstateStack(new NullDevice());
         ArrayStack<PSObject> opStack = new ArrayStack<PSObject>();

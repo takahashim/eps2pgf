@@ -320,6 +320,27 @@ public class GraphicsPSTest {
         assertTrue(Common.testString(interp, cmd));
     }
     
+    /** Test. @throws Exception the exception */
+    @Test
+    public void graphicsTest30() throws Exception {
+        String cmd = "currentcolorrendering type /dicttype eq"
+            + " currentoverprint false eq"
+            
+            + " currentblackgeneration dup type /arraytype eq exch"
+            + " type /packedarraytype eq or"
+            
+            + " currentundercolorremoval dup type /arraytype eq exch"
+            + " type /packedarraytype eq or"
+            
+            + " currenttransfer dup type /arraytype eq exch"
+            + " type /packedarraytype eq or"
+            
+            + " currenthalftone type /dicttype eq"
+            + " currentflat 1.0 sub abs 1e-5 lt"
+            + " currentsmoothness type /realtype eq";
+
+        assertTrue(Common.testString(interp, cmd));
+    }
     
 
 }

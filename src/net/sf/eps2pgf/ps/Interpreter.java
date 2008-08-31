@@ -970,6 +970,13 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: currentblackgeneration.
+     */
+    public void op_currentblackgeneration() {
+        getOpStack().push(gstate.current().currentBlackGeneration());
+    }
+    
+    /**
      * PostScript op: currentcmykcolor.
      * 
      * @throws PSError A PostScript error occurred.
@@ -990,6 +997,13 @@ public class Interpreter {
         for (int i = 0; i < color.getNrComponents(); i++) {
             getOpStack().push(new PSObjectReal(color.getLevel(i)));
         }
+    }
+    
+    /**
+     * PostScript op: currentcolorrendering.
+     */
+    public void op_currentcolorrendering() {
+        getOpStack().push(gstate.current().currentColorRendering());
     }
     
     /**
@@ -1034,8 +1048,8 @@ public class Interpreter {
      * PostScript op: currentflat.
      */
     public void op_currentflat() {
-        // pgf does not support changing the flatness
-        getOpStack().push(new PSObjectReal(0.2));
+        double flat = gstate.current().currentFlatness();
+        getOpStack().push(new PSObjectReal(flat));
     }
     
     /**
@@ -1047,6 +1061,13 @@ public class Interpreter {
     public void op_currentgray() throws PSError, ProgramError {
         double gray = gstate.current().currentgray();
         getOpStack().push(new PSObjectReal(gray));
+    }
+    
+    /**
+     * PostScript op: currenthalftone.
+     */
+    public void op_currenthalftone() {
+        getOpStack().push(gstate.current().currentHalftone());
     }
     
     /**
@@ -1078,6 +1099,14 @@ public class Interpreter {
         PSObjectMatrix matrix = getOpStack().pop().toMatrix();
         matrix.copy(gstate.current().getCtm());
         getOpStack().push(matrix);
+    }
+    
+    /**
+     * PostScript op: currentoverprint.
+     */
+    public void op_currentoverprint() {
+        boolean overprint = gstate.current().currentOverprint();
+        getOpStack().push(new PSObjectBool(overprint));
     }
     
     /**
@@ -1134,10 +1163,32 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: currentsmoothness.
+     */
+    public void op_currentsmoothness() {
+        double smoothness = gstate.current().currentSmoothness();
+        getOpStack().push(new PSObjectReal(smoothness));
+    }
+    
+    /**
      * PostScript op: currentstrokeadjust.
      */
     public void op_currentstrokeadjust() {
         getOpStack().push(new PSObjectBool(gstate.current().getStrokeAdjust()));
+    }
+    
+    /**
+     * PostScript op: currenttransfer.
+     */
+    public void op_currenttransfer() {
+        getOpStack().push(gstate.current().currentTransfer());
+    }
+    
+    /**
+     * PostScript op: currentundercolorremoval.
+     */
+    public void op_currentundercolorremoval() {
+        getOpStack().push(gstate.current().currentUndercolorRemoval());
     }
     
     /**
