@@ -356,5 +356,21 @@ public class GraphicsPSTest {
         assertTrue(Common.testString(interp, cmd));
     }
     
+    /** Test. @throws Exception the exception */
+    @Test
+    public void graphicsTest32() throws Exception {
+        String cmd = "{} dup settransfer currentcolortransfer pop pop pop eq"
+            + " /redproc {/red pop} dup 3 1 roll def"
+            + " /greenproc {/green pop} dup 3 1 roll def"
+            + " /blueproc {/blue pop} dup 3 1 roll def"
+            + " /grayproc {/gray pop} dup 3 1 roll def"
+            + " setcolortransfer currentcolortransfer"
+            + " userdict /grayproc get eq"
+            + " 4 1 roll userdict /blueproc get eq"
+            + " 4 1 roll userdict /greenproc get eq"
+            + " 4 1 roll userdict /redproc get eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+    
 
 }

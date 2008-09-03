@@ -103,7 +103,11 @@ public class GraphicsState implements Cloneable {
     /** Current undercolor removal function. */
     private PSObjectArray undercolorRemoval;
     
-    /** Current transfer function to convert colors to device settings. */
+    /**
+     * Current transfer functions to convert colors to device settings.
+     * The array contains four procedures:
+     * {redproc greenproc blueproc grayproc}
+     */
     private PSObjectArray transfer;
     
     /** Current halftone. */
@@ -140,7 +144,7 @@ public class GraphicsState implements Cloneable {
         try {
             blackGeneration = new PSObjectArray("{}");
             undercolorRemoval = new PSObjectArray("{}");
-            transfer = new PSObjectArray("{}");
+            transfer = new PSObjectArray("[{} {} {} {}]");
         } catch (PSError e) {
             // this can never happen
         }
@@ -381,6 +385,16 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
+     * Gets the current color transfer.
+     * 
+     * @return Array with color transfer functions:
+     * <code>{redproc greenproc blueproc grayproc}</code>.
+     */
+    public PSObjectArray currentColorTransfer() {
+        return transfer;
+    }
+    
+    /**
      * Gets the current undercolor removal.
      * 
      * @return The current undercolor removal.
@@ -390,12 +404,18 @@ public class GraphicsState implements Cloneable {
     }
     
     /**
-     * Gets the current transfer.
+     * Gets the current gray transfer.
      * 
-     * @return The current transfer.
+     * @return The current gray transfer.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectArray currentTransfer() {
-        return transfer;
+    public PSObjectArray currentTransfer() throws ProgramError {
+        try {
+            return transfer.get(3).toProc();
+        } catch (PSError e) {
+            throw new ProgramError("PSError in currentTransfer()");
+        }
     }
     
     /**
@@ -1051,10 +1071,43 @@ public class GraphicsState implements Cloneable {
     /**
      * Set the transfer procedure.
      * 
-     * @param proc The new transfer procedure.
+     * @param redproc The red transfer function.
+     * @param greenproc The green transfer function.
+     * @param blueproc The blue transfer function.
+     * @param grayproc The gray transfer function.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void setTransfer(final PSObjectArray proc) {
-        transfer = proc;
+    public void setColorTransfer(final PSObjectArray redproc,
+            final PSObjectArray greenproc, final PSObjectArray blueproc,
+            final PSObjectArray grayproc) throws ProgramError {
+        
+        try {
+            transfer.set(0, redproc);
+            transfer.set(1, greenproc);
+            transfer.set(2, blueproc);
+            transfer.set(3, grayproc);
+        } catch (PSErrorRangeCheck e) {
+            throw new ProgramError("rangecheck in setColorTransfer()");
+        }
+    }
+    
+
+    /**
+     * Set the transfer procedure.
+     * 
+     * @param proc The new transfer procedure.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void setTransfer(final PSObjectArray proc) throws ProgramError {
+        for (int i = 0; i < 4; i++) {
+            try {
+                transfer.set(i, proc);
+            } catch (PSErrorRangeCheck e) {
+                throw new ProgramError("rangecheck in setTransfer()");
+            }
+        }
     }
     
     /**

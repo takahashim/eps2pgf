@@ -1016,13 +1016,18 @@ public class Interpreter {
     
     /**
      * PostScript op: currentcolortransfer.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_currentcolortransfer() {
-        PSObjectArray proc = gstate.current().currentTransfer();
-        getOpStack().push(proc);
-        getOpStack().push(proc);
-        getOpStack().push(proc);
-        getOpStack().push(proc);
+    public void op_currentcolortransfer() throws ProgramError {
+        PSObjectArray procs = gstate.current().currentColorTransfer();
+        try {
+            for (int i = 0; i < 4; i++) {
+                getOpStack().push(procs.get(i));
+            }
+        } catch (PSErrorRangeCheck e) {
+            throw new ProgramError("rangecheck in op_currentcolortransfer()");
+        }
     }
     
     /**
@@ -1191,8 +1196,10 @@ public class Interpreter {
     
     /**
      * PostScript op: currenttransfer.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_currenttransfer() {
+    public void op_currenttransfer() throws ProgramError {
         getOpStack().push(gstate.current().currentTransfer());
     }
     
@@ -3032,6 +3039,21 @@ public class Interpreter {
         PSObject arrayOrName = getOpStack().pop();
         gstate.current().setcolorspace(arrayOrName);
     }
+    
+    /**
+     * PostScrip op: setcolortransfer.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_setcolortransfer() throws PSError, ProgramError {
+        PSObjectArray grayProc = getOpStack().pop().toProc();
+        PSObjectArray blueProc = getOpStack().pop().toProc();
+        PSObjectArray greenProc = getOpStack().pop().toProc();
+        PSObjectArray redProc = getOpStack().pop().toProc();
+        gstate.current().setColorTransfer(redProc, greenProc, blueProc,
+                grayProc);
+    }
    
     /**
      * PostScript op: setdash.
@@ -3266,8 +3288,9 @@ public class Interpreter {
      * PostScript op: settransfer.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_settransfer() throws PSError {
+    public void op_settransfer() throws PSError, ProgramError {
         PSObjectArray proc = getOpStack().pop().toProc();
         gstate.current().setTransfer(proc);
     }
