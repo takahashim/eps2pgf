@@ -3,7 +3,7 @@
  *
  * This file is part of Eps2pgf.
  *
- * Copyright 2007, 2008 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2008 Paul Wagenaars <paul@wagenaars.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,6 @@ import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
 import net.sf.eps2pgf.ps.resources.outputdevices.PGFDevice;
 import net.sf.eps2pgf.util.ArrayStack;
 
-// TODO: Auto-generated Javadoc
 /**
  * Interprets a PostScript document and produces output.
  * 
@@ -1827,8 +1826,18 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_grestore() throws PSError, IOException, ProgramError {
-        gstate.restoreGstate();
-        
+        gstate.restoreGstate(true);
+    }
+    
+    /**
+     * PostScript op: grestoreall.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_grestoreall() throws PSError, IOException, ProgramError {
+        gstate.restoreAllGstate(true);
     }
     
     /**
@@ -1839,7 +1848,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_gsave() throws PSError, IOException, ProgramError {
-        gstate.saveGstate();
+        gstate.saveGstate(true);
     }
     
     /**
@@ -2702,10 +2711,8 @@ public class Interpreter {
             throw new PSErrorTypeCheck();
         }
         
-        // grestore is not full replacement for restore, so the might be some
-        // problems.
-        op_grestore();
-    }    
+        gstate.restoreAllGstate(false);
+    }
     
     /**
      * PostScript op: rmoveto.
@@ -2804,9 +2811,7 @@ public class Interpreter {
      */
     public void op_save() throws PSError, IOException, ProgramError {
         getOpStack().push(new PSObjectName("/-save- (dummy)"));
-        // gsave is not a full replacement for save, so there might be some
-        // problems.
-        op_gsave();
+        gstate.saveGstate(false);
     }
    
     /**
