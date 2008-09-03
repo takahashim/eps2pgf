@@ -1015,6 +1015,17 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: currentcolortransfer.
+     */
+    public void op_currentcolortransfer() {
+        PSObjectArray proc = gstate.current().currentTransfer();
+        getOpStack().push(proc);
+        getOpStack().push(proc);
+        getOpStack().push(proc);
+        getOpStack().push(proc);
+    }
+    
+    /**
      * PostScript op: currentdict.
      */
     public void op_currentdict() {
@@ -2228,6 +2239,17 @@ public class Interpreter {
         font.setKey("FontSize", new PSObjectReal(fontSize));
         
         getOpStack().push(font);
+    }
+    
+    /**
+     * PostScript op: makepattern.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_makepattern() throws PSError {
+        //PSObjectMatrix matrix = getOpStack().pop().toMatrix();
+        //PSObjectDict dict = getOpStack().pop().toDict();
+        throw new PSErrorUnimplemented("makepattern operator");
     }
     
     /**
