@@ -115,4 +115,13 @@ public class MiscPSTest {
         assertTrue(Common.testString(interp, cmd));
     }
 
+    /** Test. @throws Exception the exception */
+    @Test
+    public void miscTest9() throws Exception {
+        String cmd = "<</DoesntExist (test) /JobName (myname)>> setuserparams"
+            + " currentuserparams /JobName get (myname) eq"
+            + " currentuserparams /DoesntExist known false eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
 }

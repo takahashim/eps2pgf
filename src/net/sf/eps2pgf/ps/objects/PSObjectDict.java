@@ -340,6 +340,26 @@ public class PSObjectDict extends PSObject {
     }
     
     /**
+     * Sets a key in the dictionary.
+     * 
+     * @param key Key of the new dictionary entry.
+     * @param value Value of the new dictionary entry.
+     */
+    public void setKey(final String key, final int value) {
+        map.put(new PSObjectName(key, true), new PSObjectInt(value));
+    }
+    
+    /**
+     * Sets a key in the dictionary.
+     * 
+     * @param key Key of the new dictionary entry.
+     * @param value Value of the new dictionary entry.
+     */
+    public void setKey(final String key, final boolean value) {
+        map.put(new PSObjectName(key, true), new PSObjectBool(value));
+    }
+    
+    /**
      * Set a key in the dictionary.
      * 
      * @param key Key of the new dictionary entry.

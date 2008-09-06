@@ -112,6 +112,9 @@ public class Interpreter {
     /** User-defined options. */
     private Options options;
     
+    /** Interpreter parameters. */
+    private InterpParams interpParams;
+    
     /** Log information. */
     private final Logger log = Logger.getLogger("net.sourceforge.eps2pgf");
     
@@ -201,6 +204,9 @@ public class Interpreter {
         Encoding.initialize();
         resourceManager = new ResourceManager();
         
+        // Initialize interpreter parameters
+        interpParams = new InterpParams(this);
+        
         // Create dictionary stack
         setDictStack(new DictStack(this));
 
@@ -273,6 +279,15 @@ public class Interpreter {
      */
     public ArrayStack<PSObject> getOpStack() {
         return opStack;
+    }
+    
+    /**
+     * Get the interpreter options.
+     * 
+     * @return The current interpreter options.
+     */
+    public Options getOptions() {
+        return options;
     }
 
     /**
@@ -1208,6 +1223,13 @@ public class Interpreter {
      */
     public void op_currentundercolorremoval() {
         getOpStack().push(gstate.current().currentUndercolorRemoval());
+    }
+    
+    /**
+     * PostScript op: currentuserparams.
+     */
+    public void op_currentuserparams() {
+        getOpStack().push(interpParams.currentUserParams());
     }
     
     /**
@@ -3303,6 +3325,16 @@ public class Interpreter {
     public void op_setundercolorremoval() throws PSError {
         PSObjectArray proc = getOpStack().pop().toProc();
         gstate.current().setUndercolorRemoval(proc);
+    }
+    
+    /**
+     * PostScript op: setuserparams.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_setuserparams() throws PSError {
+        PSObjectDict dict = getOpStack().pop().toDict();
+        interpParams.setUserParams(dict);
     }
    
     /**
