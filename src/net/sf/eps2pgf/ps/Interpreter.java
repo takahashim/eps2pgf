@@ -1210,6 +1210,15 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: currentsystemparams.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_currentsystemparams() throws ProgramError {
+        getOpStack().push(interpParams.currentSystemParams());
+    }
+    
+    /**
      * PostScript op: currenttransfer.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
@@ -3304,6 +3313,17 @@ public class Interpreter {
         
         boolean bool = getOpStack().pop().toBool();
         gstate.current().setStrokeAdjust(bool);
+    }
+    
+    /**
+     * PostScript op: setsystemparams.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_setsystemparams() throws PSError, ProgramError {
+        PSObjectDict dict = getOpStack().pop().toDict();
+        interpParams.setSystemParams(dict);
     }
     
     /**

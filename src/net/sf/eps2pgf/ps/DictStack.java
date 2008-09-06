@@ -300,6 +300,7 @@ public class DictStack {
         }
         systemdict.setKey("revision", new PSObjectInt(revision));
         systemdict.setKey("serialnumber", new PSObjectInt(0));
+        systemdict.setKey("product", "Eps2pgf");
     }
 
     /**

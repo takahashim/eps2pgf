@@ -124,4 +124,12 @@ public class MiscPSTest {
         assertTrue(Common.testString(interp, cmd));
     }
 
+    /** Test. @throws Exception the exception */
+    @Test
+    public void miscTest10() throws Exception {
+        String cmd = "<</PrinterName (myname)>> setsystemparams"
+            + " currentsystemparams /PrinterName get (myname) eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
 }

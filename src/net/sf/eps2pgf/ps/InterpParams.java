@@ -23,8 +23,11 @@ package net.sf.eps2pgf.ps;
 import java.io.File;
 import java.util.List;
 
+import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
+import net.sf.eps2pgf.ps.resources.Utils;
 
 /**
  * This class manages interpreter parameters. See appendix C of the PostScript
@@ -85,6 +88,39 @@ public class InterpParams {
     }
     
     /**
+     * Returns a dictionary containing the keys and current values of all system
+     * parameters.
+     * 
+     * @return A copy of the dictionary with system parameters.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public PSObjectDict currentSystemParams() throws ProgramError {
+        return getSystemParamsDict().clone();
+    }
+    
+    /**
+     * Sets new system parameters.
+     * 
+     * @param newParams The dictionary with new system parameters.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void setSystemParams(final PSObjectDict newParams)
+            throws ProgramError {
+        
+        List<PSObject> items = newParams.getItemList();
+        PSObjectDict sysParams = getSystemParamsDict();
+        for (int i = 1; i < items.size(); i += 2) {
+            PSObject key = items.get(i);
+            if (sysParams.known(key)) {
+                PSObject value = items.get(i + 1);
+                sysParams.setKey(key, value);
+            }
+        }
+    }
+    
+    /**
      * Gets the user parameters dictionary.
      * 
      * @return The user parameters dictionary.
@@ -131,6 +167,75 @@ public class InterpParams {
         dict.setKey("MinFontCompress", Integer.MAX_VALUE);
         dict.setKey("VMReclaim", 0);
         dict.setKey("VMThreshold", 1000000);
+        
+        return dict;
+    }
+
+    /**
+     * Gets the system parameters dictionary.
+     * 
+     * @return The system parameters dictionary.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    private PSObjectDict getSystemParamsDict() throws ProgramError {
+        if (systemParams == null) {
+            systemParams = createDefaultSystemParams();
+        }
+        return systemParams;
+    }
+    
+    /**
+     * Create a new dictionary with all system parameters with default values.
+     * 
+     * @return A new dictionary with system parameters with default values.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    private PSObjectDict createDefaultSystemParams() throws ProgramError {
+        PSObjectDict dict = new PSObjectDict();
+        
+        dict.setKey("ByteOrder", false);
+        dict.setKey("BuildTime", 0);
+        dict.setKey("CurDisplayList", 0);
+        dict.setKey("CurFontCache", 0);
+        dict.setKey("CurFormCache", 0);
+        dict.setKey("CurOutlineCache", 0);
+        dict.setKey("CurPatternCache", 0);
+        dict.setKey("CurScreenStorage", 0);
+        dict.setKey("CurSourceList", 0);
+        dict.setKey("CurStoredScreenCache", 0);
+        dict.setKey("CurUPathCache", 0);
+        dict.setKey("FactoryDefaults", false);
+        dict.setKey("FontResourceDir", Utils.getResourceDir().toString());
+        dict.setKey("GenericResourceDir", Utils.getResourceDir().toString());
+        dict.setKey("GenericResourcePathSep",
+                System.getProperty("file.separator"));
+        dict.setKey("LicenseID", "");
+        dict.setKey("MaxDisplayAndSourceList", Integer.MAX_VALUE);
+        dict.setKey("MaxDisplayList", Integer.MAX_VALUE);
+        dict.setKey("MaxFontCache", Integer.MAX_VALUE);
+        dict.setKey("MaxFormCache", Integer.MAX_VALUE);
+        dict.setKey("MaxImageBuffer", Integer.MAX_VALUE);
+        dict.setKey("MaxOutlineCache", Integer.MAX_VALUE);
+        dict.setKey("MaxPatternCache", Integer.MAX_VALUE);
+        dict.setKey("MaxScreenStorage", Integer.MAX_VALUE);
+        dict.setKey("MaxSourceList", Integer.MAX_VALUE);
+        dict.setKey("MaxStoredScreenCache", Integer.MAX_VALUE);
+        dict.setKey("MaxUPathCache", Integer.MAX_VALUE);
+        dict.setKey("PageCount", 0);
+        dict.setKey("PrinterName",
+                interp.getDictStack().lookup("product").toString());
+        dict.setKey("RealFormat", "IEEE");
+        try {
+            dict.setKey("Revision",
+                    interp.getDictStack().lookup("revision").toInt());
+        } catch (PSErrorTypeCheck e) {
+            dict.setKey("Revision", 0);
+        }
+        dict.setKey("StartJobPassword", "");
+        dict.setKey("StartupMode", 0);
+        dict.setKey("SystemParamsPassword", "");
         
         return dict;
     }
