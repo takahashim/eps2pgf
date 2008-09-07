@@ -2070,6 +2070,16 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: imagemask.
+     * 
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * (yet) implemented.
+     */
+    public void op_imagemask() throws PSErrorUnimplemented {
+        throw new PSErrorUnimplemented("imagemask operator");
+    }
+    
+    /**
      * PostScript op: index.
      * 
      * @throws PSError A PostScript error occurred.
