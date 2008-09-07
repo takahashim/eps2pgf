@@ -2661,6 +2661,19 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: readline.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_readline() throws PSError {
+        PSObjectString string = getOpStack().pop().toPSString();
+        PSObjectFile file = getOpStack().pop().toFile();
+        PSObjectArray arr = file.readLine(string);
+        getOpStack().push(arr.get(0));
+        getOpStack().push(arr.get(1));
+    }
+    
+    /**
      * PostScript op: readonly.
      * 
      * @throws PSError A PostScript error occurred.

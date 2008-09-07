@@ -172,6 +172,20 @@ public class FilePSTest {
         assertTrue(Common.testString(interp, cmd));
     }
     
+    /** Test. @throws Exception the exception. */
+    @Test
+    public void fileTest13() throws Exception {
+        String cmd = "currentfile 5 string readline k\n"
+            + "exch (k) eq\n"
+            + "currentfile 10 string readline "
+            + "foo bar \n"
+            + "exch (foo bar ) eq\n"
+            + "currentfile 10 string dup 3 1 roll readline\n"
+            + "next line\n"
+            + "3 1 roll pop (next line\000) eq\n";
+        assertTrue(Common.testString(interp, cmd));
+    }
+    
 
     
 }

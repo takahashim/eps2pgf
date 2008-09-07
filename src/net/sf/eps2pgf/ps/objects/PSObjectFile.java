@@ -158,6 +158,57 @@ public class PSObjectFile extends PSObject {
     }
     
     /**
+     * Reads a line of characters (terminated by a (CR), (LF) or (CR)(LF)) from
+     * this file and stores them in a string.
+     * 
+     * @param string The string.
+     * 
+     * @return Array with two items. The first item is the substring, the second
+     * item is normally true and false when the end-of-file was encountered
+     * before the end of the line.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public PSObjectArray readLine(final PSObjectString string)
+            throws PSError {
+        
+        boolean eofNotReached = false;
+        int charsRead = -1;
+        try {
+            for (int i = 0; true; i++) {
+                int chr = inStr.read();
+                if (chr == 10) {         // line feed (LF)
+                    eofNotReached = true;
+                    charsRead = i;
+                    break;
+                } else if (chr == 13) {  // carriage return (CR)
+                    // if the next character is a (LF) we need to consume it too
+                    inStr.mark(1);
+                    chr = inStr.read();
+                    if (chr != 10) {
+                        inStr.reset();
+                    }
+                    eofNotReached = true;
+                    charsRead = i;
+                    break;
+                } else if (chr == -1) {  // end-of-file (EOF)
+                    charsRead = i;
+                } else {
+                    string.set(i, (char) chr);
+                }
+            }
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
+        
+        PSObjectArray ret = new PSObjectArray();
+        ret.addToEnd(string.getinterval(0, charsRead));
+        ret.addToEnd(new PSObjectBool(eofNotReached));
+        
+        return ret;
+    }
+    
+    /**
      * Reads characters from this file and stores them in the supplied string
      * until the string is full or the end-of-file is encountered.
      * 
