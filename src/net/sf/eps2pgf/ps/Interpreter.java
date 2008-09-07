@@ -1046,6 +1046,16 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: currentdevparams.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_currendevparams() throws PSError {
+        String device = getOpStack().pop().toPSString().toString();
+        getOpStack().push(interpParams.currentDeviceParams(device));
+    }
+    
+    /**
      * PostScript op: currentdict.
      */
     public void op_currentdict() {
@@ -3098,6 +3108,17 @@ public class Interpreter {
         
         gstate.current().setDashPattern(array);
         gstate.current().setDashOffset(offset);
+    }
+    
+    /**
+     * PostScript op: setdevparams.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_setdevparams() throws PSError {
+        PSObjectDict dict = getOpStack().pop().toDict();
+        String device = getOpStack().pop().toPSString().toString();
+        interpParams.setDeviceParams(device, dict);
     }
     
     /**

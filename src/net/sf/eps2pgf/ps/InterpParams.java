@@ -25,6 +25,7 @@ import java.util.List;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.resources.Utils;
@@ -117,6 +118,38 @@ public class InterpParams {
                 PSObject value = items.get(i + 1);
                 sysParams.setKey(key, value);
             }
+        }
+    }
+    
+    /**
+     * Returns a dictionary containing the keys and current values of parameters
+     * of the specified device.
+     * 
+     * @param device The device for which the parameters are requested.
+     * 
+     * @return A copy of the dictionary with system parameters.
+     */
+    public PSObjectDict currentDeviceParams(final String device) {
+        
+        return getDeviceParamsDict(device).clone();
+    }
+    
+    /**
+     * Sets new device parameters.
+     *
+     * @param device Name of the device for which the parameters must be
+     * changed.
+     * @param newParams The dictionary with new system parameters.
+     */
+    public void setDeviceParams(final String device,
+            final PSObjectDict newParams) {
+        
+        List<PSObject> items = newParams.getItemList();
+        PSObjectDict devParams = getDeviceParamsDict(device);
+        for (int i = 1; i < items.size(); i += 2) {
+            PSObject key = items.get(i);
+            PSObject value = items.get(i + 1);
+            devParams.setKey(key, value);
         }
     }
     
@@ -238,6 +271,31 @@ public class InterpParams {
         dict.setKey("SystemParamsPassword", "");
         
         return dict;
+    }
+    
+    /**
+     * Gets the parameters dictionary for certain device.
+     * 
+     * @param device The name of the device.
+     * 
+     * @return Dictionary with parameters for the specified device.
+     */
+    private PSObjectDict getDeviceParamsDict(final String device) {
+        if (deviceParams == null) {
+            deviceParams = new PSObjectDict();
+        }
+        if (!deviceParams.known(device)) {
+            deviceParams.setKey(device, new PSObjectDict());
+        }
+        
+        try {
+            return deviceParams.get(device).toDict();
+        } catch (PSErrorTypeCheck e) {
+            // this can never happen
+        } catch (PSErrorUndefined e) {
+            // this can never happen
+        }
+        return null;
     }
 
 }
