@@ -3,7 +3,7 @@
  *
  * This file is part of Eps2pgf.
  *
- * Copyright 2008 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2008 Paul Wagenaars <paul@wagenaars.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
