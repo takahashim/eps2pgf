@@ -666,6 +666,16 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: awidthshow.
+     * 
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * (yet) implemented.
+     */
+    public void op_awidthshow() throws PSErrorUnimplemented {
+        throw new PSErrorUnimplemented("awidthshow operator");
+    }
+    
+    /**
      * PostScript op: begin.
      * 
      * @throws PSError A PostScript error occurred.
@@ -1346,6 +1356,16 @@ public class Interpreter {
     public void op_cvx() throws PSErrorStackUnderflow {
         PSObject any = getOpStack().pop();
         getOpStack().push(any.cvx());
+    }
+    
+    /**
+     * PostScript op: cshow.
+     * 
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * (yet) implemented.
+     */
+    public void op_cshow() throws PSErrorUnimplemented {
+        throw new PSErrorUnimplemented("cshow");
     }
     
     /**
@@ -3739,6 +3759,16 @@ public class Interpreter {
             getOpStack().push(dict);
             getOpStack().push(new PSObjectBool(true));
         }
+    }
+    
+    /**
+     * PostScript op: widthshow.
+     * 
+     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * (yet) implemented.
+     */
+    public void op_widthshow() throws PSErrorUnimplemented {
+        throw new PSErrorUnimplemented("widthshow operator");
     }
    
     /**
