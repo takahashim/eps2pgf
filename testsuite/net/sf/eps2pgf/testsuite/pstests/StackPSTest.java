@@ -1,6 +1,4 @@
 /*
- * StackPSTest.java
- *
  * This file is part of Eps2pgf.
  *
  * Copyright 2007-2008 Paul Wagenaars <paul@wagenaars.org>
