@@ -65,6 +65,8 @@ Changelog
 ----------------------------------------------------------------------------
 v0.8.0 (200?-??-??)
   - Fixed: bug #2003425 Failed to convert PS figure created by dvips
+  - Added: missing texstrings for all symbols specified by
+           ISOLatin1Encoding.
 
 v0.7.0 (2008-08-24)
   - Added: feature #1856797 Bitmap images
