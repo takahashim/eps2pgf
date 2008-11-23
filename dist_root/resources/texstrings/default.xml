@@ -24,7 +24,7 @@
 <entry key="Beta">B</entry>
 
 <entry key="C">C</entry>
-<entry key="Cacute">\'C</entry>
+<entry key="Cacute">\&apos;C</entry>
 <entry key="Ccaron">\v{C}</entry>
 <entry key="Ccedilla">\c{C}</entry>
 <entry key="Chi">X</entry>
@@ -35,10 +35,10 @@
 <entry key="Delta">$\Delta$</entry>
 
 <entry key="E">E</entry>
-<entry key="Eacute">\'E</entry>
+<entry key="Eacute">\&apos;E</entry>
 <entry key="Ecaron">\v{E}</entry>
 <entry key="Ecircumflex">\^E</entry>
-<entry key="Edieresis">\"E</entry>
+<entry key="Edieresis">\&quot;E</entry>
 <entry key="Edotaccent">\.E</entry>
 <entry key="Egrave">\`E</entry>
 <entry key="Emacron">\=E</entry>
@@ -57,9 +57,9 @@
 <entry key="H">H</entry>
 
 <entry key="I">I</entry>
-<entry key="Iacute">\'I</entry>
+<entry key="Iacute">\&apos;I</entry>
 <entry key="Icircumflex">\^I</entry>
-<entry key="Idieresis">\"I</entry>
+<entry key="Idieresis">\&quot;I</entry>
 <entry key="Idotaccent">\.I</entry>
 <entry key="Ifraktur">$\Im$</entry>
 <entry key="Igrave">\`I</entry>
@@ -80,13 +80,19 @@
 <entry key="Mu">M</entry>
 
 <entry key="N">N</entry>
+<entry key="Ntilde">\~{N}</entry>
 <entry key="Nu">N</entry>
 
 <entry key="O">O</entry>
 <entry key="OE">{\OE}</entry>
+<entry key="Oacute">{\&apos;O}</entry>
+<entry key="Ocircumflex">{\^O}</entry>
+<entry key="Odieresis">\&quot;O</entry>
+<entry key="Ograve">{\`O}</entry>
 <entry key="Omega">$\Omega$</entry>
 <entry key="Omicron">O</entry>
 <entry key="Oslash">{\O}</entry>
+<entry key="Otilde">{\~O}</entry>
 
 <entry key="P">P</entry>
 <entry key="Phi">$\Phi$</entry>
@@ -104,10 +110,13 @@
 
 <entry key="T">T</entry>
 <entry key="Tau">T</entry>
+<entry key="Thorn">{\TH}</entry>
 <entry key="Theta">$\Theta$</entry>
 
 <entry key="U">U</entry>
+<entry key="Uacute">{\&apos;U}</entry>
 <entry key="Ucircumflex">\^U</entry>
+<entry key="Udieresis">\&quot;U</entry>
 <entry key="Ugrave">\`U</entry>
 <entry key="Upsilon">$\Upsilon$</entry>
 <entry key="Upsilon1">$\Upsilon$</entry>
@@ -120,13 +129,18 @@
 <entry key="Xi">$\Xi$</entry>
 
 <entry key="Y">Y</entry>
+<entry key="Yacute">{\&apos;Y}</entry>
 
 <entry key="Z">Z</entry>
 <entry key="Zeta">Z</entry>
         
 <entry key="a">a</entry>
+<entry key="aacute">\&apos;a</entry>
+<entry key="acircumflex">\^a</entry>
 <entry key="acute">$\acute{\,}$</entry>
+<entry key="adieresis">\&quot;a</entry>
 <entry key="ae">{\ae}</entry>
+<entry key="agrave">\`a</entry>
 <entry key="aleph">$\aleph$</entry>
 <entry key="alpha">$\alpha$</entry>
 <entry key="ampersand">\&amp;</entry>
@@ -151,6 +165,7 @@
 <entry key="asciitilde">{\textasciitilde}</entry>
 <entry key="asterisk">*</entry>
 <entry key="at">@</entry>
+<entry key="atilde">\~a</entry>
 
 <entry key="b">b</entry>
 <entry key="backslash">$\backslash$</entry>
@@ -174,11 +189,13 @@
 <entry key="bracketrightex">|</entry>
 <entry key="bracketrighttp">]</entry>
 <entry key="breve">{\textasciibreve}</entry>
+<entry key="brokenbar">{\textbrokenbar}</entry>
 <entry key="bullet">{\textbullet}</entry>
 
 <entry key="c">c</entry>
 <entry key="carriagereturn">\Pisymbol{psy}{191}</entry>
 <entry key="caron">{\textasciicaron}</entry>
+<entry key="ccedilla">\c{c}</entry>
 <entry key="cedilla">\c{}</entry>
 <entry key="cent">{\textcent}</entry>
 <entry key="chi">$\chi$</entry>
@@ -187,6 +204,7 @@
 <entry key="circumflex">{\textasciicircum}</entry>
 <entry key="club">$\clubsuit$</entry>
 <entry key="colon">:</entry>
+<entry key="copyright">{\textcopyright}</entry>
 <entry key="copyrightsans">\copyright</entry>
 <entry key="copyrightserif">\copyright</entry>
 <entry key="comma">,</entry>
@@ -207,6 +225,10 @@
 <entry key="dotmath">$\cdot$</entry>
 
 <entry key="e">e</entry>
+<entry key="eacute">\&apos;e</entry>
+<entry key="ecircumflex">\^e</entry>
+<entry key="edieresis">\&quot;e</entry>
+<entry key="egrave">\`e</entry>
 <entry key="eight">8</entry>
 <entry key="element">$\in$</entry>
 <entry key="ellipsis">{\dots}</entry>
@@ -245,10 +267,12 @@
 <entry key="h">h</entry>
 <entry key="heart">$\heartsuit$</entry>
 <entry key="hungarumlaut">\H{}</entry>
+<entry key="hyphen">{\--}</entry>
 
 <entry key="i">i</entry>
+<entry key="iacute">\&apos;i</entry>
 <entry key="icircumflex">\^i</entry>
-<entry key="idieresis">\"i</entry>
+<entry key="idieresis">\&quot;i</entry>
 <entry key="igrave">\`i</entry>
 <entry key="infinity">$\infty$</entry>
 <entry key="integral">$\int$</entry>
@@ -290,12 +314,19 @@
 <entry key="numbersign">{\#}</entry>
 
 <entry key="o">o</entry>
+<entry key="oacute">\&apos;o</entry>
+<entry key="ocircumflex">\^o</entry>
+<entry key="odieresis">\&quot;o</entry>
 <entry key="oe">{\oe}</entry>
 <entry key="ogonek">\k{}</entry>
+<entry key="ograve">\`o</entry>
 <entry key="omega">$\omega$</entry>
 <entry key="omega1">$\varpi$</entry>
 <entry key="omicron">o</entry>
 <entry key="one">1</entry>
+<entry key="onehalf">$\frac{1}{2}$</entry>
+<entry key="onequarter">$\frac{1}{4}$</entry>
+<entry key="onesuperior">$^1$</entry>
 <entry key="ordfeminine">$^\mathrm{a}$</entry>
 <entry key="ordmasculine">$^\mathrm{o}$</entry>
 <entry key="oslash">{\o}</entry>
@@ -345,6 +376,7 @@
 <entry key="radicalex">$^{-}$</entry>
 <entry key="reflexsubset">$\subseteq$</entry>
 <entry key="reflexsuperset">$\supseteq$</entry>
+<entry key="registered">{\textregistered}</entry>
 <entry key="registersans">\circledR</entry>
 <entry key="registerserif">\circledR</entry>
 <entry key="rho">$\rho$</entry>
@@ -379,9 +411,16 @@
 <entry key="trademarkserif">\texttrademark</entry>
 <entry key="triangle">$\triangle$</entry>
 <entry key="two">2</entry>
+<entry key="thorn">{\th}</entry>
+<entry key="threequarters">$\frac{3}{4}$</entry>
+<entry key="threesuperior">$^3$</entry>
+<entry key="twosuperior">$^2$</entry>
 
 <entry key="u">u</entry>
-<entry key="uacute">\'u</entry>
+<entry key="uacute">\&apos;u</entry>
+<entry key="ucircumflex">\^u</entry>
+<entry key="udieresis">\&quot;u</entry>
+<entry key="ugrave">\`u</entry>
 <entry key="underscore">{\_}</entry>
 <entry key="union">$\cup$</entry>
 <entry key="universal">$\forall$</entry>
@@ -396,7 +435,9 @@
 <entry key="xi">$\xi$</entry>
 
 <entry key="y">y</entry>
-<entry key="yen">{\yen}</entry>
+<entry key="yacute">\&apos;y</entry>
+<entry key="ydieresis">\&quot;y</entry>
+<entry key="yen">{\textyen}</entry>
 
 <entry key="z">z</entry>
 <entry key="zero">0</entry>

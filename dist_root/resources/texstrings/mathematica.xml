@@ -493,8 +493,8 @@
 
 	<entry key="Xi">$\xi$</entry>
 	
-	<entry key="Yacute">{\'Y}</entry>
-	<entry key="yacute">{\'y}</entry>
+	<entry key="Yacute">{\&apos;Y}</entry>
+	<entry key="yacute">{\&apos;y}</entry>
 
     <entry key="Zcaron">\v{Z}</entry>
     <entry key="zcaron">\v{z}</entry>
