@@ -125,5 +125,15 @@ public class ResourcePSTest {
             + "/testkey /Widget resourcestatus 3 1 roll pop pop";
         assertTrue(Common.testString(interp, cmd));
     }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void resourceTest8() throws Exception {
+        String cmd = "StandardEncoding /StandardEncoding /Encoding"
+            + " findresource eq"
+            + " ISOLatin1Encoding /ISOLatin1Encoding findencoding eq"
+            + " SymbolEncoding /SymbolEncoding findencoding eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
 
 }

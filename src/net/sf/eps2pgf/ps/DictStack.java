@@ -37,7 +37,9 @@ import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectOperator;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
-import net.sf.eps2pgf.ps.resources.Encoding;
+import net.sf.eps2pgf.ps.resources.encodings.ISOLatin1Encoding;
+import net.sf.eps2pgf.ps.resources.encodings.StandardEncoding;
+import net.sf.eps2pgf.ps.resources.encodings.SymbolEncoding;
 import net.sf.eps2pgf.util.ArrayStack;
 
 /**
@@ -264,12 +266,9 @@ public class DictStack {
         systemdict.setKey("currentglobal", new PSObjectBool(false));
         
         // add encoding vectors
-        PSObjectName[] encodingVector = Encoding.getISOLatin1Vector();
-        systemdict.setKey("ISOLatin1Encoding",
-                new PSObjectArray(encodingVector));
-        encodingVector = Encoding.getStandardVector();
-        systemdict.setKey("StandardEncoding",
-                new PSObjectArray(encodingVector));
+        systemdict.setKey("ISOLatin1Encoding", ISOLatin1Encoding.get());
+        systemdict.setKey("StandardEncoding", StandardEncoding.get());
+        systemdict.setKey("SymbolEncoding", SymbolEncoding.get());
         
         // Add some dummy operators that set the page size. These are sometimes
         // used.

@@ -37,7 +37,9 @@ import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
-import net.sf.eps2pgf.ps.resources.Encoding;
+import net.sf.eps2pgf.ps.resources.encodings.ISOLatin1Encoding;
+import net.sf.eps2pgf.ps.resources.encodings.StandardEncoding;
+import net.sf.eps2pgf.ps.resources.encodings.SymbolEncoding;
 import net.sf.eps2pgf.ps.resources.fonts.FontManager;
 import net.sf.eps2pgf.ps.resources.fonts.PSObjectFontMetrics;
 
@@ -140,9 +142,10 @@ public class PSObjectFont extends PSObjectDict {
      * @param fontName Name of the font to load
      * 
      * @throws PSErrorInvalidFont the PS error invalid font
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public PSObjectFont(final File resourceDir, final String fontName)
-            throws PSErrorInvalidFont {
+            throws PSErrorInvalidFont, ProgramError {
         
         super();
         
@@ -168,14 +171,11 @@ public class PSObjectFont extends PSObjectDict {
         setFID();
         String encoding = props.getProperty("encoding", "Standard");
         if (encoding.equals("Standard")) {
-            setKey(KEY_ENCODING,
-                    new PSObjectArray(Encoding.getStandardVector()));
+            setKey(KEY_ENCODING, StandardEncoding.get());
         } else if (encoding.equals("ISOLatin1")) {
-            setKey(KEY_ENCODING,
-                    new PSObjectArray(Encoding.getISOLatin1Vector()));
+            setKey(KEY_ENCODING, ISOLatin1Encoding.get());
         } else if (encoding.equals("Symbol")) {
-            setKey(KEY_ENCODING,
-                    new PSObjectArray(Encoding.getSymbolVector()));
+            setKey(KEY_ENCODING, SymbolEncoding.get());
         } else {
             LOG.severe("Unknown encoding: " + encoding);
             throw new PSErrorInvalidFont();

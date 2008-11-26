@@ -62,6 +62,22 @@ public class PSObjectArray extends PSObject {
     }
 
     /**
+     * Create a new PostScript array with n elements filled with PSObjectNull
+     * objects.
+     * 
+     * @param n Number of elements.
+     */
+    public PSObjectArray(final int n) {
+        setArray(new ArrayList<PSObject>(n));
+        setOffset(0);
+        setCount(n);
+        PSObjectNull nullObj = new PSObjectNull();
+        for (int i = 0; i < 256; i++) {
+            addToEnd(nullObj);
+        }
+    }
+
+    /**
      * Creates a new instance of PSObjectArray.
      * 
      * @param dblArray Array of doubles

@@ -60,7 +60,6 @@ import net.sf.eps2pgf.ps.objects.PSObjectNull;
 import net.sf.eps2pgf.ps.objects.PSObjectOperator;
 import net.sf.eps2pgf.ps.objects.PSObjectReal;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
-import net.sf.eps2pgf.ps.resources.Encoding;
 import net.sf.eps2pgf.ps.resources.ResourceManager;
 import net.sf.eps2pgf.ps.resources.colors.DeviceCMYK;
 import net.sf.eps2pgf.ps.resources.colors.DeviceGray;
@@ -199,7 +198,6 @@ public class Interpreter {
         initializationTime = System.currentTimeMillis();
         
         // Initialize character encodings and fonts
-        Encoding.initialize();
         resourceManager = new ResourceManager();
         
         // Initialize interpreter parameters
@@ -1715,6 +1713,17 @@ public class Interpreter {
         PSObjectFile file =
             FilterManager.filter(name, paramDict, sourceOrTarget);
         getOpStack().push(file);
+    }
+    
+    /**
+     * PostScript op: findencoding.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_findencoding() throws PSError, ProgramError {
+        getOpStack().push(new PSObjectName("/Encoding"));
+        op_findresource();
     }
     
     /**

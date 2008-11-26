@@ -33,6 +33,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.resources.colors.ColorManager;
+import net.sf.eps2pgf.ps.resources.encodings.EncodingManager;
 import net.sf.eps2pgf.ps.resources.filters.FilterManager;
 import net.sf.eps2pgf.ps.resources.fonts.FontManager;
 
@@ -245,8 +246,9 @@ public final class ResourceManager {
      * Create a new resource manager.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSError A PostScript error occurred.
      */
-    public ResourceManager() throws ProgramError {
+    public ResourceManager() throws PSError, ProgramError {
         fontManager = new FontManager();
         
         // Set the generic implementation dictionary for each resource category.
@@ -258,6 +260,8 @@ public final class ResourceManager {
         resources = new PSObjectDict();
         resources.setKey(CAT_CATEGORY, categoryDict);
         resources.setKey(CAT_GENERIC, genericDict);
+        
+        EncodingManager.initialize(this);
     }
     
     /**

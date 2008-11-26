@@ -134,6 +134,7 @@ public final class Main {
             LOG.severe("Execution failed due to a PostScript error in the input"
                     + " file.");
         } catch (ProgramError e) {
+            e.printStackTrace();
             LOG.severe("Execution failed due to an error in the program. Please"
                     + " report this to the author.");
         }
