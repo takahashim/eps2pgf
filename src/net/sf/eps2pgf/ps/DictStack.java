@@ -287,19 +287,20 @@ public class DictStack {
         systemdict.setKey("currentpacking", new PSObjectBool(false));
         systemdict.setKey("languagelevel", new PSObjectInt(3));
         
-        String version = Main.APP_VERSION;
-        systemdict.setKey("version", new PSObjectString(version));
+        String version = Main.APP_VERSION.replace(".", "0");
         int revision;
         try {
-            revision = Integer.parseInt(version.replace(".", "0"));
+            revision = Integer.parseInt(version);
         } catch (NumberFormatException e) {
-            revision = 0;
+            version = "1";
+            revision = 1;
         }
+        systemdict.setKey("version", new PSObjectString(version));
         systemdict.setKey("revision", new PSObjectInt(revision));
         systemdict.setKey("serialnumber", new PSObjectInt(0));
         systemdict.setKey("product", "Eps2pgf");
     }
-
+    
     /**
      * Push a dictionary onto the stack.
      * 
