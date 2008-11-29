@@ -591,7 +591,7 @@ public final class ResourceManager {
     public PSObjectArray resourceStatus(final PSObjectName category,
             final PSObject key) throws PSError {
         
-        LOG.fine("Quering status of resource: category = " + category.isis()
+        LOG.fine("Querying status of resource: category = " + category.isis()
                 + ", key = " + key.isis());
         
         // Get the procedure that implements this operator from the
