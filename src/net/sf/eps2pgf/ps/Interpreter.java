@@ -1158,6 +1158,16 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: currentpagedevice.
+     */
+    public void op_currentpagedevice() {
+        // Currently, this operator will always return an empty dictionary
+        // indicating that there is no page.
+        PSObjectDict emptyDict = new PSObjectDict();
+        getOpStack().push(emptyDict);
+    }
+    
+    /**
      * PostScript op: currentpoint.
      * 
      * @throws PSError A PostScript error occurred.
@@ -3332,6 +3342,16 @@ public class Interpreter {
         boolean bool = getOpStack().pop().toBool();
         PSObjectDict systemDict = dictStack.lookup("systemdict").toDict();
         systemDict.setKey("currentpacking", new PSObjectBool(bool));
+    }
+    
+    /**
+     * PostScript op: setpagedevice.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_setpagedevice() throws PSError {
+        // Just pop the dictionary from the stack and don't do anything with it.
+        getOpStack().pop().toDict();
     }
     
     /**
