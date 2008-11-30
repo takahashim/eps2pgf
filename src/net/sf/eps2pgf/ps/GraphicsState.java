@@ -140,9 +140,9 @@ public class GraphicsState implements Cloneable {
         font = new PSObjectFont();
         
         try {
-            blackGeneration = new PSObjectArray("{}");
-            undercolorRemoval = new PSObjectArray("{}");
-            transfer = new PSObjectArray("[{} {} {} {}]");
+            blackGeneration = new PSObjectArray("{}", null);
+            undercolorRemoval = new PSObjectArray("{}", null);
+            transfer = new PSObjectArray("[{} {} {} {}]", null);
         } catch (PSError e) {
             // this can never happen
         }

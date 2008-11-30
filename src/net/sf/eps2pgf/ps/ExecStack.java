@@ -57,6 +57,8 @@ public class ExecStack {
      * Gets the next PostScript token from the top-most item on this execution
      * stack.
      * 
+     * @param interp The interpreter.
+     * 
      * @return Returns next token. Returns <code>null</code> when there are no
      * more tokens left on the top item on the stack. This empty top
      * item is popped and <code>null</code> is returned.
@@ -64,7 +66,9 @@ public class ExecStack {
      * @throws PSError There was a PostScript error retrieving the next token.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObject getNextToken() throws PSError, ProgramError {
+    public PSObject getNextToken(final Interpreter interp)
+            throws PSError, ProgramError {
+        
         // Check for empty stack
         if (stack.size() == 0) {
             return null;
@@ -73,7 +77,7 @@ public class ExecStack {
         // Loop through all object on the stack until we find a token
         PSObject top;
         while ((top = getTop()) != null) {
-            List<PSObject> list = top.token();
+            List<PSObject> list = top.token(interp);
             if (list.size() == 2) {
                 return list.get(0);
             } else if (list.size() == 3) {

@@ -328,7 +328,7 @@ public class Interpreter {
      */
     public void run() throws PSError, ProgramError {
         while (this.getExecStack().size() > 0) {
-            PSObject obj = this.getExecStack().getNextToken();
+            PSObject obj = this.getExecStack().getNextToken(this);
             if (obj != null) {
                 executeObject(obj, false);
             }
@@ -351,7 +351,7 @@ public class Interpreter {
         executeObject(objectToRun);
         try {
             while (execStack.getTop() != topAtStart) {
-                PSObject obj = getExecStack().getNextToken();
+                PSObject obj = getExecStack().getNextToken(this);
                 if (obj != null) {
                     executeObject(obj, false);
                 }            
@@ -1212,7 +1212,7 @@ public class Interpreter {
             //   2 div
             // }
             String spotFunction = "{ 180 mul cos exch 180 mul cos add 2 div }";
-            getOpStack().push(Parser.convertToPSObject(spotFunction));
+            getOpStack().push(Parser.convertToPSObject(spotFunction, this));
         } catch (PSErrorIOError ex) {
             // this can never happen
         } catch (IOException ex) {
@@ -1392,7 +1392,7 @@ public class Interpreter {
      */
     public void op_dblGreaterBrackets() throws PSError, IOException,
             ProgramError {
-        PSObjectArray defProc = new PSObjectArray("{def}");
+        PSObjectArray defProc = new PSObjectArray("{def}", this);
         
         op_counttomark(); getOpStack().push(new PSObjectInt(2)); op_idiv();
         op_dup(); op_dict();
@@ -3668,7 +3668,7 @@ public class Interpreter {
                 && !(obj instanceof PSObjectFile)) {
             throw new PSErrorTypeCheck();
         }
-        for (PSObject item : obj.token()) {
+        for (PSObject item : obj.token(this)) {
             getOpStack().push(item);
         }
     }

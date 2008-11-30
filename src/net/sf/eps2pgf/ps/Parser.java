@@ -25,6 +25,7 @@ import java.util.List;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
@@ -52,6 +53,7 @@ public final class Parser {
      * Convert PostScript code to list of objects.
      * 
      * @param in Reader with PostScript code
+     * @param interp The interp.
      * 
      * @return List with PostScript objects
      * 
@@ -59,12 +61,13 @@ public final class Parser {
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public static List<PSObject> convertAll(final InputStream in)
-            throws IOException, PSError, ProgramError {
+    public static List<PSObject> convertAll(final InputStream in,
+            final Interpreter interp) throws IOException, PSError,
+            ProgramError {
         
         List<PSObject> seq = new ArrayList<PSObject>();
         PSObject obj;
-        while ((obj = convertSingle(in)) != null) {
+        while ((obj = convertSingle(in, interp)) != null) {
             seq.add(obj);
         }
         return seq;
@@ -74,6 +77,7 @@ public final class Parser {
      * Read PostScript code until a single object is encountered.
      * 
      * @param in Read characters (PostScript code) from this reader.
+     * @param interp The interpreter.
      * 
      * @return Object read from in reader or 'null' if there were no more
      * objects.
@@ -82,8 +86,9 @@ public final class Parser {
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public static PSObject convertSingle(final InputStream in)
-            throws IOException, PSError, ProgramError {
+    public static PSObject convertSingle(final InputStream in, 
+            final Interpreter interp) throws IOException, PSError,
+            ProgramError {
         
         StringBuilder strSoFar = new StringBuilder();
         boolean inComment = false;
@@ -202,7 +207,7 @@ public final class Parser {
                 //
                 tokenBefore = true;
                 tokenAfter = true;
-            } else if (chr == '/') {
+            } else if ((chr == '/') && (prevChr != '/')) {
                 //
                 // Start of literal
                 //
@@ -258,7 +263,8 @@ public final class Parser {
                     in.reset();
                     charsThisConvert--;
                 }
-                PSObject newObj = convertToPSObject(strSoFar.toString());
+                PSObject newObj = convertToPSObject(strSoFar.toString(),
+                        interp);
                 charsLastConvert = charsThisConvert;
                 return newObj;
             }
@@ -266,7 +272,8 @@ public final class Parser {
                 strSoFar.append(chr);
             }
             if (tokenAfter && (strSoFar.length() > 0)) {
-                PSObject newObj = convertToPSObject(strSoFar.toString());
+                PSObject newObj = convertToPSObject(strSoFar.toString(),
+                        interp);
                 charsLastConvert = charsThisConvert;
                 return newObj;
             }
@@ -275,7 +282,8 @@ public final class Parser {
         } // end of loop through all characters
         
         if (strSoFar.length() > 0) {
-                PSObject newObj = convertToPSObject(strSoFar.toString());
+                PSObject newObj = convertToPSObject(strSoFar.toString(),
+                        interp);
                 charsLastConvert = charsThisConvert;
                 return newObj;
         }
@@ -288,6 +296,7 @@ public final class Parser {
      * Convert a string to a PostScript object.
      * 
      * @param str String to convert.
+     * @param interp The interpreter (required for immediately evaluated names)
      * 
      * @return the PS object
      * 
@@ -295,21 +304,34 @@ public final class Parser {
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    static PSObject convertToPSObject(final String str)
-            throws IOException, PSError, ProgramError {
+    static PSObject convertToPSObject(final String str,
+            final Interpreter interp) throws IOException, PSError,
+            ProgramError {
         
         if (PSObjectInt.isType(str)) {
             return new PSObjectInt(str);
         } else if (PSObjectReal.isType(str)) {
             return new PSObjectReal(str);
         } else if (PSObjectArray.isType(str)) {
-            return new PSObjectArray(str);
+            return new PSObjectArray(str, interp);
         } else if (PSObjectString.isType(str)) {
             return new PSObjectString(str, true);
         } else {
-            // At this we assume the object to be a name, either literal
-            // or executable.
-            return new PSObjectName(str);
+            // At this we assume the object to be a name, either literal,
+            // executable, or immediately evaluated.
+            if (str.startsWith("//")) {
+                // This is an immediately evaluated name. So we immediately look
+                // up the name and return the associated object.
+                PSObject obj = interp.getDictStack().lookup(str.substring(2));
+                if (obj == null) {
+                    throw new PSErrorUndefined();
+                } else {
+                    return obj;
+                }
+            } else {
+                // This is a literal or executable name.
+                return new PSObjectName(str);
+            }
         }
     }
 

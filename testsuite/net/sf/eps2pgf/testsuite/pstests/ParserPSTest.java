@@ -122,4 +122,13 @@ public class ParserPSTest {
         assertTrue(Common.testString(interp, cmd));
     }
 
+    /** Parser test. @throws Exception the exception */
+    @Test
+    public void parserTest10() throws Exception {
+        String cmd = "/nr 99 def {1 2 //nr 3 4} 2 get 99 eq"
+            + " /key {1 2 //nr 3 4} def /nr 88 def key"
+            + " 4 eq 5 1 roll 3 eq 5 1 roll 99 eq 5 1 roll 2 eq 5 1 roll 1 eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
 }

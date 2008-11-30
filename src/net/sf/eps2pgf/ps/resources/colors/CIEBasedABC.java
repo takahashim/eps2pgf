@@ -87,9 +87,9 @@ public class CIEBasedABC extends CIEBased {
         }
         if (!dict.known(DECODEABC)) {
             PSObjectArray defaultDecode = new PSObjectArray();
-            defaultDecode.addToEnd(new PSObjectArray("{}"));
-            defaultDecode.addToEnd(new PSObjectArray("{}"));
-            defaultDecode.addToEnd(new PSObjectArray("{}"));
+            defaultDecode.addToEnd(new PSObjectArray("{}", null));
+            defaultDecode.addToEnd(new PSObjectArray("{}", null));
+            defaultDecode.addToEnd(new PSObjectArray("{}", null));
             dict.setKey(DECODEABC, defaultDecode);
         }
         if (!dict.known(MATRIXABC)) {

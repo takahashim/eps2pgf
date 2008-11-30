@@ -90,9 +90,9 @@ public abstract class CIEBased extends PSColor {
         }
         if (!dict.known(DECODELMN)) {
             PSObjectArray defaultDecode = new PSObjectArray();
-            defaultDecode.addToEnd(new PSObjectArray("{}"));
-            defaultDecode.addToEnd(new PSObjectArray("{}"));
-            defaultDecode.addToEnd(new PSObjectArray("{}"));
+            defaultDecode.addToEnd(new PSObjectArray("{}", null));
+            defaultDecode.addToEnd(new PSObjectArray("{}", null));
+            defaultDecode.addToEnd(new PSObjectArray("{}", null));
             dict.setKey(DECODELMN, defaultDecode);
         }
         if (!dict.known(MATRIXLMN)) {

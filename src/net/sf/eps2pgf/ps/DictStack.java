@@ -205,7 +205,7 @@ public class DictStack {
     private void fillSystemDict(final Interpreter interp)
             throws PSError, ProgramError {
 
-        PSObjectArray emptyProc = new PSObjectArray("{}");
+        PSObjectArray emptyProc = new PSObjectArray("{}", interp);
 
         // Add operators
         Method[] mthds = interp.getClass().getMethods();
@@ -237,7 +237,7 @@ public class DictStack {
         // add errordict dictionary
         PSObjectDict errordict = new PSObjectDict();
         // dummy dictionary, error handling is not yet implemented
-        errordict.setKey("handleerror", new PSObjectArray("{stop}"));
+        errordict.setKey("handleerror", new PSObjectArray("{stop}", interp));
         systemdict.setKey("errordict", errordict);
         
         // Add $error dictionary

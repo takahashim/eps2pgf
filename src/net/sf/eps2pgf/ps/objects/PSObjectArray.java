@@ -113,11 +113,15 @@ public class PSObjectArray extends PSObject {
      * Creates a new executable array object.
      * 
      * @param pStr String representing a valid procedure (executable array)
+     * @param interp The interpreter (only required if string contains
+     * immediately evaluated names).
      * 
      * @throws PSError PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectArray(final String pStr) throws ProgramError, PSError {
+    public PSObjectArray(final String pStr, final Interpreter interp)
+            throws ProgramError, PSError {
+        
         String str = pStr;
         
         // quick check whether it is a literal or executable array
@@ -132,7 +136,7 @@ public class PSObjectArray extends PSObject {
         InputStream inStream = new PSStringInputStream(new PSObjectString(str));
         
         try {
-            this.setArray(Parser.convertAll(inStream));
+            this.setArray(Parser.convertAll(inStream, interp));
             this.setCount(this.getArray().size());
             this.setOffset(0);
         } catch (IOException e) {
@@ -640,16 +644,19 @@ public class PSObjectArray extends PSObject {
      * Please note that this method does not perform a type check following the
      * offical 'token' operator. This method will always return a result.
      * 
+     * @param interp The interpreter. Not required, may be null.
+     * 
      * @return List with one or more objects. The following are possible:
-     *         1 object : { "false boolean" }
-     *         2 objects: { "next token", "true boolean" }
-     *         3 objects: { "remainder of this object", "next token",
-     *                      "true boolean" }
-     *         
+     * 1 object : { "false boolean" }
+     * 2 objects: { "next token", "true boolean" }
+     * 3 objects: { "remainder of this object", "next token",
+     * "true boolean" }
+     * 
      * @throws PSError A PostScript error occurred.
      */
     @Override
-    public List<PSObject> token() throws PSError {
+    public List<PSObject> token(final Interpreter interp) throws PSError {
+        
         List<PSObject> list;
         int nr = size();
         if (nr == 0) {

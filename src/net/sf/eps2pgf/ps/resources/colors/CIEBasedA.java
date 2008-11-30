@@ -87,7 +87,7 @@ public class CIEBasedA extends CIEBased {
             dict.setKey(RANGEA, new PSObjectArray(defaultRange));
         }
         if (!dict.known(DECODEA)) {
-            dict.setKey(DECODEA, new PSObjectArray("{}"));
+            dict.setKey(DECODEA, new PSObjectArray("{}", null));
         }
         if (!dict.known(MATRIXA)) {
             double[] defaultMatrix =  {1.0, 1.0, 1.0};
