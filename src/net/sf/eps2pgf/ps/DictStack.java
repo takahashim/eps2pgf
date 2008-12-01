@@ -260,6 +260,10 @@ public class DictStack {
         systemdict.setKey("statusdict", new PSObjectDict());
         systemdict.setKey("FontDirectory",
                 interp.getResourceManager().getFontManager());
+        systemdict.setKey("GlobalFontDirectory",
+                interp.getResourceManager().getFontManager());
+        systemdict.setKey("SharedFontDirectory",
+                interp.getResourceManager().getFontManager());
         systemdict.setKey(KEY_INTERNALDICT, new PSObjectDict());
         
         // VM allocation mode
