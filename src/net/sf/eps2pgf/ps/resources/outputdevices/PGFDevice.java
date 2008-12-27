@@ -45,7 +45,7 @@ import net.sf.eps2pgf.ps.PathSection;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
@@ -228,10 +228,10 @@ public class PGFDevice implements OutputDevice {
      * @param path The path.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      * (yet) implemented.
      */
-    void writePath(final Path path) throws IOException, PSErrorUnimplemented {
+    void writePath(final Path path) throws IOException, PSErrorUnregistered {
         for (int i = 0; i < path.getSections().size(); i++) {
             PathSection section = path.getSections().get(i);
             if (section instanceof Moveto) {
@@ -261,7 +261,7 @@ public class PGFDevice implements OutputDevice {
             } else if (section instanceof Closepath) {
                 out.write("\\pgfpathclose\n");
             } else {
-                throw new PSErrorUnimplemented("Can't handle "
+                throw new PSErrorUnregistered("Can't handle "
                         + section.getClass().getName());
             }
         }
@@ -297,11 +297,11 @@ public class PGFDevice implements OutputDevice {
      * @param clipPath the clip path
      * 
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      *                              (yet) implemented.
      */
     public void clip(final Path clipPath)
-            throws IOException, PSErrorUnimplemented {
+            throws IOException, PSErrorUnregistered {
         writePath(clipPath);
         out.write("\\pgfusepath{clip}\n");
     }
@@ -399,7 +399,7 @@ public class PGFDevice implements OutputDevice {
         if (shading instanceof RadialShading) {
             radialShading((RadialShading) shading, gstate);
         } else {
-            throw new PSErrorUnimplemented("Shading of this type " + shading);
+            throw new PSErrorUnregistered("Shading of this type " + shading);
         }
     }
     

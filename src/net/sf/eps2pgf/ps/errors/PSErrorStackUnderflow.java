@@ -24,6 +24,14 @@ package net.sf.eps2pgf.ps.errors;
  * @author Paul Wagenaars
  */
 public class PSErrorStackUnderflow extends PSError {
+    
     /** Serial version UID. */
     private static final long serialVersionUID = 1L;
+    
+    /**
+     * Instantiates a new stackunderflow error.
+     */
+    public PSErrorStackUnderflow() {
+        super(PSError.STACKUNDERFLOW);
+    }
 }

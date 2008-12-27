@@ -19,10 +19,19 @@
 package net.sf.eps2pgf.ps.errors;
 
 /**
+ * PostScript error: ioerror.
  *
  * @author Paul Wagenaars
  */
 public class PSErrorIOError extends PSError {
+    
     /** Serial version UID. */
     private static final long serialVersionUID = 1L;
+    
+    /**
+     * Instantiates a new ioerror.
+     */
+    public PSErrorIOError() {
+        super(PSError.IOERROR);
+    }
 }

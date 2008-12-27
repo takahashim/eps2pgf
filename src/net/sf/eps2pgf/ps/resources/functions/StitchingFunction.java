@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.eps2pgf.ps.errors.PSError;
-import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
@@ -89,13 +87,10 @@ public class StitchingFunction extends PSFunction {
      * 
      * @return Output values.
      * 
-     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     * (yet) implemented.
+     * @throws PSError A PostScript error occurred.
      */
     @Override
-    public double[] evaluate(final double[] pInput) throws PSErrorRangeCheck, 
-            PSErrorUnimplemented {
+    public double[] evaluate(final double[] pInput) throws PSError {
         
         double[] input = evaluatePreProcess(pInput);
         

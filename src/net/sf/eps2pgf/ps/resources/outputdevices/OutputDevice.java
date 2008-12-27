@@ -25,7 +25,7 @@ import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.errors.PSError;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 
@@ -43,11 +43,10 @@ public interface OutputDevice extends Cloneable {
      * @param clipPath the clip path
      * 
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     *                              (yet) implemented.
+     * @throws PSErrorUnregistered the PS error unregistered
      */
     void clip(Path clipPath)
-            throws IOException, PSErrorUnimplemented;
+            throws IOException, PSErrorUnregistered;
     
     /**
      * Returns a exact deep copy of this output device.

@@ -36,7 +36,7 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.resources.encodings.ISOLatin1Encoding;
 import net.sf.eps2pgf.ps.resources.encodings.StandardEncoding;
 import net.sf.eps2pgf.ps.resources.encodings.SymbolEncoding;
@@ -309,7 +309,7 @@ public class PSObjectFont extends PSObjectDict {
                 PSObjectName charName = charNames.get(i).toName();
                 PSObject code = texStrings.lookup(charName);
                 if (code == null) {
-                    throw new PSErrorUnimplemented("TexString for "
+                    throw new PSErrorUnregistered("TexString for "
                             + charNames.get(i).isis() + " is unknown.");
                 }
                 str.append(code.toPSString().toString());

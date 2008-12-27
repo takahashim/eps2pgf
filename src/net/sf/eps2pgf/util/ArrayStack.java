@@ -51,6 +51,18 @@ public class ArrayStack<E> extends ArrayList<E> {
     }
     
     /**
+     * Creates a shallow copy of this stack. The objects in this stack are
+     * not cloned.
+     * 
+     * @return A shallow copy of this stack.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public ArrayStack<E> clone() {
+        return (ArrayStack<E>) super.clone();
+    }
+    
+    /**
      * Tests if the stack is empty.
      * 
      * @return True, if stack is empty.

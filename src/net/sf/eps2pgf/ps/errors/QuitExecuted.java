@@ -19,9 +19,12 @@
 package net.sf.eps2pgf.ps.errors;
 
 /**
- * PostScript error: dictstackunderflow.
+ * Indicates that a quit operator has been executed.
+ * 
+ * @author Paul Wagenaars
+ *
  */
-public class PSErrorDictStackUnderflow extends PSError {
+public class QuitExecuted extends InternalSignal {
     
     /**
      * Serial version UID.
@@ -29,9 +32,9 @@ public class PSErrorDictStackUnderflow extends PSError {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Instantiates a new dictstackunderflow error.
+     * Instantiates a new QuitExecuted.
      */
-    public PSErrorDictStackUnderflow() {
-        super(PSError.DICTSTACKUNDERFLOW);
+    public QuitExecuted() {
+        super(PSError.QUITEXECUTED);
     }
 }

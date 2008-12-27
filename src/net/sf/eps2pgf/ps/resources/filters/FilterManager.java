@@ -22,7 +22,7 @@ import java.io.InputStream;
 
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
@@ -240,11 +240,11 @@ public final class FilterManager {
         if (source instanceof PSObjectFile) {
             inStream = source.toFile().getStream();
         } else if (source instanceof PSObjectString) {
-            throw new PSErrorUnimplemented("Using string source for filter");
+            throw new PSErrorUnregistered("Using string source for filter");
         } else if (source instanceof PSObjectArray) {
             @SuppressWarnings("unused")
             PSObjectArray proc = source.toProc();
-            throw new PSErrorUnimplemented("Using procedure source for filter");
+            throw new PSErrorUnregistered("Using procedure source for filter");
         } else {
             throw new PSErrorTypeCheck();
         }
@@ -261,7 +261,7 @@ public final class FilterManager {
         } else if (name.eq(FILTER_SUBFILEDECODE)) {
             filteredStream = new SubFileDecode(inStream, paramDict);
         } else {
-            throw new PSErrorUnimplemented("Decode filter or type " + name);
+            throw new PSErrorUnregistered("Decode filter or type " + name);
         }
         
         return new PSObjectFile(filteredStream);
@@ -283,7 +283,7 @@ public final class FilterManager {
             final PSObjectDict paramDict, final PSObject target)
             throws PSError {
         
-        throw new PSErrorUnimplemented("Encode filters");
+        throw new PSErrorUnregistered("Encode filters");
     }
 
     /**

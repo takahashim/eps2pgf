@@ -23,6 +23,14 @@ package net.sf.eps2pgf.ps.errors;
  * @author Paul Wagenaars
  */
 public class PSErrorUnmatchedMark extends PSError {
+    
     /** Serial version UID. */
     private static final long serialVersionUID = 1L;
+    
+    /**
+     * Instantiates a new unmatchedmark error.
+     */
+    public PSErrorUnmatchedMark() {
+        super(PSError.UNMATCHEDMARK);
+    }
 }

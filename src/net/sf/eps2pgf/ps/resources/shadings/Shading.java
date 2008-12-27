@@ -24,7 +24,7 @@ import java.util.List;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
@@ -73,7 +73,7 @@ public class Shading {
                 newShading = new RadialShading(dict);
                 break;
             default:
-                throw new PSErrorUnimplemented("Shading type "
+                throw new PSErrorUnregistered("Shading type "
                         + shadingTypeObj.toInt());
         }
         
@@ -93,7 +93,7 @@ public class Shading {
         if (functionObj instanceof PSObjectDict) {
             function = PSFunction.newFunction(functionObj.toDict());
         } else if (functionObj instanceof PSObjectArray) {
-            throw new PSErrorUnimplemented("Defining a function with an array");
+            throw new PSErrorUnregistered("Defining a function with an array");
         } else {
             throw new PSErrorTypeCheck();
         }
@@ -114,15 +114,13 @@ public class Shading {
      * 
      * @param s Parametric variable ranging from 0.0 to 1.0, where 0.0
      * corresponds with the starting circle and 1.0 with the ending circle.
-     *          
+     * 
      * @return Array with values of color components. Check the ColorSpace for
      * which value in the array is which component.
-     *         
-     * @throws PSErrorRangeCheck S-value out of range.
-     * @throws PSErrorUnimplemented A required feature is not (yet) implemented.
+     * 
+     * @throws PSError A PostScript error occurred.
      */
-    public double[] getColor(final double s) throws PSErrorRangeCheck, 
-            PSErrorUnimplemented {
+    public double[] getColor(final double s) throws PSError {
         // First, we must convert s to t
         double t = s * (t1 - t0) + t0;
         double[] in = {t};
@@ -145,10 +143,10 @@ public class Shading {
      * @param maxError Maximum vertical distance between original and fitted
      * colors.
      * 
-     * @throws PSErrorUnimplemented A required feature is not yet implemented.
+     * @throws PSError A required feature is not yet implemented.
      */
     public double[] fitLinearSegmentsOnColor(final double maxError) 
-            throws PSErrorUnimplemented {
+            throws PSError {
         
         int nrSegments = 101;
         double[] s = new double[nrSegments];

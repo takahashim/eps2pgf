@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 import com.martiansoftware.jsap.JSAPResult;
 
 import net.sf.eps2pgf.ps.errors.PSError;
-import net.sf.eps2pgf.ps.errors.QuitOpExecuted;
+import net.sf.eps2pgf.ps.errors.QuitExecuted;
 import net.sf.eps2pgf.util.Eps2pgfFormatter;
 import net.sf.eps2pgf.util.Eps2pgfHandler;
 
@@ -128,15 +128,15 @@ public final class Main {
         } catch (ParseException e) {
             LOG.severe("Execution failed due to an error while parsing the text"
                     + " replacements file.");
-        } catch (QuitOpExecuted e) {
+        } catch (QuitExecuted e) {
             /* empty block */
         } catch (PSError e) {
-            LOG.severe("Execution failed due to a PostScript error in the input"
-                    + " file.");
+            LOG.severe("Execution failed due to a PostScript error in the"
+                    + " input file.");
         } catch (ProgramError e) {
             e.printStackTrace();
-            LOG.severe("Execution failed due to an error in the program. Please"
-                    + " report this to the author.");
+            LOG.severe("Execution failed due to an internal error in the"
+                    + " program. Please report this to the author.");
         }
     }
     

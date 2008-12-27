@@ -18,20 +18,41 @@
 
 package net.sf.eps2pgf.ps.errors;
 
+import net.sf.eps2pgf.ps.objects.PSObjectName;
+
 /**
- * PostScript error: dictstackunderflow.
+ * Superclass for internal signaling of the program. These are not standard
+ * PostScript errors.
+ * 
+ * @author Paul Wagenaars
+ *
  */
-public class PSErrorDictStackUnderflow extends PSError {
-    
+public class InternalSignal extends PSError {
+
     /**
      * Serial version UID.
      */
     private static final long serialVersionUID = 1L;
 
     /**
-     * Instantiates a new dictstackunderflow error.
+     * Instantiates a new internal error.
+     * 
+     * @param errorType The error type.
      */
-    public PSErrorDictStackUnderflow() {
-        super(PSError.DICTSTACKUNDERFLOW);
+    protected InternalSignal(final PSObjectName errorType) {
+        super(errorType);
     }
+
+    /**
+     * Instantiates a new internal error.
+     * 
+     * @param errorType The error type.
+     * @param message A custom error message.
+     */
+    protected InternalSignal(final PSObjectName errorType,
+            final String message) {
+        
+        super(errorType, message);
+    }
+
 }

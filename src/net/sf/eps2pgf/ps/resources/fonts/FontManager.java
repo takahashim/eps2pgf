@@ -33,7 +33,7 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFont;
@@ -153,7 +153,7 @@ public final class FontManager extends PSObjectDict {
         font.toDict().setKey(FONT_DICT_KEY, key);
         try {
             font.assertValidFont();
-        } catch (PSErrorUnimplemented e) {
+        } catch (PSErrorUnregistered e) {
             // At this point this error is not fatal. So for now we just ignore
             // it. When the font is actually used it will be fatal.
         }

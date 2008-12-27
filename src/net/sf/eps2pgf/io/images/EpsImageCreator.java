@@ -29,7 +29,6 @@ import net.sf.eps2pgf.Main;
 import net.sf.eps2pgf.io.RandomAccessOutputStream;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.errors.PSError;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.filters.ASCII85Encode;
 import net.sf.eps2pgf.ps.resources.filters.FlateEncode;
@@ -143,11 +142,9 @@ public final class EpsImageCreator {
      * OutputStream.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     * (yet) implemented.
      */
     private static void writeColorSpace(final RandomAccessOutputStream out,
-            final Image img) throws PSErrorUnimplemented, IOException {
+            final Image img) throws IOException {
         
         PSColor colorSpace = img.getColorSpace();
         out.write(colorSpace.getColorSpace().isis());

@@ -31,6 +31,7 @@ public class PSErrorNoCurrentPoint extends PSError {
      * Creates a new instance of PSErrorNoCurrentPoint.
      */
     public PSErrorNoCurrentPoint() {
+        super(PSError.NOCURRENTPOINT);
     }
     
 }

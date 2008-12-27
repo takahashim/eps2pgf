@@ -19,19 +19,19 @@
 package net.sf.eps2pgf.ps.errors;
 
 /**
- * PostScript error: dictstackunderflow.
+ * Indicates that a stop operator has been executed.
  */
-public class PSErrorDictStackUnderflow extends PSError {
-    
+public class StopExecuted extends InternalSignal {
+
     /**
      * Serial version UID.
      */
     private static final long serialVersionUID = 1L;
 
     /**
-     * Instantiates a new dictstackunderflow error.
+     * Instantiates a new StopExecuted.
      */
-    public PSErrorDictStackUnderflow() {
-        super(PSError.DICTSTACKUNDERFLOW);
+    public StopExecuted() {
+        super(PSError.STOPEXECUTED);
     }
 }

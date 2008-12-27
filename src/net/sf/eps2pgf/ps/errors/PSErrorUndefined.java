@@ -26,13 +26,11 @@ public class PSErrorUndefined extends PSError {
     /** Serial version UID. */
     private static final long serialVersionUID = 1L;
     
-    /** Undefined operator. */
-    private String operator;
-    
     /**
      * Create a new PSErrorUndefined exception.
      */
     public PSErrorUndefined() {
+        super(PSError.UNDEFINED);
     }
     
     /**
@@ -41,20 +39,6 @@ public class PSErrorUndefined extends PSError {
      * @param op The undefined operator.
      */
     public PSErrorUndefined(final String op) {
-        operator = op;
-    }
-    
-    /**
-     * Returns the detail message string.
-     * 
-     * @return Detailed message string
-     */
-    @Override
-    public String getMessage() {
-        if (operator == null) {
-            return super.getMessage();
-        } else {
-            return "Error: /undefined in " + operator;
-        }
-    }
+        super(PSError.UNDEFINED, "(operator: " + op + ")");
+    }    
 }

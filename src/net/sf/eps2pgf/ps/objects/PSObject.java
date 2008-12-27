@@ -28,7 +28,7 @@ import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 
 import org.fontbox.afm.FontMetric;
 
@@ -643,12 +643,12 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
     /**
      * Convert this object to a literal object.
      * 
-     * @throws PSErrorUnimplemented Converting this object type to literal is
+     * @throws PSErrorUnregistered Converting this object type to literal is
      * not yet supported.
      * 
      * @return This object converted to a literal object
      */
-    public PSObject cvlit() throws PSErrorUnimplemented {
+    public PSObject cvlit() throws PSErrorUnregistered {
         PSObject dup = dup();
         dup.literal = true;
         return dup;

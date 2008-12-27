@@ -22,7 +22,7 @@ import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
@@ -96,7 +96,7 @@ public class Indexed extends PSColor {
                 }
             }
         } else {
-            throw new PSErrorUnimplemented("Indexed color space with non-string"
+            throw new PSErrorUnregistered("Indexed color space with non-string"
                     + " lookup table.");
         }
         

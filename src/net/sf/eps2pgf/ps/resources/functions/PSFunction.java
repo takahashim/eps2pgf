@@ -22,7 +22,7 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 
@@ -65,7 +65,7 @@ public class PSFunction {
         PSFunction newFunction;
         switch (typeObj.toInt()) {
             case 0:
-                throw new PSErrorUnimplemented("FunctionType 0");
+                throw new PSErrorUnregistered("FunctionType 0");
                 //break;
             case 2:
                 newFunction = new ExponentialFunction(dict);
@@ -114,14 +114,11 @@ public class PSFunction {
      * 
      * @return The output values.
      * 
-     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     * (yet) implemented.
+     * @throws PSError A PostScript error occurred.
      */
-    public double[] evaluate(final double[] input) throws PSErrorRangeCheck, 
-            PSErrorUnimplemented {
+    public double[] evaluate(final double[] input) throws PSError {
         
-        throw new PSErrorUnimplemented("Evaluating functions of this type");
+        throw new PSErrorUnregistered("Evaluating functions of this type");
     }
     
     /**

@@ -19,10 +19,19 @@
 package net.sf.eps2pgf.ps.errors;
 
 /**
+ * Standard PostScript error: invalidexit.
  *
  * @author Paul Wagenaars
  */
 public class PSErrorInvalidExit extends PSError {
+    
     /** Serial version UID. */
     private static final long serialVersionUID = 1L;
+    
+    /**
+     * Instantiates a new invalidexit.
+     */
+    public PSErrorInvalidExit() {
+        super(PSError.INVALIDEXIT);
+    }
 }

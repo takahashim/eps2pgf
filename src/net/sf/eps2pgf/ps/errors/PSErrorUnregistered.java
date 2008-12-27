@@ -19,16 +19,22 @@
 package net.sf.eps2pgf.ps.errors;
 
 /**
- * This "error" is not really an error. It merely signals that the 'quit'
- * PostScript operator has been executed.
- * 
- * @author Paul Wagenaars
- *
+ * PostScript error: unregistered.
  */
-public class QuitOpExecuted extends PSError {
+public class PSErrorUnregistered extends PSError {
 
-    /** Serial version UID. */
+    /**
+     * Serial version UID.
+     */
     private static final long serialVersionUID = 1L;
     
-
+    /**
+     * Instantiates a unregistered error.
+     * 
+     * @param message The message describing what exactly is not implemented.
+     */
+    public PSErrorUnregistered(final String message) {
+        super(PSError.UNREGISTERED, "Feature not (yet) implemented: "
+                + message);
+    }
 }

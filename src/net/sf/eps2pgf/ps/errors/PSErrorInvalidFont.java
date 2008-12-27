@@ -23,17 +23,15 @@ package net.sf.eps2pgf.ps.errors;
  * @author Paul Wagenaars
  */
 public class PSErrorInvalidFont extends PSError {
+
     /** Serial version UID. */
     private static final long serialVersionUID = 1L;
-
-    /** Explanantion of error. */
-    private String operator = "";
-    
 
     /**
      * Creates a new instance of PSErrorInvalidFont.
      */
     public PSErrorInvalidFont() {
+        super(PSError.INVALIDFONT);
     }
     
     /**
@@ -42,21 +40,6 @@ public class PSErrorInvalidFont extends PSError {
      * @param op Explanation of error.
      */
     public PSErrorInvalidFont(final String op) {
-        operator = op;
-    }
-    
-    /**
-     * Returns the detail message string.
-     * 
-     * @return Detail message string
-     */
-    @Override
-    public String getMessage() {
-        if (operator == null) {
-            return super.getMessage();
-        } else {
-            return "Error: Invalid font (" + operator + ")";
-        }
-    }
-
+        super(PSError.INVALIDFONT, "(operator: " + op + ")");
+    }    
 }

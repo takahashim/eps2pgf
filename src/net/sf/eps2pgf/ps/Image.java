@@ -24,7 +24,7 @@ import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
@@ -189,10 +189,10 @@ public class Image {
                     loadType1Image(dict, interp);
                     break;
                 case 3:
-                    throw new PSErrorUnimplemented("Bitmap images of type 3.");
+                    throw new PSErrorUnregistered("Bitmap images of type 3.");
                     // break;
                 case 4:
-                    throw new PSErrorUnimplemented("Bitmap images of type 4.");
+                    throw new PSErrorUnregistered("Bitmap images of type 4.");
                     // break;
                 default:
                     throw new PSErrorRangeCheck();
@@ -246,24 +246,24 @@ public class Image {
         }
         PSObject dataSource = dict.get(DATA_SOURCE);
         if (multipleSources) {
-            throw new PSErrorUnimplemented("Image from multiple data sources.");
+            throw new PSErrorUnregistered("Image from multiple data sources.");
         } else {
             if (dataSource instanceof PSObjectFile) {
                 loadDataFromFile((PSObjectFile) dataSource, imgWidthPx,
                         imgHeightPx, nrInputValues);
             } else if (dataSource instanceof PSObjectString) {
-                throw new PSErrorUnimplemented("Reading (bitmap) image data"
+                throw new PSErrorUnregistered("Reading (bitmap) image data"
                         + " from a string.");
             } else if (dataSource instanceof PSObjectArray) {
                 if (multipleSources) {
-                    throw new PSErrorUnimplemented("Reading bitmap data from"
+                    throw new PSErrorUnregistered("Reading bitmap data from"
                             + " multiple data sources.");
                 } else {
                     loadDataFromProcedure((PSObjectArray) dataSource,
                             imgWidthPx, imgHeightPx, nrInputValues, interp);
                 }
             } else {
-                throw new PSErrorUnimplemented("Reading (bitmap) image data"
+                throw new PSErrorUnregistered("Reading (bitmap) image data"
                         + " from other " + dataSource);
             }
         }
@@ -671,7 +671,7 @@ public class Image {
                 intValue = (data[byteMsb] & maskMsb) << (8 - bitInByteLsb);
                 intValue |= (data[byteLsb] & maskLsb) >> bitInByteLsb;
             } else {
-                throw new PSErrorUnimplemented("More than 16 bit per component"
+                throw new PSErrorUnregistered("More than 16 bit per component"
                         + " is not supported in bitmap images.");
             }
             values[v] = intValue;

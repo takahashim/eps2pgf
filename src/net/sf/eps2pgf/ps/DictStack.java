@@ -236,8 +236,15 @@ public class DictStack {
         
         // add errordict dictionary
         PSObjectDict errordict = new PSObjectDict();
-        // dummy dictionary, error handling is not yet implemented
-        errordict.setKey("handleerror", new PSObjectArray("{stop}", interp));
+        PSObjectName[] errs = PSError.getAllPSErrors();
+        for (int i = 0; i < errs.length; i++) {
+            String str = String.format("{%s eps2pgferrorproc stop}", 
+                    errs[i].isis());
+            PSObjectArray proc = new PSObjectArray(str, interp);
+            errordict.setKey(errs[i], proc);
+        }
+        errordict.setKey("handleerror",
+                new PSObjectArray("{eps2pgfhandleerror}", interp));
         systemdict.setKey("errordict", errordict);
         
         // Add $error dictionary
@@ -332,9 +339,9 @@ public class DictStack {
      * 
      * @return The popped dictionary.
      * 
-     * @throws PSErrorDictStackUnderflow the PS error dict stack underflow
+     * @throws PSError A PostScript error occurred.
      */
-    public PSObjectDict popDict() throws PSErrorDictStackUnderflow {
+    public PSObjectDict popDict() throws PSError {
         try {
             return dictStack.pop();
         } catch (PSErrorStackUnderflow e) {

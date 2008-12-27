@@ -25,7 +25,7 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefinedResource;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
+import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectBool;
@@ -424,7 +424,7 @@ public final class ResourceManager {
         if ((proc.size() > 0) && GENERIC_PROC_NAME.eq(proc.get(0))) {
             return defineResourceGeneric(category, key, instance);
         } else {
-            throw new PSErrorUnimplemented("Using categories with custom"
+            throw new PSErrorUnregistered("Using categories with custom"
                     + " implementation dictionaries.");
         }
     }
@@ -492,7 +492,7 @@ public final class ResourceManager {
         if ((proc.size() > 0) && GENERIC_PROC_NAME.eq(proc.get(0))) {
             undefineResourceGeneric(category, key);
         } else {
-            throw new PSErrorUnimplemented("Using categories with custom"
+            throw new PSErrorUnregistered("Using categories with custom"
                     + " implementation dictionaries.");
         }        
     }
@@ -540,7 +540,7 @@ public final class ResourceManager {
         if ((proc.size() > 0) && GENERIC_PROC_NAME.eq(proc.get(0))) {
             return findResourceGeneric(category, key);
         } else {
-            throw new PSErrorUnimplemented("Using categories with custom"
+            throw new PSErrorUnregistered("Using categories with custom"
                     + " implementation dictionaries.");
         }
     }
@@ -602,7 +602,7 @@ public final class ResourceManager {
         if ((proc.size() > 0) && GENERIC_PROC_NAME.eq(proc.get(0))) {
             return resourceStatusGeneric(category, key);
         } else {
-            throw new PSErrorUnimplemented("Using categories with custom"
+            throw new PSErrorUnregistered("Using categories with custom"
                     + " implementation dictionaries.");
         }
     }
@@ -632,7 +632,7 @@ public final class ResourceManager {
         } else if (category.eq(CAT_COLORSPACEFAMILY)) {
             supported = ColorManager.colorSpaceFamilyStatus(key);
         } else if (isImplicitResourceCategory(category) != null) {
-            throw new PSErrorUnimplemented("Checking resource status of"
+            throw new PSErrorUnregistered("Checking resource status of"
                     + " resource of type " + category.isis());
         } else {
             PSObjectDict resourceDict = getResourceDict(category);

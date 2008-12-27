@@ -34,18 +34,18 @@ import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.TextHandler;
 import net.sf.eps2pgf.io.TextReplacements;
 import net.sf.eps2pgf.ps.errors.PSError;
-import net.sf.eps2pgf.ps.errors.PSErrorDictStackUnderflow;
+import net.sf.eps2pgf.ps.errors.InternalSignal;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidExit;
-import net.sf.eps2pgf.ps.errors.PSErrorInvalidStop;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorStackUnderflow;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
-import net.sf.eps2pgf.ps.errors.PSErrorUnimplemented;
 import net.sf.eps2pgf.ps.errors.PSErrorUnmatchedMark;
-import net.sf.eps2pgf.ps.errors.QuitOpExecuted;
+import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
+import net.sf.eps2pgf.ps.errors.QuitExecuted;
+import net.sf.eps2pgf.ps.errors.StopExecuted;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectBool;
@@ -296,7 +296,7 @@ public class Interpreter {
     public void start() throws ProgramError, PSError, IOException {
         try {
             run();
-        } catch (QuitOpExecuted e) {
+        } catch (QuitExecuted e) {
             /* empty block */
         } catch (PSError e) {
             log.severe("A PostScript error occurred.");
@@ -330,7 +330,26 @@ public class Interpreter {
         while (this.getExecStack().size() > 0) {
             PSObject obj = this.getExecStack().getNextToken(this);
             if (obj != null) {
-                executeObject(obj, false);
+                ArrayStack<PSObject> opStackCopy = getOpStack().clone();
+                try {
+                    executeObject(obj, false);
+                } catch (InternalSignal e) {
+                    /*
+                     * Internal errors should not be handled by the PostScript
+                     * error handling system.
+                     */
+                    throw e;
+                } catch (PSError e) {
+                    System.out.println("!!!!! start of PS error handling: "
+                            + e.getClass());
+                    opStack = opStackCopy;
+                    opStack.push(obj);
+                    PSObjectDict errordict = 
+                        dictStack.lookup("errordict").toDict();
+                    PSObject errorproc = errordict.get(e.getErrorName());
+                    execStack.push(errorproc);
+                    System.out.println("!!!!! end of PS error handling");
+                }
             }
         }
     }
@@ -448,7 +467,7 @@ public class Interpreter {
                             log.severe("      |- " + elem);
                         }
                         
-                        throw new ProgramError("Unexpected exception during in"
+                        throw new ProgramError("Unexpected exception during"
                                 + " operator call.");
                     }
                 }
@@ -457,6 +476,12 @@ public class Interpreter {
             } 
         }  // end of check whether object is literal
     }
+    
+    //TODO: remove operators from main Interpreter class and put them in several
+    //      sub-classes: e.g. InterpreterOpsA, InterpreterOpsB, etc... Each of
+    //      these classes is passed the actual Interpreter upon construction.
+    //      This means that all operator implementations must be changed to
+    //      refer to the interp.<vars> instead of <vars> directly.
     
     /**
      * PostScript op: abs.
@@ -664,11 +689,11 @@ public class Interpreter {
     /**
      * PostScript op: awidthshow.
      * 
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      * (yet) implemented.
      */
-    public void op_awidthshow() throws PSErrorUnimplemented {
-        throw new PSErrorUnimplemented("awidthshow operator");
+    public void op_awidthshow() throws PSErrorUnregistered {
+        throw new PSErrorUnregistered("awidthshow operator");
     }
     
     /**
@@ -770,11 +795,11 @@ public class Interpreter {
     /**
      * PostScript op: clip.
      * 
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      * (yet) implemented.
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void op_clip() throws PSErrorUnimplemented, IOException {
+    public void op_clip() throws PSErrorUnregistered, IOException {
         gstate.current().clip();
         gstate.current().getDevice().clip(gstate.current().getClippingPath());
     }
@@ -789,21 +814,21 @@ public class Interpreter {
     /**
      * PostScript op: cliprestore.
      * 
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      * (yet) implemented.
      */
-    public void op_cliprestore() throws PSErrorUnimplemented {
-        throw new PSErrorUnimplemented("PostScript operator 'cliprestore'");
+    public void op_cliprestore() throws PSErrorUnregistered {
+        throw new PSErrorUnregistered("PostScript operator 'cliprestore'");
     }
     
     /**
      * PostScript op: clipsave.
      * 
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      * (yet) implemented.
      */
-    public void op_clipsave() throws PSErrorUnimplemented {
-        throw new PSErrorUnimplemented("PostScript operator 'clipsave'");
+    public void op_clipsave() throws PSErrorUnregistered {
+        throw new PSErrorUnregistered("PostScript operator 'clipsave'");
     }
     
     /**
@@ -1296,11 +1321,9 @@ public class Interpreter {
     /**
      * PostScript op: cvlit.
      * 
-     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     * (yet) implemented.
+     * @throws PSError A PostScript error occurred.
      */
-    public void op_cvlit() throws PSErrorStackUnderflow, PSErrorUnimplemented {
+    public void op_cvlit() throws PSError {
         PSObject any = getOpStack().pop();
         getOpStack().push(any.cvlit());
     }
@@ -1367,11 +1390,11 @@ public class Interpreter {
     /**
      * PostScript op: cshow.
      * 
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      * (yet) implemented.
      */
-    public void op_cshow() throws PSErrorUnimplemented {
-        throw new PSErrorUnimplemented("cshow");
+    public void op_cshow() throws PSErrorUnregistered {
+        throw new PSErrorUnregistered("cshow operator");
     }
     
     /**
@@ -1561,9 +1584,9 @@ public class Interpreter {
     /**
      * PostScript op: end.
      * 
-     * @throws PSErrorDictStackUnderflow the PS error dict stack underflow
+     * @throws PSError A PostScript error occurred.
      */
-    public void op_end() throws PSErrorDictStackUnderflow {
+    public void op_end() throws PSError {
         getDictStack().popDict();
     }
     
@@ -1600,13 +1623,44 @@ public class Interpreter {
     }
     
     /**
+     * Internal Eps2pgf operator: implements default error-handling procedure.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_eps2pgferrorproc() throws PSError {
+        PSObjectName errName = opStack.pop().toName();
+        PSObjectDict dollarError = dictStack.lookup("$error").toDict();
+        dollarError.setKey("newerror", true);
+        dollarError.setKey("errorname", errName);
+        dollarError.setKey("command", opStack.peek());
+        dollarError.setKey("errorinfo", new PSObjectNull());
+        
+        boolean recordStacks = dollarError.get("recordstacks").toBool();
+        if (recordStacks) {
+            opStack.push(new PSObjectArray(opStack.size()));
+            op_astore();
+            dollarError.setKey("ostack", opStack.pop());
+            
+            opStack.push(new PSObjectArray(execStack.size()));
+            op_execstack();
+            PSObjectArray estack = opStack.pop().toArray();
+            estack = estack.getinterval(0, estack.size() - 1);
+            dollarError.setKey("estack", estack);
+            
+            opStack.push(new PSObjectArray(dictStack.countdictstack()));
+            op_dictstack();
+            dollarError.setKey("dstack", opStack.pop());
+        }
+    }
+    
+    /**
      * PostScript op: errordict.
      * 
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      * (yet) implemented.
      */
-    public void op_errordict() throws PSErrorUnimplemented {
-        throw new PSErrorUnimplemented("errordict operator");
+    public void op_errordict() throws PSErrorUnregistered {
+        throw new PSErrorUnregistered("errordict operator");
     }
     
     /**
@@ -2089,11 +2143,11 @@ public class Interpreter {
     /**
      * PostScript op: imagemask.
      * 
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      * (yet) implemented.
      */
-    public void op_imagemask() throws PSErrorUnimplemented {
-        throw new PSErrorUnimplemented("imagemask operator");
+    public void op_imagemask() throws PSErrorUnregistered {
+        throw new PSErrorUnregistered("imagemask operator");
     }
     
     /**
@@ -2125,10 +2179,10 @@ public class Interpreter {
      * PostScript op: initclip.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      * (yet) implemented.
      */
-    public void op_initclip() throws IOException, PSErrorUnimplemented {
+    public void op_initclip() throws IOException, PSErrorUnregistered {
         gstate.current().setClippingPath(defaultClippingPath.clone());
         gstate.current().getDevice().clip(gstate.current().getClippingPath());
     }
@@ -2297,7 +2351,7 @@ public class Interpreter {
             }
         } catch (PSErrorInvalidExit e) {
             // 'exit' operator called from within this loop
-        } catch (PSErrorInvalidStop e) {
+        } catch (StopExecuted e) {
             // 'stop' operator called from within this loop
         }
     }
@@ -2344,7 +2398,7 @@ public class Interpreter {
     public void op_makepattern() throws PSError {
         //PSObjectMatrix matrix = getOpStack().pop().toMatrix();
         //PSObjectDict dict = getOpStack().pop().toDict();
-        throw new PSErrorUnimplemented("makepattern operator");
+        throw new PSErrorUnregistered("makepattern operator");
     }
     
     /**
@@ -2554,7 +2608,7 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_picstr() throws PSError {
-        throw new PSErrorUnimplemented("operator: picstr");
+        throw new PSErrorUnregistered("operator: picstr");
     }
     
     /**
@@ -2616,7 +2670,7 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_quit() throws PSError {
-        throw new QuitOpExecuted();
+        throw new QuitExecuted();
     }
     
     /**
@@ -3517,7 +3571,7 @@ public class Interpreter {
             boolean status = ((PSObjectFile) obj).status();
             getOpStack().push(new PSObjectBool(status));
         } else {
-            throw new PSErrorUnimplemented("'status' operator of non-file"
+            throw new PSErrorUnregistered("'status' operator of non-file"
                     + " object.");
         }
     }
@@ -3525,26 +3579,24 @@ public class Interpreter {
     /**
      * PostScript op: stop.
      * 
-     * @throws PSErrorInvalidStop Stop operator is not allowed here.
+     * @throws StopExecuted Stop operator is not allowed here.
      */
-    public void op_stop() throws PSErrorInvalidStop {
-        throw new PSErrorInvalidStop();
+    public void op_stop() throws StopExecuted {
+        //TODO Make implementation more following the PostScript manual
+        throw new StopExecuted();
     }
     
     /**
      * PostScript op: stopped.
      * 
-     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
-     * (yet) implemented.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSError A PostScript error occurred.
      */
-    public void op_stopped() throws PSErrorStackUnderflow, PSErrorUnimplemented,
-            ProgramError {
+    public void op_stopped() throws PSError, ProgramError {
         PSObject any = getOpStack().pop();
         try {
             runObject(any);
-        } catch (PSErrorUnimplemented e) {
+        } catch (PSErrorUnregistered e) {
             // Don't catch unimplemented errors since they indicate that
             // eps2pgf is not fully implemented. It is not an actual
             // postscript error
@@ -3814,11 +3866,11 @@ public class Interpreter {
     /**
      * PostScript op: widthshow.
      * 
-     * @throws PSErrorUnimplemented Encountered a PostScript feature that is not
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      * (yet) implemented.
      */
-    public void op_widthshow() throws PSErrorUnimplemented {
-        throw new PSErrorUnimplemented("widthshow operator");
+    public void op_widthshow() throws PSErrorUnregistered {
+        throw new PSErrorUnregistered("widthshow operator");
     }
    
     /**

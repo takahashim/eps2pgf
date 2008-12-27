@@ -19,10 +19,18 @@
 package net.sf.eps2pgf.ps.errors;
 
 /**
+ * PostScript error: undefinedresource.
  *
  * @author Paul Wagenaars
  */
 public class PSErrorUndefinedResource extends PSError {
     /** Serial version UID. */
     private static final long serialVersionUID = 1L;
+    
+    /**
+     * Instantiates a new undefinedresource error.
+     */
+    public PSErrorUndefinedResource() {
+        super(PSError.UNDEFINEDRESOURCE);
+    }
 }

@@ -19,10 +19,18 @@
 package net.sf.eps2pgf.ps.errors;
 
 /**
+ * Standard PostScript error: invalidaccess.
  *
  * @author Paul Wagenaars
  */
 public class PSErrorInvalidAccess extends PSError {
     /** Serial version UID. */
     private static final long serialVersionUID = 1L;
+    
+    /**
+     * Instantiates a new invalidaccess PostScript error.
+     */
+    public PSErrorInvalidAccess() {
+        super(PSError.INVALIDACCESS);
+    }
 }
