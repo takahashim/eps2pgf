@@ -303,4 +303,15 @@ public class DictPSTest {
         String cmd = "<</a 123>> <</b (abc) /c (def)>> dup 3 1 roll copy eq";
         assertTrue(Common.testString(interp, cmd));
     }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void dictTest34Errordict() throws Exception {
+        String cmd = "errordict /undefined {} put"
+            + " /badproc {1 666 put whoops} def"
+            + " [1 2 3 4] dup badproc"
+            + " type /nametype eq exch"
+            + " 1 get 666 eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
 }

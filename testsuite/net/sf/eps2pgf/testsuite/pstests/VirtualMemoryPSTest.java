@@ -59,12 +59,22 @@ public class VirtualMemoryPSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void test1_current_and_setglobal() throws Exception {
+    public void currentAndSetglobal() throws Exception {
         String cmd = "currentglobal not"
             + " true setglobal currentglobal"
             + " false setglobal currentglobal not";
         assertTrue(Common.testString(interp, cmd));
     }
 
+    /** Test. @throws Exception the exception */
+    @Test
+    public void saveRestore() throws Exception {
+        String cmd = "save"
+            + "errordict /undefined {1 2 3} put"
+            + "errordict /undefined get length 3 eq"
+            + "exch restore"
+            + "errordict /undefined get length 0 eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
 
 }
