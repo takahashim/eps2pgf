@@ -34,7 +34,6 @@ import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.TextHandler;
 import net.sf.eps2pgf.io.TextReplacements;
 import net.sf.eps2pgf.ps.errors.PSError;
-import net.sf.eps2pgf.ps.errors.InternalSignal;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidExit;
@@ -44,7 +43,6 @@ import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnmatchedMark;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
-import net.sf.eps2pgf.ps.errors.QuitExecuted;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectBool;
@@ -305,8 +303,6 @@ public class Interpreter {
                 execStack.push(handleError);
                 start();
             }
-        } catch (QuitExecuted e) {
-            /* empty block */
         } catch (PSError e) {
             throw new ProgramError("Encountered a PostScript error were they"
                     + " should not occur.");
@@ -328,12 +324,6 @@ public class Interpreter {
                 ArrayStack<PSObject> opStackCopy = getOpStack().clone();
                 try {
                     executeObject(obj, false);
-                } catch (InternalSignal e) {
-                    /*
-                     * Internal errors should not be handled by the PostScript
-                     * error handling system.
-                     */
-                    throw e;
                 } catch (PSError e) {
                     opStack = opStackCopy;
                     opStack.push(obj);
@@ -2712,7 +2702,11 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_quit() throws PSError {
-        throw new QuitExecuted();
+        ExecStack estack = getExecStack();
+        while (estack.pop() != null) {
+            /* empty block */
+        }
+
     }
     
     /**
