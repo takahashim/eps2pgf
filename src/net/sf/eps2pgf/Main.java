@@ -128,15 +128,12 @@ public final class Main {
         } catch (ParseException e) {
             LOG.severe("Execution failed due to an error while parsing the text"
                     + " replacements file.");
-        } catch (QuitExecuted e) {
-            /* empty block */
         } catch (PSError e) {
-            LOG.severe("Execution failed due to a PostScript error in the"
-                    + " input file.");
+            /* empty block */
         } catch (ProgramError e) {
             e.printStackTrace();
             LOG.severe("Execution failed due to an internal error in the"
-                    + " program. Please report this to the author.");
+                    + " program. Please report this error to the author.");
         }
     }
     

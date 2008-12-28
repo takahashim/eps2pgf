@@ -217,7 +217,7 @@ public class PGFDevice implements OutputDevice {
             scopeDepth = -1;
         }
         for (int i = 0; i < scopeDepth; i++) {
-            out.write("\\end{pgfscope}\n");
+            endScope();
         }
         out.write("\\end{pgfpicture}\n");
     }

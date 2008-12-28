@@ -45,7 +45,6 @@ import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnmatchedMark;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.errors.QuitExecuted;
-import net.sf.eps2pgf.ps.errors.StopExecuted;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectBool;
@@ -296,28 +295,24 @@ public class Interpreter {
     public void start() throws ProgramError, PSError, IOException {
         try {
             run();
+            
+            // Do some error reporting using the handleerror procedure if an
+            // error occurred.
+            PSObjectDict dollarError = dictStack.lookup("$error").toDict();
+            if (dollarError.lookup("newerror").toBool()) {
+                PSObjectDict errorDict = dictStack.lookup("errordict").toDict();
+                PSObject handleError = errorDict.get("handleerror");
+                execStack.push(handleError);
+                start();
+            }
         } catch (QuitExecuted e) {
             /* empty block */
         } catch (PSError e) {
-            log.severe("A PostScript error occurred.");
-            log.severe("    Type: " + e.getMessage());
-            
-            int n = Math.min(getOpStack().size(), 10);
-            log.severe("    Operand stack (max top 10 items):");
-            if (n == 0) {
-                log.severe("      (empty)");
-            } else {
-                for (int i = 0; i < n; i++) {
-                    log.severe("      |- " + getOpStack().peek(i).isis());
-                }
-                if (n < getOpStack().size()) {
-                    log.severe("      (rest of stack suppressed)");
-                }
-            }
+            throw new ProgramError("Encountered a PostScript error were they"
+                    + " should not occur.");
+        } finally {
             this.gstate.current().getDevice().finish();
-            throw e;
         }
-        this.gstate.current().getDevice().finish();
     }
     
     /**
@@ -340,15 +335,12 @@ public class Interpreter {
                      */
                     throw e;
                 } catch (PSError e) {
-                    System.out.println("!!!!! start of PS error handling: "
-                            + e.getClass());
                     opStack = opStackCopy;
                     opStack.push(obj);
                     PSObjectDict errordict = 
                         dictStack.lookup("errordict").toDict();
                     PSObject errorproc = errordict.get(e.getErrorName());
                     execStack.push(errorproc);
-                    System.out.println("!!!!! end of PS error handling");
                 }
             }
         }
@@ -408,7 +400,7 @@ public class Interpreter {
      * for more info.
      * 
      * @param obj Object that is to be executed
-     * @param indirect Indicates how the object was encoutered: directly
+     * @param indirect Indicates how the object was encountered: directly
      * (encountered by the interpreter) or indirect (as a
      * result of executing some other object)
      * 
@@ -1614,6 +1606,22 @@ public class Interpreter {
     }
     
     /**
+     * Internal Eps2pgf operator: eps2pgfendofstopped. It indicates that the
+     * end of a 'stopped' context has been reached.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_eps2pgfendofstopped() throws ProgramError {
+        getOpStack().push(new PSObjectBool(false));
+        try {
+            PSObjectDict dollarError = dictStack.lookup("$error").toDict();
+            dollarError.setKey("newerror", false);
+        } catch (PSErrorTypeCheck e) {
+            throw new ProgramError("The $error dict is not a dictionary.");
+        }
+    }
+    
+    /**
      * Internal Eps2pgf operator: eps2pgfgetmetrics.
      */
     public void op_eps2pgfgetmetrics() {
@@ -1651,6 +1659,38 @@ public class Interpreter {
             op_dictstack();
             dollarError.setKey("dstack", opStack.pop());
         }
+    }
+    
+    /**
+     * Internal Eps2pgf operator. Default handleerror procedure.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public void op_eps2pgfhandleerror() throws PSError {
+        PSObjectDict de = dictStack.lookup("$error").toDict();
+        de.setKey("newerror", false);
+
+        log.severe("A PostScript error occurred.");
+        log.severe("    Type: " + de.lookup("errorname").isis());
+        
+        if (de.lookup("recordstacks").toBool()) {
+            log.severe("    Operand stack:");
+            PSObjectArray ostack = de.lookup("ostack").toArray();
+            int nos = ostack.size();
+            int n = Math.min(nos, 15);
+            for (int i = (nos - 1); i >= (nos - n); i--) {
+                log.severe("      |- " + ostack.get(i).isis());
+            }
+            if (n < ostack.size()) {
+                log.severe("      (rest of stack suppressed, "
+                        + (nos - n) + " items)");
+            }
+        } else {
+            log.severe("    Record stacks disabled");
+        }
+        
+        log.severe("Execution failed due to a PostScript error in the"
+                + " input file.");
     }
     
     /**
@@ -1729,6 +1769,9 @@ public class Interpreter {
      * @throws PSErrorInvalidExit Exit not allowed at this position.
      */
     public void op_exit() throws PSErrorInvalidExit {
+        //TODO: implement this method more following the PostScript manual.
+        //      I.e without throwing the invalidexit error, but by popping down
+        //      the execution stack.
         throw new PSErrorInvalidExit();
     }
     
@@ -2343,6 +2386,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_loop() throws PSError, ProgramError {
+        //TODO implement this method without the runObject() method 
         PSObjectArray proc = getOpStack().pop().toProc();
         
         try {
@@ -2351,8 +2395,6 @@ public class Interpreter {
             }
         } catch (PSErrorInvalidExit e) {
             // 'exit' operator called from within this loop
-        } catch (StopExecuted e) {
-            // 'stop' operator called from within this loop
         }
     }
     
@@ -3578,12 +3620,19 @@ public class Interpreter {
    
     /**
      * PostScript op: stop.
-     * 
-     * @throws StopExecuted Stop operator is not allowed here.
      */
-    public void op_stop() throws StopExecuted {
-        //TODO Make implementation more following the PostScript manual
-        throw new StopExecuted();
+    public void op_stop() {
+        ExecStack estack = getExecStack();
+        PSObject obj;
+        while ((obj = estack.pop()) != null) {
+            if ((obj instanceof PSObjectName) && !obj.isLiteral()
+                    && obj.isis().equals("eps2pgfendofstopped")) {
+                break;
+            }
+        }
+        if (estack.size() > 0) {
+            getOpStack().push(new PSObjectBool(true));
+        }
     }
     
     /**
@@ -3593,19 +3642,8 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_stopped() throws PSError, ProgramError {
-        PSObject any = getOpStack().pop();
-        try {
-            runObject(any);
-        } catch (PSErrorUnregistered e) {
-            // Don't catch unimplemented errors since they indicate that
-            // eps2pgf is not fully implemented. It is not an actual
-            // postscript error
-            throw e;
-        } catch (PSError e) {
-            getOpStack().push(new PSObjectBool(true));
-            return;
-        }
-        getOpStack().push(new PSObjectBool(false));
+        getExecStack().push(new PSObjectName("eps2pgfendofstopped", false));
+        getExecStack().push(getOpStack().pop());
     }
     
     /**
