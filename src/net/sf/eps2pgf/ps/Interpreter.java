@@ -348,6 +348,8 @@ public class Interpreter {
      */
     public void runObject(final PSObject objectToRun)
             throws PSError, ProgramError {
+        //TODO: reimplement methods that use this method. I think it's better to
+        //      implement them by working with the stack directly.
         PSObject topAtStart = execStack.getTop();
         executeObject(objectToRun);
         try {
@@ -355,7 +357,9 @@ public class Interpreter {
                 PSObject obj = getExecStack().getNextToken(this);
                 if (obj != null) {
                     executeObject(obj, false);
-                }            
+                } else {
+                    break;
+                }
             }
         } catch (PSError e) {
             // There was an error. Restore the execution stack to its original
@@ -2382,6 +2386,9 @@ public class Interpreter {
         try {
             while (true) {
                 runObject(proc);
+                if (getExecStack().size() == 0) {
+                    break;
+                }
             }
         } catch (PSErrorInvalidExit e) {
             // 'exit' operator called from within this loop

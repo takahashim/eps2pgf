@@ -116,6 +116,13 @@ public class ControlPSTest {
             + " 5 1 roll 2.5 eq  5 1 roll 3.0 eq";
         assertTrue(Common.testString(interp, cmd));
     }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void controlTest8bFor() throws Exception {
+        String cmd = "true 0 1 5 {3 eq {stop} if} for false";
+        assertTrue(Common.testString(interp, cmd));
+    }
 
     /** Test. @throws Exception the exception */
     @Test
@@ -149,7 +156,7 @@ public class ControlPSTest {
     /** Test. @throws Exception the exception */
     @Test
     public void controlTest13Loop() throws Exception {
-        String cmd = "1 {1 add dup 5 eq {stop} if} loop 5 eq";
+        String cmd = "true 1 {1 add dup 5 eq {pop stop} if} loop false";
         assertTrue(Common.testString(interp, cmd));
     }
 
