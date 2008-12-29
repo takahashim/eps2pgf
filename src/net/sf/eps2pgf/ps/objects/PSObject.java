@@ -735,6 +735,18 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
+     * Return this object if it is an operator, throw PSErrorTypeCheck
+     * otherwise.
+     * 
+     * @return This object, if it is an operator.
+     * 
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
+    public PSObjectOperator toOperator() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Convert this object to a procedure object, if possible.
      * 
      * @throws PSErrorTypeCheck Unable to convert this object type to a

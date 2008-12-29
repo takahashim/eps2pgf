@@ -66,6 +66,16 @@ public class DictStack {
     /** System dictionary. */
     private PSObjectDict systemdict = new PSObjectDict();
     
+    /**
+     * Quick access constant. See documentation for
+     * defineQuickAccessConstants() method for more information.
+     */
+    // CHECKSTYLE:OFF
+    public PSObjectOperator eps2pgfEndOfStopped;
+    public PSObjectOperator eps2pgfForall;
+    public PSObjectOperator eps2pgfFor;
+    public PSObjectOperator eps2pgfLoop;
+    // CHECKSTYLE:ON
     
     /**
      * Create a new dictionary stack.
@@ -78,6 +88,7 @@ public class DictStack {
      */
     public DictStack(final Interpreter interp) throws PSError, ProgramError {
         fillSystemDict(interp);
+        defineQuickAccessConstants();
         try {
             systemdict.readonly();
         } catch (PSErrorTypeCheck e) {
@@ -171,6 +182,25 @@ public class DictStack {
         }
         
         return array.getinterval(0, n);
+    }
+    
+    /**
+     * Defines some constants that are associated with values in the systemdict.
+     * This allows faster access to these values. This is for example useful for
+     * the internal eps2pgf* operators.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    private void defineQuickAccessConstants() throws ProgramError {
+        try {
+            eps2pgfEndOfStopped = lookup("eps2pgfendofstopped").toOperator();
+            eps2pgfFor = lookup("eps2pgffor").toOperator();
+            eps2pgfForall = lookup("eps2pgfforall").toOperator();
+            eps2pgfLoop = lookup("eps2pgfloop").toOperator();
+        } catch (PSErrorTypeCheck e) {
+            throw new ProgramError("Object in dictstack has incorrect type for"
+                    + " quick access constants.");
+        }
     }
     
     /**

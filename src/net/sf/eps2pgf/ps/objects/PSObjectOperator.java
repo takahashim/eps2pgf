@@ -146,4 +146,17 @@ public class PSObjectOperator extends PSObject {
     public Method getOpMethod() {
         return opMethod;
     }
+    
+    /**
+     * Return this object if it is an operator, throw PSErrorTypeCheck
+     * otherwise.
+     * 
+     * @return This object, if it is an operator.
+     */
+    @Override
+    public PSObjectOperator toOperator() {
+        return this;
+    }
+    
+
 }

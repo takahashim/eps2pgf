@@ -1625,7 +1625,7 @@ public class Interpreter {
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_eps2pgfloopfor() throws ProgramError {
+    public void op_eps2pgffor() throws ProgramError {
         ArrayStack<PSObject> cs = getContStack();
         ArrayStack<PSObject> os = getOpStack();
         ExecStack es = getExecStack();
@@ -1658,7 +1658,7 @@ public class Interpreter {
                 }
                 
                 // Push objects to execution stack
-                es.push(new PSObjectName("eps2pgfloopfor"));
+                es.push(getDictStack().eps2pgfFor);
                 es.push(proc);
                 
                 // Push arguments to continuation stack
@@ -1681,7 +1681,7 @@ public class Interpreter {
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_eps2pgfloopforall() throws ProgramError {
+    public void op_eps2pgfforall() throws ProgramError {
         ArrayStack<PSObject> cs = getContStack();
         ArrayStack<PSObject> os = getOpStack();
         ExecStack es = getExecStack();
@@ -1700,7 +1700,7 @@ public class Interpreter {
                 }
                 
                 // Push objects on execution stack
-                es.push(new PSObjectName("eps2pgfloopforall"));
+                es.push(getDictStack().eps2pgfForall);
                 es.push(proc);
                 
                 // Push arguments on continuation stack
@@ -1805,6 +1805,32 @@ public class Interpreter {
     }
     
     /**
+     * Internal Eps2pgf operator. Continuation function for 'loop' operator.
+     * Input arguments: null proc
+     * Note: right is top of stack
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_eps2pgfloop() throws ProgramError {
+        ArrayStack<PSObject> cs = getContStack();
+        ExecStack es = getExecStack();
+        try {
+            // Get arguments from continuation stack.
+            PSObject proc = cs.pop();
+            cs.pop().toNull();
+            
+            es.push(getDictStack().eps2pgfLoop);
+            es.push(proc);
+            
+            cs.push(new PSObjectNull());
+            cs.push(proc);
+        } catch (PSError e) {
+            throw new ProgramError(e.getErrorName().isis()
+                    + " in continuation function");
+        }
+    }
+    
+    /**
      * PostScript op: errordict.
      * 
      * @throws PSErrorUnregistered Encountered a PostScript feature that is not
@@ -1882,26 +1908,28 @@ public class Interpreter {
     public void op_exit() throws PSErrorInvalidExit {
         ExecStack estack = getExecStack();
         PSObject obj;
+        DictStack ds = getDictStack();
         while ((obj = estack.pop()) != null) {
-            if ((obj instanceof PSObjectName) && !obj.isLiteral()) {
-                if (obj.isis().startsWith("eps2pgfloop")) {
-                    // Also pop down the continuation stack
-                    try {
-                        ArrayStack<PSObject> cs = getContStack();
-                        while (cs.size() > 0) {
-                            if (cs.pop() instanceof PSObjectNull) {
-                                break;
-                            }
+            if ((obj == ds.eps2pgfFor)
+                    || (obj == ds.eps2pgfForall)
+                    || (obj == ds.eps2pgfLoop)) {
+                
+                // Also pop down the continuation stack
+                try {
+                    ArrayStack<PSObject> cs = getContStack();
+                    while (cs.size() > 0) {
+                        if (cs.pop() instanceof PSObjectNull) {
+                            break;
                         }
-                    } catch (PSErrorStackUnderflow e) {
-                        /* empty block */
                     }
-                    
-                    return;
-                    
-                } else if (obj.isis().equals("eps2pgfendofstopped")) {
-                    throw new PSErrorInvalidExit();
+                } catch (PSErrorStackUnderflow e) {
+                    /* empty block */
                 }
+                
+                return;
+                
+            } else if (obj == ds.eps2pgfEndOfStopped) {
+                throw new PSErrorInvalidExit();
             }
         }
         throw new PSErrorInvalidExit();
@@ -2046,7 +2074,9 @@ public class Interpreter {
         }
         
         // Push continuation function to execution stack
-        getExecStack().push(new PSObjectName("eps2pgfloopfor"));
+        //TODO don't create a new executable name each time. Instead make
+        //     constants containing operator objects of often used functions.
+        getExecStack().push(getDictStack().eps2pgfFor);
         
         // Push arguments to continuation stack
         ArrayStack<PSObject> cs = getContStack();
@@ -2082,7 +2112,7 @@ public class Interpreter {
         cs.push(itemListArray);
         cs.push(proc);
 
-        es.push(new PSObjectName("eps2pgfloopforall"));        
+        es.push(getDictStack().eps2pgfForall);        
     }
     
     /**
@@ -2503,19 +2533,13 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_loop() throws PSError, ProgramError {
-        //TODO implement this method without the runObject() method 
-        PSObjectArray proc = getOpStack().pop().toProc();
+        ExecStack es = getExecStack();
+        ArrayStack<PSObject> cs = getContStack();
         
-        try {
-            while (true) {
-                runObject(proc);
-                if (getExecStack().size() == 0) {
-                    break;
-                }
-            }
-        } catch (PSErrorInvalidExit e) {
-            // 'exit' operator called from within this loop
-        }
+        es.push(getDictStack().eps2pgfLoop);
+        
+        cs.push(new PSObjectNull());
+        cs.push(getOpStack().pop());
     }
     
     /**
@@ -3752,9 +3776,9 @@ public class Interpreter {
         //     the continuation stack.
         ExecStack estack = getExecStack();
         PSObject obj;
+        DictStack ds = getDictStack();
         while ((obj = estack.pop()) != null) {
-            if ((obj instanceof PSObjectName) && !obj.isLiteral()
-                    && obj.isis().equals("eps2pgfendofstopped")) {
+            if (obj == ds.eps2pgfEndOfStopped) {
                 break;
             }
         }
@@ -3770,7 +3794,7 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_stopped() throws PSError, ProgramError {
-        getExecStack().push(new PSObjectName("eps2pgfendofstopped", false));
+        getExecStack().push(getDictStack().eps2pgfEndOfStopped);
         getExecStack().push(getOpStack().pop());
     }
     
