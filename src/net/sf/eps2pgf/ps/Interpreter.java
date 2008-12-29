@@ -1619,6 +1619,62 @@ public class Interpreter {
     }
     
     /**
+     * Internal Eps2pgf operator. Continuation function for 'for' operator.
+     * Input arguments: null current increment limit proc
+     * Note: right is top of stack
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_eps2pgfloopfor() throws ProgramError {
+        ArrayStack<PSObject> cs = getContStack();
+        ArrayStack<PSObject> os = getOpStack();
+        ExecStack es = getExecStack();
+        try {
+            // Pop input arguments from continuation stack
+            PSObject proc = cs.pop();
+            PSObject objLimit = cs.pop();
+            double limit = objLimit.toReal();
+            PSObject objIncr = cs.pop();
+            double incr = objIncr.toReal();
+            double current = cs.pop().toReal();
+            cs.pop().toNull();
+            
+            // Check whether limit, incr and current are all three integers
+            boolean allIntegers = false;
+            if ((limit == Math.round(limit)) && (incr == Math.round(incr))
+                    && (current == Math.round(current))) {
+                allIntegers = true;
+            }
+
+            // Execute one iteration of the loop, and prepare next
+            if (((incr > 0) && (current <= limit))
+                || ((incr < 0) && (current >= limit))) {
+                
+                // Push value to op stack
+                if (allIntegers) {
+                    os.push(new PSObjectInt(current));
+                } else {
+                    os.push(new PSObjectReal(current));
+                }
+                
+                // Push objects to execution stack
+                es.push(new PSObjectName("eps2pgfloopfor"));
+                es.push(proc);
+                
+                // Push arguments to continuation stack
+                cs.push(new PSObjectNull());
+                cs.push(new PSObjectReal(current + incr));
+                cs.push(objIncr);
+                cs.push(objLimit);
+                cs.push(proc);
+            }
+        } catch (PSError e) {
+            throw new ProgramError(e.getErrorName().isis()
+                    + " in continuation function");
+        }
+    }
+    
+    /**
      * Internal Eps2pgf operator. Continuation function for 'forall' operator.
      * Input arguments: null nrItemsPerLoop itemList proc
      * Note: right is top of stack
@@ -1972,20 +2028,15 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_for() throws PSError, ProgramError {
-        //TODO: implement this operator with runObject()
-        PSObjectArray proc = getOpStack().pop().toProc();
-        double limit = getOpStack().pop().toReal();
-        double inc = getOpStack().pop().toReal();
-        double initial = getOpStack().pop().toReal();
-        
-        // Check whether limit, inc and initial are all three integers
-        boolean allIntegers = false;
-        if ((limit == Math.round(limit)) && (inc == Math.round(inc))
-                && (initial == Math.round(initial))) {
-            allIntegers = true;
-        }
+        PSObject proc = getOpStack().pop();
+        PSObject objLimit = getOpStack().pop();
+        PSObject objInc = getOpStack().pop();
+        PSObject objInitial = getOpStack().pop();
         
         // Prevent (virtually) infinite loops
+        double inc = objInc.toReal();
+        double limit = objLimit.toReal();
+        double initial = objInitial.toReal();
         if (inc == 0) {
             return;
         } else if ((inc > 0) && (limit < initial)) {
@@ -1994,29 +2045,16 @@ public class Interpreter {
             return;
         }
         
-        // Execute the for loop
-        double control = initial;
-        try {
-            while (true) {
-                if ((inc > 0) && (control > limit)) {
-                    break;
-                } else if ((inc < 0) && (control < limit)) {
-                    break;
-                }
-
-                if (allIntegers) {
-                    getOpStack().push(new PSObjectInt(control));
-                } else {
-                    getOpStack().push(new PSObjectReal(control));
-                }
-                
-                runObject(proc);
-
-                control += inc;
-            }
-        } catch (PSErrorInvalidExit e) {
-            // 'exit' operator called from within this loop
-        }
+        // Push continuation function to execution stack
+        getExecStack().push(new PSObjectName("eps2pgfloopfor"));
+        
+        // Push arguments to continuation stack
+        ArrayStack<PSObject> cs = getContStack();
+        cs.push(new PSObjectNull());
+        cs.push(objInitial);
+        cs.push(objInc);
+        cs.push(objLimit);
+        cs.push(proc);
     }
     
     /**
