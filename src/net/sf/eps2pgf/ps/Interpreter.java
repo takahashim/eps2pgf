@@ -1831,6 +1831,38 @@ public class Interpreter {
     }
     
     /**
+     * Internal Eps2pgf operator. Continuation function for 'repeat' operator.
+     * Input arguments: null repeatcount proc
+     * Note: right is top of stack
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_eps2pgfrepeat() throws ProgramError {
+        ArrayStack<PSObject> cs = getContStack();
+        ExecStack es = getExecStack();
+        try {
+            // Get arguments from continuation stack.
+            PSObject proc = cs.pop();
+            int repeatCount = cs.pop().toNonNegInt();
+            cs.pop().toNull();
+            
+            if (repeatCount > 0) {
+                // Push objects on execution stack
+                es.push(getDictStack().eps2pgfRepeat);
+                es.push(proc);
+            
+                // Push objects on continuation stack
+                cs.push(new PSObjectNull());
+                cs.push(new PSObjectInt(repeatCount - 1));
+                cs.push(proc);
+            }
+        } catch (PSError e) {
+            throw new ProgramError(e.getErrorName().isis()
+                    + " in continuation function");
+        }
+    }
+    
+    /**
      * PostScript op: errordict.
      * 
      * @throws PSErrorUnregistered Encountered a PostScript feature that is not
@@ -3046,17 +3078,17 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_repeat() throws PSError, ProgramError {
-        //TODO: implement this method without runObject()
         PSObjectArray proc = getOpStack().pop().toProc();
-        int n = getOpStack().pop().toNonNegInt();
+        PSObject objN = getOpStack().pop();
+        objN.toNonNegInt();
         
-        try {
-            for (int i = 0; i < n; i++) {
-                runObject(proc);
-            }
-        } catch (PSErrorInvalidExit e) {
-            // 'exit' operator called from within this loop
-        }
+        ArrayStack<PSObject> cs = getContStack();
+        
+        cs.push(new PSObjectNull());
+        cs.push(objN);
+        cs.push(proc);
+        
+        getExecStack().push(getDictStack().eps2pgfRepeat);
     }
     
     /**

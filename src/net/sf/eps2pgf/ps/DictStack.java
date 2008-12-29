@@ -75,6 +75,7 @@ public class DictStack {
     public PSObjectOperator eps2pgfForall;
     public PSObjectOperator eps2pgfFor;
     public PSObjectOperator eps2pgfLoop;
+    public PSObjectOperator eps2pgfRepeat;
     // CHECKSTYLE:ON
     
     /**
@@ -197,6 +198,7 @@ public class DictStack {
             eps2pgfFor = lookup("eps2pgffor").toOperator();
             eps2pgfForall = lookup("eps2pgfforall").toOperator();
             eps2pgfLoop = lookup("eps2pgfloop").toOperator();
+            eps2pgfRepeat = lookup("eps2pgfrepeat").toOperator();
         } catch (PSErrorTypeCheck e) {
             throw new ProgramError("Object in dictstack has incorrect type for"
                     + " quick access constants.");
