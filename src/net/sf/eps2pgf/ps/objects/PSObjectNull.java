@@ -112,6 +112,18 @@ public class PSObjectNull extends PSObject {
     public String isis() {
         return "null";
     }
+    
+    /**
+     * Returns the same object.
+     * 
+     * @return This object.
+     */
+    @Override
+    public PSObjectNull toNull() {
+        return this;
+    }
+    
+
 
     /**
      * Returns the type of this object.

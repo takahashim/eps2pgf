@@ -110,6 +110,22 @@ public class PSObjectArray extends PSObject {
     }
     
     /**
+     * Creates a new instance of PSObjectArray.
+     * 
+     * @param objs Objects that will be stored in the new array.
+     */
+    public PSObjectArray(final List<PSObject> objs) {
+        setArray(new ArrayList<PSObject>(objs.size()));
+        for (int i = 0; i < objs.size(); i++) {
+            getArray().add(objs.get(i));
+        }
+        
+        // Use the entire array
+        setOffset(0);
+        setCount(objs.size());
+    }
+    
+    /**
      * Creates a new executable array object.
      * 
      * @param pStr String representing a valid procedure (executable array)

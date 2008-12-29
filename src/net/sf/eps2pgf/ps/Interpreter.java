@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+//TODO replace copyright 2007-2008 with 2007-2009.
+
 package net.sf.eps2pgf.ps;
 
 import java.io.IOException;
@@ -84,6 +86,16 @@ public class Interpreter {
     
     /** Dictionary stack. */
     private DictStack dictStack;
+    
+    /**
+     * Continuation stack. Arguments for continuation operators are stored on
+     * this stack. These special operators are for example used in loops: such
+     * as 'repeat', 'for' and 'forall'. Each time a continuation function is
+     * pushed onto the execution stack its accompanying arguments are pushed
+     * onto this stack preceded by a null object. I.e. first a null object is
+     * pushed on the continuation stack, followed by the arguments. 
+     */
+    private ArrayStack<PSObject> contStack = new ArrayStack<PSObject>();
     
     /** Execution stack. */
     private ExecStack execStack = new ExecStack();
@@ -245,6 +257,15 @@ public class Interpreter {
      */
     void setDictStack(final DictStack pDictStack) {
         dictStack = pDictStack;
+    }
+    
+    /**
+     * Get the continuation arguments stack.
+     * 
+     * @return The continuation stack.
+     */
+    public ArrayStack<PSObject> getContStack() {
+        return contStack;
     }
 
     /**
@@ -626,8 +647,6 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_ashow() throws PSError, IOException, ProgramError {
-        log.info("ashow operator encoutered. ashow is not implemented, "
-                + "instead the normal show is used.");
         PSObjectString string = getOpStack().pop().toPSString();
         string.checkAccess(false, true, false);
         getOpStack().pop().toReal(); // read ay
@@ -1600,6 +1619,47 @@ public class Interpreter {
     }
     
     /**
+     * Internal Eps2pgf operator. Continuation function for 'forall' operator.
+     * Input arguments: null nrItemsPerLoop itemList proc
+     * Note: right is top of stack
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_eps2pgfloopforall() throws ProgramError {
+        ArrayStack<PSObject> cs = getContStack();
+        ArrayStack<PSObject> os = getOpStack();
+        ExecStack es = getExecStack();
+        try {
+            // Get arguments from continuation stack.
+            PSObject proc = cs.pop();
+            PSObjectArray itemList = cs.pop().toArray();
+            PSObject objNrItemsPerLoop = cs.pop();
+            int nrItemsPerLoop = objNrItemsPerLoop.toInt();
+            cs.pop().toNull();
+            
+            if (itemList.size() > 0) {
+                // Push object on operand stack
+                for (int i = 0; i < nrItemsPerLoop; i++) {
+                    os.push(itemList.remove(0));
+                }
+                
+                // Push objects on execution stack
+                es.push(new PSObjectName("eps2pgfloopforall"));
+                es.push(proc);
+                
+                // Push arguments on continuation stack
+                cs.push(new PSObjectNull());
+                cs.push(objNrItemsPerLoop);
+                cs.push(itemList);
+                cs.push(proc);
+            }
+        } catch (PSError e) {
+            throw new ProgramError(e.getErrorName().isis()
+                    + " in continuation function");
+        }
+    }
+    
+    /**
      * Internal Eps2pgf operator: eps2pgfendofstopped. It indicates that the
      * end of a 'stopped' context has been reached.
      * 
@@ -1634,7 +1694,7 @@ public class Interpreter {
         PSObjectDict dollarError = dictStack.lookup("$error").toDict();
         dollarError.setKey("newerror", true);
         dollarError.setKey("errorname", errName);
-        dollarError.setKey("command", opStack.peek());
+        dollarError.setKey("command", opStack.pop());
         dollarError.setKey("errorinfo", new PSObjectNull());
         
         boolean recordStacks = dollarError.get("recordstacks").toBool();
@@ -1666,6 +1726,7 @@ public class Interpreter {
 
         log.severe("A PostScript error occurred.");
         log.severe("    Type: " + de.lookup("errorname").isis());
+        log.severe("    While executing: " + de.lookup("command").isis());
         
         if (de.lookup("recordstacks").toBool()) {
             log.severe("    Operand stack:");
@@ -1760,12 +1821,33 @@ public class Interpreter {
     /**
      * PostScript op: exit.
      * 
-     * @throws PSErrorInvalidExit Exit not allowed at this position.
+     * @throws PSErrorInvalidExit 'exit' operator at invalid location.
      */
     public void op_exit() throws PSErrorInvalidExit {
-        //TODO: implement this method more following the PostScript manual.
-        //      I.e without throwing the invalidexit error, but by popping down
-        //      the execution stack.
+        ExecStack estack = getExecStack();
+        PSObject obj;
+        while ((obj = estack.pop()) != null) {
+            if ((obj instanceof PSObjectName) && !obj.isLiteral()) {
+                if (obj.isis().startsWith("eps2pgfloop")) {
+                    // Also pop down the continuation stack
+                    try {
+                        ArrayStack<PSObject> cs = getContStack();
+                        while (cs.size() > 0) {
+                            if (cs.pop() instanceof PSObjectNull) {
+                                break;
+                            }
+                        }
+                    } catch (PSErrorStackUnderflow e) {
+                        /* empty block */
+                    }
+                    
+                    return;
+                    
+                } else if (obj.isis().equals("eps2pgfendofstopped")) {
+                    throw new PSErrorInvalidExit();
+                }
+            }
+        }
         throw new PSErrorInvalidExit();
     }
     
@@ -1890,6 +1972,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_for() throws PSError, ProgramError {
+        //TODO: implement this operator with runObject()
         PSObjectArray proc = getOpStack().pop().toProc();
         double limit = getOpStack().pop().toReal();
         double inc = getOpStack().pop().toReal();
@@ -1943,23 +2026,25 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_forall() throws PSError, ProgramError {
-        PSObjectArray proc = getOpStack().pop().toProc();
+        ArrayStack<PSObject> os = getOpStack();
+        ExecStack es = getExecStack();
+        ArrayStack<PSObject> cs = getContStack();
+
+        PSObject proc = os.pop();
         proc.checkAccess(true, false, false);
-        PSObject obj = getOpStack().pop();
+        PSObject obj = os.pop();
         obj.checkAccess(false, true, false);
         
         List<PSObject> items = obj.getItemList();
         int nr = items.remove(0).toNonNegInt();
-        try {
-            while (!items.isEmpty()) {
-                for (int i = 0; i < nr; i++) {
-                     getOpStack().push(items.remove(0));
-                }
-                runObject(proc);
-            }
-        } catch (PSErrorInvalidExit e) {
-            // 'exit' operator called from within this loop
-        }
+        PSObjectArray itemListArray = new PSObjectArray(items);
+        
+        cs.push(new PSObjectNull());
+        cs.push(new PSObjectInt(nr));
+        cs.push(itemListArray);
+        cs.push(proc);
+
+        es.push(new PSObjectName("eps2pgfloopforall"));        
     }
     
     /**
@@ -2113,7 +2198,7 @@ public class Interpreter {
         PSObjectArray proc = getOpStack().pop().toProc();
         boolean bool = getOpStack().pop().toBool();
         if (bool) {
-            runObject(proc);
+            getExecStack().push(proc);
         }
     }
     
@@ -2129,9 +2214,9 @@ public class Interpreter {
         boolean bool = getOpStack().pop().toBool();
         
         if (bool) {
-            runObject(proc1);
+            getExecStack().push(proc1);
         } else {
-            runObject(proc2);
+            getExecStack().push(proc2);
         }
     }
     
@@ -2604,6 +2689,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_pathforall() throws PSError, ProgramError {
+        //TODO: implement this method without runObject()
         PSObjectArray close = getOpStack().pop().toProc();
         PSObjectArray curve = getOpStack().pop().toProc();
         PSObjectArray line = getOpStack().pop().toProc();
@@ -2898,6 +2984,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_repeat() throws PSError, ProgramError {
+        //TODO: implement this method without runObject()
         PSObjectArray proc = getOpStack().pop().toProc();
         int n = getOpStack().pop().toNonNegInt();
         
@@ -3623,6 +3710,8 @@ public class Interpreter {
      * PostScript op: stop.
      */
     public void op_stop() {
+        //TODO this operator must also check for contintuation function and pop
+        //     the continuation stack.
         ExecStack estack = getExecStack();
         PSObject obj;
         while ((obj = estack.pop()) != null) {

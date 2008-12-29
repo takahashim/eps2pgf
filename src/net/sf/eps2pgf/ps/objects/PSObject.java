@@ -724,6 +724,17 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
+     * Convert this object to a null object, if possible.
+     * 
+     * @return The null object.
+     * 
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
+    public PSObjectNull toNull() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
      * Convert this object to a procedure object, if possible.
      * 
      * @throws PSErrorTypeCheck Unable to convert this object type to a

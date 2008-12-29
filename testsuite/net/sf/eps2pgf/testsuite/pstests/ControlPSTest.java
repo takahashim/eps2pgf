@@ -59,14 +59,14 @@ public class ControlPSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest1Exec() throws Exception {
+    public void exec1() throws Exception {
         String cmd = "{1 2 add} exec 3 eq  [1 2 /add load] exec length 3 eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest2Exec() throws Exception {
+    public void exec2() throws Exception {
         String cmd = "(3 2 add) cvx exec 5 eq  /add exec /add eq"
             + " 3 2 /add cvx exec 5 eq";
         assertTrue(Common.testString(interp, cmd));
@@ -74,21 +74,21 @@ public class ControlPSTest {
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest3If() throws Exception {
+    public void if1() throws Exception {
         String cmd = "99 false {1 2 add} if 99 eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest4If() throws Exception {
+    public void if2() throws Exception {
         String cmd = "true {1 2 add} if 3 eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest5Ifelse() throws Exception {
+    public void ifelse1() throws Exception {
         String cmd = "1 2 true {add} {sub} ifelse 3 eq"
             + " 1 2 false {add}{sub} ifelse -1 eq";
         assertTrue(Common.testString(interp, cmd));
@@ -96,14 +96,14 @@ public class ControlPSTest {
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest6For() throws Exception {
+    public void for1() throws Exception {
         String cmd = "0 1 1 4 {add} for dup 10 eq exch type /integertype eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest7For() throws Exception {
+    public void for2() throws Exception {
         String cmd = "1 2 6 {} for 5 eq  3 1 roll 3 eq"
             + " 3 1 roll type /integertype eq";
         assertTrue(Common.testString(interp, cmd));
@@ -111,7 +111,7 @@ public class ControlPSTest {
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest8For() throws Exception {
+    public void for3() throws Exception {
         String cmd = "3 -.5 1 {} for 1.0 eq  5 1 roll 1.5 eq  5 1 roll 2.0 eq"
             + " 5 1 roll 2.5 eq  5 1 roll 3.0 eq";
         assertTrue(Common.testString(interp, cmd));
@@ -119,14 +119,48 @@ public class ControlPSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest8bFor() throws Exception {
+    public void for4() throws Exception {
         String cmd = "true 0 1 5 {3 eq {stop} if} for false";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest9Repeat() throws Exception {
+    public void for5() throws Exception {
+        String cmd = "1 1 1 {99} for 99 eq exch 1 eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void forall1() throws Exception {
+        String cmd = "[1 2 3 4] {"
+            + " [1 2 3 4] {mul dup 10 gt {exit} if} forall"
+            + " } forall"
+            + " 24 eq 4 1 roll 18 eq 4 1 roll 12 eq 4 1 roll 24 eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void forall2() throws Exception {
+        String cmd = "(abc) {} forall 99 eq 3 1 roll 98 eq 3 1 roll 97 eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void forall3() throws Exception {
+        String cmd = "/d 3 dict def d /aa 1 put d /bb 2 put d /cc 3 put"
+            + " d {} forall exch d exch get eq 5 1 roll"
+            + " exch d exch get eq 3 1 roll exch d exch get eq";
+        assertTrue(Common.testString(interp, cmd));
+    }
+
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void repeat1() throws Exception {
         String cmd = "4 {(abc)} repeat (abc) eq  4 1 roll (abc) eq"
             + " 4 1 roll (abc) eq  4 1 roll (abc) eq";
         assertTrue(Common.testString(interp, cmd));
@@ -134,35 +168,35 @@ public class ControlPSTest {
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest10Repeat() throws Exception {
+    public void repeat2() throws Exception {
         String cmd = "1 2 3 4 3 {pop} repeat 1 eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest11Repeat() throws Exception {
+    public void repeat3() throws Exception {
         String cmd = "mark 0 {(will not happen)} repeat mark eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest12Loop() throws Exception {
+    public void loop1() throws Exception {
         String cmd = "1 {1 add dup 5 eq {exit} if} loop 5 eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest13Loop() throws Exception {
+    public void loop2() throws Exception {
         String cmd = "true 1 {1 add dup 5 eq {pop stop} if} loop false";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest14Exit() throws Exception {
+    public void exit1() throws Exception {
         String cmd = "0 2 999 {dup 6 eq {exit} if} for 6 eq  4 1 roll 4 eq"
             + " 4 1 roll 2 eq  4 1 roll 0 eq";
         assertTrue(Common.testString(interp, cmd));
@@ -170,7 +204,7 @@ public class ControlPSTest {
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest15Exit() throws Exception {
+    public void exit2() throws Exception {
         String cmd = "[1 2 3] {exit} forall 1 eq"
             + " 99 {exit} repeat count 1 eq";
         assertTrue(Common.testString(interp, cmd));
@@ -178,21 +212,27 @@ public class ControlPSTest {
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest16Exit() throws Exception {
+    public void exit3() throws Exception {
         String cmd = "{exit} loop true";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest17Stop() throws Exception {
+    public void exit4() throws Exception {
+        String cmd = "[1 2 3 4 5] { pop {exit} stopped } forall";
+        assertTrue(Common.testString(interp, cmd));
+    }
+    /** Test. @throws Exception the exception */
+    @Test
+    public void stop1() throws Exception {
         String cmd = "{1 2 stop 3 4} stopped  3 1 roll 2 eq  3 1 roll 1 eq";
         assertTrue(Common.testString(interp, cmd));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest18Stopped() throws Exception {
+    public void stopped1() throws Exception {
         String cmd = "{add} stopped  {1 2} stopped false eq"
             + " 3 1 roll 2 eq 3 1 roll 1 eq";
         assertTrue(Common.testString(interp, cmd));
@@ -200,7 +240,7 @@ public class ControlPSTest {
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest19Execstack() throws Exception {
+    public void execstack1() throws Exception {
         String cmd = "{1 2 100 array execstack 3 4} exec pop pop"
             + " 3 1 roll pop pop dup length 1"
             + " sub get dup 0 get 3 eq  exch 1 get 4 eq";
@@ -209,16 +249,9 @@ public class ControlPSTest {
 
     /** Test. @throws Exception the exception */
     @Test
-    public void controlTest20Countexecstack() throws Exception {
+    public void countexecstack1() throws Exception {
         String cmd = "countexecstack {countexecstack 999} exec pop sub -1 eq";
         assertTrue(Common.testString(interp, cmd));
     }
-
-    /** Test. @throws Exception the exception */
-    @Test
-    public void controlTest21For() throws Exception {
-        String cmd = "1 1 1 {99} for 99 eq exch 1 eq";
-        assertTrue(Common.testString(interp, cmd));
-    }
-
+    
 }
