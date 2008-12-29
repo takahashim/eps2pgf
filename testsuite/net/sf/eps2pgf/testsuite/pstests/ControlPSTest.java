@@ -44,7 +44,7 @@ public class ControlPSTest {
      */
     @BeforeClass
     public static void setUpClass() throws Exception {
-        Logger.getLogger("net.sourceforge.eps2pgf").setLevel(Level.OFF);
+        Logger.getLogger("net.sourceforge.eps2pgf").setLevel(Level.SEVERE);
     }
     
     /**

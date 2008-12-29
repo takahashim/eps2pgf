@@ -18,10 +18,13 @@
 
 package net.sf.eps2pgf.testsuite.pstests;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectBool;
+import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFile;
 import net.sf.eps2pgf.util.ArrayStack;
 
@@ -53,9 +56,20 @@ public final class Common {
         
         PSObjectFile cmds = new PSObjectFile(
                 new StringInputStream(postscriptCommands));
+
+        PSObjectArray he = new PSObjectArray("{errordict /handleerror"
+                + " {/errorhandled true def eps2pgfhandleerror} put}", interp);
         
         interp.getExecStack().push(cmds);
+        interp.getExecStack().push(he);
         interp.start();
+        
+        PSObject err = interp.getDictStack().lookup("errorhandled");
+        if ((err != null) && err.toBool()) {
+            PSObjectDict de = interp.getDictStack().lookup("$error").toDict();
+            throw new ProgramError(de.lookup("errorname").isis() + " in "
+                    + de.lookup("command").isis());
+        }
         
         // Check all booleans on the stack
         boolean boolFound = false;

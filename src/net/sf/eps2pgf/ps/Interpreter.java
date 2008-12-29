@@ -1722,10 +1722,12 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_eps2pgfendofstopped() throws ProgramError {
-        getOpStack().push(new PSObjectBool(false));
         try {
             PSObjectDict dollarError = dictStack.lookup("$error").toDict();
+            boolean newError = dollarError.lookup("newerror").toBool();
             dollarError.setKey("newerror", false);
+            
+            getOpStack().push(new PSObjectBool(newError));
         } catch (PSErrorTypeCheck e) {
             throw new ProgramError("The $error dict is not a dictionary.");
         }
@@ -1746,26 +1748,29 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_eps2pgferrorproc() throws PSError {
-        PSObjectName errName = opStack.pop().toName();
+        ArrayStack<PSObject> os = getOpStack();
+        PSObjectName errName = os.pop().toName();
         PSObjectDict dollarError = dictStack.lookup("$error").toDict();
         dollarError.setKey("newerror", true);
         dollarError.setKey("errorname", errName);
-        dollarError.setKey("command", opStack.pop());
+        dollarError.setKey("command", os.pop());
         dollarError.setKey("errorinfo", new PSObjectNull());
         
         boolean recordStacks = dollarError.get("recordstacks").toBool();
         if (recordStacks) {
-            opStack.push(new PSObjectArray(opStack.size()));
-            op_astore();
-            dollarError.setKey("ostack", opStack.pop());
+            PSObjectArray arr = new PSObjectArray();
+            for (int i = 0; i < os.size(); i++) {
+                arr.addToEnd(os.peek(os.size() - i - 1));
+            }
+            dollarError.setKey("ostack", arr);
             
-            opStack.push(new PSObjectArray(execStack.size()));
+            os.push(new PSObjectArray(execStack.size()));
             op_execstack();
-            PSObjectArray estack = opStack.pop().toArray();
+            PSObjectArray estack = os.pop().toArray();
             estack = estack.getinterval(0, estack.size() - 1);
             dollarError.setKey("estack", estack);
             
-            opStack.push(new PSObjectArray(dictStack.countdictstack()));
+            os.push(new PSObjectArray(dictStack.countdictstack()));
             op_dictstack();
             dollarError.setKey("dstack", opStack.pop());
         }
@@ -1938,13 +1943,14 @@ public class Interpreter {
      * @throws PSErrorInvalidExit 'exit' operator at invalid location.
      */
     public void op_exit() throws PSErrorInvalidExit {
-        ExecStack estack = getExecStack();
+        ExecStack es = getExecStack();
         PSObject obj;
         DictStack ds = getDictStack();
-        while ((obj = estack.pop()) != null) {
+        while ((obj = es.pop()) != null) {
             if ((obj == ds.eps2pgfFor)
                     || (obj == ds.eps2pgfForall)
-                    || (obj == ds.eps2pgfLoop)) {
+                    || (obj == ds.eps2pgfLoop)
+                    || (obj == ds.eps2pgfRepeat)) {
                 
                 // Also pop down the continuation stack
                 try {
@@ -1961,9 +1967,13 @@ public class Interpreter {
                 return;
                 
             } else if (obj == ds.eps2pgfEndOfStopped) {
+                // Push obj back on execution stack to make sure we're still in
+                // the 'stopped' context.
+                es.push(obj);
                 throw new PSErrorInvalidExit();
             }
         }
+        
         throw new PSErrorInvalidExit();
     }
     
@@ -3802,20 +3812,31 @@ public class Interpreter {
    
     /**
      * PostScript op: stop.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_stop() {
+    public void op_stop() throws ProgramError {
         //TODO this operator must also check for contintuation function and pop
         //     the continuation stack.
-        ExecStack estack = getExecStack();
+        ExecStack es = getExecStack();
         PSObject obj;
         DictStack ds = getDictStack();
-        while ((obj = estack.pop()) != null) {
+        while ((obj = es.pop()) != null) {
             if (obj == ds.eps2pgfEndOfStopped) {
+                // Set 'newerror' in $error to indicate that an "error"
+                // occurred.
+                try {
+                    PSObjectDict dollarError = ds.lookup("$error").toDict();
+                    dollarError.setKey("newerror", true);
+                } catch (PSErrorTypeCheck e) {
+                    throw new ProgramError("$error is not a dictionary.");
+                }
+
+                // Push eps2pgfEndOfStopped operator back on the execution stack
+                // so that it gets executed.
+                es.push(obj);
                 break;
             }
-        }
-        if (estack.size() > 0) {
-            getOpStack().push(new PSObjectBool(true));
         }
     }
     
