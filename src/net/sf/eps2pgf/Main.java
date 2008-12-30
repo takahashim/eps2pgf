@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2008 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,7 +152,7 @@ public final class Main {
     public static void printVersionCopyright() {
         System.out.println(getNameVersion());
         System.out.println("");
-        System.out.println("Copyright 2007-2008 Paul Wagenaars"
+        System.out.println("Copyright 2007-2009 Paul Wagenaars"
                 + " <paul@wagenaars.org>");
         System.out.println("");
         System.out.println("Licensed under the Apache License, Version 2.0 (the"

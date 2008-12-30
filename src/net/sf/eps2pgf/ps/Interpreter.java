@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2008 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-//TODO replace copyright 2007-2008 with 2007-2009.
 
 package net.sf.eps2pgf.ps;
 
