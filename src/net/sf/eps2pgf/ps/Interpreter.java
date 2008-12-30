@@ -1722,14 +1722,20 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_eps2pgfstopped() throws ProgramError {
+        ArrayStack<PSObject> cs = getContStack();
         try {
+            // Pop arguments from continuation stack
+            cs.pop().toNull();
+            
+            // Get current value of 'newerror' and set it to false
             PSObjectDict dollarError = dictStack.lookup("$error").toDict();
             boolean newError = dollarError.lookup("newerror").toBool();
             dollarError.setKey("newerror", false);
             
+            // Push results on operand stack
             getOpStack().push(new PSObjectBool(newError));
-        } catch (PSErrorTypeCheck e) {
-            throw new ProgramError("The $error dict is not a dictionary.");
+        } catch (PSError e) {
+            throw new ProgramError("An PS error: " + e.getMessage());
         }
     }
     
@@ -2174,8 +2180,6 @@ public class Interpreter {
         }
         
         // Push continuation function to execution stack
-        //TODO don't create a new executable name each time. Instead make
-        //     constants containing operator objects of often used functions.
         getExecStack().push(getDictStack().eps2pgfFor);
         
         // Push arguments to continuation stack
@@ -3894,8 +3898,6 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_stop() throws ProgramError {
-        //TODO this operator must also check for contintuation function and pop
-        //     the continuation stack.
         ExecStack es = getExecStack();
         PSObject obj;
         DictStack ds = getDictStack();
@@ -3914,6 +3916,21 @@ public class Interpreter {
                 // so that it gets executed.
                 es.push(obj);
                 break;
+            } else if (ds.isContinuationFunction(obj)) {
+                // Pop continuation stack down to a Null object. These are the
+                // arguments for the continuation function just popped from the
+                // execution stack.
+                ArrayStack<PSObject> cs = getContStack();
+                try {
+                    while (true) {
+                        if (cs.pop() instanceof PSObjectNull) {
+                            break;
+                        }
+                    }
+                } catch (PSErrorStackUnderflow e) {
+                    throw new ProgramError("No null object found on"
+                            + " continuation stack.");
+                }
             }
         }
     }
@@ -3925,8 +3942,13 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_stopped() throws PSError, ProgramError {
+        
+        // Push proc and continuation function on stack
         getExecStack().push(getDictStack().eps2pgfStopped);
         getExecStack().push(getOpStack().pop());
+
+        // Push arguments of continutation function on c stack
+        getContStack().push(new PSObjectNull());
     }
     
     /**

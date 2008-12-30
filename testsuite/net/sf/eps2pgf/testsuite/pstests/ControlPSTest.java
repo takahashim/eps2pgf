@@ -229,7 +229,14 @@ public class ControlPSTest {
         String cmd = "{1 2 stop 3 4} stopped  3 1 roll 2 eq  3 1 roll 1 eq";
         assertTrue(Common.testString(interp, cmd, 3));
     }
-
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void stop2() throws Exception {
+        String cmd = "{ [true false false] {stop} forall } stopped";
+        assertTrue(Common.testString(interp, cmd, 2));
+    }
+    
     /** Test. @throws Exception the exception */
     @Test
     public void stopped1() throws Exception {
