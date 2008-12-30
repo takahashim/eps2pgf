@@ -1580,10 +1580,12 @@ public class Interpreter {
         InputStream eexecInStream = new EexecDecode(rawInStream);
         PSObjectFile eexecFile = new PSObjectFile(eexecInStream);
         
-        getOpStack().push(getDictStack().lookup("systemdict"));
-        op_begin();
-        runObject(eexecFile);
-        op_end();
+        getDictStack().pushDict(getDictStack().lookup("systemdict").toDict());
+        
+        getExecStack().push(getDictStack().eps2pgfEexec);
+        getContStack().push(new PSObjectNull());
+        
+        getExecStack().push(eexecFile);
     }
     
     /**
@@ -1756,6 +1758,28 @@ public class Interpreter {
      */
     public void op_eps2pgfcshow() throws ProgramError {
         throw new ProgramError("Continuation function not yet implemented.");
+    }
+    
+    /**
+     * Internal Eps2pgf operator. Continuation function for 'eexec' operator.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_eps2pgfeexec() throws ProgramError {
+        ArrayStack<PSObject> cs = getContStack();
+        try {
+            // Pop arguments from continuation stack
+            cs.pop().toNull();
+            
+            // Remove top systemdict from dictstack
+            PSObjectDict dict = getDictStack().popDict();
+            PSObjectDict sysdict = getDictStack().lookup("systemdict").toDict();
+            if (dict != sysdict) {
+                throw new ProgramError("Top dict is not equal to systemdict.");
+            }
+        } catch (PSError e) {
+            throw new ProgramError("An PS error: " + e.getMessage());
+        }        
     }
     
     /**

@@ -81,6 +81,7 @@ public class DictStack {
     public PSObjectOperator eps2pgfRepeat;
     public PSObjectOperator eps2pgfResourceforall;
     public PSObjectOperator eps2pgfStopped;
+    public PSObjectOperator eps2pgfEexec;
     // CHECKSTYLE:ON
     
     /**
@@ -213,6 +214,7 @@ public class DictStack {
                 lookup("eps2pgfresourceforall").toOperator();
 
             // Other continuation functions
+            eps2pgfEexec = lookup("eps2pgfeexec").toOperator();
             eps2pgfStopped = lookup("eps2pgfstopped").toOperator();
         } catch (PSErrorTypeCheck e) {
             throw new ProgramError("Object in dictstack has incorrect type for"
@@ -468,7 +470,7 @@ public class DictStack {
                     || (obj == eps2pgfCshow) || (obj == eps2pgfFilenameforall)
                     || (obj == eps2pgfKshow) || (obj == eps2pgfPathforall)
                     || (obj == eps2pgfResourceforall)
-                    || (obj == eps2pgfStopped)) {
+                    || (obj == eps2pgfStopped) || (obj == eps2pgfEexec)) {
                 return true;
             }
         }
