@@ -59,7 +59,7 @@ public class OutputPSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void outputTest1Nulldevice() throws Exception {
+    public void nulldevice1() throws Exception {
         String cmd = "nulldevice matrix currentmatrix aload pop"
             + " 0 sub abs 1e-3 lt"
             + " 6 1 roll 0 sub abs 1e-3 lt"
@@ -67,7 +67,7 @@ public class OutputPSTest {
             + " 6 1 roll 0 sub abs 1e-3 lt"
             + " 6 1 roll 0 sub abs 1e-3 lt"
             + " 6 1 roll 1 sub abs 1e-3 lt";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 6));
     }
 
 

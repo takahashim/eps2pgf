@@ -59,76 +59,76 @@ public class ParserPSTest {
     
     /** Test1. @throws Exception the exception */
     @Test
-    public void parserTest1() throws Exception {
+    public void parser1() throws Exception {
         String cmd = "[1 2] count 1 eq exch type /arraytype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test2. @throws Exception the exception */
     @Test
-    public void parserTest2() throws Exception {
+    public void parser2() throws Exception {
         String cmd = "<123d>(\022=) eq  <~j34rt~>(\343\314\266\226) ";
         cmd += "eq <~z~>(\000\000\000\000)eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
     /** Test3. @throws Exception the exception */
     @Test
-    public void parserTest3() throws Exception {
+    public void parser3() throws Exception {
         String cmd = "<</a(foo)/b 3>> count 1 eq exch type /dicttype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Parser test 4. @throws Exception the exception */
     @Test
-    public void parserTest4() throws Exception {
+    public void parser4() throws Exception {
         String cmd = "<< 1 /a 2 /b >> count 1 eq exch type /dicttype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Parser test 5. @throws Exception the exception */
     @Test
-    public void parserTest5() throws Exception {
+    public void parser5() throws Exception {
         String cmd = "(lka(oi){\\)) dup length 9 eq exch type /stringtype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Parser test 6. @throws Exception the exception */
     @Test
-    public void parserTest6() throws Exception {
+    public void parser6() throws Exception {
         String cmd = "{{ {1 2 add} {/foo put}} (}) 1 2 add} count 1 eq ";
         cmd += "exch type /arraytype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Parser test 7. @throws Exception the exception */
     @Test
-    public void parserTest7() throws Exception {
+    public void parser7() throws Exception {
         String cmd = "16#0 0 eq  16#C 12 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Parser test. @throws Exception the exception */
     @Test
-    public void parserTest8() throws Exception {
+    public void parser8() throws Exception {
         String cmd = "(\\\\) (\\134) eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Parser test. @throws Exception the exception */
     @Test
-    public void parserTest9() throws Exception {
+    public void parser9() throws Exception {
         String cmd = "<~abc~>(\311\211) eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Parser test. @throws Exception the exception */
     @Test
-    public void parserTest10() throws Exception {
+    public void parser10() throws Exception {
         String cmd = "/nr 99 def {1 2 //nr 3 4} 2 get 99 eq"
             + " /key {1 2 //nr 3 4} def /nr 88 def key"
             + " 4 eq 5 1 roll 3 eq 5 1 roll 99 eq 5 1 roll 2 eq 5 1 roll 1 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 6));
     }
 
 }

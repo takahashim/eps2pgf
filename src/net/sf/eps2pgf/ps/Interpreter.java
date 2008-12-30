@@ -367,8 +367,8 @@ public class Interpreter {
      */
     public void runObject(final PSObject objectToRun)
             throws PSError, ProgramError {
-        //TODO: reimplement methods that use this method. I think it's better to
-        //      implement them by working with the stack directly.
+        //TODO reimplement methods that use this method. I think it's better to
+        //     implement them by working with the stack directly.
         PSObject topAtStart = execStack.getTop();
         executeObject(objectToRun);
         try {
@@ -482,7 +482,7 @@ public class Interpreter {
         }  // end of check whether object is literal
     }
     
-    //TODO: remove operators from main Interpreter class and put them in several
+    //TODO remove operators from main Interpreter class and put them in several
     //      sub-classes: e.g. InterpreterOpsA, InterpreterOpsB, etc... Each of
     //      these classes is passed the actual Interpreter upon construction.
     //      This means that all operator implementations must be changed to
@@ -1402,31 +1402,25 @@ public class Interpreter {
     
     /**
      * PostScript op: >>.
-     * this operator is equivalent to the following code (from PostScript
-     * manual)
-     * counttomark 2 idiv
-     * dup dict
-     * begin
-     * {def} repeat
-     * pop
-     * currentdict
-     * end.
      * 
      * @throws PSError A PostScript error occurred.
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_dblGreaterBrackets() throws PSError, IOException,
-            ProgramError {
-        PSObjectArray defProc = new PSObjectArray("{def}", this);
-        
-        op_counttomark(); getOpStack().push(new PSObjectInt(2)); op_idiv();
-        op_dup(); op_dict();
-        op_begin();
-          getOpStack().push(defProc); op_repeat();
-          op_pop();
-          op_currentdict();
-        op_end();
+    public void op_dblGreaterBrackets() throws PSError, ProgramError {
+        ArrayStack<PSObject> os = getOpStack();
+        PSObjectDict dict = new PSObjectDict();
+        while (true) {
+            PSObject value = os.pop();
+            if (value instanceof PSObjectMark) {
+                break;
+            }
+            PSObject key = os.pop();
+            if (value instanceof PSObjectMark) {
+                throw new PSErrorRangeCheck();
+            }
+            dict.setKey(key, value);
+        }
+        os.push(dict);
     }
     
     /**
@@ -2887,7 +2881,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_pathforall() throws PSError, ProgramError {
-        //TODO: implement this method without runObject()
+        //TODO implement this method without runObject()
         PSObjectArray close = getOpStack().pop().toProc();
         PSObjectArray curve = getOpStack().pop().toProc();
         PSObjectArray line = getOpStack().pop().toProc();
