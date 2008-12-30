@@ -41,10 +41,25 @@ public final class Common {
     }
     
     /**
+     * 
+     * @param interp
+     * @param postscriptCommands
+     * @return
+     * @throws Exception
+     */
+    public static boolean testString(final Interpreter interp,
+            final String postscriptCommands) throws Exception {
+        //TODO remove this function and define stack size for all tests
+        throw new ProgramError("Please remove this function.");
+    }
+    
+    /**
      * Test some PostScript commands.
      * 
      * @param postscriptCommands The postscript commands.
      * @param interp The interpreter in which the commands are tested.
+     * @param nrStackObj The number of object that should be on the operand
+     * stack after running.
      * 
      * @return True, if all booleans where true. False, if there were no
      * booleans, or if at least one of the booleans was false.
@@ -52,7 +67,8 @@ public final class Common {
      * @throws Exception the exception
      */
     public static boolean testString(final Interpreter interp,
-            final String postscriptCommands) throws Exception {
+            final String postscriptCommands, final int nrStackObj)
+            throws Exception {
         
         PSObjectFile cmds = new PSObjectFile(
                 new StringInputStream(postscriptCommands));
@@ -64,11 +80,17 @@ public final class Common {
         interp.getExecStack().push(he);
         interp.start();
         
+        // Check whether an error was handled by the interpreter
         PSObject err = interp.getDictStack().lookup("errorhandled");
         if ((err != null) && err.toBool()) {
             PSObjectDict de = interp.getDictStack().lookup("$error").toDict();
             throw new ProgramError(de.lookup("errorname").isis() + " in "
                     + de.lookup("command").isis());
+        }
+
+        // Check for number of item on operand stack
+        if (nrStackObj != interp.getOpStack().size()) {
+            return false;
         }
         
         // Check all booleans on the stack
