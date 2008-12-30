@@ -1721,7 +1721,7 @@ public class Interpreter {
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_eps2pgfendofstopped() throws ProgramError {
+    public void op_eps2pgfstopped() throws ProgramError {
         try {
             PSObjectDict dollarError = dictStack.lookup("$error").toDict();
             boolean newError = dollarError.lookup("newerror").toBool();
@@ -1740,6 +1740,16 @@ public class Interpreter {
         double[] metrics = gstate.current().getDevice().eps2pgfGetMetrics();
         PSObjectArray array = new PSObjectArray(metrics);
         getOpStack().push(array);
+    }
+    
+    /**
+     * Internal Eps2pgf operator: continuation function for looping context
+     * operator.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_eps2pgfcshow() throws ProgramError {
+        throw new ProgramError("Continuation function not yet implemented.");
     }
     
     /**
@@ -1777,6 +1787,16 @@ public class Interpreter {
     }
     
     /**
+     * Internal Eps2pgf operator: continuation function for looping context
+     * operator.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_eps2pgffilenameforall() throws ProgramError {
+        throw new ProgramError("Continuation function not yet implemented.");
+    }
+    
+    /**
      * Internal Eps2pgf operator. Default handleerror procedure.
      * 
      * @throws PSError A PostScript error occurred.
@@ -1810,6 +1830,16 @@ public class Interpreter {
     }
     
     /**
+     * Internal Eps2pgf operator: continuation function for looping context
+     * operator.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_eps2pgfkshow() throws ProgramError {
+        throw new ProgramError("Continuation function not yet implemented.");
+    }
+    
+    /**
      * Internal Eps2pgf operator. Continuation function for 'loop' operator.
      * Input arguments: null proc
      * Note: right is top of stack
@@ -1833,6 +1863,16 @@ public class Interpreter {
             throw new ProgramError(e.getErrorName().isis()
                     + " in continuation function");
         }
+    }
+    
+    /**
+     * Internal Eps2pgf operator: continuation function for looping context
+     * operator.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_eps2pgfpathforall() throws ProgramError {
+        throw new ProgramError("Continuation function not yet implemented.");
     }
     
     /**
@@ -1865,6 +1905,16 @@ public class Interpreter {
             throw new ProgramError(e.getErrorName().isis()
                     + " in continuation function");
         }
+    }
+    
+    /**
+     * Internal Eps2pgf operator: continuation function for looping context
+     * operator.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void op_eps2pgfresourceforall() throws ProgramError {
+        throw new ProgramError("Continuation function not yet implemented.");
     }
     
     /**
@@ -1947,11 +1997,7 @@ public class Interpreter {
         PSObject obj;
         DictStack ds = getDictStack();
         while ((obj = es.pop()) != null) {
-            if ((obj == ds.eps2pgfFor)
-                    || (obj == ds.eps2pgfForall)
-                    || (obj == ds.eps2pgfLoop)
-                    || (obj == ds.eps2pgfRepeat)) {
-                
+            if (ds.isLoopingContext(obj)) {
                 // Also pop down the continuation stack
                 try {
                     ArrayStack<PSObject> cs = getContStack();
@@ -1966,7 +2012,7 @@ public class Interpreter {
                 
                 return;
                 
-            } else if (obj == ds.eps2pgfEndOfStopped) {
+            } else if (obj == ds.eps2pgfStopped) {
                 // Push obj back on execution stack to make sure we're still in
                 // the 'stopped' context.
                 es.push(obj);
@@ -1996,6 +2042,18 @@ public class Interpreter {
     public void op_false() {
         getOpStack().push(new PSObjectBool(false));
     }
+    
+    /**
+     * PostScript op: filenameforall.
+     * 
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
+     * (yet) implemented.
+     */
+    public void op_filenameforall() throws PSErrorUnregistered {
+        throw new PSErrorUnregistered("filenameforall operator");
+    }
+    
+
     
     /**
      * PostScript op: fill.
@@ -2488,6 +2546,16 @@ public class Interpreter {
         dict.checkAccess(false, true, false);
         
         getOpStack().push(new PSObjectBool(dict.known(key)));
+    }
+    
+    /**
+     * PostScript op: kshow.
+     * 
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
+     * (yet) implemented.
+     */
+    public void op_kshow() throws PSErrorUnregistered {
+        throw new PSErrorUnregistered("kshow operator");
     }
     
     /**
@@ -3099,6 +3167,16 @@ public class Interpreter {
         cs.push(proc);
         
         getExecStack().push(getDictStack().eps2pgfRepeat);
+    }
+    
+    /**
+     * PostScript op: resourceforall.
+     * 
+     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
+     * (yet) implemented.
+     */
+    public void op_resourceforall() throws PSErrorUnregistered {
+        throw new PSErrorUnregistered("resourceforall operator");
     }
     
     /**
@@ -3822,7 +3900,7 @@ public class Interpreter {
         PSObject obj;
         DictStack ds = getDictStack();
         while ((obj = es.pop()) != null) {
-            if (obj == ds.eps2pgfEndOfStopped) {
+            if (obj == ds.eps2pgfStopped) {
                 // Set 'newerror' in $error to indicate that an "error"
                 // occurred.
                 try {
@@ -3832,7 +3910,7 @@ public class Interpreter {
                     throw new ProgramError("$error is not a dictionary.");
                 }
 
-                // Push eps2pgfEndOfStopped operator back on the execution stack
+                // Push eps2pgfStopped operator back on the execution stack
                 // so that it gets executed.
                 es.push(obj);
                 break;
@@ -3847,7 +3925,7 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_stopped() throws PSError, ProgramError {
-        getExecStack().push(getDictStack().eps2pgfEndOfStopped);
+        getExecStack().push(getDictStack().eps2pgfStopped);
         getExecStack().push(getOpStack().pop());
     }
     

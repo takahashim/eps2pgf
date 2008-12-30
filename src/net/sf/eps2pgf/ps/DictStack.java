@@ -71,11 +71,16 @@ public class DictStack {
      * defineQuickAccessConstants() method for more information.
      */
     // CHECKSTYLE:OFF
-    public PSObjectOperator eps2pgfEndOfStopped;
-    public PSObjectOperator eps2pgfForall;
+    public PSObjectOperator eps2pgfCshow;
+    public PSObjectOperator eps2pgfFilenameforall;
     public PSObjectOperator eps2pgfFor;
+    public PSObjectOperator eps2pgfForall;
+    public PSObjectOperator eps2pgfKshow;
     public PSObjectOperator eps2pgfLoop;
+    public PSObjectOperator eps2pgfPathforall;
     public PSObjectOperator eps2pgfRepeat;
+    public PSObjectOperator eps2pgfResourceforall;
+    public PSObjectOperator eps2pgfStopped;
     // CHECKSTYLE:ON
     
     /**
@@ -194,11 +199,21 @@ public class DictStack {
      */
     private void defineQuickAccessConstants() throws ProgramError {
         try {
-            eps2pgfEndOfStopped = lookup("eps2pgfendofstopped").toOperator();
+            // Looping context procedures
+            eps2pgfCshow = lookup("eps2pgfcshow").toOperator();
+            eps2pgfFilenameforall =
+                lookup("eps2pgffilenameforall").toOperator();
             eps2pgfFor = lookup("eps2pgffor").toOperator();
             eps2pgfForall = lookup("eps2pgfforall").toOperator();
+            eps2pgfKshow = lookup("eps2pgfkshow").toOperator();
             eps2pgfLoop = lookup("eps2pgfloop").toOperator();
+            eps2pgfPathforall = lookup("eps2pgfpathforall").toOperator();
             eps2pgfRepeat = lookup("eps2pgfrepeat").toOperator();
+            eps2pgfResourceforall =
+                lookup("eps2pgfresourceforall").toOperator();
+
+            // Other continuation functions
+            eps2pgfStopped = lookup("eps2pgfstopped").toOperator();
         } catch (PSErrorTypeCheck e) {
             throw new ProgramError("Object in dictstack has incorrect type for"
                     + " quick access constants.");
@@ -413,6 +428,51 @@ public class DictStack {
         }
         
         return null;
+    }
+    
+    
+    /**
+     * Checks whether an object is an operator defining a looping context. See
+     * PostScript manual under 'exit' operator for info which operators these
+     * are.
+     * 
+     * @param obj The object to check.
+     * 
+     * @return True when object defines looping context, false otherwise.
+     */
+    public boolean isLoopingContext(final PSObject obj) {
+        if (obj instanceof PSObjectOperator) {
+            if ((obj == eps2pgfFor) || (obj == eps2pgfForall)
+                    || (obj == eps2pgfLoop) || (obj == eps2pgfRepeat)
+                    || (obj == eps2pgfCshow) || (obj == eps2pgfFilenameforall)
+                    || (obj == eps2pgfKshow) || (obj == eps2pgfPathforall)
+                    || (obj == eps2pgfResourceforall)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    
+    /**
+     * Checks whether an object is an continuation function.
+     * 
+     * @param obj The object to check.
+     * 
+     * @return True when object is continuation function, false otherwise.
+     */
+    public boolean isContinuationFunction(final PSObject obj) {
+        if (obj instanceof PSObjectOperator) {
+            if ((obj == eps2pgfFor) || (obj == eps2pgfForall)
+                    || (obj == eps2pgfLoop) || (obj == eps2pgfRepeat)
+                    || (obj == eps2pgfCshow) || (obj == eps2pgfFilenameforall)
+                    || (obj == eps2pgfKshow) || (obj == eps2pgfPathforall)
+                    || (obj == eps2pgfResourceforall)
+                    || (obj == eps2pgfStopped)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     
