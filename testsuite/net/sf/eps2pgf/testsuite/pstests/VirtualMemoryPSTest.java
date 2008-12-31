@@ -73,7 +73,7 @@ public class VirtualMemoryPSTest {
             + " errordict /undefined {1 2 3 4 5 6 7 8 9 10 11 12 13 14 15} put"
             + " errordict /undefined get length 15 eq"
             + " exch restore"
-            + " errordict /undefined get length 15 eq";
+            + " errordict /undefined get length 15 ne";
         assertTrue(Common.testString(interp, cmd, 2));
     }
 
