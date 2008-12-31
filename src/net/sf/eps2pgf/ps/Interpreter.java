@@ -1890,11 +1890,67 @@ public class Interpreter {
     /**
      * Internal Eps2pgf operator: continuation function for looping context
      * operator.
+     * Input arguments: null path move line curve close
+     * Note: right is top of continuation stack 
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_eps2pgfpathforall() throws ProgramError {
-        throw new ProgramError("Continuation function not yet implemented.");
+        ArrayStack<PSObject> cs = getContStack();
+        ArrayStack<PSObject> os = getOpStack();
+        ExecStack es = getExecStack();
+        PSObjectMatrix ctm = gstate.current().getCtm();
+        
+        try {
+            // Get arguments from continuation stack.
+            PSObject close = cs.pop();
+            PSObject curve = cs.pop();
+            PSObject line = cs.pop();
+            PSObject move = cs.pop();
+            PSObjectArray path = cs.pop().toArray();
+            cs.pop().toNull();
+            
+            if (path.size() > 0) {
+                PathSection section = path.remove(0).toPathSection();
+                int nrCoors = 0;
+                PSObject proc = close;
+                if (section instanceof Moveto) {
+                    nrCoors = 1;
+                    proc = move;
+                } else if (section instanceof Lineto) {
+                    nrCoors = 1;
+                    proc = line;
+                } else if (section instanceof Curveto) {
+                    nrCoors = 3;
+                    proc = curve;
+                }
+                
+                // Push objects on operand stack
+                for (int j = 0; j < nrCoors; j++) {
+                    double x = section.getParam(2 * j);
+                    double y = section.getParam(2 * j + 1);
+                    double[] coor = ctm.itransform(x, y);
+                    os.push(new PSObjectReal(coor[0]));
+                    os.push(new PSObjectReal(coor[1]));
+                }
+                
+                // Push objects on execution stack
+                es.push(getDictStack().eps2pgfPathforall);
+                es.push(proc);
+            
+                // Push arguments on continuation stack
+                cs.push(new PSObjectNull());
+                cs.push(path);
+                cs.push(move);
+                cs.push(line);
+                cs.push(curve);
+                cs.push(close);
+            }
+            
+        } catch (PSError e) {
+            throw new ProgramError(e.getErrorName().isis()
+                    + " in continuation function");
+        }
     }
     
     /**
@@ -2881,42 +2937,29 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_pathforall() throws PSError, ProgramError {
-        //TODO implement this method without runObject()
-        PSObjectArray close = getOpStack().pop().toProc();
-        PSObjectArray curve = getOpStack().pop().toProc();
-        PSObjectArray line = getOpStack().pop().toProc();
-        PSObjectArray move = getOpStack().pop().toProc();
+        ArrayStack<PSObject> os = getOpStack();
+        PSObjectArray close = os.pop().toProc();
+        PSObjectArray curve = os.pop().toProc();
+        PSObjectArray line = os.pop().toProc();
+        PSObjectArray move = os.pop().toProc();
         
-        ArrayList<PathSection> path = gstate.current().getPath().getSections();
-        PSObjectMatrix ctm = gstate.current().getCtm();
-        
-        try {
-            for (int i = 0; i < path.size(); i++) {
-                PathSection section = path.get(i);
-                int nrCoors = 0;
-                PSObjectArray proc = close;
-                if (section instanceof Moveto) {
-                    nrCoors = 1;
-                    proc = move;
-                } else if (section instanceof Lineto) {
-                    nrCoors = 1;
-                    proc = line;
-                } else if (section instanceof Curveto) {
-                    nrCoors = 3;
-                    proc = curve;
-                }
-                for (int j = 0; j < nrCoors; j++) {
-                    double x = section.getParam(2 * j);
-                    double y = section.getParam(2 * j + 1);
-                    double[] coor = ctm.itransform(x, y);
-                    getOpStack().push(new PSObjectReal(coor[0]));
-                    getOpStack().push(new PSObjectReal(coor[1]));
-                }
-                runObject(proc);
-            }
-        } catch (PSErrorInvalidExit e) {
-            // 'exit' operator executed within this loop
+        ArrayList<PathSection> sects = gstate.current().getPath().getSections();
+        PSObjectArray path = new PSObjectArray();
+        for (int i = 0; i < sects.size(); i++) {
+            path.addToEnd(sects.get(i));
         }
+        
+        // Push objects on execution stack
+        getExecStack().push(getDictStack().eps2pgfPathforall);
+    
+        // Push arguments on continuation stack
+        ArrayStack<PSObject> cs = getContStack();
+        cs.push(new PSObjectNull());
+        cs.push(path);
+        cs.push(move);
+        cs.push(line);
+        cs.push(curve);
+        cs.push(close);
     }
     
     /**

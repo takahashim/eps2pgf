@@ -20,11 +20,13 @@ package net.sf.eps2pgf.ps;
 
 import java.util.logging.Logger;
 
+import net.sf.eps2pgf.ps.objects.PSObject;
+
 /**
  * Represent a part of a PostScript path (i.e. lineto, curveto, moveto, ...)
  * @author Paul Wagenaars
  */
-public class PathSection implements Cloneable {
+public class PathSection extends PSObject implements Cloneable {
     
     /** Coordinates associated with this path section. */
     private double[] params = new double[6];
@@ -41,11 +43,7 @@ public class PathSection implements Cloneable {
     public PathSection clone() {
         LOG.finest("PathSection clone() called.");
         PathSection copy;
-        try {
-            copy = (PathSection) super.clone();
-        } catch (CloneNotSupportedException e) {
-            copy = new PathSection();
-        }
+        copy = (PathSection) super.clone();
         copy.params = params.clone();
         return copy;
     }
@@ -63,6 +61,59 @@ public class PathSection implements Cloneable {
     }
     
     /**
+     * PostScript operator 'dup'. Create a (shallow) copy of this object. The
+     * values of composite object is not copied, but shared.
+     * 
+     * @return Shallow copy of this object.
+     */
+    @Override
+    public PathSection dup() {
+        PathSection ps;
+        if (this instanceof Moveto) {
+            ps = new Moveto();
+        } else if (this instanceof Lineto) {
+            ps = new Lineto();
+        } else if (this instanceof Curveto) {
+            ps = new Curveto();
+        } else {
+            double[] dummy = {Double.NaN, Double.NaN};
+            ps = new Closepath(dummy);
+        }
+        ps.params = params;
+        
+        return ps;
+    }
+    
+    /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof PathSection)) {
+            return false;
+        }
+        PathSection ps = (PathSection) obj;
+        if (this.getClass() != ps.getClass()) {
+            return false;
+        }
+        for (int i = 0; i < nrParams(); i++) {
+            if (this.getParam(i) != ps.getParam(i)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
      * Gets the parameter with the specified index.
      * 
      * @param index Index of the value to get. 
@@ -71,6 +122,25 @@ public class PathSection implements Cloneable {
      */
     public double getParam(final int index) {
         return params[index];
+    }
+    
+    /**
+     * Returns a hashCode value for this object. This method is supported
+     * for the benefit hashtables, such as used in PSObjectDict.
+     * 
+     * @return Hash code for this object.
+     */
+    @Override
+    public int hashCode() {
+        int code = this.getClass().hashCode();
+        for (int i = 0; i < nrParams(); i++) {
+            double val = getParam(i);
+            if (Double.isInfinite(val) || Double.isNaN(val)) {
+                break;
+            }
+            code *= i * ((int) (val * 1e6));
+        }
+        return code;
     }
     
     /**
@@ -92,5 +162,14 @@ public class PathSection implements Cloneable {
         params[index] = newValue;
     }
     
+    /**
+     * Returns this path section.
+     * 
+     * @return This path section.
+     */
+    @Override
+    public PathSection toPathSection() {
+        return this;
+    }
     
 }

@@ -30,6 +30,7 @@ public class Closepath extends PathSection implements Cloneable {
      * @param position Coordinate to where this closepath returns.
      */
     public Closepath(final double[] position) {
+        //TODO hmm I think the position argument doesn't do anything
         int nr = nrParams();
         for (int i = 0; i < nr; i++) {
             setParam(i, Double.NaN);

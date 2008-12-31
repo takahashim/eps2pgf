@@ -23,6 +23,7 @@ import java.util.List;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.ps.PathSection;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
@@ -743,6 +744,17 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
     public PSObjectOperator toOperator() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Returns this object as path section.
+     * 
+     * @return the path section
+     * 
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
+    public PathSection toPathSection() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     
