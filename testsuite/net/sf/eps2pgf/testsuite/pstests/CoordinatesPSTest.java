@@ -59,260 +59,260 @@ public class CoordinatesPSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest1Matrix() throws Exception {
+    public void matrix1() throws Exception {
         String cmd = "matrix {} forall  0 eq  6 1 roll 0 eq  6 1 roll 1 eq"
             + " 6 1 roll 0 eq  6 1 roll 0 eq  6 1 roll 1 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 6));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest2Matrix() throws Exception {
+    public void matrix2() throws Exception {
         String cmd = "matrix dup eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest3Initmatrix() throws Exception {
+    public void initmatrix1() throws Exception {
         String cmd = "/m1 matrix currentmatrix def /m2 2 2 scale initmatrix"
             + " matrix currentmatrix def  m1 0 get m2 0 get eq  m1 1 get m2 1"
             + " get eq  m1 2 get m2 2 get eq  m1 3 get m2 3 get eq  m1 4 get m2"
             + " 4 get eq  m1 5 get m2 5 get eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 6));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest4Identmatrix() throws Exception {
+    public void identmatrix1() throws Exception {
         String cmd = "/m matrix identmatrix def m 0 get 1 eq  m 1 get 0 eq  m 2"
             + " get 0 eq  m 3 get 1 eq  m 4 get 0 eq  m 5 get 0 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 6));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest5Identmatrix() throws Exception {
+    public void identmatrix2() throws Exception {
         String cmd = "matrix dup identmatrix pop [1 0 0 1 0 0] /m2 exch def /m1"
             + " exch def 0 1 m1 length 1 sub {dup m1 exch get 1e-40 add exch m2"
             + " exch get 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le"
             + " exch 0 gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 12));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest6Identmatrix() throws Exception {
+    public void identmatrix3() throws Exception {
         String cmd = "6 array dup  identmatrix pop [1 0 0 1 0 0] /m2 exch def"
             + " /m1 exch def 0 1 m1 length 1 sub {dup m1 exch get 1e-40 add"
             + " exch m2 exch get 1e-40 add div dup 1 lt {1 exch div} if dup"
             + " 1.001 le exch 0 gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 12));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest7Defaultmatrix() throws Exception {
+    public void defaultmatrix1() throws Exception {
         String cmd = "/m1 matrix currentmatrix def /m2 matrix defaultmatrix def"
             + " m1 0 get m2 0 get eq  m1 1 get m2 1 get eq  m1 2 get m2 2 get"
             + " eq  m1 3 get m2 3 get eq  m1 4 get m2 4 get eq  m1 5 get m2 5"
             + " get eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 6));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest8Currentmatrix() throws Exception {
+    public void currentmatrix1() throws Exception {
         String cmd = "matrix currentmatrix length 6 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest9Setmatrix() throws Exception {
+    public void setmatrix1() throws Exception {
         String cmd = "[1 2 3 4 5 6] setmatrix /m 6 array currentmatrix def  m 0"
             + " get 1 eq  m 1 get 2 eq  m 2 get 3 eq  m 3 get 4 eq  m 4 get 5"
             + " eq  m 5 get 6 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 6));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest10Translate() throws Exception {
+    public void translate1() throws Exception {
         String cmd = "[1.2 3.4 5.6 7.8 9.1 2.3] setmatrix 12.34 56.78 translate"
             + " matrix currentmatrix [1.2 3.4 5.6 7.8 341.88 487.14] /m2 exch"
             + " def /m1 exch def 0 1 5 {dup m1 exch get 1e-40 add exch m2 exch"
             + " get 1e-40 add div dup 1 lt {1 exch div} if dup 1.0001 le exch 0"
             + " gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 12));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest11Translate() throws Exception {
+    public void translate2() throws Exception {
         String cmd = "12.34 56.78 matrix translate [1 0 0 1 12.34 56.78] /m2"
             + " exch def /m1 exch def 0 1 5 {dup m1 exch get 1e-40 add exch m2"
             + " exch get 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le"
             + " exch 0 gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 12));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest12Scale() throws Exception {
+    public void scale1() throws Exception {
         String cmd = "[1.2 3.4 5.6 7.8 9.1 2.3] setmatrix 12.34 56.78 scale"
             + " matrix currentmatrix [14.81 41.96 318.0 442.9 9.1 2.3] /m2 exch"
             + " def /m1 exch def 0 1 5 {dup m1 exch get 1e-40 add exch m2 exch"
             + " get 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0"
             + " gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 12));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest13Scale() throws Exception {
+    public void scale2() throws Exception {
         String cmd = "12.34 56.78 matrix scale [12.34 0 0 56.78 0 0] /m2 exch"
             + " def /m1 exch def 0 1 5 {dup m1 exch get 1e-40 add exch m2 exch"
             + " get 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0"
             + " gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 12));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest14Rotate() throws Exception {
+    public void rotate1() throws Exception {
         String cmd = "[1.2 3.4 5.6 7.8 9.1 2.3] setmatrix -56.78 rotate matrix"
             + " currentmatrix [-4.027 -4.663 4.072 7.118 9.1 2.3] /m2 exch def"
             + " /m1 exch def 0 1 5 {dup m1 exch get 1e-40 add exch m2 exch get"
             + " 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt}"
             + " for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 12));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest15Rotate() throws Exception {
+    public void rotate2() throws Exception {
         String cmd = "-56.78 matrix rotate [0.548 -0.837 0.837 0.548 0 0] /m2"
             + " exch def /m1 exch def 0 1 5 {dup m1 exch get 1e-40 add exch m2"
             + " exch get 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le"
             + " exch 0 gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 12));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest16Concat() throws Exception {
+    public void concat1() throws Exception {
         String cmd = "[1.2 3.4 5.6 7.8 9.1 2.3] setmatrix [5.6 7.8 9.0 1.2 3.4"
             + " 5.6] concat matrix currentmatrix [50.4 79.88 17.52 39.96 44.54"
             + " 57.54] /m2 exch def /m1 exch def 0 1 5 {dup m1 exch get 1e-40"
             + " add exch m2 exch get 1e-40 add div dup 1 lt {1 exch div} if dup"
             + " 1.001 le exch 0 gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 12));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest17Concatmatrix() throws Exception {
+    public void concatmatrix1() throws Exception {
         String cmd = "[5.6 7.8 9.0 1.2 3.4 5.6] [1.2 3.4 5.6 7.8 9.1 2.3]"
             + " matrix concatmatrix [50.4 79.88 17.52 39.96 44.54 57.54] /m2"
             + " exch def /m1 exch def 0 1 5 {dup m1 exch get 1e-40 add exch m2"
             + " exch get 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le"
             + " exch 0 gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 12));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest18Transform() throws Exception {
+    public void transform1() throws Exception {
         String cmd = "[1.2 3.4 5.6 7.8 9.1 2.3] setmatrix 56.78 23.96 transform"
             + " 2 array astore [211.41 382.2] /m2 exch def /m1 exch def 0 1 m1"
             + " length 1 sub {dup m1 exch get 1e-40 add exch m2 exch get 1e-40"
             + " add div dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest19Transform() throws Exception {
+    public void transform2() throws Exception {
         String cmd = "56.78 23.96 [1.2 3.4 5.6 7.8 9.1 2.3] transform 2 array"
             + " astore [211.41 382.2] /m2 exch def /m1 exch def 0 1 m1 length 1"
             + " sub {dup m1 exch get 1e-40 add exch m2 exch get 1e-40 add div"
             + " dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest20Dtransform() throws Exception {
+    public void dtransform1() throws Exception {
         String cmd = "[1.2 3.4 5.6 7.8 9.1 2.3] setmatrix 56.78 23.96"
             + " dtransform 2 array astore [202.31 379.94] /m2 exch def /m1 exch"
             + " def 0 1 m1 length 1 sub {dup m1 exch get 1e-40 add exch m2 exch"
             + " get 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0"
             + " gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest21Dtransform() throws Exception {
+    public void dtransform2() throws Exception {
         String cmd = "56.78 23.96 [1.2 3.4 5.6 7.8 9.1 2.3] dtransform 2 array"
             + " astore [202.31 379.94] /m2 exch def /m1 exch def 0 1 m1 length"
             + " 1 sub {dup m1 exch get 1e-40 add exch m2 exch get 1e-40 add div"
             + " dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest22Itransform() throws Exception {
+    public void itransform1() throws Exception {
         String cmd = "[1.2 3.4 5.6 7.8 9.1 2.3] setmatrix 56.78 23.96"
             + " itransform 2 array astore [-25.889 14.062] /m2 exch def/m1 exch"
             + " def 0 1 m1 length 1 sub {dup m1 exch get 1e-40 add exch m2 exch"
             + " get 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0"
             + " gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest23Itransform() throws Exception {
+    public void itransform2() throws Exception {
         String cmd = "56.78 23.96 [1.2 3.4 5.6 7.8 9.1 2.3] itransform 2 array"
             + " astore [-25.889 14.062] /m2 exch def /m1 exch def 0 1 m1 length"
             + " 1 sub {dup m1 exch get 1e-40 add exch m2 exch get 1e-40 add div"
             + " dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest24Idtransform() throws Exception {
+    public void idtransform1() throws Exception {
         String cmd = "[1.2 3.4 5.6 7.8 9.1 2.3] setmatrix 56.78 23.96"
             + " idtransform 2 array astore [-31.891 16.973] /m2 exch def /m1"
             + " exch def 0 1 m1 length 1 sub {dup m1 exch get 1e-40 add exch m2"
             + " exch get 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le"
             + " exch 0 gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest25Idtransform() throws Exception {
+    public void idtransform2() throws Exception {
         String cmd = "56.78 23.96 [1.2 3.4 5.6 7.8 9.1 2.3] idtransform 2 array"
             + " astore [-31.891 16.973] /m2 exch def /m1 exch def 0 1 m1 length"
             + " 1 sub {dup m1 exch get 1e-40 add exch m2 exch get 1e-40 add div"
             + " dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt} for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void coordinatesTest26Invertmatrix() throws Exception {
+    public void invertmatrix1() throws Exception {
         String cmd = "[1.2 3.4 5.6 7.8 9.1 2.3] matrix invertmatrix [-0.8058"
             + " 0.3512 0.5785 -0.1240 6.002 -2.911] /m2 exch def /m1 exch def 0"
             + " 1 m1 length 1 sub {dup m1 exch get 1e-40 add exch m2 exch get"
             + " 1e-40 add div dup 1 lt {1 exch div} if dup 1.001 le exch 0 gt}"
             + " for";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 12));
     }
 
 
