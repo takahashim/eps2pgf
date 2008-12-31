@@ -59,58 +59,58 @@ public class ResourcePSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void resourceTest1_Resourcestatus() throws Exception {
+    public void resourcestatus1() throws Exception {
         String cmd = "999 /FontType resourcestatus false eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void resourceTest2_Resourcestatus() throws Exception {
+    public void resourcestatus2() throws Exception {
         String cmd = "1 /FontType resourcestatus 3 1 roll 0 eq 3 1 roll 0 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void resourceTest3_Resourcestatus() throws Exception {
+    public void resourcestatus3() throws Exception {
         String cmd = "/ASCII85Decode /Filter resourcestatus"
             + " 3 1 roll 0 eq 3 1 roll 0 eq"
             + " /DoesntExist /Filter resourcestatus false eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
     
     /** Test. @throws Exception the exception */
     @Test
-    public void resourceTest4_Resourcestatus() throws Exception {
+    public void resourcestatus4() throws Exception {
         String cmd = "/DeviceGray /ColorSpaceFamily resourcestatus"
             + " 3 1 roll pop pop"
             + " /DeviceRGB /ColorSpaceFamily resourcestatus 3 1 roll pop pop"
             + " /DeviceCMYK /ColorSpaceFamily resourcestatus 3 1 roll pop pop"
             + " /DoesntExist /ColorSpaceFamily resourcestatus false eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void resourceTest5_Defineresource() throws Exception {
+    public void defineresource1() throws Exception {
         String cmd = "/TheKey [/DeviceGray] /ColorSpace defineresource"
             + " pop true";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void resourceTest6_Findresource() throws Exception {
+    public void findresource1() throws Exception {
         String cmd = "/test [ /DeviceGray ] /ColorSpace defineresource"
             + " pop /test /ColorSpace findresource 0 get /DeviceGray eq"
             + " /test /ColorSpace undefineresource";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void resourceTest7() throws Exception {
+    public void misc1() throws Exception {
         // Example 3.7 from PostScript reference
         // plus some extra test by my.
         String cmd = "currentglobal"
@@ -123,17 +123,17 @@ public class ResourcePSTest {
             
             + "/testkey 10 dict /Widget defineresource pop"
             + "/testkey /Widget resourcestatus 3 1 roll pop pop";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
     
     /** Test. @throws Exception the exception */
     @Test
-    public void resourceTest8() throws Exception {
+    public void misc2() throws Exception {
         String cmd = "StandardEncoding /StandardEncoding /Encoding"
             + " findresource eq"
             + " ISOLatin1Encoding /ISOLatin1Encoding findencoding eq"
             + " SymbolEncoding /SymbolEncoding findencoding eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
 }
