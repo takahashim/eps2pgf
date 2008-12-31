@@ -59,182 +59,182 @@ public class TypePSTest {
     
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest1Type() throws Exception {
+    public void type1() throws Exception {
         String cmd = "[1 2 3] type /arraytype eq {1 2 add} type /arraytype eq";
         cmd += " matrix type /arraytype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest2Type() throws Exception {
+    public void type2() throws Exception {
         String cmd = "true type /booleantype eq  null type /nulltype eq";
         cmd += " mark type /marktype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest3Type() throws Exception {
+    public void type3() throws Exception {
         String cmd = "123 type /integertype eq  1.1 type /realtype eq";
         cmd += " (abc) type /stringtype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest4Type() throws Exception {
+    public void type4() throws Exception {
         String cmd = "10 dict type /dicttype eq";
         cmd += " /add load type /operatortype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest5Type() throws Exception {
+    public void type5() throws Exception {
         String cmd = "/burp type /nametype eq  1 type type /nametype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest6Cvlit() throws Exception {
+    public void cvlit1() throws Exception {
         String cmd = "{1 2 add} dup cvlit exch bind pop 2 get type"
             + " /operatortype eq  1 cvlit pop";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest7Cvx() throws Exception {
+    public void cvx1() throws Exception {
         String cmd = "[1 2 3]dup cvx exec count 4 eq"
             + " 5 -1 roll exec count 5 eq"
             + " exch pop 5 -1 roll 1 eq"
             + " 5 -1 roll 2 eq 5 -1 roll 3 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 5));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest8Cvx() throws Exception {
+    public void cvx2() throws Exception {
         String cmd = "[1 2 3] dup cvx 2 /x put 2 get /x eq  [1 2 3] dup cvx eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest9Xcheck() throws Exception {
+    public void cvx3() throws Exception {
+        String cmd = "/proc {{1} {2} /gt cvx} bind def proc xcheck";
+        cmd += " 3 1 roll pop pop /proc load 2 get xcheck false eq";
+        assertTrue(Common.testString(interp, cmd, 2));
+    }
+
+    /** Type test. @throws Exception the exception */
+    @Test
+    public void xcheck1() throws Exception {
         String cmd = "/koe xcheck false eq  [1 2 3] xcheck false eq"
             + " {1 2 3} xcheck true eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest10Xcheck() throws Exception {
+    public void xcheck2() throws Exception {
         String cmd = "/add cvx load xcheck true eq  /koe cvx xcheck true eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest11Executeonly() throws Exception {
+    public void executeonly1() throws Exception {
         String cmd = "(123) executeonly rcheck false eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest12Noaccess() throws Exception {
-        String cmd = "[1 2] noaccess pop {/abc noaccess rcheck} stopped true eq"
-            + " {9 dict executeonly noaccess} stopped true eq";
-        assertTrue(Common.testString(interp, cmd));
+    public void noaccess1() throws Exception {
+        String cmd = "[1 2] noaccess pop {/abc noaccess rcheck} stopped"
+            + " exch /abc eq {9 dict executeonly noaccess} stopped exch pop";
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest13Readonly() throws Exception {
+    public void readonly1() throws Exception {
         String cmd = "[1 2 3] readonly dup rcheck true eq exch wcheck false eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest14Rcheck() throws Exception {
+    public void rcheck1() throws Exception {
         String cmd = "[1 2 3] rcheck true eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest15Wcheck() throws Exception {
+    public void wcheck1() throws Exception {
         String cmd = "(koe) wcheck true eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest16Cvi() throws Exception {
+    public void cvi1() throws Exception {
         String cmd = "(3.3E1) cvi 33 eq  2 cvi 2 eq  -47.8 cvi -47 eq"
             + " 520.9 cvi 520 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest17Cvn() throws Exception {
+    public void cvn1() throws Exception {
         String cmd = "(abc) cvn type /nametype eq  (abc) cvn xcheck false eq"
             + " (abc) cvn /abc eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest18Cvn() throws Exception {
+    public void cvn2() throws Exception {
         String cmd = "(abc) cvx cvn type /nametype eq"
             + " (abc) cvx cvn xcheck true eq   (abc) cvx cvn /abc eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest19Cvr() throws Exception {
+    public void cvr1() throws Exception {
         String cmd = "1.1 cvr 1.1 eq  78 cvr 78.0 eq  (78.9) cvr 78.9 eq"
             + " (1e3) cvr 1000.0 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest20Cvrs() throws Exception {
+    public void cvrs1() throws Exception {
         String cmd = "/temp 12 string def  123 10 temp cvrs (123) eq"
             + " -123 10 temp cvrs (-123) eq  123.4 10 temp cvrs (123.4) eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest21Cvrs() throws Exception {
+    public void cvrs2() throws Exception {
         String cmd = "/temp 12 string def  123 16 temp cvrs (7B) eq"
             + " -123 16 temp cvrs (FFFFFF85) eq  123.4 16 temp cvrs (7B) eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
     /** Type test. @throws Exception the exception */
     @Test
-    public void typeTest22Cvs() throws Exception {
+    public void cvs1() throws Exception {
         String cmd = "579 20 string cvs (579) eq"
             + " mark 20 string cvs (--nostringval--) eq "
             + " /foo 20 string cvs (foo) eq";
-        assertTrue(Common.testString(interp, cmd));
-    }
-
-    /** Type test. @throws Exception the exception */
-    @Test
-    public void typeTest23Cvx() throws Exception {
-        String cmd = "/proc {{1} {2} /gt cvx} bind def proc xcheck";
-        cmd += " 3 1 roll pop pop /proc load 2 get xcheck false eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 3));
     }
 
 
