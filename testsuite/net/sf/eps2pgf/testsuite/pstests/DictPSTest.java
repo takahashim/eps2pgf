@@ -59,259 +59,260 @@ public class DictPSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest1dict() throws Exception {
+    public void dict1() throws Exception {
         String cmd = "10 dict type /dicttype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest2Lessless() throws Exception {
+    public void lessless1() throws Exception {
         String cmd = "<< 1 2 3 counttomark 3 eq"
             + " 5 1 roll pop pop pop pop";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest3Greatergreater() throws Exception {
+    public void greatergreater1() throws Exception {
         String cmd = "mark /test {1 add} >> type /dicttype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest4Length() throws Exception {
+    public void length1() throws Exception {
         String cmd = "10 dict length 0 eq  << /a 1/b 2 /c{2 add}>> length 3 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest5Maxlength() throws Exception {
+    public void maxlength1() throws Exception {
         String cmd = "11 dict maxlength 11 eq  << /a 1 /b 2 >> maxlength 2 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest6Begin() throws Exception {
+    public void begin1() throws Exception {
         String cmd = "10 dict dup begin currentdict eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest7End() throws Exception {
+    public void end1() throws Exception {
         String cmd = "10 dict begin currentdict end currentdict dup 3 1 roll ne"
             + " exch userdict eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest8Def() throws Exception {
+    public void def1() throws Exception {
         String cmd = "/str (abcdefghi) def (123) str cvs (123) eq"
             + " str (123defghi) eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest9Def() throws Exception {
+    public void def2() throws Exception {
         String cmd = "/str1 (1 2 add) def str1 (1 2 add) eq"
             + " /str2 (1 2 add) cvx def str2 3 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest10Def() throws Exception {
+    public void def3() throws Exception {
         String cmd = "(abc) dup /foo exch def cvx pop foo xcheck false eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest11Load() throws Exception {
+    public void load1() throws Exception {
         String cmd = "<< /a (abc) /b 123 >> begin  /a load (abc) eq"
             + " /b load 123 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest12Store() throws Exception {
+    public void store1() throws Exception {
         String cmd = "/a 123 store a 123 eq  /a (abc) store a (abc) eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest13Get() throws Exception {
+    public void get1() throws Exception {
         String cmd = "<</a 1.0 /b 2 >> /b get 2 eq"
             + " /foo (abc) def currentdict /foo get (abc) eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest14Put() throws Exception {
+    public void put1() throws Exception {
         String cmd = "10 dict dup /foo (bar) put  begin foo (bar) eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest15Undef() throws Exception {
+    public void undef1() throws Exception {
         String cmd = "10 dict dup /foo (bar) put dup /foo undef begin {foo}"
             + " stopped";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest16Known() throws Exception {
+    public void known1() throws Exception {
         String cmd = "/mydict 5 dict def mydict /total 0 put mydict /total"
             + " known  mydict /badname known false eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest17Where() throws Exception {
+    public void where1() throws Exception {
         String cmd = "<</a 123 /b 456>> dup begin <</d (abc) /e (def)>> begin"
             + " /b where 3 1 roll eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest18Copy() throws Exception {
+    public void copy1() throws Exception {
         String cmd = "<</a 123>> <</b (abc) /c (def)>> dup 3 1 roll copy eq"
             + "<</a 123>> <</b (abc) /c (def)>> copy /a known";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest19Forall() throws Exception {
+    public void forall1() throws Exception {
         String cmd = "<</a 123 /b 123>> {} forall  123 eq  4 1 roll dup /b eq"
             + " exch /a eq or  4 1 roll 123 eq  4 1 roll dup/a eq exch/b eq or";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest20Forall() throws Exception {
+    public void forall2() throws Exception {
         String cmd = "0 <</a 1 /b 2 /c 3>> {exch pop add} forall 6 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest21Currentdict() throws Exception {
+    public void currentdict1() throws Exception {
         String cmd = "currentdict userdict eq"
             + " 10 dict begin currentdict userdict ne";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest22Errordict() throws Exception {
+    public void errordict1() throws Exception {
         String cmd = "errordict type /dicttype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest23Error() throws Exception {
+    public void error1() throws Exception {
         String cmd = "$error type /dicttype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest24Systemdict() throws Exception {
+    public void systemdict1() throws Exception {
         String cmd = "systemdict type /dicttype eq"
-            + " {systemdict /foo (bar) put} stopped";
-        assertTrue(Common.testString(interp, cmd));
+            + " {systemdict /foo (bar) put} stopped"
+            + "  4 1 roll (bar) eq 4 1 roll /foo eq 4 1 roll pop";
+        assertTrue(Common.testString(interp, cmd, 4));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest25Globaldict() throws Exception {
+    public void globaldict1() throws Exception {
         String cmd = "globaldict type /dicttype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest26Statusdict() throws Exception {
+    public void statusdict1() throws Exception {
         String cmd = "statusdict type /dicttype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest27Countdictstack() throws Exception {
+    public void countdictstack1() throws Exception {
         String cmd = "countdictstack 3 eq  10 dict begin countdictstack 4 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest28Dictstack() throws Exception {
+    public void dictstack1() throws Exception {
         String cmd = "10 array dictstack dup 0 get systemdict"
             + " eq exch length 3 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest29Cleardictstack() throws Exception {
+    public void cleardictstack1() throws Exception {
         String cmd = "10 dict begin countdictstack 4 eq"
             + " cleardictstack countdictstack 3 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest30() throws Exception {
+    public void misc1() throws Exception {
         String cmd = "<< 1 (abc) >> {} forall pop 1 add 2 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest31() throws Exception {
+    public void misc2() throws Exception {
         String cmd = "1 dict dup /a 99 put (a) get 99 eq"
             + " 1 dict dup 1 999 put 1.0 get 999 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest32() throws Exception {
+    public void misc3() throws Exception {
         String cmd = "10 dict dup (abc) 123 put {} forall pop type/nametype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest33Copy() throws Exception {
+    public void copy2() throws Exception {
         String cmd = "<</a 123>> <</b (abc) /c (def)>> dup 3 1 roll copy eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
     
     /** Test. @throws Exception the exception */
     @Test
-    public void dictTest34Errordict() throws Exception {
+    public void errordict2() throws Exception {
         String cmd = "errordict /undefined {} put"
             + " /badproc {1 666 put whoops} def"
             + " [1 2 3 4] dup badproc"
             + " type /nametype eq exch"
             + " 1 get 666 eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 }
