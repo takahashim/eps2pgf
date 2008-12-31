@@ -59,75 +59,75 @@ public class MiscPSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest1() throws Exception {
+    public void version1() throws Exception {
         String cmd = "version type /stringtype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest2() throws Exception {
+    public void realtime1() throws Exception {
         String cmd = "realtime type /integertype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest3() throws Exception {
+    public void usertime1() throws Exception {
         String cmd = "usertime type /integertype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest4() throws Exception {
+    public void languagelevel1() throws Exception {
         String cmd = "languagelevel type /integertype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest5() throws Exception {
+    public void product1() throws Exception {
         String cmd = "product type /stringtype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest6() throws Exception {
+    public void revision1() throws Exception {
         String cmd = "revision type /integertype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest7() throws Exception {
+    public void serialnumber1() throws Exception {
         String cmd = "serialnumber type /integertype eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
     
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest8() throws Exception {
+    public void papersizes1() throws Exception {
         String cmd = "letter a4 legal a3 true";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest9() throws Exception {
+    public void userparams1() throws Exception {
         String cmd = "<</DoesntExist (test) /JobName (myname)>> setuserparams"
             + " currentuserparams /JobName get (myname) eq"
             + " currentuserparams /DoesntExist known false eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void miscTest10() throws Exception {
+    public void systemparams1() throws Exception {
         String cmd = "<</PrinterName (myname)>> setsystemparams"
             + " currentsystemparams /PrinterName get (myname) eq";
-        assertTrue(Common.testString(interp, cmd));
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
 }
