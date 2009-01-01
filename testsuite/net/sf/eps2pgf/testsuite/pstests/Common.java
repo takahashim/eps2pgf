@@ -41,19 +41,6 @@ public final class Common {
     }
     
     /**
-     * 
-     * @param interp
-     * @param postscriptCommands
-     * @return
-     * @throws Exception
-     */
-    public static boolean testString(final Interpreter interp,
-            final String postscriptCommands) throws Exception {
-        //TODO remove this function and define stack size for all tests
-        throw new ProgramError("Please remove this function.");
-    }
-    
-    /**
      * Test some PostScript commands.
      * 
      * @param postscriptCommands The postscript commands.
