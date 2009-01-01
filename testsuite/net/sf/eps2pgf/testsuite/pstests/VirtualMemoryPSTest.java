@@ -68,13 +68,64 @@ public class VirtualMemoryPSTest {
 
     /** Test. @throws Exception the exception */
     @Test
-    public void saveRestore() throws Exception {
+    public void saveRestore1() throws Exception {
         String cmd = "save"
             + " errordict /undefined {1 2 3 4 5 6 7 8 9 10 11 12 13 14 15} put"
             + " errordict /undefined get length 15 eq"
             + " exch restore"
             + " errordict /undefined get length 15 ne";
         assertTrue(Common.testString(interp, cmd, 2));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void saveRestore2() throws Exception {
+        String cmd = "currentpacking save exch dup not setpacking dup"
+            + " currentpacking ne 3 1 roll exch restore currentpacking eq"
+            + " currentglobal save exch dup not setglobal dup currentglobal ne"
+            + " 3 1 roll exch restore currentglobal eq";
+        assertTrue(Common.testString(interp, cmd, 4));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void saveRestore3() throws Exception {
+        String cmd = "currentuserparams /MaxExecStack get dup save exch 1 sub"
+            + " dup /MaxExecStack exch << 3 1 roll >> setuserparams"
+            + " currentuserparams /MaxExecStack get eq 3 1 roll restore"
+            + " currentuserparams /MaxExecStack get eq";
+        assertTrue(Common.testString(interp, cmd, 2));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void saveRestore4() throws Exception {
+        String cmd = "{save grestore restore} stopped false eq"
+            + "{restore} stopped";
+        assertTrue(Common.testString(interp, cmd, 2));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void saveRestore5() throws Exception {
+        String cmd = "[1 2 3] dup save exch 0 (a) put restore dup 0 get 1 eq"
+            + " exch dup 0 (a) put 0 get (a) eq";
+        assertTrue(Common.testString(interp, cmd, 2));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void saveRestore6() throws Exception {
+        String cmd = "save /abc 1 def restore /abc where not";
+        assertTrue(Common.testString(interp, cmd, 1));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
+    public void saveGrestoreall() throws Exception {
+        String cmd = "gsave 2 setlinewidth save 3 setlinewidth grestoreall"
+            + " currentlinewidth 2 eq exch pop";
+        assertTrue(Common.testString(interp, cmd, 1));
     }
 
 }
