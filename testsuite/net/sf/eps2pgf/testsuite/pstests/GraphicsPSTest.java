@@ -63,6 +63,16 @@ public class GraphicsPSTest {
         String cmd = "currentcolorspace 0 get /DeviceGray eq";
         assertTrue(Common.testString(interp, cmd, 1));
     }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void gsavegrestore1() throws Exception {
+        String cmd = "grestore 1 setlinewidth gsave 2 setlinewidth grestore"
+            + " currentlinewidth 1 eq"
+            + " gsave 2 setlinewidth gsave 3 setlinewidth grestoreall"
+            + " currentlinewidth 1 eq";
+        assertTrue(Common.testString(interp, cmd, 2));
+    } 
 
     /** Test. @throws Exception the exception */
     @Test
