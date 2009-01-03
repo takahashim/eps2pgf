@@ -37,12 +37,14 @@ import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.resources.filters.ASCII85Decode;
 import net.sf.eps2pgf.ps.resources.filters.ASCIIHexDecode;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * String PostScript object.
  * @author Wagenaars
  */
-public class PSObjectString extends PSObject {
+public class PSObjectString extends PSObject implements MapCloneable {
     
     /** Value of this PostScript string. */
     private StringBuilder value;
@@ -182,12 +184,32 @@ public class PSObjectString extends PSObject {
     /**
      * Creates a deep copy of this object.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public PSObjectString clone() {
-        PSObjectString copy = (PSObjectString) super.clone();
-        copy.value = new StringBuilder(value);
+    public PSObjectString clone(CloneMappings cloneMap)
+            throws ProgramError {
+        
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (PSObjectString) cloneMap.get(this);
+        }
+        
+        PSObjectString copy = (PSObjectString) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
+        if (cloneMap.containsKey(value)) {
+            copy.value = (StringBuilder) cloneMap.get(value);
+        } else {
+            copy.value = new StringBuilder(value);
+            cloneMap.add(value, copy.value);
+        }
+        
         return copy;
     }
 

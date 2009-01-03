@@ -27,6 +27,8 @@ import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.resources.Utils;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * This class manages interpreter parameters. See appendix C of the PostScript
@@ -35,7 +37,7 @@ import net.sf.eps2pgf.ps.resources.Utils;
  * @author Paul Wagenaars
  *
  */
-public class InterpParams {
+public class InterpParams implements MapCloneable, Cloneable {
     
     /** User parameters. */
     private PSObjectDict userParams = null;
@@ -64,9 +66,12 @@ public class InterpParams {
      * parameters.
      * 
      * @return A copy of the dictionary with user parameters.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectDict currentUserParams() {
-        return getUserParamsDict().clone();
+    public PSObjectDict currentUserParams() throws ProgramError {
+        CloneMappings cloneMap = new CloneMappings();
+        return getUserParamsDict().clone(cloneMap);
     }
     
     /**
@@ -95,7 +100,8 @@ public class InterpParams {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public PSObjectDict currentSystemParams() throws ProgramError {
-        return getSystemParamsDict().clone();
+        CloneMappings cloneMap = new CloneMappings();
+        return getSystemParamsDict().clone(cloneMap);
     }
     
     /**
@@ -126,10 +132,14 @@ public class InterpParams {
      * @param device The device for which the parameters are requested.
      * 
      * @return A copy of the dictionary with system parameters.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectDict currentDeviceParams(final String device) {
+    public PSObjectDict currentDeviceParams(final String device)
+            throws ProgramError {
         
-        return getDeviceParamsDict(device).clone();
+        CloneMappings cloneMap = new CloneMappings();
+        return getDeviceParamsDict(device).clone(cloneMap);
     }
     
     /**
@@ -215,6 +225,44 @@ public class InterpParams {
         }
         return systemParams;
     }
+    
+    /**
+     * Creates a *deep* copy of this object.
+     * 
+     * @param cloneMap The clone map.
+     * 
+     * @return A deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public InterpParams clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (InterpParams) cloneMap.get(this);
+        }
+        
+        InterpParams copy;
+        try {
+            copy = (InterpParams) super.clone();
+            cloneMap.add(this, copy);
+        } catch (CloneNotSupportedException e) {
+            throw new ProgramError("super.clone failed");
+        }
+        
+        if (userParams != null) {
+            copy.userParams = userParams.clone(cloneMap);
+        }
+        if (systemParams != null) {
+            copy.systemParams = systemParams.clone(cloneMap);
+        }
+        if (deviceParams != null) {
+            copy.deviceParams = deviceParams.clone(cloneMap);
+        }
+        
+        return copy;
+    }
+    
     
     /**
      * Create a new dictionary with all system parameters with default values.

@@ -18,14 +18,17 @@
 
 package net.sf.eps2pgf.ps.objects;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * PostScript object: name.
  *
  * @author Paul Wagenaars
  */
-public class PSObjectName extends PSObject {
+public class PSObjectName extends PSObject implements MapCloneable {
     
     /** The value of this name. */
     private String name;
@@ -174,11 +177,25 @@ public class PSObjectName extends PSObject {
     /**
      * Creates a deep copy of this object.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public PSObjectName clone() {
-        PSObjectName copy = (PSObjectName) super.clone();
+    public PSObjectName clone(CloneMappings cloneMap)
+            throws ProgramError {
+        
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (PSObjectName) cloneMap.get(this);
+        }
+        
+        PSObjectName copy = (PSObjectName) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
         return copy;
     }
 

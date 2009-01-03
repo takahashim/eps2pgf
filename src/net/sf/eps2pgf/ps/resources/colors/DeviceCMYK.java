@@ -22,6 +22,8 @@ import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * CMYK color.
@@ -29,7 +31,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectName;
  * @author Wagenaars
  *
  */
-public class DeviceCMYK extends PSColor {
+public class DeviceCMYK extends PSColor implements MapCloneable {
     
     /** Name of this color space family. */
     public static final PSObjectName FAMILYNAME
@@ -54,13 +56,23 @@ public class DeviceCMYK extends PSColor {
     /**
      * Creates an exact deep copy of this object.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return an exact deep copy of this object.
      * 
-     * @throws CloneNotSupportedException Clone not supported by this object.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public DeviceCMYK clone() throws CloneNotSupportedException {
-        DeviceCMYK copy = (DeviceCMYK) super.clone();
+    public DeviceCMYK clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (DeviceCMYK) cloneMap.get(this);
+        }
+        
+        DeviceCMYK copy = (DeviceCMYK) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
         return copy;
     }
 

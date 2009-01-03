@@ -33,6 +33,8 @@ import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 import net.sf.eps2pgf.ps.resources.colors.ColorManager;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Structure that holds the graphics state (graphic control parameter).
@@ -40,7 +42,7 @@ import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
  *
  * @author Paul Wagenaars
  */
-public class GraphicsState implements Cloneable {
+public class GraphicsState implements MapCloneable, Cloneable {
     
     /**
      * Current Transformation Matrix (CTM). All coordinates will be transformed
@@ -314,43 +316,59 @@ public class GraphicsState implements Cloneable {
     /**
      * Intersects the area inside the current clipping path with the area
      * inside the current path.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void clip() {
-        this.clippingPath = this.path.clone();
+    public void clip() throws ProgramError {
+        clippingPath = path.clone(null);
     }
     
     /**
      * Creates a deep copy of this object.
-     * @throws CloneNotSupportedException Indicates that clone is not (fully)
-     *         supported. This should not happen.
+     * 
+     * @param cloneMap The clone map.
+     * 
      * @return Returns the deep copy.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    @Override
-    public GraphicsState clone() throws CloneNotSupportedException {
+    public GraphicsState clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (GraphicsState) cloneMap.get(this);
+        }
         
-        GraphicsState copy = (GraphicsState) super.clone();
-        copy.clippingPath = clippingPath.clone();
-        copy.color = color.clone();
-        copy.ctm = ctm.clone();
+        GraphicsState copy;
+        try {
+            copy = (GraphicsState) super.clone();
+            cloneMap.add(this, copy);
+        } catch (CloneNotSupportedException e) {
+            throw new ProgramError("super.clone failed");
+        }
+        
+        copy.clippingPath = clippingPath.clone(cloneMap);
+        copy.color = color.clone(cloneMap);
+        copy.ctm = ctm.clone(cloneMap);
         // dashoffset is primitive, it doesn't need to be cloned explicitly.
-        copy.dashPattern = dashPattern.clone();
+        copy.dashPattern = dashPattern.clone(cloneMap);
         // flat is primitive, it doesn't need to be cloned explicitly.
-        copy.font = font.clone();
+        copy.font = font.clone(cloneMap);
         // linewidth is primitive, it doesn't need to be cloned explicitly.
         // linecap is primitive, it doesn't need to be cloned explicitly.
-        copy.path = path.clone();
+        copy.path = path.clone(cloneMap);
         copy.position = position.clone();
         // strokeAdjust is primitive, it doesn't need to be cloned explicitly.
         
-        copy.colorRendering = colorRendering.clone();
+        copy.colorRendering = colorRendering.clone(cloneMap);
         // overprint is primitive, it doesn't need to be cloned explicitely.
-        copy.blackGeneration = blackGeneration.clone();
-        copy.undercolorRemoval = undercolorRemoval.clone();
-        copy.transfer = transfer.clone();
-        copy.halftone = halftone.clone();
+        copy.blackGeneration = blackGeneration.clone(cloneMap);
+        copy.undercolorRemoval = undercolorRemoval.clone(cloneMap);
+        copy.transfer = transfer.clone(cloneMap);
+        copy.halftone = halftone.clone(cloneMap);
         // flatness is primitive, it doesn't need to be cloned explicitely.
         // smoothness is primitive, it doesn't need to be cloned explicitely.
-        copy.device = device.clone();
+        copy.device = device.clone(cloneMap);
         
         return copy;
     }

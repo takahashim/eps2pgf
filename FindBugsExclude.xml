@@ -31,4 +31,8 @@ limitations under the License.
 		<Method name="showText" />
 		<Bug code="NP" />
 	</Match>
+	<Match>
+		<Class name="net.sf.eps2pgf.ps.PathS" />
+		<Bug code="CN" />
+	</Match>
 </FindBugsFilter>

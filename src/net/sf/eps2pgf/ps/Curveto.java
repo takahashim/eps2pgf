@@ -18,14 +18,17 @@
 
 package net.sf.eps2pgf.ps;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Cubic Bezier curve path section.
  *
  * @author Paul Wagenaars
  */
-public class Curveto extends PathSection implements Cloneable {
+public class Curveto extends PathSection implements MapCloneable {
     
     /**
      * Creates a new instance of Curveto.
@@ -69,12 +72,25 @@ public class Curveto extends PathSection implements Cloneable {
     
     /**
      * Create a clone of this object.
+     * 
+     * @param cloneMap The clone map.
+     * 
      * @return Returns clone of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public Curveto clone() {
-        Curveto newSection = (Curveto) super.clone();
-        return newSection;
+    public Curveto clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (Curveto) cloneMap.get(this);
+        }
+
+        Curveto copy = (Curveto) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
+        return copy;
     }
     
     /**

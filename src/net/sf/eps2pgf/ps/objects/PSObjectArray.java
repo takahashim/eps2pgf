@@ -32,13 +32,15 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * PostScript object: array.
  *
  * @author Paul Wagenaars
  */
-public class PSObjectArray extends PSObject {
+public class PSObjectArray extends PSObject implements MapCloneable {
     
     /** Array with the actual array items. */
     private List<PSObject> array;
@@ -240,15 +242,37 @@ public class PSObjectArray extends PSObject {
     /**
      * Creates a deep copy of this array.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Deep copy of this array
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public PSObjectArray clone() {
-        PSObjectArray copy = (PSObjectArray) super.clone();
-        copy.setArray(new ArrayList<PSObject>(getArray().size()));
-        for (PSObject obj : getArray()) {
-            copy.getArray().add(obj.clone());
+    public PSObjectArray clone(CloneMappings cloneMap)
+            throws ProgramError {
+        
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (PSObjectArray) cloneMap.get(this);
         }
+
+        PSObjectArray copy = (PSObjectArray) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
+        if (cloneMap.containsKey(array)) {
+            copy.array = (List<PSObject>) cloneMap.get(array);
+        } else {
+            copy.array = new ArrayList<PSObject>(array.size());
+            cloneMap.add(array, copy.array);
+        
+            for (PSObject obj : array) {
+                copy.array.add(obj.clone(cloneMap));
+            }
+        }
+        
         return copy;
     }
 

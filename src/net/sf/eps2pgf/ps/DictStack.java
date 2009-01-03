@@ -41,6 +41,8 @@ import net.sf.eps2pgf.ps.resources.encodings.ISOLatin1Encoding;
 import net.sf.eps2pgf.ps.resources.encodings.StandardEncoding;
 import net.sf.eps2pgf.ps.resources.encodings.SymbolEncoding;
 import net.sf.eps2pgf.util.ArrayStack;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * PostScript dictionary stack.
@@ -48,7 +50,7 @@ import net.sf.eps2pgf.util.ArrayStack;
  *
  * @author Paul Wagenaars
  */
-public class DictStack {
+public class DictStack implements MapCloneable, Cloneable {
     
     /** Key to the internaldict as defined in the systemdict. */
     public static final PSObjectName KEY_INTERNALDICT =
@@ -65,6 +67,9 @@ public class DictStack {
     
     /** System dictionary. */
     private PSObjectDict systemdict = new PSObjectDict();
+    
+    /** Interpreter to which this dictionary stack belongs. */
+    private Interpreter interp;
     
     /**
      * Quick access constant. See documentation for
@@ -87,14 +92,15 @@ public class DictStack {
     /**
      * Create a new dictionary stack.
      * 
-     * @param interp The interpreter with which this dictionary stack is
+     * @param aInterp The interpreter with which this dictionary stack is
      * associated.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public DictStack(final Interpreter interp) throws PSError, ProgramError {
-        fillSystemDict(interp);
+    public DictStack(final Interpreter aInterp) throws PSError, ProgramError {
+        interp = aInterp;
+        fillSystemDict();
         defineQuickAccessConstants();
         try {
             systemdict.readonly();
@@ -145,6 +151,52 @@ public class DictStack {
      */
     int countdictstack() {
         return 3 + dictStack.size();
+    }
+    
+    /**
+     * Creates a *deep* copy of this object.
+     * 
+     * @param cloneMap The clone map.
+     * 
+     * @return A deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    @SuppressWarnings("unchecked")
+    public DictStack clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (DictStack) cloneMap.get(this);
+        }
+        
+        DictStack copy;
+        try {
+            copy = (DictStack) super.clone();
+            cloneMap.add(this, copy);
+        } catch (CloneNotSupportedException e) {
+            throw new ProgramError("super.clone failed");
+        }
+        
+        try {
+            if (cloneMap.containsKey(dictStack)) {
+                copy.dictStack =
+                    (ArrayStack<PSObjectDict>) cloneMap.get(dictStack);
+            } else {
+                copy.dictStack = new ArrayStack<PSObjectDict>();
+                cloneMap.add(dictStack, copy.dictStack);
+                for (int i = 0; i < dictStack.size(); i++) {
+                    copy.dictStack.push(dictStack.peek(i).clone(cloneMap));
+                }
+            }
+        } catch (PSErrorStackUnderflow e) {
+            /* empty block */
+        }
+        copy.globaldict = globaldict.clone(cloneMap);
+        copy.systemdict = systemdict.clone(cloneMap);
+        copy.userdict = userdict.clone(cloneMap);
+        
+        return copy;
     }
     
     /**
@@ -246,13 +298,10 @@ public class DictStack {
     /**
      * Fill the system dictionary with all operators and other values.
      * 
-     * @param interp The interpreter.
-     * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    private void fillSystemDict(final Interpreter interp)
-            throws PSError, ProgramError {
+    private void fillSystemDict() throws PSError, ProgramError {
 
         PSObjectArray emptyProc = new PSObjectArray("{}", interp);
 

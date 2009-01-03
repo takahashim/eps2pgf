@@ -29,6 +29,8 @@ import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 import org.fontbox.afm.FontMetric;
 
@@ -37,7 +39,7 @@ import org.fontbox.afm.FontMetric;
  * PostScript object.
  * @author Paul Wagenaars
  */
-public class PSObjectFontMetrics extends PSObject implements Cloneable {
+public class PSObjectFontMetrics extends PSObject implements MapCloneable {
     
     /** Stores all font metrics. */
     private FontMetric fontMetrics;
@@ -106,14 +108,26 @@ public class PSObjectFontMetrics extends PSObject implements Cloneable {
     /**
      * Creates a (deep) copy of this object.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Deep copy of this object
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public PSObjectFontMetrics clone() {
-        PSObjectFontMetrics copy = (PSObjectFontMetrics) super.clone();
-        copy.fontMetrics = fontMetrics;
-        copy.subrs = subrs;
-        return new PSObjectFontMetrics(fontMetrics, subrs);
+    public PSObjectFontMetrics clone(CloneMappings cloneMap)
+            throws ProgramError {
+        
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (PSObjectFontMetrics) cloneMap.get(this);
+        }
+        
+        PSObjectFontMetrics copy = (PSObjectFontMetrics) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
+        return copy;
     }
     
     /**

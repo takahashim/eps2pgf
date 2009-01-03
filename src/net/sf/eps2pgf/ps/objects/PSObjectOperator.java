@@ -20,13 +20,17 @@ package net.sf.eps2pgf.ps.objects;
 
 import java.lang.reflect.Method;
 
+import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
+
 /**
  * Object that represents a PostScript operator. Either a built-in or
  * user-defined operator.
  * 
  * @author Paul Wagenaars
  */
-public class PSObjectOperator extends PSObject {
+public class PSObjectOperator extends PSObject implements MapCloneable {
     
     /** Name of this operator. */
     private String name;
@@ -60,11 +64,25 @@ public class PSObjectOperator extends PSObject {
     /**
      * Creates a deep copy of this object.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public PSObjectOperator clone() {
-        PSObjectOperator copy = (PSObjectOperator) super.clone();
+    public PSObjectOperator clone(CloneMappings cloneMap)
+            throws ProgramError {
+        
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (PSObjectOperator) cloneMap.get(this);
+        }
+        
+        PSObjectOperator copy = (PSObjectOperator) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
         return copy;
     }
 

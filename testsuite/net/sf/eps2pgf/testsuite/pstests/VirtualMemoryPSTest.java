@@ -119,6 +119,15 @@ public class VirtualMemoryPSTest {
         String cmd = "save /abc 1 def restore /abc where not";
         assertTrue(Common.testString(interp, cmd, 1));
     }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void saveRestore7() throws Exception {
+        String cmd = "{save save exch restore restore} stopped"
+            + " exch type /savetype eq"
+            + "{save save restore restore} stopped not";
+        assertTrue(Common.testString(interp, cmd, 3));
+    }
 
     /** Test. @throws Exception the exception */
     @Test

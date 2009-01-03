@@ -56,6 +56,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectNull;
 import net.sf.eps2pgf.ps.objects.PSObjectOperator;
 import net.sf.eps2pgf.ps.objects.PSObjectReal;
+import net.sf.eps2pgf.ps.objects.PSObjectSave;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.ResourceManager;
 import net.sf.eps2pgf.ps.resources.colors.DeviceCMYK;
@@ -124,6 +125,12 @@ public class Interpreter {
     
     /** Initialization time of interpreter. (milliseconds since 1970). */
     private long initializationTime;
+    
+    /**
+     * Counter that increases by one each time the interpreter executes an
+     * object.
+     */
+    private int interpCounter = 0;
     
     /**
      * Creates a new instance of interpreter.
@@ -244,17 +251,8 @@ public class Interpreter {
         if (bbox != null) {
             op_initclip();
         } else {
-            gstate.current().setClippingPath(defaultClippingPath.clone());
+            gstate.current().setClippingPath(defaultClippingPath.clone(null));
         }
-    }
-    
-    /**
-     * Set the dictionary stack.
-     * 
-     * @param pDictStack the dictStack to set
-     */
-    void setDictStack(final DictStack pDictStack) {
-        dictStack = pDictStack;
     }
     
     /**
@@ -273,6 +271,15 @@ public class Interpreter {
      */
     public DictStack getDictStack() {
         return dictStack;
+    }
+
+    /**
+     * Set the dictionary stack.
+     * 
+     * @param newDictStack The new dictionary stack.
+     */
+    public void setDictStack(final DictStack newDictStack) {
+        dictStack = newDictStack;
     }
 
     /**
@@ -340,6 +347,7 @@ public class Interpreter {
         while (this.getExecStack().size() > 0) {
             PSObject obj = this.getExecStack().getNextToken(this);
             if (obj != null) {
+                interpCounter++;
                 ArrayStack<PSObject> opStackCopy = getOpStack().clone();
                 try {
                     executeObject(obj, false);
@@ -801,17 +809,23 @@ public class Interpreter {
      * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      * (yet) implemented.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_clip() throws PSErrorUnregistered, IOException {
+    public void op_clip()
+            throws ProgramError, PSErrorUnregistered, IOException {
+        
         gstate.current().clip();
         gstate.current().getDevice().clip(gstate.current().getClippingPath());
     }
     
     /**
      * PostScript op: clippath.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_clippath() {
-        gstate.current().setPath(gstate.current().getClippingPath().clone());
+    public void op_clippath() throws ProgramError {
+        gstate.current().setPath(
+                gstate.current().getClippingPath().clone(null));
     }
     
     /**
@@ -1083,8 +1097,9 @@ public class Interpreter {
      * PostScript op: currentdevparams.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_currendevparams() throws PSError {
+    public void op_currendevparams() throws PSError, ProgramError {
         String device = getOpStack().pop().toPSString().toString();
         getOpStack().push(interpParams.currentDeviceParams(device));
     }
@@ -1098,9 +1113,11 @@ public class Interpreter {
     
     /**
      * PostScript op: currentdash.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_currentdash() {
-        opStack.push(gstate.current().getDashPattern().clone());
+    public void op_currentdash() throws ProgramError {
+        opStack.push(gstate.current().getDashPattern().clone(null));
         opStack.push(new PSObjectReal(gstate.current().getDashOffset()));
     }
     
@@ -1290,8 +1307,10 @@ public class Interpreter {
     
     /**
      * PostScript op: currentuserparams.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_currentuserparams() {
+    public void op_currentuserparams() throws ProgramError {
         getOpStack().push(interpParams.currentUserParams());
     }
     
@@ -1594,8 +1613,9 @@ public class Interpreter {
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_eoclip() throws PSError, IOException {
+    public void op_eoclip() throws ProgramError, PSError, IOException {
         gstate.current().clip();
         gstate.current().getDevice().eoclip(gstate.current());
     }
@@ -2342,7 +2362,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_grestore() throws PSError, IOException, ProgramError {
-        gstate.restoreGstate(true);
+        gstate.restoreGstate(true, null);
     }
     
     /**
@@ -2353,7 +2373,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_grestoreall() throws PSError, IOException, ProgramError {
-        gstate.restoreAllGstate(true);
+        gstate.restoreAllGstate(true, null);
     }
     
     /**
@@ -2364,7 +2384,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_gsave() throws PSError, IOException, ProgramError {
-        gstate.saveGstate(true);
+        gstate.saveGstate(true, null);
     }
     
     /**
@@ -2547,9 +2567,12 @@ public class Interpreter {
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSErrorUnregistered Encountered a PostScript feature that is not
      * (yet) implemented.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_initclip() throws IOException, PSErrorUnregistered {
-        gstate.current().setClippingPath(defaultClippingPath.clone());
+    public void op_initclip()
+            throws ProgramError, IOException, PSErrorUnregistered {
+        
+        gstate.current().setClippingPath(defaultClippingPath.clone(null));
         gstate.current().getDevice().clip(gstate.current().getClippingPath());
     }
     
@@ -2742,11 +2765,12 @@ public class Interpreter {
      * PostScript op: makefont.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_makefont() throws PSError {
+    public void op_makefont() throws PSError, ProgramError {
         PSObjectMatrix matrix = getOpStack().pop().toMatrix();
         PSObjectDict font = getOpStack().pop().toDict();
-        font = font.clone();
+        font = font.clone(null);
         PSObjectMatrix fontMatrix = font.lookup("FontMatrix").toMatrix();
         
         // Concatenate matrix to fontMatrix and store it back in font
@@ -2754,7 +2778,7 @@ public class Interpreter {
         font.setKey("FontMatrix", fontMatrix);
         
         // Calculate the fontsize in LaTeX points
-        PSObjectMatrix ctm = gstate.current().getCtm().clone();
+        PSObjectMatrix ctm = gstate.current().getCtm().clone(null);
         ctm.concat(fontMatrix);
         double fontSize = ctm.getMeanScaling() / 2.54 * 72.27;
         font.setKey("FontSize", new PSObjectReal(fontSize));
@@ -3159,8 +3183,9 @@ public class Interpreter {
      * 
      * @throws PSError A PostScript error occurred.
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_rectclip() throws PSError, IOException {
+    public void op_rectclip() throws ProgramError, PSError, IOException {
         rectPath();
         op_clip();
         op_newpath();
@@ -3264,13 +3289,9 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_restore() throws PSError, IOException, ProgramError {
-        PSObjectName obj = getOpStack().pop().toName();
-        
-        if (!obj.toString().equals("-save- (dummy)")) {
-            throw new PSErrorTypeCheck();
-        }
-        
-        gstate.restoreAllGstate(false);
+        PSObjectSave save = getOpStack().pop().toSave();
+        save.restore();
+        gstate.restoreAllGstate(false, null);
     }
     
     /**
@@ -3369,8 +3390,8 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_save() throws PSError, IOException, ProgramError {
-        getOpStack().push(new PSObjectName("/-save- (dummy)"));
-        gstate.saveGstate(false);
+        getOpStack().push(new PSObjectSave(this));
+        gstate.saveGstate(false, null);
     }
    
     /**
@@ -3399,8 +3420,9 @@ public class Interpreter {
      * PostScript operator: scalefont.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_scalefont() throws PSError {
+    public void op_scalefont() throws ProgramError, PSError {
         double scale = getOpStack().pop().toReal();
         
         // "font scale scalefont" is equivalent to 
@@ -4414,11 +4436,39 @@ public class Interpreter {
     }
     
     /**
+     * Gets the interpreter parameters.
+     * 
+     * @return the interpreter parameters.
+     */
+    public InterpParams getInterpParams() {
+        return interpParams;
+    }
+    
+    /**
+     * Sets the interpreter parameters.
+     * 
+     * @param newInterpParams The new interpreter parameters.
+     */
+    public void setInterpParams(final InterpParams newInterpParams) {
+        interpParams = newInterpParams;
+    }
+    
+    
+    /**
      * Get the resource manager.
      * 
      * @return the resource manager.
      */
     public ResourceManager getResourceManager() {
         return resourceManager;
+    }
+
+    /**
+     * Gets the current value of the interpreter counter.
+     * 
+     * @return The current value of the interpreter counter.
+     */
+    public int getInterpCounter() {
+        return interpCounter;
     }
 }

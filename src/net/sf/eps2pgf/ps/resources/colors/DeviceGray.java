@@ -22,11 +22,13 @@ import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Gray color.
  */
-public class DeviceGray extends PSColor {
+public class DeviceGray extends PSColor implements MapCloneable {
     
     /** Name of this color space family. */
     public static final PSObjectName FAMILYNAME
@@ -51,13 +53,23 @@ public class DeviceGray extends PSColor {
     /**
      * Create an exact copy of this object.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Copy of this object.
      * 
-     * @throws CloneNotSupportedException Clone not supported by this object.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public DeviceGray clone() throws CloneNotSupportedException {
-        DeviceGray copy = (DeviceGray) super.clone();
+    public DeviceGray clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (DeviceGray) cloneMap.get(this);
+        }
+        
+        DeviceGray copy = (DeviceGray) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
         return copy;
     }
 

@@ -56,13 +56,14 @@ import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.shadings.RadialShading;
 import net.sf.eps2pgf.ps.resources.shadings.Shading;
+import net.sf.eps2pgf.util.CloneMappings;
 
 /**
  * Writes PGF files.
  * 
  * @author Paul Wagenaars
  */
-public class PGFDevice implements OutputDevice {
+public class PGFDevice implements OutputDevice, Cloneable {
     
     /** Coordinate format (used to format X- and Y-coordinates). */
     static final DecimalFormat COOR_FORMAT = new DecimalFormat("#.###", 
@@ -309,21 +310,34 @@ public class PGFDevice implements OutputDevice {
     /**
      * Returns a exact deep copy of this output device.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    @Override
-    public PGFDevice clone() {
+    public PGFDevice clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (PGFDevice) cloneMap.get(this);
+        }
+        
         PGFDevice copy;
         try {
             copy = (PGFDevice) super.clone();
-            copy.scopeStatus = scopeStatus.clone();
-            copy.out = out;                   // output writer is not cloned
-            copy.options = options;           // program options are not cloned
-            copy.deviceStatus = deviceStatus; // device status is not cloned
+            cloneMap.add(this, copy);
         } catch (CloneNotSupportedException e) {
-            /* this exception shouldn't happen. */
-            copy = null;
+            throw new ProgramError("super.clone failed");
         }
+
+        if (cloneMap.containsKey(scopeStatus)) {
+            copy.scopeStatus = (PSObjectDict) cloneMap.get(scopeStatus);
+        } else {
+            copy.scopeStatus = scopeStatus.clone(cloneMap);
+            cloneMap.add(scopeStatus, copy.scopeStatus);
+        }
+        
         return copy;
     }
 

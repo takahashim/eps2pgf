@@ -20,18 +20,20 @@ package net.sf.eps2pgf.ps.resources.outputdevices;
 
 import java.io.IOException;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
+import net.sf.eps2pgf.util.CloneMappings;
 
 /**
  * Discards all output written to this device.
  *
  * @author Paul Wagenaars
  */
-public class NullDevice implements OutputDevice {
+public class NullDevice implements OutputDevice, Cloneable {
     
     /**
      * Implements PostScript clip operator.
@@ -47,17 +49,27 @@ public class NullDevice implements OutputDevice {
     /**
      * Returns a exact deep copy of this output device.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    @Override
-    public NullDevice clone() {
+    public NullDevice clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (NullDevice) cloneMap.get(this);
+        }
+        
         NullDevice copy;
         try {
             copy = (NullDevice) super.clone();
         } catch (CloneNotSupportedException e) {
-            /* this exception shouldn't happen. */
-            copy = null;
+            throw new ProgramError("clone failed");
         }
+        cloneMap.add(this, copy);
+        
         return copy;
     }
 

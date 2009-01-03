@@ -28,11 +28,13 @@ import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Implements Indexed color space.
  */
-public class Indexed extends PSColor {
+public class Indexed extends PSColor implements MapCloneable {
     
     /** Name of this color space family. */
     public static final PSObjectName FAMILYNAME
@@ -105,18 +107,30 @@ public class Indexed extends PSColor {
     /**
      * Creates an exact deep copy of this object.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return an exact deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public Indexed clone() {
-        Indexed copy;
-        try {
-            copy = (Indexed) super.clone();
-            copy.currentColor = currentColor.clone();
-            copy.levels = levels.clone();
-        } catch (CloneNotSupportedException e) {
-            copy = null;
+    public Indexed clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (Indexed) cloneMap.get(this);
         }
+
+        Indexed copy = (Indexed) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
+        if (cloneMap.containsKey(currentColor)) {
+            copy.currentColor = (PSColor) cloneMap.get(currentColor);
+        } else {
+            copy.currentColor = currentColor.clone(cloneMap);
+            cloneMap.add(currentColor, copy.currentColor);
+        }
+        copy.levels = levels.clone();
         
         return copy;
     }

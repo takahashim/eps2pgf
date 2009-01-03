@@ -18,16 +18,19 @@
 
 package net.sf.eps2pgf.ps.objects;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefinedResult;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Represent a PostScript matrix. This is a six element array with only numeric
  * items.
  * @author Paul Wagenaars
  */
-public class PSObjectMatrix extends PSObjectArray {
+public class PSObjectMatrix extends PSObjectArray implements MapCloneable {
     /**
      * Creates a new instance of PSObjectMatrix. The new object is filled with
      * an identity matrix.
@@ -100,11 +103,25 @@ public class PSObjectMatrix extends PSObjectArray {
     /**
      * Creates a deep copy of this object.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public PSObjectMatrix clone() {
-        PSObjectMatrix copy = (PSObjectMatrix) super.clone();
+    public PSObjectMatrix clone(CloneMappings cloneMap)
+            throws ProgramError {
+        
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (PSObjectMatrix) cloneMap.get(this);
+        }
+        
+        PSObjectMatrix copy = (PSObjectMatrix) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
         return copy;
     }
 

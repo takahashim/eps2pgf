@@ -20,19 +20,21 @@ package net.sf.eps2pgf.ps.resources.outputdevices;
 
 import java.io.IOException;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.errors.PSErrorNoCurrentPoint;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
+import net.sf.eps2pgf.util.CloneMappings;
 
 /**
  * Cache device, used to create glyphs.
  *
  * @author Paul Wagenaars
  */
-public class CacheDevice implements OutputDevice {
+public class CacheDevice implements OutputDevice, Cloneable {
     
     /** The user specified wx. */
     private double specifiedWx = 0.0;
@@ -88,20 +90,31 @@ public class CacheDevice implements OutputDevice {
     /**
      * Returns a exact deep copy of this output device.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    @Override
-    public CacheDevice clone() {
+    public CacheDevice clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (CacheDevice) cloneMap.get(this);
+        }
+        
         CacheDevice copy;
         try {
-            copy = (CacheDevice) super.clone();
-            if (pathBbox != null) {
-                copy.pathBbox = pathBbox.clone();
-            }
+            copy = (CacheDevice) super.clone(); 
         } catch (CloneNotSupportedException e) {
-            /* this exception shouldn't happen. */
-            copy = null;
+            throw new ProgramError("clone failed");
         }
+        cloneMap.add(this, copy);
+        
+        if (pathBbox != null) {
+            copy.pathBbox = pathBbox.clone();
+        }
+        
         return copy;
     }
 

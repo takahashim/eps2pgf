@@ -42,6 +42,8 @@ import net.sf.eps2pgf.ps.resources.encodings.StandardEncoding;
 import net.sf.eps2pgf.ps.resources.encodings.SymbolEncoding;
 import net.sf.eps2pgf.ps.resources.fonts.FontManager;
 import net.sf.eps2pgf.ps.resources.fonts.PSObjectFontMetrics;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Wrapper around a font dictionary. This class provides methods to handle the
@@ -49,7 +51,7 @@ import net.sf.eps2pgf.ps.resources.fonts.PSObjectFontMetrics;
  * 
  * @author Paul Wagenaars
  */
-public class PSObjectFont extends PSObjectDict {
+public class PSObjectFont extends PSObjectDict implements MapCloneable {
     
     /** The next font id. */
     private static int nextFID = 0;
@@ -325,11 +327,23 @@ public class PSObjectFont extends PSObjectDict {
     /**
      * Creates a deep copy of this object.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public PSObjectFont clone() {
-        PSObjectFont copy = (PSObjectFont) super.clone();
+    public PSObjectFont clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (PSObjectFont) cloneMap.get(this);
+        }        
+
+        PSObjectFont copy = (PSObjectFont) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
         return copy;
     }
 

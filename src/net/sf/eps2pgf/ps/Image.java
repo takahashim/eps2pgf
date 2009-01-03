@@ -33,6 +33,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
+import net.sf.eps2pgf.util.CloneMappings;
 
 /**
  * Represents a bitmap image.
@@ -174,13 +175,9 @@ public class Image {
             final PSColor pColorSpace) throws PSError, ProgramError {
         
         // Get some information from the graphics state.
-        try {
-            ctm = interp.getGstate().current().getCtm().clone();
-            colorSpace = pColorSpace.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new ProgramError("CloneNotSupported exception should not be"
-                    + " thrown.");
-        }
+        CloneMappings cloneMap = new CloneMappings();
+        ctm = interp.getGstate().current().getCtm().clone(cloneMap);
+        colorSpace = pColorSpace.clone(cloneMap);
         
         int imageType = dict.get(IMAGE_TYPE).toInt();
         try {

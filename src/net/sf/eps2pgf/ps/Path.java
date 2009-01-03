@@ -19,29 +19,27 @@
 package net.sf.eps2pgf.ps;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorNoCurrentPoint;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Represents a PostScript path.
  *
  * @author Paul Wagenaars
  */
-public class Path implements Cloneable {
+public class Path implements MapCloneable, Cloneable {
+    
     /** List with sections of this path. */
     private ArrayList<PathSection> sections = new ArrayList<PathSection>();
     
     /** Reference to the graphics state stack this path is part of. */
     private GstateStack gStateStack;
-    
-    /** The logger. */
-    private static final Logger LOG =
-                                    Logger.getLogger("net.sourceforge.eps2pgf");
     
     /**
      * Creates a new instance of Path.
@@ -91,22 +89,39 @@ public class Path implements Cloneable {
     
     /**
      * Create a clone of this object.
-     * @return Returns a clone of this object. 
+     * 
+     * @param cloneMap The clone map.
+     * 
+     * @return Returns a clone of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    @Override
-    public Path clone() {
-        LOG.finest("Path clone() called.");
+    @SuppressWarnings("unchecked")
+    public Path clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (Path) cloneMap.get(this);
+        }
+        
         Path copy;
         try {
             copy = (Path) super.clone();
-            copy.sections = new ArrayList<PathSection>();
-            copy.gStateStack = gStateStack;
         } catch (CloneNotSupportedException e) {
-            copy =  new Path(gStateStack);
+            throw new ProgramError("super.clone failed");
         }
-        for (int i = 0; i < getSections().size(); i++) {
-            copy.getSections().add(getSections().get(i).clone());
+        cloneMap.add(this, copy);
+        
+        if (cloneMap.containsKey(sections)) {
+            copy.sections = (ArrayList<PathSection>) cloneMap.get(sections);
+        } else {
+            copy.sections = new ArrayList<PathSection>();
+            cloneMap.add(sections, copy.sections);
+            for (int i = 0; i < sections.size(); i++) {
+                copy.sections.add(sections.get(i).clone(cloneMap));
+            }
         }
+        
         return copy;
     }
     
@@ -226,10 +241,9 @@ public class Path implements Cloneable {
      * Creates a human-readable string representation of this object.
      * @return Human-readable string representation of this path
      */
-    @Override
-    public String toString() {
+    public String isis() {
         StringBuilder str = new StringBuilder();
-        str.append("Path (" + getSections().size() + " items)\n");
+        str.append("path (" + getSections().size() + " items)\n");
         for (int i = 0; i < getSections().size(); i++) {
             str.append(getSections().get(i).toString() + "\n");
         }

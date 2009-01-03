@@ -18,33 +18,42 @@
 
 package net.sf.eps2pgf.ps;
 
-import java.util.logging.Logger;
-
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.objects.PSObject;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Represent a part of a PostScript path (i.e. lineto, curveto, moveto, ...)
  * @author Paul Wagenaars
  */
-public class PathSection extends PSObject implements Cloneable {
+public class PathSection extends PSObject implements MapCloneable {
     
     /** Coordinates associated with this path section. */
     private double[] params = new double[6];
     
-    /** The logger. */
-    private static final Logger LOG
-                                  = Logger.getLogger("net.sourceforge.eps2pgf");
-    
     /**
      * Create a clone of this object.
+     * 
+     * @param cloneMap The clone mappings.
+     * 
      * @return Returns clone of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public PathSection clone() {
-        LOG.finest("PathSection clone() called.");
-        PathSection copy;
-        copy = (PathSection) super.clone();
+    public PathSection clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (PathSection) cloneMap.get(this);
+        }
+        
+        PathSection copy = (PathSection) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
         copy.params = params.clone();
+        
         return copy;
     }
     
@@ -138,7 +147,7 @@ public class PathSection extends PSObject implements Cloneable {
             if (Double.isInfinite(val) || Double.isNaN(val)) {
                 break;
             }
-            code *= i * ((int) (val * 1e6));
+            code += (i + 1) * ((int) (val * 1e6));
         }
         return code;
     }

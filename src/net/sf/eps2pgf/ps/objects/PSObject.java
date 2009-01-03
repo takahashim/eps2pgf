@@ -30,6 +30,8 @@ import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 import org.fontbox.afm.FontMetric;
 
@@ -37,7 +39,8 @@ import org.fontbox.afm.FontMetric;
  *
  * @author Paul Wagenaars
  */
-public abstract class PSObject implements Cloneable, Iterable<PSObject> {
+public abstract class PSObject implements MapCloneable,
+        Cloneable, Iterable<PSObject> {
     
     /** Possible values for access attribute. */
     public enum Access { UNLIMITED, READONLY, EXECUTEONLY, NONE };
@@ -141,19 +144,32 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
-     * Creates a (deep) copy of this object.
+     * Creates a deep copy of this object, maintaining multiple references to
+     * the same object. This makes sure that composite object sharing values
+     * will be copied correctly. It also prevents infinite loops.
      * 
-     * @return Deep copy of this object
+     * @param cloneMap Mappings of previously cloned objects. Mapping from
+     * original object to cloned object.
+     * 
+     * @return A clone of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    @Override
-    public PSObject clone() {
+    public PSObject clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (PSObject) cloneMap.get(this);
+        }
+        
         PSObject copy;
         try {
             copy = (PSObject) super.clone();
+            cloneMap.add(this, copy);
         } catch (CloneNotSupportedException e) {
-            copy = (PSObject) new PSObjectNull();
-            copy.copyCommonAttributes(this);
+            throw new ProgramError("super.clone() failed");
         }
+        
         return copy;
     }
     
@@ -790,6 +806,17 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * @return Floating-point number representation of this object
      */
     public double toReal() throws PSErrorTypeCheck {
+        throw new PSErrorTypeCheck();
+    }
+    
+    /**
+     * Return this object if it is a save object, throw a typecheck otherwise.
+     * 
+     * @throws PSErrorTypeCheck Unable to convert this object to a real number.
+     * 
+     * @return Save object
+     */
+    public PSObjectSave toSave() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();
     }
     

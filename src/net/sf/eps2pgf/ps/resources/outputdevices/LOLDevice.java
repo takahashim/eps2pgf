@@ -24,11 +24,13 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
+import net.sf.eps2pgf.util.CloneMappings;
 
 /**
  * Device that writes only the labels to the output.
@@ -36,7 +38,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
  * @author Paul Wagenaars
  *
  */
-public class LOLDevice implements OutputDevice {
+public class LOLDevice implements OutputDevice, Cloneable {
     
     /** Format for floating point number in the output.. */
     static final DecimalFormat FLOAT_FORMAT = new DecimalFormat("#.###", 
@@ -78,18 +80,27 @@ public class LOLDevice implements OutputDevice {
     /**
      * Returns a exact deep copy of this output device.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    @Override
-    public LOLDevice clone() {
+    public LOLDevice clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (LOLDevice) cloneMap.get(this);
+        }
+        
         LOLDevice copy;
         try {
             copy = (LOLDevice) super.clone();
-            copy.out = out;  // writer is not cloned
         } catch (CloneNotSupportedException e) {
-            /* this exception shouldn't happen. */
-            copy = null;
+            throw new ProgramError("clone failed");
         }
+        cloneMap.add(this, copy);
+        
         return copy;
     }
 

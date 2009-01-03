@@ -23,11 +23,13 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * The Interface PSColor.
  */
-public abstract class PSColor implements Cloneable {
+public abstract class PSColor implements MapCloneable, Cloneable {
     
     /** Color levels of this color. Exact meaning depends of color space. */
     private double[] levels;
@@ -35,16 +37,31 @@ public abstract class PSColor implements Cloneable {
     /**
      * Creates an exact deep copy of this object.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return an exact deep copy of this object.
      * 
-     * @throws CloneNotSupportedException Clone is not supported by this object.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    @Override
-    public PSColor clone() throws CloneNotSupportedException {
-        PSColor copy = (PSColor) super.clone();
+    public PSColor clone(CloneMappings cloneMap) throws ProgramError {
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (PSColor) cloneMap.get(this);
+        }
+        
+        PSColor copy;
+        try {
+            copy = (PSColor) super.clone();
+            cloneMap.add(this, copy);
+        } catch (CloneNotSupportedException e) {
+            throw new ProgramError("super.clone failed");
+        }
+        
         if (levels != null) {
             copy.levels = levels.clone();
         }
+        
         return copy;
     }
     

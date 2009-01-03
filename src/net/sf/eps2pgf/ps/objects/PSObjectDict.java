@@ -24,14 +24,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
+import net.sf.eps2pgf.util.CloneMappings;
+import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Represent PostScript dictionary.
  * @author Paul Wagenaars
  */
-public class PSObjectDict extends PSObject {
+public class PSObjectDict extends PSObject implements MapCloneable {
     
     /** Map containing all key->value pairs in this dictionary. */
     private HashMap<PSObject, PSObject> map;
@@ -77,15 +80,39 @@ public class PSObjectDict extends PSObject {
     /**
      * Creates a deep copy of this object.
      * 
+     * @param cloneMap The clone map.
+     * 
      * @return Deep copy of this object.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public PSObjectDict clone() {
-        PSObjectDict copy = (PSObjectDict) super.clone();
-        copy.map = new HashMap<PSObject, PSObject>();
-        for (PSObject key : map.keySet()) {
-            copy.map.put(key.clone(), map.get(key).clone());
-        }        
+    public PSObjectDict clone(CloneMappings cloneMap)
+            throws ProgramError {
+        
+        if (cloneMap == null) {
+            cloneMap = new CloneMappings();
+        } else if (cloneMap.containsKey(this)) {
+            return (PSObjectDict) cloneMap.get(this);
+        }
+
+        PSObjectDict copy = (PSObjectDict) super.clone(cloneMap);
+        cloneMap.add(this, copy);
+        
+        if (cloneMap.containsKey(map)) {
+            copy.map = (HashMap<PSObject, PSObject>) cloneMap.get(map);
+        } else {
+            copy.map = new HashMap<PSObject, PSObject>();
+            cloneMap.add(map, copy.map);
+            
+            for (PSObject key : map.keySet()) {
+                PSObject copyKey = key.clone(cloneMap);
+                PSObject copyValue = map.get(key).clone(cloneMap);
+                copy.map.put(copyKey, copyValue);
+            }
+        }
+
         return copy;
     }
 
