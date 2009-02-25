@@ -41,8 +41,6 @@ import net.sf.eps2pgf.ps.resources.encodings.ISOLatin1Encoding;
 import net.sf.eps2pgf.ps.resources.encodings.StandardEncoding;
 import net.sf.eps2pgf.ps.resources.encodings.SymbolEncoding;
 import net.sf.eps2pgf.util.ArrayStack;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * PostScript dictionary stack.
@@ -50,7 +48,7 @@ import net.sf.eps2pgf.util.MapCloneable;
  *
  * @author Paul Wagenaars
  */
-public class DictStack implements MapCloneable, Cloneable {
+public class DictStack {
     
     /** Key to the internaldict as defined in the systemdict. */
     public static final PSObjectName KEY_INTERNALDICT =
@@ -60,13 +58,13 @@ public class DictStack implements MapCloneable, Cloneable {
     private ArrayStack<PSObjectDict> dictStack = new ArrayStack<PSObjectDict>();
     
     /** User dictionary. */
-    private PSObjectDict userdict = new PSObjectDict();
+    private PSObjectDict userdict;
     
     /** Global dictionary. */
-    private PSObjectDict globaldict = new PSObjectDict();
+    private PSObjectDict globaldict;
     
     /** System dictionary. */
-    private PSObjectDict systemdict = new PSObjectDict();
+    private PSObjectDict systemdict;
     
     /** Interpreter to which this dictionary stack belongs. */
     private Interpreter interp;
@@ -100,6 +98,10 @@ public class DictStack implements MapCloneable, Cloneable {
      */
     public DictStack(final Interpreter aInterp) throws PSError, ProgramError {
         interp = aInterp;
+        userdict = new PSObjectDict(interp.getVm());
+        globaldict = new PSObjectDict(interp.getVm());
+        systemdict = new PSObjectDict(interp.getVm());
+        
         fillSystemDict();
         defineQuickAccessConstants();
         try {
@@ -151,52 +153,6 @@ public class DictStack implements MapCloneable, Cloneable {
      */
     int countdictstack() {
         return 3 + dictStack.size();
-    }
-    
-    /**
-     * Creates a *deep* copy of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return A deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @SuppressWarnings("unchecked")
-    public DictStack clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (DictStack) cloneMap.get(this);
-        }
-        
-        DictStack copy;
-        try {
-            copy = (DictStack) super.clone();
-            cloneMap.add(this, copy);
-        } catch (CloneNotSupportedException e) {
-            throw new ProgramError("super.clone failed");
-        }
-        
-        try {
-            if (cloneMap.containsKey(dictStack)) {
-                copy.dictStack =
-                    (ArrayStack<PSObjectDict>) cloneMap.get(dictStack);
-            } else {
-                copy.dictStack = new ArrayStack<PSObjectDict>();
-                cloneMap.add(dictStack, copy.dictStack);
-                for (int i = 0; i < dictStack.size(); i++) {
-                    copy.dictStack.push(dictStack.peek(i).clone(cloneMap));
-                }
-            }
-        } catch (PSErrorStackUnderflow e) {
-            /* empty block */
-        }
-        copy.globaldict = globaldict.clone(cloneMap);
-        copy.systemdict = systemdict.clone(cloneMap);
-        copy.userdict = userdict.clone(cloneMap);
-        
-        return copy;
     }
     
     /**
@@ -333,7 +289,7 @@ public class DictStack implements MapCloneable, Cloneable {
         }
         
         // add errordict dictionary
-        PSObjectDict errordict = new PSObjectDict();
+        PSObjectDict errordict = new PSObjectDict(interp.getVm());
         PSObjectName[] errs = PSError.getAllPSErrors();
         for (int i = 0; i < errs.length; i++) {
             String str = String.format("{%s eps2pgferrorproc stop}", 
@@ -346,7 +302,7 @@ public class DictStack implements MapCloneable, Cloneable {
         systemdict.setKey("errordict", errordict);
         
         // Add $error dictionary
-        PSObjectDict dollarerror = new PSObjectDict();
+        PSObjectDict dollarerror = new PSObjectDict(interp.getVm());
         dollarerror.setKey("newerror", new PSObjectBool(false));
         dollarerror.setKey("errorname", emptyProc);
         dollarerror.setKey("command", emptyProc);
@@ -362,22 +318,21 @@ public class DictStack implements MapCloneable, Cloneable {
         systemdict.setKey("systemdict", systemdict);
         systemdict.setKey("userdict", userdict);
         systemdict.setKey("globaldict", globaldict);
-        systemdict.setKey("statusdict", new PSObjectDict());
+        systemdict.setKey("statusdict", new PSObjectDict(interp.getVm()));
         systemdict.setKey("FontDirectory",
                 interp.getResourceManager().getFontManager());
         systemdict.setKey("GlobalFontDirectory",
                 interp.getResourceManager().getFontManager());
         systemdict.setKey("SharedFontDirectory",
                 interp.getResourceManager().getFontManager());
-        systemdict.setKey(KEY_INTERNALDICT, new PSObjectDict());
-        
-        // VM allocation mode
-        systemdict.setKey("currentglobal", new PSObjectBool(false));
+        systemdict.setKey(KEY_INTERNALDICT, new PSObjectDict(interp.getVm()));
         
         // add encoding vectors
-        systemdict.setKey("ISOLatin1Encoding", ISOLatin1Encoding.get());
-        systemdict.setKey("StandardEncoding", StandardEncoding.get());
-        systemdict.setKey("SymbolEncoding", SymbolEncoding.get());
+        systemdict.setKey("ISOLatin1Encoding",
+                ISOLatin1Encoding.get(interp.getVm()));
+        systemdict.setKey("StandardEncoding",
+                StandardEncoding.get(interp.getVm()));
+        systemdict.setKey("SymbolEncoding", SymbolEncoding.get(interp.getVm()));
         
         // Add some dummy operators that set the page size. These are sometimes
         // used.
@@ -404,7 +359,8 @@ public class DictStack implements MapCloneable, Cloneable {
             version = "1";
             revision = 1;
         }
-        systemdict.setKey("version", new PSObjectString(version));
+        systemdict.setKey("version",
+                new PSObjectString(version, interp.getVm()));
         systemdict.setKey("revision", new PSObjectInt(revision));
         systemdict.setKey("serialnumber", new PSObjectInt(0));
         systemdict.setKey("product", "Eps2pgf");

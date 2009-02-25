@@ -24,9 +24,10 @@ import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Path;
+import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
-import net.sf.eps2pgf.util.CloneMappings;
 
 /**
  * Discards all output written to this device.
@@ -34,6 +35,18 @@ import net.sf.eps2pgf.util.CloneMappings;
  * @author Paul Wagenaars
  */
 public class NullDevice implements OutputDevice, Cloneable {
+    
+    /** Virtual memory manager. */
+    private VM vm;
+    
+    /**
+     * Create a new NullDevice.
+     * 
+     * @param vmManager The virtual memory manager.
+     */
+    public NullDevice(final VM vmManager) {
+        vm = vmManager;
+    }
     
     /**
      * Implements PostScript clip operator.
@@ -49,26 +62,16 @@ public class NullDevice implements OutputDevice, Cloneable {
     /**
      * Returns a exact deep copy of this output device.
      * 
-     * @param cloneMap The clone map.
-     * 
      * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public NullDevice clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (NullDevice) cloneMap.get(this);
-        }
-        
+    @Override
+    public NullDevice clone() {
         NullDevice copy;
         try {
             copy = (NullDevice) super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new ProgramError("clone failed");
+            copy = null;
         }
-        cloneMap.add(this, copy);
         
         return copy;
     }
@@ -78,9 +81,12 @@ public class NullDevice implements OutputDevice, Cloneable {
      * coordinates to device space).
      * 
      * @return the PS object matrix
+     * 
+     * @throws PSErrorVMError A virtual memory error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectMatrix defaultCTM() {
-        return new PSObjectMatrix(1, 0 , 0, 1, 0, 0);
+    public PSObjectMatrix defaultCTM() throws PSErrorVMError, ProgramError {
+        return new PSObjectMatrix(1, 0 , 0, 1, 0, 0, vm);
     }
     
     /**

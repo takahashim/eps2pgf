@@ -16,28 +16,23 @@
  * limitations under the License.
  */
 
-package net.sf.eps2pgf.util;
-
-import net.sf.eps2pgf.ProgramError;
+package net.sf.eps2pgf.ps.errors;
 
 /**
- * Similar to Cloneable, except that it defines clone methods which takes
- * CloneMappings as argument.
+ * Standard PostScript error: VMerror.
  * 
  * @author Paul Wagenaars
  *
  */
-public interface MapCloneable {
+public class PSErrorVMError extends PSError {
+    
+    /** Serial version UID. */
+    private static final long serialVersionUID = 1L;
     
     /**
-     * Create a deep copy of this object. Using the clone map references between
-     * objects are maintained.
-     * 
-     * @param cloneMap The clone mappings.
-     * 
-     * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * Instantiates a new VM error.
      */
-    Object clone(final CloneMappings cloneMap) throws ProgramError;
+    public PSErrorVMError() {
+        super(PSError.VMERROR);
+    }
 }

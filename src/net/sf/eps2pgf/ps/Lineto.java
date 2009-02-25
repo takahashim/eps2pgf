@@ -18,16 +18,12 @@
 
 package net.sf.eps2pgf.ps;
 
-import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
-
 /**
  * Represents a path section formed by the lineto operator.
  *
  * @author Paul Wagenaars
  */
-public class Lineto extends PathSection implements MapCloneable {
+public class Lineto extends PathSection implements Cloneable {
     
     /**
      * Create a new Lineto instance.
@@ -51,38 +47,4 @@ public class Lineto extends PathSection implements MapCloneable {
             setParam(i, Double.NaN);
         }
     }
-    
-    /**
-     * Create a string representation of this object.
-     * 
-     * @return String representation of this object.
-     */
-    @Override
-    public String isis() {
-        return String.format("%.4g %.4g lineto", getParam(0), getParam(1));
-    }
-    
-    /**
-     * Create a clone of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Returns clone of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @Override
-    public Lineto clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (Lineto) cloneMap.get(this);
-        }
-
-        Lineto copy = (Lineto) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        return copy;
-    }
-
 }

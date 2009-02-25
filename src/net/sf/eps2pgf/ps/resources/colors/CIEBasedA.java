@@ -20,9 +20,10 @@
 package net.sf.eps2pgf.ps.resources.colors;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
-import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
@@ -55,48 +56,43 @@ public class CIEBasedA extends CIEBased {
      * Define a new CIE-based A color space.
      * 
      * @param arr The array describing the new color space.
+     * @param interp The interpreter.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public CIEBasedA(final PSObjectArray arr) throws PSError, ProgramError {
-        if (!arr.get(0).eq(FAMILYNAME)) {
-            throw new PSErrorTypeCheck();
-        }
+    public CIEBasedA(final PSObjectArray arr, final Interpreter interp)
+            throws PSError, ProgramError {
         
-        setDict(checkEntries(arr.get(1).toDict()));
+        super(arr, interp);
+        checkEntries(getDict(), interp);
     }
     
     /**
      * Make sure that all entries in the dictionary are defined. If they are not
      * defined default values are added.
      * 
-     * @param dict The dictionary
-     * 
-     * @return The checked dictionary. This is the exact same dictionary as the
-     * one passed to this method.
+     * @param dict The color dictionary.
+     * @param interp The interpreter.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    private static PSObjectDict checkEntries(final PSObjectDict dict)
-        throws PSError, ProgramError {
+    private static void checkEntries(final PSObjectDict dict,
+            final Interpreter interp) throws PSError, ProgramError {
         
+        VM vm = interp.getVm();
         if (!dict.known(RANGEA)) {
             double[] defaultRange = {0.0, 1.0};
-            dict.setKey(RANGEA, new PSObjectArray(defaultRange));
+            dict.setKey(RANGEA, new PSObjectArray(defaultRange, vm));
         }
         if (!dict.known(DECODEA)) {
-            dict.setKey(DECODEA, new PSObjectArray("{}", null));
+            dict.setKey(DECODEA, new PSObjectArray("{}", interp));
         }
         if (!dict.known(MATRIXA)) {
             double[] defaultMatrix =  {1.0, 1.0, 1.0};
-            dict.setKey(MATRIXA, new PSObjectArray(defaultMatrix));
+            dict.setKey(MATRIXA, new PSObjectArray(defaultMatrix, vm));
         }
-
-        checkCommonEntries(dict);
-        
-        return dict;
     }
     
     /**

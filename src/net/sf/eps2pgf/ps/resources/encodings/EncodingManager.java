@@ -20,6 +20,7 @@
 package net.sf.eps2pgf.ps.resources.encodings;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.resources.ResourceManager;
@@ -50,24 +51,25 @@ public final class EncodingManager {
      * 
      * @param manager The resource manager to which the standard encodings are
      * added.
+     * @param vm The virtual memory manager.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      * @throws PSError A PostScript error occurred.
      */
-    public static void initialize(final ResourceManager manager)
+    public static void initialize(final ResourceManager manager, final VM vm)
             throws PSError, ProgramError {
         
         manager.defineResource(ResourceManager.CAT_ENCODING, 
                 new PSObjectName("/StandardEncoding"), 
-                StandardEncoding.get());
+                StandardEncoding.get(vm));
         
         manager.defineResource(ResourceManager.CAT_ENCODING, 
                 new PSObjectName("/ISOLatin1Encoding"),
-                ISOLatin1Encoding.get());
+                ISOLatin1Encoding.get(vm));
         
         manager.defineResource(ResourceManager.CAT_ENCODING, 
                 new PSObjectName("/SymbolEncoding"), 
-                SymbolEncoding.get());
+                SymbolEncoding.get(vm));
 
     }
 }

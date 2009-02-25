@@ -18,17 +18,14 @@
 
 package net.sf.eps2pgf.ps.objects;
 
-import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Represent PostScript object: boolean.
  *
  * @author Paul Wagenaars
  */
-public class PSObjectBool extends PSObject implements MapCloneable {
+public class PSObjectBool extends PSObject implements Cloneable {
     
     /** Value of this boolean. */
     private boolean value = false;
@@ -64,31 +61,6 @@ public class PSObjectBool extends PSObject implements MapCloneable {
     @Override
     public PSObjectBool and(final PSObject obj2) throws PSErrorTypeCheck {
         return new PSObjectBool((value && obj2.toBool()));
-    }
-    
-    /**
-     * Creates a deep copy of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @Override
-    public PSObjectBool clone(CloneMappings cloneMap)
-            throws ProgramError {
-        
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSObjectBool) cloneMap.get(this);
-        }
-
-        PSObjectBool copy = (PSObjectBool) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        return copy;
     }
     
     /**

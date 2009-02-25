@@ -19,6 +19,7 @@
 package net.sf.eps2pgf.ps.resources.colors;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
@@ -46,14 +47,15 @@ public final class ColorManager {
      * @param obj PostScript object describing the color space. See
      * the PostScript manual on the possible types and
      * values of this object.
+     * @param interp The interpreter.
      * 
      * @return the default color for the specified color space.
      * 
      * @throws PSError a PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public static PSColor autoSetColorSpace(final PSObject obj)
-            throws PSError, ProgramError {
+    public static PSColor autoSetColorSpace(final PSObject obj,
+            final Interpreter interp) throws PSError, ProgramError {
         
         PSObjectName spaceName;
         if (obj instanceof PSObjectName) {
@@ -71,11 +73,11 @@ public final class ColorManager {
         } else if (spaceName.eq(DeviceCMYK.FAMILYNAME)) {
             return new DeviceCMYK();
         } else if (spaceName.eq(Indexed.FAMILYNAME)) {
-            return new Indexed(obj);
+            return new Indexed(obj, interp);
         } else if (spaceName.eq(CIEBasedABC.FAMILYNAME)) {
-            return new CIEBasedABC(obj.toArray());
+            return new CIEBasedABC(obj.toArray(), interp);
         } else if (spaceName.eq(CIEBasedA.FAMILYNAME)) {
-                return new CIEBasedA(obj.toArray());
+                return new CIEBasedA(obj.toArray(), interp);
         } else {
             throw new PSErrorUndefined();
         }

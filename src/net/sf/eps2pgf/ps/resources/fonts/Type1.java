@@ -31,7 +31,9 @@ import org.fontbox.util.BoundingBox;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.ps.GstateStack;
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Path;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
@@ -46,7 +48,6 @@ import net.sf.eps2pgf.ps.objects.PSObjectNull;
 import net.sf.eps2pgf.ps.objects.PSObjectReal;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.filters.EexecDecode;
-import net.sf.eps2pgf.ps.resources.outputdevices.NullDevice;
 import net.sf.eps2pgf.util.ArrayStack;
 
 /**
@@ -67,12 +68,14 @@ final class Type1 {
      * @param fontDict font dictionary describing a type 1 font
      * @param fMetrics The font metrics object where the loaded metrics will be
      * stored.
+     * @param vm The virtual memory manager.
      * 
      * @throws PSError a PostScript error occurred
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public static void load(final PSObjectFontMetrics fMetrics,
-            final PSObjectDict fontDict) throws PSError, ProgramError {
+            final PSObjectDict fontDict, final VM vm)
+            throws PSError, ProgramError {
         
         // Extract metrics information from character descriptions
         PSObjectDict charStrings;
@@ -93,7 +96,7 @@ final class Type1 {
         // Parse Subrs entry in private dictionary
         PSObjectArray subrsArray = privateDict.get(PSObjectFont.KEY_PRV_SUBRS)
                                                                      .toArray();
-        fMetrics.setSubrs(parseSubrs(subrsArray));
+        fMetrics.setSubrs(parseSubrs(subrsArray, vm));
         
         fMetrics.setFontMetrics(new FontMetric());
         List<PSObject> items = charStrings.getItemList();
@@ -102,7 +105,7 @@ final class Type1 {
                 PSObjectName charName = items.get(i).toName();
                 PSObjectString charString = items.get(i + 1).toPSString();
                 CharMetric charMetric = charString2CharMetric(fMetrics,
-                        charName.toString(), charString.toString());
+                        charName.toString(), charString.toString(), vm);
                 fMetrics.getFontMetrics().addCharMetric(charMetric);
             }
         } catch (PSError e) {
@@ -115,14 +118,15 @@ final class Type1 {
      * 
      * @param pSubrs Array with subroutines. Value of 'Subrs' entry in 'Private'
      * dictionary.
+     * @param vm The virtual memory manager.
      * 
      * @return List with all subroutines. Each subroutines consists of a list
      * with PostScript objects.
      * 
      * @throws PSError A PostScript error occured.
      */
-    private static List<List<PSObject>> parseSubrs(final PSObjectArray pSubrs)
-            throws PSError {
+    private static List<List<PSObject>> parseSubrs(final PSObjectArray pSubrs,
+            final VM vm) throws PSError {
         
         int nrSubrs = pSubrs.size();
         List<List<PSObject>> subrList = new ArrayList<List<PSObject>>(nrSubrs);
@@ -134,7 +138,7 @@ final class Type1 {
                 StringInputStream inStream =
                     new StringInputStream(inString.toString());
                 InputStream decodedStream = new EexecDecode(inStream, 4330,
-                        true);
+                        true, vm);
                 subroutine = decodeCharString(decodedStream);
             } else if (inObj instanceof PSObjectNull) {
                 subroutine = new ArrayList<PSObject>();
@@ -152,6 +156,7 @@ final class Type1 {
      * @param charName The character name.
      * @param charString The character string.
      * @param fMetrics The font metrics.
+     * @param vm The virtual memory manager.
      * 
      * @return Character metric
      * 
@@ -160,11 +165,12 @@ final class Type1 {
      */
     public static CharMetric charString2CharMetric(
             final PSObjectFontMetrics fMetrics, final String charName,
-            final String charString) throws PSError, ProgramError {
+            final String charString, final VM vm)
+            throws PSError, ProgramError {
         
         StringInputStream strInStream = new StringInputStream(charString);
         InputStream decodedCharString =
-            new EexecDecode(strInStream, 4330, true);
+            new EexecDecode(strInStream, 4330, true, vm);
         List<PSObject> tokens = decodeCharString(decodedCharString);
         double[] sb = new double[2];
         double[] w = new double[2];
@@ -298,7 +304,8 @@ final class Type1 {
             final List<PSObject> execStack, final double[] paramSb,
             final double[] paramW) throws PSError, ProgramError {
         
-        GstateStack gstate = new GstateStack(new NullDevice());
+        Interpreter interp = new Interpreter();
+        GstateStack gstate = interp.getGstate();
         ArrayStack<PSObject> opStack = new ArrayStack<PSObject>();
         
         while (!execStack.isEmpty()) {

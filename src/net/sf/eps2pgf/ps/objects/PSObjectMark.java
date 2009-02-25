@@ -18,16 +18,12 @@
 
 package net.sf.eps2pgf.ps.objects;
 
-import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
-
 /**
  * Represent PostScript mark.
  *
  * @author Paul Wagenaars
  */
-public class PSObjectMark extends PSObject implements MapCloneable {
+public class PSObjectMark extends PSObject implements Cloneable {
     
     /**
      * Create new mark object.
@@ -45,31 +41,6 @@ public class PSObjectMark extends PSObject implements MapCloneable {
         copyCommonAttributes(obj);
     }
     
-    /**
-     * Creates a deep copy of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @Override
-    public PSObjectMark clone(CloneMappings cloneMap)
-            throws ProgramError {
-        
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSObjectMark) cloneMap.get(this);
-        }
-        
-        PSObjectMark copy = (PSObjectMark) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        return copy;
-    }
-
     /**
      * PostScript operator 'dup'. Create a copy of this object. The values
      * of composite object is not copied, but shared.

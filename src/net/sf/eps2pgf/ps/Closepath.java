@@ -18,15 +18,11 @@
 
 package net.sf.eps2pgf.ps;
 
-import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
-
 /**
  *
  * @author Paul Wagenaars
  */
-public class Closepath extends PathSection implements MapCloneable {
+public class Closepath extends PathSection implements Cloneable {
     
     /**
      * Create a new Closepath object.
@@ -40,28 +36,4 @@ public class Closepath extends PathSection implements MapCloneable {
             setParam(i, Double.NaN);
         }
     }
-    
-    /**
-     * Create a clone of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Returns clone of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @Override
-    public Closepath clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (Closepath) cloneMap.get(this);
-        }
-
-        Closepath copy = (Closepath) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        return copy;
-    }
-
 }

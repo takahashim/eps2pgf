@@ -32,18 +32,18 @@ import org.fontbox.afm.FontMetric;
 import org.fontbox.util.BoundingBox;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.resources.encodings.ISOLatin1Encoding;
 import net.sf.eps2pgf.ps.resources.encodings.StandardEncoding;
 import net.sf.eps2pgf.ps.resources.encodings.SymbolEncoding;
 import net.sf.eps2pgf.ps.resources.fonts.FontManager;
 import net.sf.eps2pgf.ps.resources.fonts.PSObjectFontMetrics;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Wrapper around a font dictionary. This class provides methods to handle the
@@ -51,7 +51,7 @@ import net.sf.eps2pgf.util.MapCloneable;
  * 
  * @author Paul Wagenaars
  */
-public class PSObjectFont extends PSObjectDict implements MapCloneable {
+public class PSObjectFont extends PSObjectDict implements Cloneable {
     
     /** The next font id. */
     private static int nextFID = 0;
@@ -128,13 +128,18 @@ public class PSObjectFont extends PSObjectDict implements MapCloneable {
     /**
      * Create a new empty instance. It sets the FID, font type and default
      * matrix.
+     * 
+     * @param vm The VM manager.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectFont() {
-        super();
-        
+    public PSObjectFont(final VM vm) throws PSErrorVMError, ProgramError {
+        super(vm);
         setFID();
         setKey(KEY_FONTTYPE, new PSObjectInt(1));
-        setKey(KEY_FONTMATRIX, new PSObjectMatrix(0.001, 0, 0, 0.001, 0, 0));
+        setKey(KEY_FONTMATRIX,
+                new PSObjectMatrix(0.001, 0, 0, 0.001, 0, 0, vm));
     }
     
     /**
@@ -142,14 +147,17 @@ public class PSObjectFont extends PSObjectDict implements MapCloneable {
      * 
      * @param resourceDir Resource directory with font information
      * @param fontName Name of the font to load
+     * @param vm The VM manager.
      * 
      * @throws PSErrorInvalidFont the PS error invalid font
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectFont(final File resourceDir, final String fontName)
-            throws PSErrorInvalidFont, ProgramError {
+    public PSObjectFont(final File resourceDir, final String fontName,
+            final VM vm) throws PSErrorVMError, PSErrorInvalidFont,
+            ProgramError {
         
-        super();
+        super(vm);
         
         File fontFile = new File(resourceDir, FontManager.FONTDESC_DIR_NAME
                 + File.separator + fontName + ".font");
@@ -168,16 +176,17 @@ public class PSObjectFont extends PSObjectDict implements MapCloneable {
         
         // Setting the dictionary keys with font info
         setKey(KEY_FONTTYPE, new PSObjectInt(1));
-        setKey(KEY_FONTMATRIX, new PSObjectMatrix(0.001, 0, 0, 0.001, 0, 0));
+        setKey(KEY_FONTMATRIX,
+                new PSObjectMatrix(0.001, 0, 0, 0.001, 0, 0, vm));
         setKey(KEY_FONTNAME, new PSObjectName(fontName, true));
         setFID();
         String encoding = props.getProperty("encoding", "Standard");
         if (encoding.equals("Standard")) {
-            setKey(KEY_ENCODING, StandardEncoding.get());
+            setKey(KEY_ENCODING, StandardEncoding.get(vm));
         } else if (encoding.equals("ISOLatin1")) {
-            setKey(KEY_ENCODING, ISOLatin1Encoding.get());
+            setKey(KEY_ENCODING, ISOLatin1Encoding.get(vm));
         } else if (encoding.equals("Symbol")) {
-            setKey(KEY_ENCODING, SymbolEncoding.get());
+            setKey(KEY_ENCODING, SymbolEncoding.get(vm));
         } else {
             LOG.severe("Unknown encoding: " + encoding);
             throw new PSErrorInvalidFont();
@@ -188,7 +197,7 @@ public class PSObjectFont extends PSObjectDict implements MapCloneable {
         setKey(KEY_LATEXPOSTCODE, props.getProperty("latexpostcode", ""));
         
         String texStringName = props.getProperty("texstrings", "default");
-        setKey(KEY_TEXSTRINGS, FontManager.getTexStringDict(texStringName));
+        setKey(KEY_TEXSTRINGS, FontManager.getTexStringDict(texStringName, vm));
         
         FontMetric fontMetrics = loadAfm(resourceDir, fontName);
         setKey(KEY_AFM, new PSObjectFontMetrics(fontMetrics));
@@ -196,7 +205,7 @@ public class PSObjectFont extends PSObjectDict implements MapCloneable {
         // An AFM file does not specify CharStrings. Instead, we make a fake
         // entry.
         List< ? > charMetrics = fontMetrics.getCharMetrics();
-        PSObjectDict charStrings = new PSObjectDict();
+        PSObjectDict charStrings = new PSObjectDict(charMetrics.size(), vm);
         for (Object obj : charMetrics) {
             if (obj instanceof CharMetric) {
                 CharMetric cm = (CharMetric) obj;
@@ -234,7 +243,7 @@ public class PSObjectFont extends PSObjectDict implements MapCloneable {
         // texstrings.
         if (!known(KEY_TEXSTRINGS)) {
             setKey(KEY_TEXSTRINGS,
-                    FontManager.getTexStringDictByFontname(fontname));
+                    FontManager.getTexStringDictByFontname(fontname, getVm()));
             alreadyValid = false;
         }
         
@@ -277,7 +286,7 @@ public class PSObjectFont extends PSObjectDict implements MapCloneable {
             // Apparently there are no metrics. Try to extract it from the 
             // character descriptions.
             alreadyValid = false;
-            setKey(KEY_AFM, new PSObjectFontMetrics(this));
+            setKey(KEY_AFM, new PSObjectFontMetrics(this, getVm()));
             LOG.fine("Creating font metrics for font " + getFontName());
         }
         
@@ -325,26 +334,13 @@ public class PSObjectFont extends PSObjectDict implements MapCloneable {
     }
     
     /**
-     * Creates a deep copy of this object.
+     * Create a deep copy of this font object.
      * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @return The copy of this object.
      */
     @Override
-    public PSObjectFont clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSObjectFont) cloneMap.get(this);
-        }        
-
-        PSObjectFont copy = (PSObjectFont) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        return copy;
+    public PSObjectFont clone() {
+        return (PSObjectFont) super.clone();
     }
 
     /**

@@ -25,15 +25,13 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorNoCurrentPoint;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Represents a PostScript path.
  *
  * @author Paul Wagenaars
  */
-public class Path implements MapCloneable, Cloneable {
+public class Path implements Cloneable {
     
     /** List with sections of this path. */
     private ArrayList<PathSection> sections = new ArrayList<PathSection>();
@@ -90,36 +88,20 @@ public class Path implements MapCloneable, Cloneable {
     /**
      * Create a clone of this object.
      * 
-     * @param cloneMap The clone map.
-     * 
      * @return Returns a clone of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    @SuppressWarnings("unchecked")
-    public Path clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (Path) cloneMap.get(this);
-        }
-        
+    @Override
+    public Path clone() {
         Path copy;
         try {
             copy = (Path) super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new ProgramError("super.clone failed");
+            copy = null;
         }
-        cloneMap.add(this, copy);
         
-        if (cloneMap.containsKey(sections)) {
-            copy.sections = (ArrayList<PathSection>) cloneMap.get(sections);
-        } else {
-            copy.sections = new ArrayList<PathSection>();
-            cloneMap.add(sections, copy.sections);
-            for (int i = 0; i < sections.size(); i++) {
-                copy.sections.add(sections.get(i).clone(cloneMap));
-            }
+        copy.sections = new ArrayList<PathSection>();
+        for (int i = 0; i < sections.size(); i++) {
+            copy.sections.add(sections.get(i).clone());
         }
         
         return copy;

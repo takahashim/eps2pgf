@@ -22,9 +22,9 @@ import java.io.IOException;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSErrorStackUnderflow;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
 import net.sf.eps2pgf.util.ArrayStack;
-import net.sf.eps2pgf.util.CloneMappings;
 
 /** 
  * Manages the stack of graphics states.
@@ -51,17 +51,25 @@ public class GstateStack {
     /** The current private state. */
     private GraphicsState current;
     
+    /** The interpreter. */
+    private Interpreter interp;
+    
     /**
      * Creates a new instance of GstateStack.
      * 
      * @param output The output device to be associated with the graphics state.
+     * @param interpreter The interpreter.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorVMError A virtual memory error occurred.
      */
-    public GstateStack(final OutputDevice output) throws ProgramError {
+    public GstateStack(final OutputDevice output, final Interpreter interpreter)
+            throws ProgramError, PSErrorVMError {
+        
+        interp = interpreter;
         stack = new ArrayStack<GraphicsState>();
         saveOrGsave = new ArrayStack<Byte>();
-        setCurrent(new GraphicsState(this, output));
+        setCurrent(new GraphicsState(this, output, interp));
     }
     
     /**
@@ -69,18 +77,14 @@ public class GstateStack {
      * 
      * @param savedByGSave True if this method is called as a result of 'gsave'
      * operator. False if called as a result of 'save' operator.
-     * @param cloneMap The clone map.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void saveGstate(final boolean savedByGSave,
-            CloneMappings cloneMap) throws ProgramError, IOException {
+    public void saveGstate(final boolean savedByGSave)
+            throws ProgramError, IOException {
         
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        }
-        stack.push(current().clone(cloneMap));
+        stack.push(current().clone());
         if (savedByGSave) {
             saveOrGsave.push(GSAVE);
         } else {
@@ -94,7 +98,6 @@ public class GstateStack {
      * 
      * @param calledByGRestore True, if method called as result of 'grestore'
      * operator. False if method called as result of 'restore'.
-     * @param cloneMap The clone map. Only required if calledBYGRestore is true.
      * 
      * @return Indicator whether the restored gstate was saved by 'save' or
      * 'gsave'. EMPTYSTACK: stack was already empty, GSAVE: saved by 'gsave'
@@ -103,8 +106,8 @@ public class GstateStack {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public byte restoreGstate(final boolean calledByGRestore,
-            CloneMappings cloneMap) throws ProgramError, IOException {
+    public byte restoreGstate(final boolean calledByGRestore)
+            throws ProgramError, IOException {
         
         // If the stack is empty we do nothing.
         if (stack.isEmpty()) {
@@ -123,10 +126,7 @@ public class GstateStack {
                 // 'restore'.
                 if (calledByGRestore) {
                     // This method was called by 'grestore'
-                    if (cloneMap == null) {
-                        cloneMap = new CloneMappings();
-                    }
-                    setCurrent(stack.peek().clone(cloneMap));
+                    setCurrent(stack.peek().clone());
                 } else {
                     // This method is called by 'restore'
                     setCurrent(stack.pop());
@@ -153,18 +153,14 @@ public class GstateStack {
      * 
      * @param forGrestoreall True, if called as a result of a 'grestoreall'
      * operator. False, if called as result of 'restore' operator.
-     * @param cloneMap The clone map. Only required if calledBYGRestore is true.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void restoreAllGstate(final boolean forGrestoreall,
-            CloneMappings cloneMap) throws ProgramError, IOException {
+    public void restoreAllGstate(final boolean forGrestoreall)
+            throws ProgramError, IOException {
         
-        if (forGrestoreall && (cloneMap == null)) {
-            cloneMap = new CloneMappings();
-        }
-        while (restoreGstate(forGrestoreall, cloneMap) == GSAVE) {
+        while (restoreGstate(forGrestoreall) == GSAVE) {
             /* empty block */
         }
     }

@@ -22,12 +22,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.ps.DictStack;
-import net.sf.eps2pgf.ps.InterpParams;
 import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidRestore;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 
 /**
  * Standard PostScript object: save.
@@ -35,22 +33,13 @@ import net.sf.eps2pgf.util.MapCloneable;
  * @author Paul Wagenaars
  *
  */
-public class PSObjectSave extends PSObject implements MapCloneable {
-    
-    /** User, system and device parameters. */
-    private InterpParams interpParams;
-    
-    /** Dictionary stack. */
-    private DictStack dictStack;
+public class PSObjectSave extends PSObjectComposite implements Cloneable {
     
     /** InterpCounter at time of save.*/
     private int interpCount;
     
     /** Indicate whether this save object is valid. */
     private boolean valid = true;
-    
-    /** Interpreter to which this object belongs. */
-    private Interpreter interp;
     
     /**
      * Dictionary to keep track of the latest (i.e. highest interpCount)
@@ -61,25 +50,18 @@ public class PSObjectSave extends PSObject implements MapCloneable {
     
     /**
      * Create a new save object from the current state of the interpreter.
-     */
-    public PSObjectSave() {
-        /* empty block */
-    }
-
-    /**
-     * Create a new save object from the current state of the interpreter.
      * 
-     * @param aInterp The interpreter.
+     * @param interp The interpreter.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectSave(final Interpreter aInterp) throws ProgramError {
-        interp = aInterp;
+    public PSObjectSave(final Interpreter interp)
+            throws PSErrorVMError, ProgramError {
         
-        CloneMappings cloneMap = new CloneMappings();
-        dictStack = interp.getDictStack().clone(cloneMap);
-        interpParams = interp.getInterpParams().clone(cloneMap);
+        super(interp.getVm());
         interpCount = interp.getInterpCounter();
+        getVm().addSaveObj(interp.getVm().clone());
         
         int interpId = interp.hashCode();
         ArrayList<PSObjectSave> saveObjs;
@@ -92,33 +74,16 @@ public class PSObjectSave extends PSObject implements MapCloneable {
         saveObjs.add(this);
     }
 
-    
     /**
-     * Creates a *deep* copy of this object.
+     * Create a new save object. The new object is a shallow copy of the
+     * supplied save object.
      * 
-     * @param cloneMap The clone map.
-     * 
-     * @return A deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @param saveObj Save object to copy.
      */
-    @Override
-    public PSObjectSave clone(CloneMappings cloneMap)
-            throws ProgramError {
-        
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSObjectSave) cloneMap.get(this);
-        }
-        
-        PSObjectSave copy = (PSObjectSave) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        copy.dictStack = dictStack.clone(cloneMap);
-        copy.interpParams = interpParams.clone(cloneMap);
-        
-        return copy;
+    public PSObjectSave(final PSObjectSave saveObj) {
+        super(saveObj.getVm(), saveObj.getId());
+        interpCount = saveObj.interpCount;
+        valid = saveObj.valid;
     }
     
     /**
@@ -129,14 +94,7 @@ public class PSObjectSave extends PSObject implements MapCloneable {
      */
     @Override
     public PSObject dup() {
-        PSObjectSave copy = new PSObjectSave();
-        copy.dictStack = dictStack;
-        copy.interpParams = interpParams;
-        copy.interpCount = interpCount;
-        copy.valid = valid;
-        copy.interp = interp;
-        
-        return copy;
+        return new PSObjectSave(this);
     }
 
     /**
@@ -156,10 +114,12 @@ public class PSObjectSave extends PSObject implements MapCloneable {
         }
         PSObjectSave objSave = (PSObjectSave) obj;
         
-        return ((interpCount == objSave.interpCount)
-                && (interp.hashCode() == objSave.hashCode()));
+        return (interpCount == objSave.interpCount)
+                && (valid == objSave.valid)
+                && getId().equals(objSave.getId())
+                && getVm().equals(objSave.getVm());
     }
-
+    
     /**
      * Returns a hash code value for the object. This method is supported for
      * the benefit of hashtables such as those provided by java.util.Hashtable.
@@ -168,7 +128,7 @@ public class PSObjectSave extends PSObject implements MapCloneable {
      */
     @Override
     public int hashCode() {
-        return interpCount * interp.hashCode();
+        return interpCount;
     }
     
     /**
@@ -184,15 +144,20 @@ public class PSObjectSave extends PSObject implements MapCloneable {
     /**
      * Restore the interpreter to the state as it is stored in this object.
      * 
+     * @param interp The interpreter.
+     * 
      * @throws PSErrorInvalidRestore An invalid restore occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void restore() throws PSErrorInvalidRestore {
+    public void restore(final Interpreter interp)
+            throws PSErrorInvalidRestore, ProgramError {
+        
         if (!valid) {
             throw new PSErrorInvalidRestore();
         }
         
-        interp.setDictStack(dictStack);
-        interp.setInterpParams(interpParams);
+        VM savedVm = getVm().getSaveObj(getId());
+        interp.getVm().restoreFromSnapshot(savedVm);
         
         // Invalidate this object and all newer save objects
         valid = false;

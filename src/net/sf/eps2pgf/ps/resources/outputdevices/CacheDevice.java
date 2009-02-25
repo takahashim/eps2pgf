@@ -24,10 +24,11 @@ import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Path;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSErrorNoCurrentPoint;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
-import net.sf.eps2pgf.util.CloneMappings;
 
 /**
  * Cache device, used to create glyphs.
@@ -57,24 +58,32 @@ public class CacheDevice implements OutputDevice, Cloneable {
     /** The bounding box of all paths so far. */
     private double[] pathBbox = null;
     
+    /** Virtual memory manager associated to this object. */
+    private VM vm;
+    
     /**
      * Creates a new cache device and passes glyph width and bounding box
      * information about the glyph that will be created in this device.
+     * 
      * @param wx wx parameter
      * @param wy wy parameter
      * @param llx llx parameter
      * @param lly lly parameter
      * @param urx urx parameter
      * @param ury ury parameter
+     * @param vmManager The associated VM.
      */
     public CacheDevice(final double wx, final double wy, final double llx,
-            final double lly, final double urx, final double ury) {
+            final double lly, final double urx, final double ury,
+            final VM vmManager) {
+        
         specifiedWx = wx;
         specifiedWy = wy;
         specifiedLlx = llx;
         specifiedLly = lly;
         specifiedUrx = urx;
         specifiedUry = ury;
+        vm = vmManager;
     }
     
     /**
@@ -90,26 +99,17 @@ public class CacheDevice implements OutputDevice, Cloneable {
     /**
      * Returns a exact deep copy of this output device.
      * 
-     * @param cloneMap The clone map.
-     * 
      * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public CacheDevice clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (CacheDevice) cloneMap.get(this);
-        }
-        
+    @Override
+    public CacheDevice clone() {
         CacheDevice copy;
         try {
             copy = (CacheDevice) super.clone(); 
         } catch (CloneNotSupportedException e) {
-            throw new ProgramError("clone failed");
+            copy = new CacheDevice(specifiedWx, specifiedWy, specifiedLlx,
+                    specifiedLly, specifiedUrx, specifiedUry, vm);
         }
-        cloneMap.add(this, copy);
         
         if (pathBbox != null) {
             copy.pathBbox = pathBbox.clone();
@@ -123,9 +123,12 @@ public class CacheDevice implements OutputDevice, Cloneable {
      * coordinates to device space).
      * 
      * @return Default transformation matrix.
+     * 
+     * @throws PSErrorVMError A virtual memory error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectMatrix defaultCTM() {
-        return new PSObjectMatrix(1, 0 , 0, 1, 0, 0);
+    public PSObjectMatrix defaultCTM() throws PSErrorVMError, ProgramError {
+        return new PSObjectMatrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0, vm);
     }
     
     /**

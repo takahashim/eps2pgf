@@ -28,22 +28,19 @@ import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Parser;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 
 /**
  * PostScript object: array.
  *
  * @author Paul Wagenaars
  */
-public class PSObjectArray extends PSObject implements MapCloneable {
-    
-    /** Array with the actual array items. */
-    private List<PSObject> array;
+public class PSObjectArray extends PSObjectComposite implements Cloneable {
     
     /**
      * Offset in array (in other words: first "offset" items in array are
@@ -51,31 +48,57 @@ public class PSObjectArray extends PSObject implements MapCloneable {
      */
     private int offset;
     
-    /** Number of items in this object. */
+    /** Number of items. Set to -1 to make array variable size. */
     private int count;
     
     /**
-     * Create a new empty PostScript array.
+     * Creates a new PostScript array.
+     * 
+     * @param array The shared array object.
+     * @param startIndex The index (in the shared object) of the first item.
+     * @param length The (maximum) number of items.
+     * @param virtualMemory The VM.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectArray() {
-        setArray(new ArrayList<PSObject>());
-        setOffset(0);
-        setCount(Integer.MAX_VALUE);
+    private PSObjectArray(final List<PSObject> array, final int startIndex,
+            final int length, final VM virtualMemory) throws PSErrorVMError {
+        
+        super(virtualMemory);
+        
+        offset = startIndex;
+        count = length;
+        setArray(array);
     }
-
+    
+    /**
+     * Create a new empty variable-size PostScript array.
+     * 
+     * @param virtualMemory The VM manager.
+     * 
+     * @throws PSErrorVMError Virtual memory error
+     */
+    public PSObjectArray(final VM virtualMemory) throws PSErrorVMError {
+        this(new ArrayList<PSObject>(), 0, -1, virtualMemory);
+    }
+    
     /**
      * Create a new PostScript array with n elements filled with PSObjectNull
      * objects.
      * 
      * @param n Number of elements.
+     * @param virtualMemory The VM manager.
+     * 
+     * @throws PSErrorVMError Virtual memory error
      */
-    public PSObjectArray(final int n) {
-        setArray(new ArrayList<PSObject>(n));
-        setOffset(0);
-        setCount(n);
+    public PSObjectArray(final int n, final VM virtualMemory)
+            throws PSErrorVMError {
+        
+        this(new ArrayList<PSObject>(n), 0, n, virtualMemory);
+        List<PSObject> list = getArray();
         PSObjectNull nullObj = new PSObjectNull();
-        for (int i = 0; i < 256; i++) {
-            addToEnd(nullObj);
+        for (int i = 0; i < n; i++) {
+            list.add(nullObj);
         }
     }
 
@@ -83,85 +106,106 @@ public class PSObjectArray extends PSObject implements MapCloneable {
      * Creates a new instance of PSObjectArray.
      * 
      * @param dblArray Array of doubles
+     * @param virtualMemory The VM manager.
+     * 
+     * @throws PSErrorVMError Virtual memory error
      */
-    public PSObjectArray(final double[] dblArray) {
-        setArray(new ArrayList<PSObject>(dblArray.length));
+    //TODO is this method still required???
+    public PSObjectArray(final double[] dblArray, final VM virtualMemory)
+            throws PSErrorVMError {
+        
+        this(new ArrayList<PSObject>(dblArray.length), 0, dblArray.length,
+                virtualMemory);
+        List<PSObject> list = getArray();
         for (int i = 0; i < dblArray.length; i++) {
-            getArray().add(new PSObjectReal(dblArray[i]));
+            list.add(new PSObjectReal(dblArray[i]));
         }
-        
-        // Use the entire array
-        setOffset(0);
-        setCount(dblArray.length);
     }
     
     /**
      * Creates a new instance of PSObjectArray.
      * 
      * @param objs Objects that will be stored in the new array.
+     * @param virtualMemory The VM manager.
+     * 
+     * @throws PSErrorVMError Virtual memory error
      */
-    public PSObjectArray(final PSObject[] objs) {
-        setArray(new ArrayList<PSObject>(objs.length));
+    public PSObjectArray(final PSObject[] objs, final VM virtualMemory)
+            throws PSErrorVMError {
+        
+        this(new ArrayList<PSObject>(objs.length), 0, objs.length,
+                virtualMemory);
+        List<PSObject> list = getArray();
         for (int i = 0; i < objs.length; i++) {
-            getArray().add(objs[i]);
+            list.add(i, objs[i]);
         }
-        
-        // Use the entire array
-        setOffset(0);
-        setCount(objs.length);
     }
     
     /**
      * Creates a new instance of PSObjectArray.
      * 
      * @param objs Objects that will be stored in the new array.
+     * @param virtualMemory The VM manager.
+     * 
+     * @throws PSErrorVMError Virtual memory error
      */
-    public PSObjectArray(final List<PSObject> objs) {
-        setArray(new ArrayList<PSObject>(objs.size()));
-        for (int i = 0; i < objs.size(); i++) {
-            getArray().add(objs.get(i));
-        }
+    //TODO Is this constructor actually used?
+    //TODO Do I need to construct a new List<> object, or can I use the old one
+    public PSObjectArray(final List<PSObject> objs, final VM virtualMemory)
+            throws PSErrorVMError {
         
-        // Use the entire array
-        setOffset(0);
-        setCount(objs.size());
+        this(new ArrayList<PSObject>(objs), 0, objs.size(), virtualMemory);
     }
     
     /**
      * Creates a new executable array object.
      * 
-     * @param pStr String representing a valid procedure (executable array)
+     * @param str String representing a valid procedure (executable array)
      * @param interp The interpreter (only required if string contains
      * immediately evaluated names).
      * 
      * @throws PSError PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectArray(final String pStr, final Interpreter interp)
+    public PSObjectArray(String str, final Interpreter interp)
             throws ProgramError, PSError {
         
-        String str = pStr;
+        super(interp.getVm());
         
         // quick check whether it is a literal or executable array
         if (str.charAt(0) == '{') {
             setLiteral(false);
+            str = str.substring(1, str.length() - 1);
         } else if (str.charAt(0) == '[') {
             setLiteral(true);
+            str = str.substring(1, str.length() - 1);
         }
-        
-        str = str.substring(1, str.length() - 1);
-        
-        InputStream inStream = new PSStringInputStream(new PSObjectString(str));
-        
+        InputStream inStream =
+            new PSStringInputStream(new PSObjectString(str, getVm()));
         try {
-            this.setArray(Parser.convertAll(inStream, interp));
-            this.setCount(this.getArray().size());
-            this.setOffset(0);
+            setArray(Parser.convertAll(inStream, interp));
+            count = getArray().size();
+            offset = 0;
         } catch (IOException e) {
             throw new ProgramError("An IOException occured in"
                     + " PSObjectArray(String)");
         }
-        
+    }
+    
+    /**
+     * Creates a new instance of PSObjectArray. The new array is exactly the
+     * same as the supplied array. It shares the shared object and has the same
+     * offset and count.
+     * 
+     * @param obj Complete array from which this new PSObjectArray is a subset.
+     * 
+     * @throws PSErrorRangeCheck Indices out of range.
+     */
+    public PSObjectArray(final PSObjectArray obj) throws PSErrorRangeCheck {
+        super(obj.getVm(), obj.getId());
+        offset = obj.offset;
+        count = obj.count;
+        copyCommonAttributes(obj);
     }
     
     /**
@@ -170,45 +214,41 @@ public class PSObjectArray extends PSObject implements MapCloneable {
      * also changes the value in the other.
      * 
      * @param obj Complete array from which this new PSObjectArray is a subset.
-     * @param index Index of the first element of the subarray in the obj array.
+     * @param newOffset Index of the first element of the subarray in the object
+     *        array.
      * @param newCount Number of items in the subarray.
      * 
      * @throws PSErrorRangeCheck Indices out of range.
      */
-    public PSObjectArray(final PSObjectArray obj, final int index,
+    public PSObjectArray(final PSObjectArray obj, final int newOffset,
             final int newCount) throws PSErrorRangeCheck {
-        int n = obj.size();
-        if ((newCount != 0) || (index != 0)) {
-            if (index >= n) {
-                throw new PSErrorRangeCheck();
-            }
-            if ((index + this.getCount() - 1) >= n) {
+        
+        super(obj.getVm(), obj.getId());
+        
+        if ((newCount != 0) || (newOffset != 0)) {
+            if ((newOffset + newCount) > obj.size()) {
                 throw new PSErrorRangeCheck();
             }
         }
-
-        this.setArray(obj.getArray());
-        this.setOffset(obj.getOffset() + index);
-        this.setCount(newCount);
+        
+        offset = obj.offset + newOffset;
+        count = newCount;
         copyCommonAttributes(obj);
     }
     
     /**
-     * Insert an element at the specified position in this array.
+     * Add an element to the end to this array. This can only be done with
+     * variable-size arrays (i.e. count = -1).
      * 
-     * @param index Index at which the new element will be inserted.
      * @param value Value of the new element
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
-    public final void addAt(final int index, final PSObject value) {
-        this.getArray().add(index + this.getOffset(), value);
-    }
-    
-    /**
-     * Add an element to the end to this array.
-     * @param value Value of the new element
-     */
-    public final void addToEnd(final PSObject value) {
-        this.getArray().add(value);
+    public final void addToEnd(final PSObject value) throws PSErrorRangeCheck {
+        if (count != -1) {
+            throw new PSErrorRangeCheck();
+        }
+        getArray().add(value);
     }
     
     /**
@@ -223,59 +263,23 @@ public class PSObjectArray extends PSObject implements MapCloneable {
     @Override
     public final PSObjectArray bind(final Interpreter interp)
             throws PSErrorTypeCheck {
-        try {
-            for (int i = 0; i < size(); i++) {
-                PSObject obj = get(i);
-                set(i, obj.bind(interp));
-                if (obj instanceof PSObjectArray) {
-                    if (!((PSObjectArray) obj).isLiteral()) {
-                        obj.readonly();
-                    }
+        
+        List<PSObject> list = getArray();
+        int startIndex = offset;
+        int endIndex = startIndex + count;
+        for (int i = startIndex; i < endIndex; i++) {
+            PSObject obj = list.get(i);
+            list.set(i, obj.bind(interp));
+            if (obj instanceof PSObjectArray) {
+                if (!obj.toArray().isLiteral()) {
+                    obj.readonly();
                 }
             }
-        } catch (PSErrorRangeCheck e) {
-            // This can never happen
         }
+        
         return this;
     }
     
-    /**
-     * Creates a deep copy of this array.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Deep copy of this array
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    public PSObjectArray clone(CloneMappings cloneMap)
-            throws ProgramError {
-        
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSObjectArray) cloneMap.get(this);
-        }
-
-        PSObjectArray copy = (PSObjectArray) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        if (cloneMap.containsKey(array)) {
-            copy.array = (List<PSObject>) cloneMap.get(array);
-        } else {
-            copy.array = new ArrayList<PSObject>(array.size());
-            cloneMap.add(array, copy.array);
-        
-            for (PSObject obj : array) {
-                copy.array.add(obj.clone(cloneMap));
-            }
-        }
-        
-        return copy;
-    }
-
     /**
      * PostScript operator copy. Copies values from obj1 to this object.
      * 
@@ -296,6 +300,16 @@ public class PSObjectArray extends PSObject implements MapCloneable {
     }
     
     /**
+     * Creates a copy of this array object.
+     * 
+     * @return The copy of this object/
+     */
+    @Override
+    public PSObjectArray clone() {
+        return (PSObjectArray) super.clone();
+    }
+    
+    /**
      * PostScript operator 'dup'. Create a (shallow) copy of this object. The
      * values of composite object is not copied, but shared.
      * 
@@ -303,12 +317,7 @@ public class PSObjectArray extends PSObject implements MapCloneable {
      */
     @Override
     public PSObjectArray dup() {
-        try {
-            return new PSObjectArray(this, 0, size());
-        } catch (PSErrorRangeCheck e) {
-            // this can never happen
-            return null;
-        }
+        return clone();
     }
     
     /**
@@ -323,11 +332,10 @@ public class PSObjectArray extends PSObject implements MapCloneable {
     public boolean eq(final PSObject obj) {
         try {
             PSObjectArray objArr = obj.toArray();
-            if ((this.getCount() != objArr.getCount())
-                    || (this.getOffset() != objArr.getOffset())) {
+            if ((count != objArr.count) || (offset != objArr.offset)) {
                 return false;
             }
-            return (this.getArray() == objArr.getArray());
+            return (getId() == objArr.getId());
         } catch (PSErrorTypeCheck e) {
             return false;
         }
@@ -357,7 +365,7 @@ public class PSObjectArray extends PSObject implements MapCloneable {
      */
     @Override
     public int hashCode() {
-        return getArray().hashCode() + getOffset();
+        return getArray().hashCode() + offset + count;
     }
     
     /**
@@ -373,7 +381,7 @@ public class PSObjectArray extends PSObject implements MapCloneable {
         if ((index < 0) || (index >= size())) {
             throw new PSErrorRangeCheck();
         }
-        return getArray().get(index + getOffset());
+        return getArray().get(index + offset);
     }
     
     /**
@@ -442,15 +450,16 @@ public class PSObjectArray extends PSObject implements MapCloneable {
      */
     public double getReal(final int index)
             throws PSErrorRangeCheck, PSErrorTypeCheck {
+        
         return get(index).toReal();
     }
     
     /**
-     * Check whether a string is a procedure.
+     * Check whether a string is an array.
      * 
      * @param str String to check.
      * 
-     * @return Returns true when the string is a procedure. Returns false
+     * @return Returns true when the string is an array. Returns false
      * otherwise.
      */
     public static boolean isType(final String str) {
@@ -509,6 +518,7 @@ public class PSObjectArray extends PSObject implements MapCloneable {
     @Override
     public void put(final PSObject index, final PSObject value)
             throws PSErrorRangeCheck, PSErrorTypeCheck {
+        
         put(index.toInt(), value);
     }
     
@@ -522,10 +532,11 @@ public class PSObjectArray extends PSObject implements MapCloneable {
      */
     public void put(final int index, final PSObject value)
             throws PSErrorRangeCheck {
+        
         if ((index < 0) || (index >= size())) {
             throw new PSErrorRangeCheck();
         }
-        getArray().set(index + getOffset(), value);
+        getArray().set(index + offset, value);
     }
     
     /**
@@ -540,10 +551,12 @@ public class PSObjectArray extends PSObject implements MapCloneable {
     @Override
     public void putinterval(final int index, final PSObject obj)
             throws PSErrorTypeCheck, PSErrorRangeCheck {
+        
         PSObjectArray array3 = obj.toArray();
+        List<PSObject> list = getArray();
         int nr = array3.length();
         for (int i = 0; i < nr; i++) {
-            set(index + i, array3.get(i));
+            list.set(offset + index + i, array3.get(i));
         }
     }
 
@@ -560,23 +573,14 @@ public class PSObjectArray extends PSObject implements MapCloneable {
         if ((index < 0) || (index >= size())) {
             throw new PSErrorRangeCheck();
         }
-        return getArray().remove(index + getOffset());
-    }
-    
-    /**
-     * Replace the element with offset with value.
-     * 
-     * @param index Index of the element to replace.
-     * @param value New value of the element.
-     * 
-     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
-     */
-    public void set(final int index, final PSObject value)
-            throws PSErrorRangeCheck {
-        if ((index < 0) || (index >= size())) {
-            throw new PSErrorRangeCheck();
+        
+        PSObject element = getArray().remove(index + offset);
+        
+        if (count != -1) {
+            count--;
         }
-        getArray().set(index + getOffset(), value);
+        
+        return element; 
     }
     
     /**
@@ -587,9 +591,11 @@ public class PSObjectArray extends PSObject implements MapCloneable {
      * 
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
+    //TODO rename this method to putReal(..., ...)
     public void setReal(final int index, final double value)
             throws PSErrorRangeCheck {
-        set(index, new PSObjectReal(value));
+        
+        put(index, new PSObjectReal(value));
     }
     
     /**
@@ -597,7 +603,11 @@ public class PSObjectArray extends PSObject implements MapCloneable {
      * @return Number of items in this array.
      */
     public int size() {
-        return Math.min(getCount(), getArray().size() - getOffset());
+        if (count == -1) {
+            return getArray().size() - offset;
+        } else {
+            return count;
+        }
     }
     
     /**
@@ -623,9 +633,11 @@ public class PSObjectArray extends PSObject implements MapCloneable {
      */
     public double[] toDoubleArray(final int k) throws PSErrorRangeCheck,
             PSErrorTypeCheck {
+        
         if (k != size()) {
             throw new PSErrorRangeCheck();
         }
+        
         return toDoubleArray();
     }
     
@@ -637,13 +649,13 @@ public class PSObjectArray extends PSObject implements MapCloneable {
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
     public double[] toDoubleArray() throws PSErrorTypeCheck {
+        
         double[] newArray = new double[size()];
-        try {
-            for (int i = 0; i < size(); i++) {
-                newArray[i] = get(i).toReal();
-            }
-        } catch (PSErrorRangeCheck e) {
-            // This can never happen
+        List<PSObject> list = getArray();
+        int startIndex = offset;
+        int endIndex = startIndex + count;
+        for (int i = startIndex; i < endIndex; i++) {
+            newArray[i] = list.get(i).toReal();
         }
         
         return newArray;
@@ -705,7 +717,9 @@ public class PSObjectArray extends PSObject implements MapCloneable {
         } else {
             list = new ArrayList<PSObject>(3);
             if (nr == 1) {
-                list.add(0, new PSObjectArray());
+                PSObjectArray empty = new PSObjectArray(getVm());
+                empty.setLiteral(isLiteral());
+                list.add(0, empty);
             } else {
                 list.add(0, new PSObjectArray(this, 1, nr - 1));
             }
@@ -726,49 +740,20 @@ public class PSObjectArray extends PSObject implements MapCloneable {
     }
 
     /**
-     * Set the number of parameters in this array.
+     * Sets the array.
      * 
-     * @param pCount the count to set
-     */
-    void setCount(final int pCount) {
-        count = pCount;
-    }
-
-    /**
-     * Get the number of parameters in this array.
-     * 
-     * @return the count
-     */
-    int getCount() {
-        return count;
-    }
-
-    /**
-     * @param pOffset the offset to set
-     */
-    void setOffset(final int pOffset) {
-        offset = pOffset;
-    }
-
-    /**
-     * @return the offset
-     */
-    int getOffset() {
-        return offset;
-    }
-
-    /**
      * @param pArray the array to set
+     * 
+     * @throws PSErrorVMError A PostScript error: VMerror
      */
-    void setArray(final List<PSObject> pArray) {
-        array = pArray;
+    void setArray(final List<PSObject> pArray) throws PSErrorVMError {
+        setId(getVm().addArrayObj(pArray));
     }
 
     /**
      * @return the array
      */
     List<PSObject> getArray() {
-        return array;
+        return getVm().getArrayObj(getId());
     }
-
 }

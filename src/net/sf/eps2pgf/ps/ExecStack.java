@@ -23,6 +23,7 @@ import java.util.List;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectFile;
@@ -33,7 +34,18 @@ import net.sf.eps2pgf.ps.objects.PSObjectFile;
  */
 public class ExecStack {
     /** Execution stack (see PostScript manual for more info). */
-    private PSObjectArray stack = new PSObjectArray();
+    private PSObjectArray stack;
+    
+    /**
+     * Create a new execution stack.
+     * 
+     * @param vm The virtual memory manager.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     */
+    public ExecStack(final VM vm) throws PSErrorVMError {
+        stack = new PSObjectArray(vm);
+    }
     
     /**
      * Returns the top-most file object on this execution stack.
@@ -116,9 +128,16 @@ public class ExecStack {
      * Pushes a new item on this execution stack.
      * 
      * @param obj Object to push on the stack.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void push(final PSObject obj) {
-        stack.addToEnd(obj);
+    public void push(final PSObject obj) throws ProgramError {
+        try {
+            stack.addToEnd(obj);
+        } catch (PSErrorRangeCheck e) {
+            throw new ProgramError("Rangecheck while pushing item on execution"
+                    + " stack.");
+        }
     }
     
     /**

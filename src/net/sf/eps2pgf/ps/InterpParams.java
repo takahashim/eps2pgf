@@ -24,11 +24,10 @@ import java.util.List;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.resources.Utils;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * This class manages interpreter parameters. See appendix C of the PostScript
@@ -37,7 +36,7 @@ import net.sf.eps2pgf.util.MapCloneable;
  * @author Paul Wagenaars
  *
  */
-public class InterpParams implements MapCloneable, Cloneable {
+public class InterpParams {
     
     /** User parameters. */
     private PSObjectDict userParams = null;
@@ -68,18 +67,29 @@ public class InterpParams implements MapCloneable, Cloneable {
      * @return A copy of the dictionary with user parameters.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    public PSObjectDict currentUserParams() throws ProgramError {
-        CloneMappings cloneMap = new CloneMappings();
-        return getUserParamsDict().clone(cloneMap);
+    public PSObjectDict currentUserParams()
+            throws PSErrorVMError, PSErrorTypeCheck, ProgramError {
+        
+        PSObjectDict newDict = new PSObjectDict(interp.getVm());
+        PSObjectDict userParamsDict = getUserParamsDict();
+        newDict.copy(userParamsDict);
+        
+        return newDict;
     }
     
     /**
      * Sets new user parameters.
      * 
      * @param newParams The dictionary with new user parameters.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public void setUserParams(final PSObjectDict newParams) {
+    public void setUserParams(final PSObjectDict newParams)
+            throws PSErrorVMError {
+        
         List<PSObject> items = newParams.getItemList();
         PSObjectDict usrParams = getUserParamsDict();
         for (int i = 1; i < items.size(); i += 2) {
@@ -98,10 +108,17 @@ public class InterpParams implements MapCloneable, Cloneable {
      * @return A copy of the dictionary with system parameters.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    public PSObjectDict currentSystemParams() throws ProgramError {
-        CloneMappings cloneMap = new CloneMappings();
-        return getSystemParamsDict().clone(cloneMap);
+    public PSObjectDict currentSystemParams()
+            throws ProgramError, PSErrorVMError, PSErrorTypeCheck {
+        
+        PSObjectDict newDict = new PSObjectDict(interp.getVm());
+        PSObjectDict systemParamsDict = getSystemParamsDict();
+        newDict.copy(systemParamsDict);
+        
+        return newDict;
     }
     
     /**
@@ -110,9 +127,10 @@ public class InterpParams implements MapCloneable, Cloneable {
      * @param newParams The dictionary with new system parameters.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorVMError Virtual memory error.
      */
     public void setSystemParams(final PSObjectDict newParams)
-            throws ProgramError {
+            throws ProgramError, PSErrorVMError {
         
         List<PSObject> items = newParams.getItemList();
         PSObjectDict sysParams = getSystemParamsDict();
@@ -134,23 +152,30 @@ public class InterpParams implements MapCloneable, Cloneable {
      * @return A copy of the dictionary with system parameters.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorVMError Virtual memory error.
      */
     public PSObjectDict currentDeviceParams(final String device)
-            throws ProgramError {
+            throws ProgramError, PSErrorVMError, PSErrorTypeCheck {
         
-        CloneMappings cloneMap = new CloneMappings();
-        return getDeviceParamsDict(device).clone(cloneMap);
+        PSObjectDict newDict = new PSObjectDict(interp.getVm());
+        PSObjectDict deviceParamsDict = getDeviceParamsDict(device);
+        newDict.copy(deviceParamsDict);
+        
+        return newDict;
     }
     
     /**
      * Sets new device parameters.
-     *
+     * 
      * @param device Name of the device for which the parameters must be
      * changed.
      * @param newParams The dictionary with new system parameters.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
     public void setDeviceParams(final String device,
-            final PSObjectDict newParams) {
+            final PSObjectDict newParams) throws PSErrorVMError {
         
         List<PSObject> items = newParams.getItemList();
         PSObjectDict devParams = getDeviceParamsDict(device);
@@ -165,8 +190,10 @@ public class InterpParams implements MapCloneable, Cloneable {
      * Gets the user parameters dictionary.
      * 
      * @return The user parameters dictionary.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    private PSObjectDict getUserParamsDict() {
+    private PSObjectDict getUserParamsDict() throws PSErrorVMError {
         if (userParams == null) {
             userParams = createDefaultUserParams();
         }
@@ -177,9 +204,11 @@ public class InterpParams implements MapCloneable, Cloneable {
      * Create a new dictionary with all user parameters with default values.
      * 
      * @return A new dictionary with user parameters with default values.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    private PSObjectDict createDefaultUserParams() {
-        PSObjectDict dict = new PSObjectDict();
+    private PSObjectDict createDefaultUserParams() throws PSErrorVMError {
+        PSObjectDict dict = new PSObjectDict(interp.getVm());
         
         dict.setKey("AccurateScreens", false);
         dict.setKey("HalftoneMode", 0);
@@ -218,49 +247,15 @@ public class InterpParams implements MapCloneable, Cloneable {
      * @return The system parameters dictionary.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorVMError Virtual memory error.
      */
-    private PSObjectDict getSystemParamsDict() throws ProgramError {
+    private PSObjectDict getSystemParamsDict()
+            throws ProgramError, PSErrorVMError {
+        
         if (systemParams == null) {
             systemParams = createDefaultSystemParams();
         }
         return systemParams;
-    }
-    
-    /**
-     * Creates a *deep* copy of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return A deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    public InterpParams clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (InterpParams) cloneMap.get(this);
-        }
-        
-        InterpParams copy;
-        try {
-            copy = (InterpParams) super.clone();
-            cloneMap.add(this, copy);
-        } catch (CloneNotSupportedException e) {
-            throw new ProgramError("super.clone failed");
-        }
-        
-        if (userParams != null) {
-            copy.userParams = userParams.clone(cloneMap);
-        }
-        if (systemParams != null) {
-            copy.systemParams = systemParams.clone(cloneMap);
-        }
-        if (deviceParams != null) {
-            copy.deviceParams = deviceParams.clone(cloneMap);
-        }
-        
-        return copy;
     }
     
     
@@ -270,10 +265,12 @@ public class InterpParams implements MapCloneable, Cloneable {
      * @return A new dictionary with system parameters with default values.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorVMError Virtual memory error.
      */
-    private PSObjectDict createDefaultSystemParams() throws ProgramError {
-        PSObjectDict dict = new PSObjectDict();
+    private PSObjectDict createDefaultSystemParams()
+            throws ProgramError, PSErrorVMError {
         
+        PSObjectDict dict = new PSObjectDict(interp.getVm());
         dict.setKey("ByteOrder", false);
         dict.setKey("BuildTime", 0);
         dict.setKey("CurDisplayList", 0);
@@ -325,13 +322,17 @@ public class InterpParams implements MapCloneable, Cloneable {
      * @param device The name of the device.
      * 
      * @return Dictionary with parameters for the specified device.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    private PSObjectDict getDeviceParamsDict(final String device) {
+    private PSObjectDict getDeviceParamsDict(final String device)
+            throws PSErrorVMError {
+        
         if (deviceParams == null) {
-            deviceParams = new PSObjectDict();
+            deviceParams = new PSObjectDict(interp.getVm());
         }
         if (!deviceParams.known(device)) {
-            deviceParams.setKey(device, new PSObjectDict());
+            deviceParams.setKey(device, new PSObjectDict(interp.getVm()));
         }
         
         try {

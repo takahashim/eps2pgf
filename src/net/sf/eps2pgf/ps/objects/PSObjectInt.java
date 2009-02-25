@@ -18,18 +18,15 @@
 
 package net.sf.eps2pgf.ps.objects;
 
-import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * PostScript object: integer.
  *
  * @author Paul Wagenaars
  */
-public class PSObjectInt extends PSObject implements MapCloneable {
+public class PSObjectInt extends PSObject implements Cloneable {
     
     /** Value of this integer object. */
     private int value;
@@ -161,31 +158,6 @@ public class PSObjectInt extends PSObject implements MapCloneable {
         return new PSObjectInt(this.value);
     }
     
-    /**
-     * Creates a deep copy of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @Override
-    public PSObjectInt clone(CloneMappings cloneMap)
-            throws ProgramError {
-        
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSObjectInt) cloneMap.get(this);
-        }
-        
-        PSObjectInt copy = (PSObjectInt) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        return copy;
-    }
-
     /**
      * PostScript operator 'cvi'. Convert this object to an integer
      * 

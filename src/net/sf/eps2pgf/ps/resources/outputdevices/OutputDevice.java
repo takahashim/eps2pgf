@@ -26,16 +26,15 @@ import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Interface for exporters (e.g. PGF and TikZ)
  * @author Paul Wagenaars
  */
-public interface OutputDevice extends MapCloneable {
+public interface OutputDevice extends Cloneable {
     
     /**
      * Implements PostScript clip operator.
@@ -53,21 +52,20 @@ public interface OutputDevice extends MapCloneable {
     /**
      * Returns a exact deep copy of this output device.
      * 
-     * @param cloneMap The clone map.
-     * 
      * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    OutputDevice clone(final CloneMappings cloneMap) throws ProgramError;
+    OutputDevice clone();
+    
     
     /**
      * Returns a <b>copy</b> default transformation matrix (converts user space
      * coordinates to device space).
      * 
      * @return Default transformation matrix.
+     * @throws PSErrorVMError A virtual memory error occurred. 
+     * @throws ProgramError A program error indicates a bug.
      */
-    PSObjectMatrix defaultCTM();
+    PSObjectMatrix defaultCTM() throws PSErrorVMError, ProgramError;
     
     /**
      * Initialize before any other methods are called. Normally, this method

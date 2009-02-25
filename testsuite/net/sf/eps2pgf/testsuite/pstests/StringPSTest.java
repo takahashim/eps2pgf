@@ -103,8 +103,9 @@ public class StringPSTest {
     /** Test. @throws Exception the exception */
     @Test
     public void getinterval2() throws Exception {
-        String cmd = "(abcdef) 2 4 getinterval 1 2 getinterval (de) eq";
-        assertTrue(Common.testString(interp, cmd, 1));
+        String cmd = "(abcdef) 2 4 getinterval 1 2 getinterval (de) eq"
+            + " (abcdef) 2 4 getinterval 1 3 getinterval (def) eq";
+        assertTrue(Common.testString(interp, cmd, 2));
     }
 
     /** Test. @throws Exception the exception */

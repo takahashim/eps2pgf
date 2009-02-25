@@ -27,28 +27,34 @@ import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Parser;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * PostScript file object.
  * 
  * @author Paul Wagenaars
  */
-public class PSObjectFile extends PSObject implements MapCloneable {
+public class PSObjectFile extends PSObject implements Cloneable {
     
     /** Input stream from which data is read. */
     private InputStream inStr;
+    
+    /** VM where this object's shared value is stored. */
+    private VM vm;
     
     /**
      * Creates a new instance of PSObjectFile.
      * 
      * @param fileInputStream Reader to access the file
+     * @param virtualMemory The VM manager.
      */
-    public PSObjectFile(final InputStream fileInputStream) {
+    public PSObjectFile(final InputStream fileInputStream,
+            final VM virtualMemory) {
+        
+        vm = virtualMemory;
         if (fileInputStream != null) {
             setStream(fileInputStream);
         } else {
@@ -57,31 +63,6 @@ public class PSObjectFile extends PSObject implements MapCloneable {
         setLiteral(false);
     }
     
-    /**
-     * Creates a deep copy of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @Override
-    public PSObjectFile clone(CloneMappings cloneMap)
-            throws ProgramError {
-        
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSObjectFile) cloneMap.get(this);
-        }
-        
-        PSObjectFile copy = (PSObjectFile) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        return copy;
-    }
-
     /**
      * PostScript operator 'closefile'. Breaks connection between this file
      * object and the <code>InputStream</code>.
@@ -104,7 +85,7 @@ public class PSObjectFile extends PSObject implements MapCloneable {
      */
     @Override
     public PSObjectFile dup() {
-        PSObjectFile dupFile = new PSObjectFile(inStr);
+        PSObjectFile dupFile = new PSObjectFile(inStr, vm);
         dupFile.copyCommonAttributes(this);
         return dupFile;
     }
@@ -216,7 +197,7 @@ public class PSObjectFile extends PSObject implements MapCloneable {
             throw new PSErrorIOError();
         }
         
-        PSObjectArray ret = new PSObjectArray();
+        PSObjectArray ret = new PSObjectArray(vm);
         ret.addToEnd(string.getinterval(0, charsRead));
         ret.addToEnd(new PSObjectBool(eofNotReached));
         

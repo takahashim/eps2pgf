@@ -24,33 +24,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 
 /**
  * Represent PostScript dictionary.
  * @author Paul Wagenaars
  */
-public class PSObjectDict extends PSObject implements MapCloneable {
+public class PSObjectDict extends PSObjectComposite implements Cloneable {
     
-    /** Map containing all key->value pairs in this dictionary. */
-    private HashMap<PSObject, PSObject> map;
-    
-    /**
-     * Maximum number of entries in this dictionary. (this value is
-     * informational only).
-     */
+    /** Maximum number of entries in this dictionary. (this value is
+     * informational only). */
     private int capacity;
     
     /**
      * Creates a new instance of PSObjectDict.
+     * 
+     * @param virtualMemory The VM manager.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectDict() {
-        map = new HashMap<PSObject, PSObject>();
-        capacity = 0;
+    public PSObjectDict(final VM virtualMemory) throws PSErrorVMError {
+        this(-1, virtualMemory);
     }
     
     /**
@@ -58,9 +55,15 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      * 
      * @param pCapacity Maximum number of items that can be stored in this
      * dictionary. This value has no effect. The dictionary size is unlimited.
+     * @param virtualMemory The VM manager.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectDict(final int pCapacity) {
-        map = new HashMap<PSObject, PSObject>();
+    public PSObjectDict(final int pCapacity, final VM virtualMemory)
+            throws PSErrorVMError {
+        
+        super(virtualMemory);
+        setMap(new HashMap<PSObject, PSObject>());
         capacity = pCapacity;
     }
     
@@ -68,54 +71,15 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      * Creates a new PSObjectDict. The new dictionary shares its hash map with
      * the passed dictionary.
      * 
-     * @param pDict The new dictionary will use the same hash map as this
+     * @param dict The new dictionary will use the same hash map as this
      * dictionary.
      */
-    public PSObjectDict(final PSObjectDict pDict) {
-        map = pDict.map;
-        capacity = pDict.capacity;
-        copyCommonAttributes(pDict);
+    public PSObjectDict(final PSObjectDict dict) {
+        super(dict.getVm(), dict.getId());
+        capacity = dict.capacity;
+        copyCommonAttributes(dict);
     }
     
-    /**
-     * Creates a deep copy of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    public PSObjectDict clone(CloneMappings cloneMap)
-            throws ProgramError {
-        
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSObjectDict) cloneMap.get(this);
-        }
-
-        PSObjectDict copy = (PSObjectDict) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        if (cloneMap.containsKey(map)) {
-            copy.map = (HashMap<PSObject, PSObject>) cloneMap.get(map);
-        } else {
-            copy.map = new HashMap<PSObject, PSObject>();
-            cloneMap.add(map, copy.map);
-            
-            for (PSObject key : map.keySet()) {
-                PSObject copyKey = key.clone(cloneMap);
-                PSObject copyValue = map.get(key).clone(cloneMap);
-                copy.map.put(copyKey, copyValue);
-            }
-        }
-
-        return copy;
-    }
-
     /**
      * PostScript operator copy. Copies values from obj1 to this object.
      * 
@@ -128,23 +92,34 @@ public class PSObjectDict extends PSObject implements MapCloneable {
     @Override
     public PSObject copy(final PSObject obj1) throws PSErrorTypeCheck {
         PSObjectDict dict1 = obj1.toDict();
-        for (Map.Entry<PSObject, PSObject> entry : dict1.map.entrySet()) {
-            setKey(entry.getKey(), entry.getValue());
+        Map<PSObject, PSObject> map = getMap();
+        for (Map.Entry<PSObject, PSObject> entry : dict1.getMap().entrySet()) {
+            map.put(entry.getKey(), entry.getValue());
         }
         
         return this;
+    }
+    
+    /**
+     * Create a deep copy of this dictionary object.
+     * 
+     * @return The copy of this object.
+     */
+    @Override
+    public PSObjectDict clone() {
+        return (PSObjectDict) super.clone();
     }
 
     /**
      * Dumps the entire dictionary to stdout.
      * 
-     * @param preStr String that will be prepended to each line written to
+     * @param pre String that will be prepended to each line written to
      * output.
      */
-    public void dumpFull(final String preStr) {
-        Set<PSObject> keys = map.keySet();
+    public void dumpFull(final String pre) {
+        Set<PSObject> keys = getMap().keySet();
         for (PSObject key : keys) {
-            System.out.println(preStr + key + " -> " + map.get(key).isis());
+            System.out.println(pre + key + " -> " + getMap().get(key).isis());
         }
     }
     
@@ -183,7 +158,7 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      */
     @Override
     public int hashCode() {
-        return map.hashCode();
+        return getMap().hashCode();
     }
     
     /**
@@ -232,7 +207,7 @@ public class PSObjectDict extends PSObject implements MapCloneable {
     public List<PSObject> getItemList() {
         List<PSObject> lst = new ArrayList<PSObject>();
         lst.add(new PSObjectInt(2));
-        for (Map.Entry<PSObject, PSObject> entry : map.entrySet()) {
+        for (Map.Entry<PSObject, PSObject> entry : getMap().entrySet()) {
             lst.add(entry.getKey());
             lst.add(entry.getValue());
         }
@@ -246,7 +221,7 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      */
     @Override
     public String isis() {
-        return "-dict(" + map.size() + ")-";
+        return "-dict(" + getMap().size() + ")-";
     }
     
     /**
@@ -257,7 +232,7 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      * @return Returns true when the key is known, returns false otherwise
      */
     public boolean known(final PSObject key) {
-        return map.containsKey(key);
+        return getMap().containsKey(key);
     }
     
     /**
@@ -268,7 +243,7 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      * @return Returns true when the key is known, returns false otherwise
      */
     public boolean known(final String key) {
-        return map.containsKey(new PSObjectName(key, true));
+        return getMap().containsKey(new PSObjectName(key, true));
     }
     
     /**
@@ -278,7 +253,7 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      */
     @Override
     public int length() {
-        return map.size();
+        return getMap().size();
     }
     
     /**
@@ -290,7 +265,7 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      * @param key Key of the entry to look up.
      */
     public PSObject lookup(final PSObject key) {
-        return map.get(key);
+        return getMap().get(key);
     }
     
     /**
@@ -302,7 +277,7 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      * @param key Key of the entry to look up.
      */
     public PSObject lookup(final String key) {
-        return map.get(new PSObjectName(key, true));
+        return getMap().get(new PSObjectName(key, true));
     }
     
     /**
@@ -333,15 +308,16 @@ public class PSObjectDict extends PSObject implements MapCloneable {
     /**
      * Sets a key in the dictionary.
      * 
-     * @param pKey Key of the new dictionary entry.
+     * @param key Key of the new dictionary entry.
      * @param value Value of the new dictionary entry.
      */
-    public void setKey(final PSObject pKey, final PSObject value) {
-        PSObject key = pKey;
+    public void setKey(final PSObject key, final PSObject value) {
         if (key instanceof PSObjectString) {
-            key = new PSObjectName(((PSObjectString) key).toString(), true);
+            PSObjectString keyStr = (PSObjectString) key;
+            getMap().put(new PSObjectName(keyStr.toString(), true), value);
+        } else {
+            getMap().put(key, value);
         }
-        map.put(key, value);
     }
     
     /**
@@ -351,7 +327,7 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      * @param value Value of the new dictionary entry.
      */
     public void setKey(final String key, final PSObject value) {
-        map.put(new PSObjectName(key, true), value);
+        setKey(new PSObjectName(key, true), value);
     }
     
     /**
@@ -359,9 +335,13 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      * 
      * @param key Key of the new dictionary entry.
      * @param value Value of the new dictionary entry.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public void setKey(final String key, final String value) {
-        map.put(new PSObjectName(key, true), new PSObjectString(value));
+    public void setKey(final String key, final String value)
+            throws PSErrorVMError {
+        
+        setKey(new PSObjectName(key, true), new PSObjectString(value, getVm()));
     }
     
     /**
@@ -371,7 +351,7 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      * @param value Value of the new dictionary entry.
      */
     public void setKey(final String key, final int value) {
-        map.put(new PSObjectName(key, true), new PSObjectInt(value));
+        setKey(new PSObjectName(key, true), new PSObjectInt(value));
     }
     
     /**
@@ -381,7 +361,7 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      * @param value Value of the new dictionary entry.
      */
     public void setKey(final String key, final boolean value) {
-        map.put(new PSObjectName(key, true), new PSObjectBool(value));
+        setKey(new PSObjectName(key, true), new PSObjectBool(value));
     }
     
     /**
@@ -392,10 +372,15 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      * PSObjectString.
      * 
      * @return Created PSObjectString.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectString setKey(final PSObject key, final String value) {
-        PSObjectString psoValue = new PSObjectString(value);
-        map.put(key, psoValue);
+    //TODO is this method used anywhere?
+    public PSObjectString setKey(final PSObject key, final String value)
+            throws PSErrorVMError {
+        
+        PSObjectString psoValue = new PSObjectString(value, getVm());
+        getMap().put(key, psoValue);
         return psoValue;
     }
     
@@ -424,7 +409,7 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      */
     @Override
     public String toString() {
-        return "Dict: (" + map.size() + " items)";
+        return "Dict: (" + getMap().size() + " items)";
     }
     
     /**
@@ -445,7 +430,27 @@ public class PSObjectDict extends PSObject implements MapCloneable {
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
     public void undef(final PSObject key) throws PSErrorTypeCheck {
-        map.remove(key);
+        getMap().remove(key);
+    }
+    
+    /**
+     * Register a new map to the VM manager.
+     * 
+     * @param map The map.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     */
+    private void setMap(Map<PSObject, PSObject> map) throws PSErrorVMError {
+        setId(getVm().addDictObj(map));
     }
 
+    /**
+     * Gets the map from the VM manager.
+     * 
+     * @return map The map.
+     */
+    private Map<PSObject, PSObject> getMap() {
+        return getVm().getDictObj(getId());
+    }
+    
 }

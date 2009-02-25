@@ -18,16 +18,13 @@
 
 package net.sf.eps2pgf.ps;
 
-import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.objects.PSObject;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Represent a part of a PostScript path (i.e. lineto, curveto, moveto, ...)
  * @author Paul Wagenaars
  */
-public class PathSection extends PSObject implements MapCloneable {
+public class PathSection extends PSObject implements Cloneable {
     
     /** Coordinates associated with this path section. */
     private double[] params = new double[6];
@@ -35,22 +32,11 @@ public class PathSection extends PSObject implements MapCloneable {
     /**
      * Create a clone of this object.
      * 
-     * @param cloneMap The clone mappings.
-     * 
      * @return Returns clone of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public PathSection clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PathSection) cloneMap.get(this);
-        }
-        
-        PathSection copy = (PathSection) super.clone(cloneMap);
-        cloneMap.add(this, copy);
+    public PathSection clone() {
+        PathSection copy = (PathSection) super.clone();
         
         copy.params = params.clone();
         
@@ -70,56 +56,14 @@ public class PathSection extends PSObject implements MapCloneable {
     }
     
     /**
-     * PostScript operator 'dup'. Create a (shallow) copy of this object. The
-     * values of composite object is not copied, but shared.
+     * Returns a duplicate of this object. The duplicates shares the params with
+     * this object.
      * 
-     * @return Shallow copy of this object.
+     * @return Duplicate of this object.
      */
     @Override
     public PathSection dup() {
-        PathSection ps;
-        if (this instanceof Moveto) {
-            ps = new Moveto();
-        } else if (this instanceof Lineto) {
-            ps = new Lineto();
-        } else if (this instanceof Curveto) {
-            ps = new Curveto();
-        } else {
-            double[] dummy = {Double.NaN, Double.NaN};
-            ps = new Closepath(dummy);
-        }
-        ps.params = params;
-        
-        return ps;
-    }
-    
-    /**
-     * Indicates whether some other object is equal to this one.
-     * Required when used as index in PSObjectDict
-     * 
-     * @param obj The object to compare to.
-     * 
-     * @return True, if equal.
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof PathSection)) {
-            return false;
-        }
-        PathSection ps = (PathSection) obj;
-        if (this.getClass() != ps.getClass()) {
-            return false;
-        }
-        for (int i = 0; i < nrParams(); i++) {
-            if (this.getParam(i) != ps.getParam(i)) {
-                return false;
-            }
-        }
-        
-        return true;
+        return (PathSection) super.clone();
     }
     
     /**
@@ -131,25 +75,6 @@ public class PathSection extends PSObject implements MapCloneable {
      */
     public double getParam(final int index) {
         return params[index];
-    }
-    
-    /**
-     * Returns a hashCode value for this object. This method is supported
-     * for the benefit hashtables, such as used in PSObjectDict.
-     * 
-     * @return Hash code for this object.
-     */
-    @Override
-    public int hashCode() {
-        int code = this.getClass().hashCode();
-        for (int i = 0; i < nrParams(); i++) {
-            double val = getParam(i);
-            if (Double.isInfinite(val) || Double.isNaN(val)) {
-                break;
-            }
-            code += (i + 1) * ((int) (val * 1e6));
-        }
-        return code;
     }
     
     /**
@@ -170,15 +95,59 @@ public class PathSection extends PSObject implements MapCloneable {
     public void setParam(final int index, final double newValue) {
         params[index] = newValue;
     }
-    
+
     /**
      * Returns this path section.
      * 
-     * @return This path section.
+     * @return This object.
      */
     @Override
     public PathSection toPathSection() {
         return this;
+    }
+    
+    /**
+     * Checks whether this object is equal.
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return true, if equals
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if ((obj != null) && (this.getClass().equals(obj.getClass()))) {
+            PathSection secObj = (PathSection) obj;
+            for (int i = 0; i < params.length; i++) {
+                double diff = Math.abs(params[i] - secObj.params[i]);
+                double maxValue = 
+                    Math.max(Math.abs(params[i]), Math.abs(secObj.params[i]));
+                if ((diff > 0.0) && ((diff / maxValue) > 1e-10)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Return a hash code of this object.
+     * 
+     * @return The hash code.
+     */
+    @Override
+    public int hashCode() {
+        int code = 0;
+        for (int i = 0; i < params.length; i++) {
+            if (Double.isInfinite(params[i]) || Double.isNaN(params[i])) {
+                code += i * 1000;
+            } else {
+                code += i * (int) (1e3 * params[i]);
+            }
+        }
+        code += this.getClass().hashCode();
+        return code;
     }
     
 }

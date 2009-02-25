@@ -131,10 +131,59 @@ public class VirtualMemoryPSTest {
 
     /** Test. @throws Exception the exception */
     @Test
+    public void saveRestore8() throws Exception {
+        String cmd = "/a [1 2 3] def save a 0 99 put a exch restore"
+            + " a 0 get 1 eq exch 0 get 1 eq"
+            + " /b (abc) def save b 0 100 put b exch restore"
+            + " b 0 get 100 eq exch 0 get 100 eq";
+        assertTrue(Common.testString(interp, cmd, 4));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
     public void saveGrestoreall() throws Exception {
         String cmd = "gsave 2 setlinewidth save 3 setlinewidth grestoreall"
             + " currentlinewidth 2 eq exch pop";
         assertTrue(Common.testString(interp, cmd, 1));
     }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void localGlobalVM1() throws Exception {
+        String cmd = "/lstr (string1) def"
+            + " /ldict 10 dict def"
+            + " true setglobal"
+            + " /gstr (string2) def"
+            + " /gdict 5 dict def"
+            + " false setglobal"
+            + " {ldict /a lstr put} stopped not"
+            + " {gdict /b gstr put} stopped not"
+            + " {ldict /c gstr put} stopped not"
+            + " {gdict /d lstr put} stopped 4 1 roll pop pop pop"
+            + " {gdict /e 7 put} stopped not";
+        assertTrue(Common.testString(interp, cmd, 5));
+    }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void localGlobalVM2() throws Exception {
+        String cmd = "{save 3 array dup /a def exch restore} stopped"
+            + " 3 1 roll pop pop"
+            + " true setglobal save 3 array dup /b def exch restore"
+            + " type /arraytype eq";
+        assertTrue(Common.testString(interp, cmd, 2));
+    }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void gcheck1() throws Exception {
+        String cmd = "1 gcheck"
+            + " (abc) gcheck not"
+            + " true setglobal (def) false setglobal gcheck";
+        assertTrue(Common.testString(interp, cmd, 3));
+    }
+    
+    
+    
 
 }

@@ -51,13 +51,16 @@ public class ASCIIHexDecode extends InputStream {
         
         in = pIn;
         
-        PSObject obj = dict.lookup(FilterManager.KEY_CLOSESOURCE);
-        if (obj != null) {
-            closeSource = obj.toBool();
+        if (dict != null) {
+            PSObject obj = dict.lookup(FilterManager.KEY_CLOSESOURCE);
+            if (obj != null) {
+                closeSource = obj.toBool();
+            } else {
+                closeSource = false;
+            }
         } else {
             closeSource = false;
         }
-
     }
     
     /**

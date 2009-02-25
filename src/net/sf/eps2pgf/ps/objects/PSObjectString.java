@@ -31,23 +31,20 @@ import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Parser;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.resources.filters.ASCII85Decode;
 import net.sf.eps2pgf.ps.resources.filters.ASCIIHexDecode;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * String PostScript object.
  * @author Wagenaars
  */
-public class PSObjectString extends PSObject implements MapCloneable {
-    
-    /** Value of this PostScript string. */
-    private StringBuilder value;
+public class PSObjectString extends PSObjectComposite implements Cloneable {
     
     /**
      * Offset, skip this number of characters at the start of
@@ -59,13 +56,35 @@ public class PSObjectString extends PSObject implements MapCloneable {
     private int count;
     
     /**
+     * Creates a new instance of PSObjectString.
+     * 
+     * @param str This object is initialized with a copy of this string.
+     * @param virtualMemory The virtual memory.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     */
+    public PSObjectString(final String str, final VM virtualMemory)
+            throws PSErrorVMError {
+        
+        super(virtualMemory);
+        offset = 0;
+        count = str.length();
+        setSharedString(new StringBuilder(str));
+    }
+    
+    /**
      * Create a new PostScript string with n \u0000 characters.
      * 
      * @param n Number of \u0000 characters in the new string
+     * @param virtualMemory The VM manager.
      * 
      * @throws PSErrorRangeCheck <code>n</code> is less than zero
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectString(final int n) throws PSErrorRangeCheck {
+    public PSObjectString(final int n, final VM virtualMemory)
+            throws PSErrorRangeCheck, PSErrorVMError {
+        
+        super(virtualMemory);
         if (n < 0) {
             throw new PSErrorRangeCheck();
         }
@@ -73,35 +92,24 @@ public class PSObjectString extends PSObject implements MapCloneable {
         for (int i = 0; i < n; i++) {
             str.append("\u0000");
         }
-        
-        value = new StringBuilder(str.toString());
         offset = 0;
-        count = value.length();
+        count = n;
+        setSharedString(str);
     }
     
     /**
      * Creates a new instance of PSObjectString.
      * 
-     * @param str This object is initialized with a copy of this string.
-     */
-    public PSObjectString(final String str) {
-        value = new StringBuilder(str);
-        offset = 0;
-        count = value.length();
-    }
-    
-    /**
-     * Creates a new instance of PSObjectString.
-     * 
-     * @param pStr The value of the new PSObjectString will have this value
      * @param isPostScript Interpret the string as PostScript string?
+     * @param str The string.
+     * @param virtualMemory The VM manager.
      * 
      * @throws PSError A PostScript error occurred.
      */
-    public PSObjectString(final String pStr, final boolean isPostScript)
-            throws PSError {
+    public PSObjectString(String str, final boolean isPostScript,
+            final VM virtualMemory) throws PSError {
         
-        String str = pStr;
+        super(virtualMemory);
         if (isPostScript) {
             int len = str.length();
             if ((len > 0) && (str.charAt(0) == '(')
@@ -120,9 +128,9 @@ public class PSObjectString extends PSObject implements MapCloneable {
                 str = parseHex(str.substring(1, len - 1));
             }
         }
-        value = new StringBuilder(str);
         offset = 0;
-        count = value.length();
+        count = str.length();
+        setSharedString(new StringBuilder(str));
     }
     
     /**
@@ -138,13 +146,13 @@ public class PSObjectString extends PSObject implements MapCloneable {
     public PSObjectString(final PSObjectString str, final int index,
             final int length) throws PSErrorRangeCheck {
         
+        super(str.getVm(), str.getId());
         if ((index < 0) || (length < 0)) {
             throw new PSErrorRangeCheck();
         }
         if ((index + length) > str.count) {
             throw new PSErrorRangeCheck();
         }
-        value = str.value;
         offset = index + str.offset;
         count = length;
         copyCommonAttributes(str);
@@ -182,38 +190,6 @@ public class PSObjectString extends PSObject implements MapCloneable {
     }
     
     /**
-     * Creates a deep copy of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @Override
-    public PSObjectString clone(CloneMappings cloneMap)
-            throws ProgramError {
-        
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSObjectString) cloneMap.get(this);
-        }
-        
-        PSObjectString copy = (PSObjectString) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        if (cloneMap.containsKey(value)) {
-            copy.value = (StringBuilder) cloneMap.get(value);
-        } else {
-            copy.value = new StringBuilder(value);
-            cloneMap.add(value, copy.value);
-        }
-        
-        return copy;
-    }
-
-    /**
      * PostScript operator copy. Copies values from obj1 to this object.
      * 
      * @param obj1 Copy values from obj1
@@ -241,7 +217,7 @@ public class PSObjectString extends PSObject implements MapCloneable {
      */
     @Override
     public int cvi() throws PSError {
-        PSObjectReal ro = new PSObjectReal(value.toString());
+        PSObjectReal ro = new PSObjectReal(getSharedString().toString());
         return ro.cvi();
     }
     
@@ -251,7 +227,7 @@ public class PSObjectString extends PSObject implements MapCloneable {
      * @return This object converted to name object.
      */
     public PSObjectName cvn() {
-        return new PSObjectName(value.toString(), isLiteral());
+        return new PSObjectName(getSharedString().toString(), isLiteral());
     }
 
     /**
@@ -263,7 +239,7 @@ public class PSObjectString extends PSObject implements MapCloneable {
      */
     @Override
     public double cvr() throws PSError {
-        PSObjectReal ro = new PSObjectReal(value.toString());
+        PSObjectReal ro = new PSObjectReal(getSharedString().toString());
         return ro.toReal();
     }
     
@@ -286,14 +262,15 @@ public class PSObjectString extends PSObject implements MapCloneable {
      * @return Array with character names
      * 
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorVMError Virtual memory error.
      */
     public PSObjectArray decode(final PSObjectArray encoding)
-            throws PSErrorRangeCheck {
+            throws PSErrorRangeCheck, PSErrorVMError {
         
-        PSObjectArray arr = new PSObjectArray();
+        PSObjectArray arr = new PSObjectArray(getVm());
         for (int i = 0; i < count; i++) {
             int chr = get(i);
-            arr.addAt(i, encoding.get(chr));
+            arr.addToEnd(encoding.get(chr));
         }
         return arr;
     }
@@ -366,7 +343,7 @@ public class PSObjectString extends PSObject implements MapCloneable {
             throw new PSErrorRangeCheck();
         }
         
-        return value.charAt(index + offset);
+        return getSharedString().charAt(index + offset);
     }
     
     /**
@@ -440,7 +417,7 @@ public class PSObjectString extends PSObject implements MapCloneable {
      */
     @Override
     public boolean gt(final PSObject obj2) throws PSErrorTypeCheck {
-        String obj1Str = value.toString();
+        String obj1Str = getSharedString().toString();
         String obj2Str = obj2.toPSString().toString();
         return (obj1Str.compareTo(obj2Str) > 0);
     }
@@ -668,8 +645,7 @@ public class PSObjectString extends PSObject implements MapCloneable {
      */
     public String parseBase85(final String str) throws PSError {
         InputStream stringStream = new StringInputStream(str);
-        PSObjectDict dict = new PSObjectDict();
-        InputStream inStream = new ASCII85Decode(stringStream, dict);
+        InputStream inStream = new ASCII85Decode(stringStream, null);
         
         StringBuilder parsedStr = new StringBuilder();
         int c;
@@ -695,8 +671,7 @@ public class PSObjectString extends PSObject implements MapCloneable {
      */
     public String parseHex(final String str) throws PSError {
         InputStream stringStream = new StringInputStream(str);
-        PSObjectDict dict = new PSObjectDict();
-        InputStream inStream = new ASCIIHexDecode(stringStream, dict);
+        InputStream inStream = new ASCIIHexDecode(stringStream, null);
         
         StringBuilder parsedStr = new StringBuilder();
         int c;
@@ -735,7 +710,7 @@ public class PSObjectString extends PSObject implements MapCloneable {
         }
         char chr = (char) chrInt;
         
-        value.setCharAt(idx, chr);
+        getSharedString().setCharAt(idx, chr);
     }
     
     /**
@@ -752,7 +727,8 @@ public class PSObjectString extends PSObject implements MapCloneable {
         if ((index < 0) || (newStr.length() > (count - index))) {
             throw new PSErrorRangeCheck();
         }
-        value.replace(offset + index, offset + index + newStr.length(), newStr);
+        getSharedString().replace(offset + index, 
+                offset + index + newStr.length(), newStr);
     }
     
     /**
@@ -818,7 +794,7 @@ public class PSObjectString extends PSObject implements MapCloneable {
             throw new PSErrorRangeCheck();
         }
         
-        value.setCharAt(index + offset, chr);
+        getSharedString().setCharAt(index + offset, chr);
     }
 
     /**
@@ -838,7 +814,7 @@ public class PSObjectString extends PSObject implements MapCloneable {
      */
     @Override
     public String toString() {
-        return value.substring(offset, offset + count);
+        return getSharedString().substring(offset, offset + count);
     }
     
     /**
@@ -873,7 +849,7 @@ public class PSObjectString extends PSObject implements MapCloneable {
             try {
                 post = getinterval(chrs, count - chrs);
             } catch (PSErrorRangeCheck e) {
-                post = new PSObjectString("");
+                post = new PSObjectString("", getVm());
             }
             lst.add(post);
             lst.add(any);
@@ -977,6 +953,29 @@ public class PSObjectString extends PSObject implements MapCloneable {
             throw new PSErrorTypeCheck();
         }
         return num;
+    }
+    
+    /**
+     * Register a new shared string object with the VM and adds it to this
+     * object.
+     * 
+     * @param str The shared string object.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     */
+    private void setSharedString(final StringBuilder str)
+            throws PSErrorVMError {
+        
+        setId(getVm().addStringObj(str));
+    }
+    
+    /**
+     * Gets the shared string object.
+     * 
+     * @return The shared string object.
+     */
+    private StringBuilder getSharedString() {
+        return getVm().getStringObj(getId());
     }
 
 }

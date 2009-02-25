@@ -43,6 +43,7 @@ import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnmatchedMark;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectBool;
@@ -80,11 +81,17 @@ import net.sf.eps2pgf.util.ArrayStack;
  */
 public class Interpreter {
     
+    /** Virtual Memory (VM) manager. */
+    private final VM vm = new VM();
+    
+    /** Resource manager. */
+    private final ResourceManager resourceManager = new ResourceManager(this);
+    
     /** Operand stack (see PostScript manual for more info). */
     private ArrayStack<PSObject> opStack = new ArrayStack<PSObject>();
     
     /** Dictionary stack. */
-    private DictStack dictStack;
+    private final DictStack dictStack = new DictStack(this);
     
     /**
      * Continuation stack. Arguments for continuation operators are stored on
@@ -94,13 +101,13 @@ public class Interpreter {
      * onto this stack preceded by a null object. I.e. first a null object is
      * pushed on the continuation stack, followed by the arguments. 
      */
-    private ArrayStack<PSObject> contStack = new ArrayStack<PSObject>();
+    private final ArrayStack<PSObject> contStack = new ArrayStack<PSObject>();
     
     /** Execution stack. */
-    private ExecStack execStack = new ExecStack();
+    private final ExecStack execStack = new ExecStack(vm);
     
     /** Graphics state. */
-    private GstateStack gstate;
+    private final GstateStack gstate;
     
     /** Text handler, handles text in the postscript code. */
     private TextHandler textHandler;
@@ -111,20 +118,17 @@ public class Interpreter {
     /** Default clipping path. */
     private Path defaultClippingPath;
     
-    /** Resource manager. */
-    private ResourceManager resourceManager;
-    
     /** User-defined options. */
     private Options options;
     
     /** Interpreter parameters. */
-    private InterpParams interpParams;
+    private final InterpParams interpParams = new InterpParams(this);
     
     /** Log information. */
     private final Logger log = Logger.getLogger("net.sourceforge.eps2pgf");
     
     /** Initialization time of interpreter. (milliseconds since 1970). */
-    private long initializationTime;
+    private final long initializationTime = System.currentTimeMillis();
     
     /**
      * Counter that increases by one each time the interpreter executes an
@@ -155,24 +159,23 @@ public class Interpreter {
         OutputDevice output;
         switch (opts.getOutputType()) {
             case PGF:
-                output = new PGFDevice(outputWriter, options);
+                output = new PGFDevice(outputWriter, options, vm);
                 break;
             case LOL:
-                output = new LOLDevice(outputWriter);
+                output = new LOLDevice(outputWriter, vm);
                 break;
             default:
                 throw new ProgramError("Unknown output device ("
                         + opts.getOutputType() + ").");
         }
-        this.gstate = new GstateStack(output);
+        gstate = new GstateStack(output, this);
         
-        this.header = fileHeader;
+        header = fileHeader;
         
         // Text handler
-        this.textHandler = new TextHandler(this.gstate, textReplace,
-                opts.getTextmode());
+        textHandler = new TextHandler(gstate, textReplace, opts.getTextmode());
         
-        this.initialize();
+        initialize();
     }
     
     /**
@@ -181,23 +184,29 @@ public class Interpreter {
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      * @throws PSError A PostScript error occurred.
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public Interpreter() throws ProgramError, PSError, IOException {
+    public Interpreter() throws ProgramError, PSError {
+        options = new Options();
+
         // Create graphics state stack with output device
-        OutputDevice output = new NullDevice();
-        gstate = new GstateStack(output);
+        OutputDevice output = new NullDevice(vm);
+        gstate = new GstateStack(output, this);
         
         // "Infinite" bounding box (square box from (-10m,-10m) to (10m,10m))
         double[] bbox = {-28346.46, -28346.46, 28346.46, 28346.46};
         header = new DSCHeader(bbox);
         
-        options = new Options();
-
         // Text handler
         textHandler = new TextHandler(gstate);
         
-        initialize();
+        //TODO remove initialize function and put everything in a single
+        // constructor and call that constructor from here.
+        try {
+            initialize();
+        } catch (IOException e) {
+            throw new ProgramError("IOException occurred with null device."
+                    + " That shouldn't happen.");
+        }
     }
     
     /**
@@ -208,20 +217,8 @@ public class Interpreter {
      * @throws ProgramError the program error
      */
     void initialize() throws IOException, PSError, ProgramError {
-        // Initialization time of interpreter
-        initializationTime = System.currentTimeMillis();
-        
-        // Initialize character encodings and fonts
-        resourceManager = new ResourceManager();
-        
-        // Initialize interpreter parameters
-        interpParams = new InterpParams(this);
-        
-        // Create dictionary stack
-        setDictStack(new DictStack(this));
 
         gstate.current().getDevice().init();
-        
         gstate.current().setcolorspace(new PSObjectName("DeviceGray", true));
         
         // An eps-file defines a bounding box. Set this bounding box as the
@@ -251,7 +248,7 @@ public class Interpreter {
         if (bbox != null) {
             op_initclip();
         } else {
-            gstate.current().setClippingPath(defaultClippingPath.clone(null));
+            gstate.current().setClippingPath(defaultClippingPath.clone());
         }
     }
     
@@ -271,15 +268,6 @@ public class Interpreter {
      */
     public DictStack getDictStack() {
         return dictStack;
-    }
-
-    /**
-     * Set the dictionary stack.
-     * 
-     * @param newDictStack The new dictionary stack.
-     */
-    public void setDictStack(final DictStack newDictStack) {
-        dictStack = newDictStack;
     }
 
     /**
@@ -628,9 +616,10 @@ public class Interpreter {
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorVMError Virtual memory error.
      */
     public void op_array() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorRangeCheck {
+            PSErrorRangeCheck, PSErrorVMError {
         int n = getOpStack().pop().toNonNegInt();
         op_sqBrackLeft();
         PSObjectNull nullObj = new PSObjectNull();
@@ -673,7 +662,7 @@ public class Interpreter {
         int n = array.size();
         try {
             for (int i = (n - 1); i >= 0; i--) {
-                array.set(i, getOpStack().pop());
+                array.put(i, getOpStack().pop());
             }
         } catch (PSErrorRangeCheck e) {
             // due to the for-loop this can never happen
@@ -825,7 +814,7 @@ public class Interpreter {
      */
     public void op_clippath() throws ProgramError {
         gstate.current().setPath(
-                gstate.current().getClippingPath().clone(null));
+                gstate.current().getClippingPath().clone());
     }
     
     /**
@@ -902,7 +891,7 @@ public class Interpreter {
             for (int i = (ncomp - 1); i >= 0; i++) {
                 sources[i] = getOpStack().pop();
             }
-            dataSource = new PSObjectArray(sources);
+            dataSource = new PSObjectArray(sources, vm);
         } else {
             dataSource = getOpStack().pop();
         }
@@ -914,7 +903,7 @@ public class Interpreter {
         int width = getOpStack().pop().toInt();
         
         // Construct an image dictionary
-        PSObjectDict dict = new PSObjectDict();
+        PSObjectDict dict = new PSObjectDict(vm);
         dict.setKey(Image.IMAGE_TYPE, new PSObjectInt(1));
         dict.setKey(Image.WIDTH, new PSObjectInt(width));
         dict.setKey(Image.HEIGHT, new PSObjectInt(height));
@@ -927,7 +916,7 @@ public class Interpreter {
             decode[2 * i] = 0.0;
             decode[2 * i + 1] = 1.0;
         }
-        dict.setKey(Image.DECODE, new PSObjectArray(decode));
+        dict.setKey(Image.DECODE, new PSObjectArray(decode, vm));
         
         Image image = new Image(dict, this, colorSpace);
         gstate.current().getDevice().image(image);
@@ -1072,9 +1061,14 @@ public class Interpreter {
     
     /**
      * PostScript op: currentcolorspace.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
-    public void op_currentcolorspace() {
-        getOpStack().push(gstate.current().getColor().getColorSpace());
+    public void op_currentcolorspace() throws PSErrorVMError,
+            PSErrorRangeCheck {
+        
+        getOpStack().push(gstate.current().getColor().getColorSpace(vm));
     }
     
     /**
@@ -1117,7 +1111,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_currentdash() throws ProgramError {
-        opStack.push(gstate.current().getDashPattern().clone(null));
+        opStack.push(gstate.current().getDashPattern().clone());
         opStack.push(new PSObjectReal(gstate.current().getDashOffset()));
     }
     
@@ -1129,7 +1123,7 @@ public class Interpreter {
     public void op_currentfile() throws PSError {
         PSObjectFile file = getExecStack().getTopmostFile();
         if (file == null) {
-            file = new PSObjectFile(null);
+            file = new PSObjectFile(null, vm);
         } else {
             file = file.dup();
         }
@@ -1143,6 +1137,14 @@ public class Interpreter {
     public void op_currentflat() {
         double flat = gstate.current().currentFlatness();
         getOpStack().push(new PSObjectReal(flat));
+    }
+    
+    /**
+     * PostScript op: currentglobal.
+     */
+    public void op_currentglobal() {
+        PSObjectBool bool = new PSObjectBool(vm.currentGlobal());
+        getOpStack().push(bool);
     }
     
     /**
@@ -1204,11 +1206,13 @@ public class Interpreter {
     
     /**
      * PostScript op: currentpagedevice.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public void op_currentpagedevice() {
+    public void op_currentpagedevice() throws PSErrorVMError {
         // Currently, this operator will always return an empty dictionary
         // indicating that there is no page.
-        PSObjectDict emptyDict = new PSObjectDict();
+        PSObjectDict emptyDict = new PSObjectDict(vm);
         getOpStack().push(emptyDict);
     }
     
@@ -1284,8 +1288,12 @@ public class Interpreter {
      * PostScript op: currentsystemparams.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public void op_currentsystemparams() throws ProgramError {
+    public void op_currentsystemparams() throws ProgramError, PSErrorVMError,
+            PSErrorTypeCheck {
+        
         getOpStack().push(interpParams.currentSystemParams());
     }
     
@@ -1309,8 +1317,12 @@ public class Interpreter {
      * PostScript op: currentuserparams.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public void op_currentuserparams() throws ProgramError {
+    public void op_currentuserparams() throws ProgramError, PSErrorVMError,
+            PSErrorTypeCheck {
+        
         getOpStack().push(interpParams.currentUserParams());
     }
     
@@ -1382,7 +1394,7 @@ public class Interpreter {
         string.checkAccess(false, false, true);
         int radix = getOpStack().pop().toInt();
         PSObject num = getOpStack().pop();
-        getOpStack().push(new PSObjectString(num.cvrs(radix)));
+        getOpStack().push(new PSObjectString(num.cvrs(radix), vm));
     }
     
     /**
@@ -1427,7 +1439,7 @@ public class Interpreter {
      */
     public void op_dblGreaterBrackets() throws PSError, ProgramError {
         ArrayStack<PSObject> os = getOpStack();
-        PSObjectDict dict = new PSObjectDict();
+        PSObjectDict dict = new PSObjectDict(vm);
         while (true) {
             PSObject value = os.pop();
             if (value instanceof PSObjectMark) {
@@ -1465,8 +1477,9 @@ public class Interpreter {
      * PostScript op: defaultmatrix.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_defaultmatrix() throws PSError {
+    public void op_defaultmatrix() throws PSError, ProgramError {
         PSObjectMatrix matrix = getOpStack().pop().toMatrix();
         matrix.copy(gstate.current().getDevice().defaultCTM());
         getOpStack().push(matrix);
@@ -1506,11 +1519,12 @@ public class Interpreter {
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorVMError Virtual memory error.
      */
     public void op_dict() throws PSErrorStackUnderflow, PSErrorTypeCheck, 
-            PSErrorRangeCheck {
+            PSErrorRangeCheck, PSErrorVMError {
         int capacity = getOpStack().pop().toNonNegInt();
-        getOpStack().push(new PSObjectDict(capacity));
+        getOpStack().push(new PSObjectDict(capacity, vm));
     }
     
     /**
@@ -1588,8 +1602,8 @@ public class Interpreter {
         } else {
             throw new PSErrorTypeCheck();
         }
-        InputStream eexecInStream = new EexecDecode(rawInStream);
-        PSObjectFile eexecFile = new PSObjectFile(eexecInStream);
+        InputStream eexecInStream = new EexecDecode(rawInStream, vm);
+        PSObjectFile eexecFile = new PSObjectFile(eexecInStream, vm);
         
         getDictStack().pushDict(getDictStack().lookup("systemdict").toDict());
         
@@ -1755,10 +1769,12 @@ public class Interpreter {
     
     /**
      * Internal Eps2pgf operator: eps2pgfgetmetrics.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public void op_eps2pgfgetmetrics() {
+    public void op_eps2pgfgetmetrics() throws PSErrorVMError {
         double[] metrics = gstate.current().getDevice().eps2pgfGetMetrics();
-        PSObjectArray array = new PSObjectArray(metrics);
+        PSObjectArray array = new PSObjectArray(metrics, vm);
         getOpStack().push(array);
     }
     
@@ -1810,19 +1826,19 @@ public class Interpreter {
         
         boolean recordStacks = dollarError.get("recordstacks").toBool();
         if (recordStacks) {
-            PSObjectArray arr = new PSObjectArray();
+            PSObjectArray arr = new PSObjectArray(vm);
             for (int i = 0; i < os.size(); i++) {
                 arr.addToEnd(os.peek(os.size() - i - 1));
             }
             dollarError.setKey("ostack", arr);
             
-            os.push(new PSObjectArray(execStack.size()));
+            os.push(new PSObjectArray(execStack.size(), vm));
             op_execstack();
             PSObjectArray estack = os.pop().toArray();
             estack = estack.getinterval(0, estack.size() - 1);
             dollarError.setKey("estack", estack);
             
-            os.push(new PSObjectArray(dictStack.countdictstack()));
+            os.push(new PSObjectArray(dictStack.countdictstack(), vm));
             op_dictstack();
             dollarError.setKey("dstack", opStack.pop());
         }
@@ -2089,8 +2105,9 @@ public class Interpreter {
      * PostScript op: exit.
      * 
      * @throws PSErrorInvalidExit 'exit' operator at invalid location.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_exit() throws PSErrorInvalidExit {
+    public void op_exit() throws PSErrorInvalidExit, ProgramError {
         ExecStack es = getExecStack();
         PSObject obj;
         DictStack ds = getDictStack();
@@ -2173,10 +2190,10 @@ public class Interpreter {
     public void op_filter() throws PSError {
         PSObjectName name = getOpStack().pop().toName();
         PSObjectDict paramDict =
-            FilterManager.getParameters(name, getOpStack());
+            FilterManager.getParameters(name, getOpStack(), vm);
         PSObject sourceOrTarget = getOpStack().pop();
         PSObjectFile file =
-            FilterManager.filter(name, paramDict, sourceOrTarget);
+            FilterManager.filter(name, paramDict, sourceOrTarget, vm);
         getOpStack().push(file);
     }
     
@@ -2301,7 +2318,7 @@ public class Interpreter {
         
         List<PSObject> items = obj.getItemList();
         int nr = items.remove(0).toNonNegInt();
-        PSObjectArray itemListArray = new PSObjectArray(items);
+        PSObjectArray itemListArray = new PSObjectArray(items, vm);
         
         cs.push(new PSObjectNull());
         cs.push(new PSObjectInt(nr));
@@ -2362,7 +2379,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_grestore() throws PSError, IOException, ProgramError {
-        gstate.restoreGstate(true, null);
+        gstate.restoreGstate(true);
     }
     
     /**
@@ -2373,7 +2390,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_grestoreall() throws PSError, IOException, ProgramError {
-        gstate.restoreAllGstate(true, null);
+        gstate.restoreAllGstate(true);
     }
     
     /**
@@ -2384,7 +2401,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_gsave() throws PSError, IOException, ProgramError {
-        gstate.saveGstate(true, null);
+        gstate.saveGstate(true);
     }
     
     /**
@@ -2406,10 +2423,11 @@ public class Interpreter {
      * PostScript op: identmatrix.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_identmatrix() throws PSError {
+    public void op_identmatrix() throws PSError, ProgramError {
         PSObjectMatrix matrix = getOpStack().pop().toMatrix();
-        matrix.copy(new PSObjectMatrix());
+        matrix.copy(new PSObjectMatrix(vm));
         getOpStack().push(matrix);
     }
     
@@ -2509,7 +2527,7 @@ public class Interpreter {
             int height = getOpStack().pop().toInt();
             int width = getOpStack().pop().toInt();
             
-            dict = new PSObjectDict();
+            dict = new PSObjectDict(vm);
             dict.setKey(Image.IMAGE_TYPE, new PSObjectInt(1));
             dict.setKey(Image.WIDTH, new PSObjectInt(width));
             dict.setKey(Image.HEIGHT, new PSObjectInt(height));
@@ -2518,7 +2536,7 @@ public class Interpreter {
             dict.setKey(Image.BITS_PER_COMPONENT,
                     new PSObjectInt(bitsPerSample));
             double[] decode = {0.0, 1.0};
-            dict.setKey(Image.DECODE, new PSObjectArray(decode));
+            dict.setKey(Image.DECODE, new PSObjectArray(decode, vm));
             colorSpace = new DeviceGray();
         }
         
@@ -2572,14 +2590,17 @@ public class Interpreter {
     public void op_initclip()
             throws ProgramError, IOException, PSErrorUnregistered {
         
-        gstate.current().setClippingPath(defaultClippingPath.clone(null));
+        gstate.current().setClippingPath(defaultClippingPath.clone());
         gstate.current().getDevice().clip(gstate.current().getClippingPath());
     }
     
     /**
      * PostScript op: initmatrix.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_initmatrix() {
+    public void op_initmatrix() throws PSErrorVMError, ProgramError {
         gstate.current().initmatrix();
     }
     
@@ -2770,7 +2791,7 @@ public class Interpreter {
     public void op_makefont() throws PSError, ProgramError {
         PSObjectMatrix matrix = getOpStack().pop().toMatrix();
         PSObjectDict font = getOpStack().pop().toDict();
-        font = font.clone(null);
+        font = font.clone();
         PSObjectMatrix fontMatrix = font.lookup("FontMatrix").toMatrix();
         
         // Concatenate matrix to fontMatrix and store it back in font
@@ -2778,7 +2799,7 @@ public class Interpreter {
         font.setKey("FontMatrix", fontMatrix);
         
         // Calculate the fontsize in LaTeX points
-        PSObjectMatrix ctm = gstate.current().getCtm().clone(null);
+        PSObjectMatrix ctm = gstate.current().getCtm().clone();
         ctm.concat(fontMatrix);
         double fontSize = ctm.getMeanScaling() / 2.54 * 72.27;
         font.setKey("FontSize", new PSObjectReal(fontSize));
@@ -2808,9 +2829,10 @@ public class Interpreter {
      * Postscript op: matrix.
      * 
      * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_matrix() throws PSError {
-        getOpStack().push(new PSObjectMatrix());
+    public void op_matrix() throws PSError, ProgramError {
+        getOpStack().push(new PSObjectMatrix(vm));
     }
     
     /**
@@ -2923,9 +2945,12 @@ public class Interpreter {
     
     /**
      * PostScript op: nulldevice.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void op_nulldevice() {
-        OutputDevice nullDevice = new NullDevice();
+    public void op_nulldevice() throws PSErrorVMError, ProgramError {
+        OutputDevice nullDevice = new NullDevice(vm);
         gstate.current().setDevice(nullDevice);
         gstate.current().initmatrix();
     }
@@ -2968,7 +2993,7 @@ public class Interpreter {
         PSObjectArray move = os.pop().toProc();
         
         ArrayList<PathSection> sects = gstate.current().getPath().getSections();
-        PSObjectArray path = new PSObjectArray();
+        PSObjectArray path = new PSObjectArray(vm);
         for (int i = 0; i < sects.size(); i++) {
             path.addToEnd(sects.get(i));
         }
@@ -3006,9 +3031,11 @@ public class Interpreter {
     
     /**
      * PostScript op: product.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public void op_product() {
-        getOpStack().push(new PSObjectString(Main.APP_NAME));
+    public void op_product() throws PSErrorVMError {
+        getOpStack().push(new PSObjectString(Main.APP_NAME, vm));
     }
     
     /**
@@ -3290,8 +3317,8 @@ public class Interpreter {
      */
     public void op_restore() throws PSError, IOException, ProgramError {
         PSObjectSave save = getOpStack().pop().toSave();
-        save.restore();
-        gstate.restoreAllGstate(false, null);
+        save.restore(this);
+        gstate.restoreAllGstate(false);
     }
     
     /**
@@ -3391,7 +3418,7 @@ public class Interpreter {
      */
     public void op_save() throws PSError, IOException, ProgramError {
         getOpStack().push(new PSObjectSave(this));
-        gstate.saveGstate(false, null);
+        gstate.saveGstate(false);
     }
    
     /**
@@ -3500,9 +3527,11 @@ public class Interpreter {
      * 
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_setcachedevice() throws PSErrorStackUnderflow,
-            PSErrorTypeCheck {
+            PSErrorTypeCheck, PSErrorVMError, ProgramError {
         double ury = getOpStack().pop().toReal();
         double urx = getOpStack().pop().toReal();
         double lly = getOpStack().pop().toReal();
@@ -3510,7 +3539,7 @@ public class Interpreter {
         double wy = getOpStack().pop().toReal();
         double wx = getOpStack().pop().toReal();
         gstate.current().setDevice(new CacheDevice(wx, wy, llx, lly, urx,
-                ury));
+                ury, vm));
         gstate.current().initmatrix();
     }
     
@@ -3519,9 +3548,11 @@ public class Interpreter {
      * 
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_setcachedevice2() throws PSErrorStackUnderflow,
-            PSErrorTypeCheck {
+            PSErrorTypeCheck, PSErrorVMError, ProgramError {
         getOpStack().pop(); // pop vy
         getOpStack().pop(); // pop vx
         getOpStack().pop(); // pop w1y
@@ -3533,7 +3564,7 @@ public class Interpreter {
         double w0y = getOpStack().pop().toReal();
         double w0x = getOpStack().pop().toReal();
         gstate.current().setDevice(new CacheDevice(w0x, w0y, llx, lly, urx,
-                ury));
+                ury, vm));
         gstate.current().initmatrix();
     }
     
@@ -3662,14 +3693,10 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_setglobal() throws PSError {
-        PSObject nextGlobal = opStack.pop();
-        if (!(nextGlobal instanceof PSObjectBool)) {
-            throw new PSErrorTypeCheck();
-        }
-        PSObjectDict systemDict = dictStack.lookup("systemdict").toDict();
-        systemDict.setKey("currentglobal", nextGlobal);
+        boolean bool = getOpStack().pop().toBool();
+        vm.setGlobal(bool);
     }
-   
+    
     /**
      * PostScript op: setgray.
      * 
@@ -4038,11 +4065,12 @@ public class Interpreter {
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorVMError Virtual memory error.
      */
     public void op_string() throws PSErrorStackUnderflow, PSErrorTypeCheck,
-            PSErrorRangeCheck {
+            PSErrorRangeCheck, PSErrorVMError {
         int n = getOpStack().pop().toNonNegInt();
-        getOpStack().push(new PSObjectString(n));
+        getOpStack().push(new PSObjectString(n, vm));
     }
    
     /**
@@ -4087,9 +4115,10 @@ public class Interpreter {
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      * @throws PSErrorUnmatchedMark Expected mark not found.
+     * @throws PSErrorVMError Virtual memory error.
      */
     public void op_sqBrackRight() throws PSErrorStackUnderflow,
-            PSErrorTypeCheck, PSErrorUnmatchedMark {
+            PSErrorTypeCheck, PSErrorUnmatchedMark, PSErrorVMError {
         op_counttomark();
         int n = getOpStack().pop().toInt();
         PSObject[] objs = new PSObject[n];
@@ -4097,7 +4126,7 @@ public class Interpreter {
             objs[i] = getOpStack().pop();
         }
         getOpStack().pop();  // clear mark
-        getOpStack().push(new PSObjectArray(objs));
+        getOpStack().push(new PSObjectArray(objs, vm));
         
         
     }
@@ -4445,22 +4474,21 @@ public class Interpreter {
     }
     
     /**
-     * Sets the interpreter parameters.
-     * 
-     * @param newInterpParams The new interpreter parameters.
-     */
-    public void setInterpParams(final InterpParams newInterpParams) {
-        interpParams = newInterpParams;
-    }
-    
-    
-    /**
      * Get the resource manager.
      * 
      * @return the resource manager.
      */
     public ResourceManager getResourceManager() {
         return resourceManager;
+    }
+    
+    /**
+     * Gets the VM manager.
+     * 
+     * @return The VM manager.
+     */
+    public VM getVm() {
+        return vm;
     }
 
     /**

@@ -18,17 +18,16 @@
 
 package net.sf.eps2pgf.ps.resources.colors;
 
-import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Gray color.
  */
-public class DeviceGray extends PSColor implements MapCloneable {
+public class DeviceGray extends PSColor implements Cloneable {
     
     /** Name of this color space family. */
     public static final PSObjectName FAMILYNAME
@@ -41,38 +40,9 @@ public class DeviceGray extends PSColor implements MapCloneable {
      * Instantiates a new gray color.
      */
     public DeviceGray() {
-        try {
-            setColor(DEFAULT_LEVELS);
-        } catch (PSError e) {
-            // this can never happen
-        } catch (ProgramError e) {
-            // this can never happen
-        }
+        super(DEFAULT_LEVELS);
     }
     
-    /**
-     * Create an exact copy of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @Override
-    public DeviceGray clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (DeviceGray) cloneMap.get(this);
-        }
-        
-        DeviceGray copy = (DeviceGray) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        return copy;
-    }
-
     /**
      * Convert this color to CMYK.
      * 
@@ -91,11 +61,18 @@ public class DeviceGray extends PSColor implements MapCloneable {
     /**
      * Gets a PostScript array describing the color space of this color.
      * 
+     * @param vm The VM manager.
+     * 
      * @return array describing color space.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
     @Override
-    public PSObjectArray getColorSpace() {
-        PSObjectArray array = new PSObjectArray();
+    public PSObjectArray getColorSpace(final VM vm) throws PSErrorVMError,
+            PSErrorRangeCheck {
+        
+        PSObjectArray array = new PSObjectArray(vm);
         array.addToEnd(new PSObjectName("DeviceGray", true));
         return array;
     }

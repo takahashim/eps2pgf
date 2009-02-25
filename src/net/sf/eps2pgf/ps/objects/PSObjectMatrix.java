@@ -19,29 +19,36 @@
 package net.sf.eps2pgf.ps.objects;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefinedResult;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 
 /**
  * Represent a PostScript matrix. This is a six element array with only numeric
  * items.
  * @author Paul Wagenaars
  */
-public class PSObjectMatrix extends PSObjectArray implements MapCloneable {
+public class PSObjectMatrix extends PSObjectArray implements Cloneable {
+    
     /**
      * Creates a new instance of PSObjectMatrix. The new object is filled with
      * an identity matrix.
+     * 
+     * @param vm The VM manager
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectMatrix() {
-        this(1, 0, 0, 1, 0, 0);
+    public PSObjectMatrix(final VM vm) throws PSErrorVMError, ProgramError {
+        this(1, 0, 0, 1, 0, 0, vm);
     }
     
     /**
      * Creates a new instance of PSObjectMatrix. See PostScript manual
      * under "4.3 Coordinate Systems and Transformation" for more info.
+     * 
      * @param a See PostScript manual  under "4.3 Coordinate Systems and
      * Transformation" for more info.
      * @param b See PostScript manual  under "4.3 Coordinate Systems and
@@ -54,15 +61,27 @@ public class PSObjectMatrix extends PSObjectArray implements MapCloneable {
      * Transformation" for more info.
      * @param ty See PostScript manual  under "4.3 Coordinate Systems and
      * Transformation" for more info.
+     * @param vm The VM manager
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public PSObjectMatrix(final double a, final double b, final double c,
-            final double d, final double tx, final double ty) {
-        addAt(0, new PSObjectReal(a));
-        addAt(1, new PSObjectReal(b));
-        addAt(2, new PSObjectReal(c));
-        addAt(3, new PSObjectReal(d));
-        addAt(4, new PSObjectReal(tx));
-        addAt(5, new PSObjectReal(ty));
+            final double d, final double tx, final double ty, final VM vm)
+            throws PSErrorVMError, ProgramError {
+        
+        super(vm);
+        
+        try {
+            addToEnd(new PSObjectReal(a));
+            addToEnd(new PSObjectReal(b));
+            addToEnd(new PSObjectReal(c));
+            addToEnd(new PSObjectReal(d));
+            addToEnd(new PSObjectReal(tx));
+            addToEnd(new PSObjectReal(ty));
+        } catch (PSErrorRangeCheck e) {
+            throw new ProgramError("Rangecheck error during matrix creation.");
+        }
     }
     
     /**
@@ -77,12 +96,8 @@ public class PSObjectMatrix extends PSObjectArray implements MapCloneable {
     public PSObjectMatrix(final PSObjectArray refArray)
             throws PSErrorRangeCheck, PSErrorTypeCheck {
         
-        checkMatrix(refArray);
-
-        setArray(refArray.getArray());
-        setOffset(refArray.getOffset());
-        setCount(refArray.getCount());
-        copyCommonAttributes(refArray);
+        super(refArray);
+        checkMatrix(this);
     }
     
     /**
@@ -101,30 +116,16 @@ public class PSObjectMatrix extends PSObjectArray implements MapCloneable {
     }
     
     /**
-     * Creates a deep copy of this object.
+     * Creates a clone of this object.
      * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @return The clone of this object.
      */
     @Override
-    public PSObjectMatrix clone(CloneMappings cloneMap)
-            throws ProgramError {
-        
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSObjectMatrix) cloneMap.get(this);
-        }
-        
-        PSObjectMatrix copy = (PSObjectMatrix) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        return copy;
+    public PSObjectMatrix clone() {
+        return (PSObjectMatrix) super.clone();
     }
 
+    
     /**
      * Applies the transformation represented by conc to this matrix.
      * newMatrix = conc * matrix

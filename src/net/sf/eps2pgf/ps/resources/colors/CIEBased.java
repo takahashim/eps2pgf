@@ -18,11 +18,13 @@
 
 package net.sf.eps2pgf.ps.resources.colors;
 
-import java.io.IOException;
-
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
@@ -59,51 +61,74 @@ public abstract class CIEBased extends PSColor {
     protected static final PSObjectName BLACKPOINT
         = new PSObjectName("/BlackPoint");
     
+    /** Local interpreter in which decode procedures are executed. */
+    private static Interpreter localInterp = null;
+    
+
     /** Color space dictionary. */
     private PSObjectDict dict;
     
     /** Component levels in XYZ color space. */
     private double[] xyzLevels = new double[3];
     
-    /** Interpreter in which decode procedures are executed. */
-    private static Interpreter interp = null;
     
+    /**
+     * Creates a new CIE based color.
+     * 
+     * @param arr The color definition array.
+     * @param interp The interpreter to which this color belongs.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    protected CIEBased(final PSObjectArray arr, final Interpreter interp)
+            throws PSError, ProgramError {
+        
+        if (!arr.get(0).eq(getFamilyName())) {
+            throw new PSErrorTypeCheck();
+        }
+        
+        setDict(arr.get(1).toDict());
+        checkCommonEntries(getDict(), interp);
+    }
     
     /**
      * Make sure that all entries in the dictionary are defined. If they are not
      * defined default values are added.
      * 
-     * @param dict The dictionary.
+     * @param dict The dictionary to check
+     * @param interp The interpreter
      * 
      * @return The checked dictionary, this is the exact same dictionary as the
      * one passed this method.
      * 
-     * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSError A PostScript error occurred.
      */
-    protected static PSObjectDict checkCommonEntries(final PSObjectDict dict)
-        throws PSError, ProgramError {
+    private static PSObjectDict checkCommonEntries(PSObjectDict dict, 
+            final Interpreter interp) throws ProgramError, PSError {
         
+        VM vm = interp.getVm();
         if (!dict.known(RANGELMN)) {
             double[] defaultRange = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
-            dict.setKey(RANGELMN, new PSObjectArray(defaultRange));
+            dict.setKey(RANGELMN, new PSObjectArray(defaultRange, vm));
         }
         if (!dict.known(DECODELMN)) {
-            PSObjectArray defaultDecode = new PSObjectArray();
-            defaultDecode.addToEnd(new PSObjectArray("{}", null));
-            defaultDecode.addToEnd(new PSObjectArray("{}", null));
-            defaultDecode.addToEnd(new PSObjectArray("{}", null));
+            PSObjectArray defaultDecode = new PSObjectArray(vm);
+            defaultDecode.addToEnd(new PSObjectArray("{}", interp));
+            defaultDecode.addToEnd(new PSObjectArray("{}", interp));
+            defaultDecode.addToEnd(new PSObjectArray("{}", interp));
             dict.setKey(DECODELMN, defaultDecode);
         }
         if (!dict.known(MATRIXLMN)) {
             double[] defaultMatrix
                     =  {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
-            dict.setKey(MATRIXLMN, new PSObjectArray(defaultMatrix));
+            dict.setKey(MATRIXLMN, new PSObjectArray(defaultMatrix, vm));
         }
         dict.get(WHITEPOINT).toArray();
         if (!dict.known(BLACKPOINT)) {
             double[] defaultBlack = {0.0, 0.0, 0.0};
-            dict.setKey(BLACKPOINT, new PSObjectArray(defaultBlack));
+            dict.setKey(BLACKPOINT, new PSObjectArray(defaultBlack, vm));
         }
         
         return dict;
@@ -123,29 +148,31 @@ public abstract class CIEBased extends PSColor {
     protected static double decode(final double input, final PSObjectArray proc)
             throws PSError, ProgramError {
         
-        if (interp == null) {
-            try {
-                interp = new Interpreter();
-            } catch (IOException e) {
-                throw new ProgramError("Creating new interpreter generated an"
-                        + " IOException.");
-            }
+        if (localInterp == null) {
+            localInterp = new Interpreter();
         }
         
-        interp.getOpStack().push(new PSObjectReal(input));
-        interp.getExecStack().push(proc);
-        interp.run();
-        return interp.getOpStack().pop().toReal();
+        localInterp.getOpStack().push(new PSObjectReal(input));
+        localInterp.getExecStack().push(proc);
+        localInterp.run();
+        return localInterp.getOpStack().pop().toReal();
     }
     
     /**
      * Gets a PostScript array describing the color space of this color.
      * 
+     * @param vm The VM manager.
+     * 
      * @return array describing color space.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
     @Override
-    public PSObjectArray getColorSpace() {
-        PSObjectArray colSpace = new PSObjectArray();
+    public PSObjectArray getColorSpace(final VM vm) throws PSErrorVMError,
+            PSErrorRangeCheck {
+        
+        PSObjectArray colSpace = new PSObjectArray(vm);
         colSpace.addToEnd(getFamilyName());
         colSpace.addToEnd(getDict());
         return colSpace;

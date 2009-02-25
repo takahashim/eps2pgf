@@ -21,6 +21,7 @@ package net.sf.eps2pgf.ps.resources.filters;
 import java.io.InputStream;
 import java.io.IOException;
 
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 
@@ -53,11 +54,12 @@ public class EexecDecode extends InputStream {
      * Wrap a eexec decryption layer around and input stream.
      * 
      * @param pIn Stream from which encrypted data will be read
+     * @param vm The virtual memory manager.
      * 
      * @throws PSError A PostScript error occurred.
      */
-    public EexecDecode(final InputStream pIn) throws PSError {
-        PSObjectDict dict = new PSObjectDict();
+    public EexecDecode(final InputStream pIn, final VM vm) throws PSError {
+        PSObjectDict dict = new PSObjectDict(vm);
         in = new ASCIIHexDecode(pIn, dict);
         n = 4;
         r = 55665;
@@ -71,16 +73,17 @@ public class EexecDecode extends InputStream {
      * @param pIn Stream from which encrypted data will be read
      * @param password The password.
      * @param binaryInput The binary input.
+     * @param vm The virtual memory manager.
      * 
      * @throws PSError A PostScript error occurred.
      */
     public EexecDecode(final InputStream pIn, final int password,
-            final boolean binaryInput) throws PSError {
+            final boolean binaryInput, final VM vm) throws PSError {
         
         if (binaryInput) {
             this.in = pIn;
         } else {
-            PSObjectDict dict = new PSObjectDict();
+            PSObjectDict dict = new PSObjectDict(vm);
             this.in = new ASCIIHexDecode(pIn, dict);
         }
         n = 4;

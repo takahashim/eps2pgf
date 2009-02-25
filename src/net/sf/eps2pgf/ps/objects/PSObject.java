@@ -30,8 +30,6 @@ import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 import org.fontbox.afm.FontMetric;
 
@@ -39,8 +37,7 @@ import org.fontbox.afm.FontMetric;
  *
  * @author Paul Wagenaars
  */
-public abstract class PSObject implements MapCloneable,
-        Cloneable, Iterable<PSObject> {
+public abstract class PSObject implements Cloneable, Iterable<PSObject> {
     
     /** Possible values for access attribute. */
     public enum Access { UNLIMITED, READONLY, EXECUTEONLY, NONE };
@@ -144,30 +141,17 @@ public abstract class PSObject implements MapCloneable,
     }
     
     /**
-     * Creates a deep copy of this object, maintaining multiple references to
-     * the same object. This makes sure that composite object sharing values
-     * will be copied correctly. It also prevents infinite loops.
+     * Creates a clone of this object.
      * 
-     * @param cloneMap Mappings of previously cloned objects. Mapping from
-     * original object to cloned object.
-     * 
-     * @return A clone of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @return The clone of this object.
      */
-    public PSObject clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSObject) cloneMap.get(this);
-        }
-        
+    @Override
+    public PSObject clone() {
         PSObject copy;
         try {
             copy = (PSObject) super.clone();
-            cloneMap.add(this, copy);
         } catch (CloneNotSupportedException e) {
-            throw new ProgramError("super.clone() failed");
+            copy = null;
         }
         
         return copy;
@@ -764,11 +748,12 @@ public abstract class PSObject implements MapCloneable,
     }
     
     /**
-     * Returns this object as path section.
+     * Convert this object to a path section, if possible.
      * 
-     * @return the path section
+     * @throws PSErrorTypeCheck Unable to convert this object type to a
+     * path section.
      * 
-     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @return Path section representation of this object
      */
     public PathSection toPathSection() throws PSErrorTypeCheck {
         throw new PSErrorTypeCheck();

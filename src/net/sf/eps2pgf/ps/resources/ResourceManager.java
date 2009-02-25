@@ -21,11 +21,14 @@ package net.sf.eps2pgf.ps.resources;
 import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefinedResource;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectBool;
@@ -235,6 +238,8 @@ public final class ResourceManager {
     private static final PSObjectName GENERIC_PROC_NAME
         = new PSObjectName("/Eps2pgfGenericProc");
     
+    /** Virtual memory manager. */
+    private Interpreter interp;
     
     /** Font manager. */
     private FontManager fontManager;
@@ -245,23 +250,29 @@ public final class ResourceManager {
     /**
      * Create a new resource manager.
      * 
+     * @param interpreter The interpreter.
+     * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      * @throws PSError A PostScript error occurred.
      */
-    public ResourceManager() throws PSError, ProgramError {
-        fontManager = new FontManager();
+    public ResourceManager(final Interpreter interpreter)
+            throws PSError, ProgramError {
+        
+        interp = interpreter;
+        
+        fontManager = new FontManager(interp.getVm());
         
         // Set the generic implementation dictionary for each resource category.
         PSObjectDict genericDict = createGenericDict(CAT_GENERIC);
-        PSObjectDict categoryDict = new PSObjectDict();
+        PSObjectDict categoryDict = new PSObjectDict(interp.getVm());
         categoryDict.setKey(CAT_GENERIC, genericDict);
         categoryDict.setKey(CAT_CATEGORY, genericDict);
         
-        resources = new PSObjectDict();
+        resources = new PSObjectDict(interp.getVm());
         resources.setKey(CAT_CATEGORY, categoryDict);
         resources.setKey(CAT_GENERIC, genericDict);
         
-        EncodingManager.initialize(this);
+        EncodingManager.initialize(this, interp.getVm());
     }
     
     /**
@@ -270,16 +281,22 @@ public final class ResourceManager {
      * @param catName The cat name.
      * 
      * @return A new generic implementation dictionary.
+     * @throws PSErrorVMError A virtual memory error occurred. 
      */
-    private static PSObjectDict createGenericDict(final PSObjectName catName) {
+    private PSObjectDict createGenericDict(final PSObjectName catName)
+            throws PSErrorVMError {
         
         // Create a generic procedure
-        PSObjectArray genericProc = new PSObjectArray();
+        PSObjectArray genericProc = new PSObjectArray(interp.getVm());
         genericProc.setLiteral(false);
-        genericProc.addToEnd(GENERIC_PROC_NAME);
+        try {
+            genericProc.addToEnd(GENERIC_PROC_NAME);
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen
+        }
         
         // Create the generic implementation dictionary
-        PSObjectDict dict = new PSObjectDict();
+        PSObjectDict dict = new PSObjectDict(interp.getVm());
         dict.setKey(KEY_DEFINERESOURCE, genericProc);
         dict.setKey(KEY_UNDEFINERESOURCE, genericProc);
         dict.setKey(KEY_FINDRESOURCE, genericProc);
@@ -391,7 +408,7 @@ public final class ResourceManager {
                 catName = category;
             }
             
-            PSObjectDict dict = new PSObjectDict();
+            PSObjectDict dict = new PSObjectDict(interp.getVm());
             resources.setKey(catName, dict);
             return dict;
         }
@@ -455,7 +472,7 @@ public final class ResourceManager {
             return fontManager.defineFont(key, instance.toFont());
         } else if (category.eq(CAT_COLORSPACE)) {
             // Check if it is a valid color space.
-            ColorManager.autoSetColorSpace(instance);
+            ColorManager.autoSetColorSpace(instance, interp);
         } else if (category.eq(CAT_CATEGORY)) {
             instance.toDict().setKey(KEY_CATEGORY, key);
         }
@@ -639,7 +656,7 @@ public final class ResourceManager {
             supported = resourceDict.known(key);
         }
         
-        PSObjectArray ret = new PSObjectArray();
+        PSObjectArray ret = new PSObjectArray(interp.getVm());
         if (supported) {
             ret.addToEnd(new PSObjectInt(0));
             ret.addToEnd(new PSObjectInt(0));

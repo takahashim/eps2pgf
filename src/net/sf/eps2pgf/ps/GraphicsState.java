@@ -25,6 +25,7 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorNoCurrentPoint;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
@@ -33,8 +34,6 @@ import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 import net.sf.eps2pgf.ps.resources.colors.ColorManager;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Structure that holds the graphics state (graphic control parameter).
@@ -42,7 +41,7 @@ import net.sf.eps2pgf.util.MapCloneable;
  *
  * @author Paul Wagenaars
  */
-public class GraphicsState implements MapCloneable, Cloneable {
+public class GraphicsState implements Cloneable {
     
     /**
      * Current Transformation Matrix (CTM). All coordinates will be transformed
@@ -50,7 +49,7 @@ public class GraphicsState implements MapCloneable, Cloneable {
      * files to micrometers.
      * [a b c d tx ty] -> x' = a*x + b*y + tx ; y' = c*x + d*y * ty
      */
-    private PSObjectMatrix ctm = new PSObjectMatrix();
+    private PSObjectMatrix ctm;
     
     /** Current position in pt (before CTM is applied). */
     private double[] position = new double[2];
@@ -80,7 +79,7 @@ public class GraphicsState implements MapCloneable, Cloneable {
     private double miterLimit = 10.0;
     
     /** Current dash pattern. */
-    private PSObjectArray dashPattern = new PSObjectArray();
+    private PSObjectArray dashPattern;
     
     /** Current dash offset. */
     private double dashOffset = 0.0;
@@ -92,7 +91,7 @@ public class GraphicsState implements MapCloneable, Cloneable {
     // Device dependent parameters
     //
     /** Current color rendering. */
-    private PSObjectDict colorRendering = new PSObjectDict();
+    private PSObjectDict colorRendering;
     
     /** Current overprint. */
     private boolean overprint = false;
@@ -111,7 +110,7 @@ public class GraphicsState implements MapCloneable, Cloneable {
     private PSObjectArray transfer;
     
     /** Current halftone. */
-    private PSObject halftone = new PSObjectDict();
+    private PSObject halftone;
     
     /** Current flatness of curves. */
     private double flatness = 1.0;
@@ -122,29 +121,41 @@ public class GraphicsState implements MapCloneable, Cloneable {
     /** Reference to current output device. */
     private OutputDevice device;
     
+    /** The interpreter. */
+    private Interpreter interp;
+    
     /**
      * Creates a new default graphics state.
      * 
      * @param parentGraphicsStack Pointer the graphics stack of which this
      * object is part of.
      * @param wDevice Output device.
+     * @param interpreter The interpreter.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorVMError A virtual memory error occurred.
      */
     public GraphicsState(final GstateStack parentGraphicsStack,
-            final OutputDevice wDevice) throws ProgramError {
+            final OutputDevice wDevice, final Interpreter interpreter)
+            throws ProgramError, PSErrorVMError {
+        
+        interp = interpreter;
 
+        colorRendering = new PSObjectDict(interp.getVm());
+        ctm = new PSObjectMatrix(interp.getVm());
+        dashPattern = new PSObjectArray(interp.getVm());
         device = wDevice;
+        halftone = new PSObjectDict(interp.getVm());
                 
         initmatrix();
         path = new Path(parentGraphicsStack);
         clippingPath = new Path(parentGraphicsStack);
-        font = new PSObjectFont();
+        font = new PSObjectFont(interp.getVm());
         
         try {
-            blackGeneration = new PSObjectArray("{}", null);
-            undercolorRemoval = new PSObjectArray("{}", null);
-            transfer = new PSObjectArray("[{} {} {} {}]", null);
+            blackGeneration = new PSObjectArray("{}", interp);
+            undercolorRemoval = new PSObjectArray("{}", interp);
+            transfer = new PSObjectArray("[{} {} {} {}]", interp);
         } catch (PSError e) {
             // this can never happen
         }
@@ -316,59 +327,48 @@ public class GraphicsState implements MapCloneable, Cloneable {
     /**
      * Intersects the area inside the current clipping path with the area
      * inside the current path.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void clip() throws ProgramError {
-        clippingPath = path.clone(null);
+    public void clip() {
+        clippingPath = path.clone();
     }
     
     /**
      * Creates a deep copy of this object.
      * 
-     * @param cloneMap The clone map.
-     * 
      * @return Returns the deep copy.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public GraphicsState clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (GraphicsState) cloneMap.get(this);
-        }
-        
+    @Override
+    public GraphicsState clone() {
         GraphicsState copy;
         try {
             copy = (GraphicsState) super.clone();
-            cloneMap.add(this, copy);
         } catch (CloneNotSupportedException e) {
-            throw new ProgramError("super.clone failed");
+            copy = null;
         }
         
-        copy.clippingPath = clippingPath.clone(cloneMap);
-        copy.color = color.clone(cloneMap);
-        copy.ctm = ctm.clone(cloneMap);
-        // dashoffset is primitive, it doesn't need to be cloned explicitly.
-        copy.dashPattern = dashPattern.clone(cloneMap);
-        // flat is primitive, it doesn't need to be cloned explicitly.
-        copy.font = font.clone(cloneMap);
-        // linewidth is primitive, it doesn't need to be cloned explicitly.
-        // linecap is primitive, it doesn't need to be cloned explicitly.
-        copy.path = path.clone(cloneMap);
-        copy.position = position.clone();
-        // strokeAdjust is primitive, it doesn't need to be cloned explicitly.
-        
-        copy.colorRendering = colorRendering.clone(cloneMap);
-        // overprint is primitive, it doesn't need to be cloned explicitely.
-        copy.blackGeneration = blackGeneration.clone(cloneMap);
-        copy.undercolorRemoval = undercolorRemoval.clone(cloneMap);
-        copy.transfer = transfer.clone(cloneMap);
-        copy.halftone = halftone.clone(cloneMap);
+        copy.blackGeneration = blackGeneration.clone();
+        copy.clippingPath = clippingPath.clone();
+        copy.color = color.clone();
+        copy.colorRendering = colorRendering.clone();
+        copy.ctm = ctm.clone();
+        // dashOffset is primitive, it doesn't need to be cloned explicitly.
+        copy.dashPattern = dashPattern.clone();
+        copy.device = device.clone();
         // flatness is primitive, it doesn't need to be cloned explicitely.
+        copy.font = font.clone();
+        copy.halftone = halftone.clone();
+        // interp is a reference to the interpreter, it is not cloned
+        // lineCap is primitive, it doesn't need to be cloned explicitly.
+        // lineJoin is primitive, it doesn't need to be cloned explicitly.
+        // linewidth is primitive, it doesn't need to be cloned explicitly.
+        // miterLimit is primitive, it doesn't need to be cloned explicitely.
+        // overprint is primitive, it doesn't need to be cloned explicitely.
+        copy.path = path.clone();
+        copy.position = position.clone();
         // smoothness is primitive, it doesn't need to be cloned explicitely.
-        copy.device = device.clone(cloneMap);
+        // strokeAdjust is primitive, it doesn't need to be cloned explicitly.
+        copy.transfer = transfer.clone();
+        copy.undercolorRemoval = undercolorRemoval.clone();
         
         return copy;
     }
@@ -585,12 +585,15 @@ public class GraphicsState implements MapCloneable, Cloneable {
      * of all transformations applied by the PostScript program.
      * 
      * @return The mean scaling applied by the user.
+     * 
+     * @throws PSErrorVMError A virtual memory error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public double getMeanUserScaling() {
+    public double getMeanUserScaling() throws PSErrorVMError, ProgramError {
         double scaling = Double.NaN;
         try {
-            scaling = this.ctm.getMeanScaling()
-                    / this.device.defaultCTM().getMeanScaling();
+            scaling = ctm.getMeanScaling()
+                        / device.defaultCTM().getMeanScaling();
         } catch (PSErrorRangeCheck e) {
             // this can never happen, since none of the matrices above are
             // controlled by the is user.
@@ -603,8 +606,11 @@ public class GraphicsState implements MapCloneable, Cloneable {
     
     /**
      * Sets the current transformation matrix (CTM) to its default value.
+     * 
+     * @throws PSErrorVMError A virtual memory error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void initmatrix() {
+    public void initmatrix() throws PSErrorVMError, ProgramError {
         this.ctm = this.device.defaultCTM();
     }
     
@@ -764,7 +770,7 @@ public class GraphicsState implements MapCloneable, Cloneable {
     public void setcolorspace(final PSObject obj)
             throws PSError, IOException, ProgramError {
         
-        color = ColorManager.autoSetColorSpace(obj);
+        color = ColorManager.autoSetColorSpace(obj, interp);
     }
     
     /**
@@ -1099,10 +1105,10 @@ public class GraphicsState implements MapCloneable, Cloneable {
             final PSObjectArray grayproc) throws ProgramError {
         
         try {
-            transfer.set(0, redproc);
-            transfer.set(1, greenproc);
-            transfer.set(2, blueproc);
-            transfer.set(3, grayproc);
+            transfer.put(0, redproc);
+            transfer.put(1, greenproc);
+            transfer.put(2, blueproc);
+            transfer.put(3, grayproc);
         } catch (PSErrorRangeCheck e) {
             throw new ProgramError("rangecheck in setColorTransfer()");
         }
@@ -1119,7 +1125,7 @@ public class GraphicsState implements MapCloneable, Cloneable {
     public void setTransfer(final PSObjectArray proc) throws ProgramError {
         for (int i = 0; i < 4; i++) {
             try {
-                transfer.set(i, proc);
+                transfer.put(i, proc);
             } catch (PSErrorRangeCheck e) {
                 throw new ProgramError("rangecheck in setTransfer()");
             }

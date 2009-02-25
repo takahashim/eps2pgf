@@ -20,6 +20,7 @@ package net.sf.eps2pgf.ps.resources.filters;
 
 import java.io.InputStream;
 
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
@@ -83,13 +84,14 @@ public final class FilterManager {
      * 
      * @param stack The stack from which parameters are read.
      * @param name The name of the filter for which the parameters must be read.
+     * @param vm The virtual memory manager.
      * 
      * @return Dictionary with parameters.
      * 
      * @throws PSError A PostScript error occurred.
      */
     public static PSObjectDict getParameters(final PSObjectName name,
-            final ArrayStack<PSObject> stack)
+            final ArrayStack<PSObject> stack, final VM vm)
             throws PSError {
         
         PSObjectDict dict;
@@ -97,9 +99,9 @@ public final class FilterManager {
         // There are some filters which have different possibilities for
         // arguments. 
         if (name.eq(FILTER_SUBFILEDECODE)) {
-            dict = getParametersSubFileDecode(name, stack);
+            dict = getParametersSubFileDecode(name, stack, vm);
         } else if (name.eq(FILTER_RUNLENGTHENCODE)) {
-            dict = getParametersRunLengthEncode(name, stack);
+            dict = getParametersRunLengthEncode(name, stack, vm);
         } else {
             // The parameters of the filter have the same possibilities:
             // For example for the DCTDecode filter:
@@ -110,7 +112,7 @@ public final class FilterManager {
                 dict = (PSObjectDict) obj;
             } else {
                 stack.push(obj);
-                dict = new PSObjectDict();
+                dict = new PSObjectDict(vm);
             }
         }
         
@@ -129,14 +131,15 @@ public final class FilterManager {
      * 
      * @param stack The stack from which parameters are read.
      * @param name The name of the filter for which the parameters must be read.
+     * @param vm The virtual memory manager.
      * 
      * @return Dictionary with parameters.
      * 
      * @throws PSError A PostScript error occurred.
      */
     private static PSObjectDict getParametersSubFileDecode(
-            final PSObjectName name, final ArrayStack<PSObject> stack)
-            throws PSError {
+            final PSObjectName name, final ArrayStack<PSObject> stack,
+            final VM vm) throws PSError {
         
         PSObjectDict dict;
         PSObject obj = stack.pop();
@@ -150,7 +153,7 @@ public final class FilterManager {
                 dict = (PSObjectDict) obj;
             } else {
                 stack.push(obj);
-                dict = new PSObjectDict();
+                dict = new PSObjectDict(vm);
             }
             dict.setKey(SubFileDecode.KEY_EODSTRING, eodString);
             dict.setKey(SubFileDecode.KEY_EODCOUNT, eodCount);
@@ -170,14 +173,15 @@ public final class FilterManager {
      * 
      * @param stack The stack from which parameters are read.
      * @param name The name of the filter for which the parameters must be read.
+     * @param vm The virtual memory manager.
      * 
      * @return Dictionary with parameters.
      * 
      * @throws PSError A PostScript error occurred.
      */
     private static PSObjectDict getParametersRunLengthEncode(
-            final PSObjectName name, final ArrayStack<PSObject> stack)
-            throws PSError {
+            final PSObjectName name, final ArrayStack<PSObject> stack,
+            final VM vm) throws PSError {
         
         int recordSize = stack.pop().toInt();
         PSObjectDict dict;
@@ -186,7 +190,7 @@ public final class FilterManager {
             dict = (PSObjectDict) obj;
         } else {
             stack.push(obj);
-            dict = new PSObjectDict();
+            dict = new PSObjectDict(vm);
         }
         dict.setKey("RecordSize", new PSObjectInt(recordSize));
 
@@ -201,19 +205,20 @@ public final class FilterManager {
      * @param paramDict The dictionary with filter parameters
      * @param sourceOrTarget The data source or target (depending whether it's
      * a decode or encode filter).
+     * @param vm The virtual memory manager.
      * 
      * @return The new file object with encode/decode filter wrapped around it.
      * 
      * @throws PSError A PostScript error occurred.
      */
     public static PSObjectFile filter(final PSObjectName filterName,
-            final PSObjectDict paramDict, final PSObject sourceOrTarget)
-            throws PSError {
+            final PSObjectDict paramDict, final PSObject sourceOrTarget,
+            final VM vm) throws PSError {
         
         String name = filterName.toString();
         
         if (name.endsWith("Decode")) {
-            return filterDecode(filterName, paramDict, sourceOrTarget);
+            return filterDecode(filterName, paramDict, sourceOrTarget, vm);
         } else if (name.endsWith("Encode")) {
             return filterEncode(filterName, paramDict, sourceOrTarget);
         } else {
@@ -227,14 +232,15 @@ public final class FilterManager {
      * @param name The filter name.
      * @param paramDict The dictionary with filter parameters
      * @param source The raw data source.
+     * @param vm The virtual memory manager.
      * 
      * @return A new file object with decode filter wrapped around it.
      * 
      * @throws PSError A PostScript error occurred.
      */
     private static PSObjectFile filterDecode(final PSObjectName name,
-            final PSObjectDict paramDict, final PSObject source)
-            throws PSError {
+            final PSObjectDict paramDict, final PSObject source,
+            final VM vm) throws PSError {
         
         InputStream inStream;
         if (source instanceof PSObjectFile) {
@@ -264,7 +270,7 @@ public final class FilterManager {
             throw new PSErrorUnregistered("Decode filter or type " + name);
         }
         
-        return new PSObjectFile(filteredStream);
+        return new PSObjectFile(filteredStream, vm);
     }
         
 

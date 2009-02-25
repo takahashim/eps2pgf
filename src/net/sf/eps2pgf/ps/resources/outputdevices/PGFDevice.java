@@ -42,10 +42,12 @@ import net.sf.eps2pgf.ps.Lineto;
 import net.sf.eps2pgf.ps.Moveto;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.PathSection;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
@@ -56,7 +58,6 @@ import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.shadings.RadialShading;
 import net.sf.eps2pgf.ps.resources.shadings.Shading;
-import net.sf.eps2pgf.util.CloneMappings;
 
 /**
  * Writes PGF files.
@@ -141,17 +142,26 @@ public class PGFDevice implements OutputDevice, Cloneable {
     /** Number of next bitmap image. */
     private int nextImage = 1;
     
+    /** Virtual memory manager. */
+    private VM vm;
+    
     /**
      * Creates a new instance of PGFExport.
      * 
      * @param wOut Writer to where the PGF code will be written.
      * @param pOptions Program options (may also contain options for this
      * device).
+     * @param vmManager The virtual memory manager.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public PGFDevice(final Writer wOut, final Options pOptions) {
+    public PGFDevice(final Writer wOut, final Options pOptions,
+            final VM vmManager) throws PSErrorVMError {
+        
+        vm = vmManager;
         out = wOut;
-        scopeStatus = new PSObjectDict();
-        deviceStatus = new PSObjectDict();
+        scopeStatus = new PSObjectDict(vm);
+        deviceStatus = new PSObjectDict(vm);
         options = pOptions;
     }
     
@@ -160,10 +170,13 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * coordinates to device space).
      * 
      * @return Default transformation matrix.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectMatrix defaultCTM() {
+    public PSObjectMatrix defaultCTM() throws PSErrorVMError, ProgramError {
         return new PSObjectMatrix(25.4 * 1000.0 / 72.0, 0.0, 0.0,
-                25.4 * 1000.0 / 72.0, 0.0, 0.0);
+                25.4 * 1000.0 / 72.0, 0.0, 0.0, vm);
     }
     
     /**
@@ -188,10 +201,10 @@ public class PGFDevice implements OutputDevice, Cloneable {
     public void init() throws PSError, IOException {
         
         scopeStatus.setKey(KEY_LAST_LINEWIDTH, new PSObjectReal(-1.0));
-        scopeStatus.setKey(KEY_LAST_DASHPATTERN, new PSObjectArray());
+        scopeStatus.setKey(KEY_LAST_DASHPATTERN, new PSObjectArray(vm));
         scopeStatus.setKey(KEY_LAST_DASHOFFSET, new PSObjectReal(0.0));
-        scopeStatus.setKey(KEY_LAST_COLOR, new PSObjectArray());
-        scopeStatus.setKey(KEY_LAST_COLSPACE, new PSObjectString(""));
+        scopeStatus.setKey(KEY_LAST_COLOR, new PSObjectArray(vm));
+        scopeStatus.setKey(KEY_LAST_COLSPACE, new PSObjectString("", vm));
         scopeStatus.setKey(KEY_LAST_LINECAP, new PSObjectInt(0));
         scopeStatus.setKey(KEY_LAST_LINEJOIN, new PSObjectInt(0));
         scopeStatus.setKey(KEY_LAST_MITERLIMIT, new PSObjectReal(10.0));
@@ -310,33 +323,18 @@ public class PGFDevice implements OutputDevice, Cloneable {
     /**
      * Returns a exact deep copy of this output device.
      * 
-     * @param cloneMap The clone map.
-     * 
      * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PGFDevice clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PGFDevice) cloneMap.get(this);
-        }
-        
+    @Override
+    public PGFDevice clone() {
         PGFDevice copy;
         try {
             copy = (PGFDevice) super.clone();
-            cloneMap.add(this, copy);
         } catch (CloneNotSupportedException e) {
-            throw new ProgramError("super.clone failed");
+            copy = null;
         }
 
-        if (cloneMap.containsKey(scopeStatus)) {
-            copy.scopeStatus = (PSObjectDict) cloneMap.get(scopeStatus);
-        } else {
-            copy.scopeStatus = scopeStatus.clone(cloneMap);
-            cloneMap.add(scopeStatus, copy.scopeStatus);
-        }
+        copy.scopeStatus = scopeStatus.clone();
         
         return copy;
     }
@@ -570,7 +568,7 @@ public class PGFDevice implements OutputDevice, Cloneable {
         double lastOffset = scopeStatus.get(KEY_LAST_DASHOFFSET).toReal();
         
         double scaling = gstate.getCtm().getMeanScaling();
-        PSObjectArray currentArray = new PSObjectArray();
+        PSObjectArray currentArray = new PSObjectArray(vm);
         for (int i = 0; i < gstate.getDashPattern().size(); i++) {
             currentArray.addToEnd(new PSObjectReal(gstate.getDashPattern()
                     .get(i).toReal() * scaling));
@@ -743,12 +741,12 @@ public class PGFDevice implements OutputDevice, Cloneable {
         out.write("\\pgfsetstrokecolor{eps2pgf_color}");
         out.write("\\pgfsetfillcolor{eps2pgf_color}\n");
         
-        PSObjectArray newColor = new PSObjectArray();
+        PSObjectArray newColor = new PSObjectArray(vm);
         for (int i = 0; i < n; i++) {
             newColor.addToEnd(new PSObjectReal(color.getLevel(i)));
         }
         scopeStatus.setKey(KEY_LAST_COLOR, newColor);
-        scopeStatus.setKey(KEY_LAST_COLSPACE, new PSObjectString(colspace));
+        scopeStatus.setKey(KEY_LAST_COLSPACE, new PSObjectString(colspace, vm));
     }
 
     /**
@@ -877,11 +875,11 @@ public class PGFDevice implements OutputDevice, Cloneable {
         try {
             OutputStream epsOut = new BufferedOutputStream(
                     new FileOutputStream(epsFile));
-            EpsImageCreator.writeImage(epsOut, img, epsFile.getName());
+            EpsImageCreator.writeImage(epsOut, img, epsFile.getName(), vm);
             epsOut.close();
             OutputStream pdfOut = new BufferedOutputStream(
                     new FileOutputStream(pdfFile));
-            PdfImageCreator pdfImgCreator = new PdfImageCreator();
+            PdfImageCreator pdfImgCreator = new PdfImageCreator(vm);
             pdfImgCreator.writeImage(pdfOut, img, pdfFile.getName());
             pdfOut.close();
             double[][] bbox = img.getDeviceBbox();

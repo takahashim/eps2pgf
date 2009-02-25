@@ -19,43 +19,55 @@
 package net.sf.eps2pgf.ps.resources.colors;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * The Interface PSColor.
  */
-public abstract class PSColor implements MapCloneable, Cloneable {
+public abstract class PSColor implements Cloneable {
     
     /** Color levels of this color. Exact meaning depends of color space. */
     private double[] levels;
     
     /**
+     * Construct a new PSColor.
+     */
+    protected PSColor() {
+        /* empty block */
+    }
+    
+    /**
+     * Construct a new PSColor.
+     * 
+     * @param componentLevel Levels of color components.
+     */
+    protected PSColor(final double[] componentLevel) {
+        try {
+            setColor(componentLevel);
+        } catch (PSError e) {
+            /* empty block */
+        } catch (ProgramError e) {
+            /* empty block */
+        }
+    }
+    
+    /**
      * Creates an exact deep copy of this object.
      * 
-     * @param cloneMap The clone map.
-     * 
      * @return an exact deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSColor clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSColor) cloneMap.get(this);
-        }
-        
+    @Override
+    public PSColor clone() {
         PSColor copy;
         try {
             copy = (PSColor) super.clone();
-            cloneMap.add(this, copy);
         } catch (CloneNotSupportedException e) {
-            throw new ProgramError("super.clone failed");
+            copy = null;
         }
         
         if (levels != null) {
@@ -75,9 +87,16 @@ public abstract class PSColor implements MapCloneable, Cloneable {
     /**
      * Gets a PostScript array describing the color space of this color.
      * 
+     * @param virtualMemory The VM manager for the shared object of the created
+     * array.
+     * 
      * @return array describing color space.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws PSErrorRangeCheck A PostScript rangecheck error.
      */
-    public abstract PSObjectArray getColorSpace();
+    public abstract PSObjectArray getColorSpace(final VM virtualMemory)
+            throws PSErrorVMError, PSErrorRangeCheck;
     
     /**
      * Gets the gray level equivalent of this color.
@@ -184,5 +203,4 @@ public abstract class PSColor implements MapCloneable, Cloneable {
     public double getLevel(final int i) {
         return levels[i];
     }
-    
 }

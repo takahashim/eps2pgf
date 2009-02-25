@@ -28,9 +28,10 @@ import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Path;
+import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
-import net.sf.eps2pgf.util.CloneMappings;
 
 /**
  * Device that writes only the labels to the output.
@@ -46,14 +47,19 @@ public class LOLDevice implements OutputDevice, Cloneable {
     
     /** Output is written to this writer. */
     private Writer out;
+    
+    /** Virtual memory manager. */
+    private VM vm;
 
     /**
      * Instantiates a new lOL device.
      * 
      * @param pOut Output will be written to this object.
+     * @param virtualMemory The virtual memory manager.
      */
-    public LOLDevice(final Writer pOut) {
-        this.out = pOut;
+    public LOLDevice(final Writer pOut, final VM virtualMemory) {
+        out = pOut;
+        vm = virtualMemory;
     }
 
     /**
@@ -68,40 +74,33 @@ public class LOLDevice implements OutputDevice, Cloneable {
     }
 
     /**
-     * Returns a <b>copy</b> default transformation matrix (converts user space
-     * coordinates to device space).
-     * 
-     * @return Default transformation matrix.
-     */
-    public PSObjectMatrix defaultCTM() {
-        return new PSObjectMatrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
-    }
-
-    /**
      * Returns a exact deep copy of this output device.
      * 
-     * @param cloneMap The clone map.
-     * 
      * @return Deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public LOLDevice clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (LOLDevice) cloneMap.get(this);
-        }
-        
+    @Override
+    public LOLDevice clone() {
         LOLDevice copy;
         try {
             copy = (LOLDevice) super.clone();
         } catch (CloneNotSupportedException e) {
-            throw new ProgramError("clone failed");
+            copy = null;
         }
-        cloneMap.add(this, copy);
         
         return copy;
+    }
+
+    /**
+     * Returns a <b>copy</b> default transformation matrix (converts user space
+     * coordinates to device space).
+     * 
+     * @return Default transformation matrix.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public PSObjectMatrix defaultCTM() throws PSErrorVMError, ProgramError {
+        return new PSObjectMatrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0, vm);
     }
 
     /**

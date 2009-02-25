@@ -29,11 +29,13 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFont;
@@ -101,10 +103,13 @@ public final class FontManager extends PSObjectDict {
     /**
      * Create a new FontDirectory and makes sure the FontManager is initialized.
      * 
+     * @param vm The virtual memory manager.
+     * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public FontManager() throws ProgramError {
-        super();
+    public FontManager(final VM vm) throws PSErrorVMError, ProgramError {
+        super(vm);
         
         // Make sure the FontManager is initialized
         initialize();
@@ -249,7 +254,8 @@ public final class FontManager extends PSObjectDict {
         String fontName = fontKey.toString();
         LOG.info("Loading " + fontName + " font from "
                 + Utils.getResourceDir());
-        PSObjectFont font = new PSObjectFont(Utils.getResourceDir(), fontName);
+        PSObjectFont font = new PSObjectFont(Utils.getResourceDir(), fontName,
+                getVm());
         
         // Now the font is loaded, add it to the fonts list so that it
         // doesn't need to loaded again.
@@ -321,12 +327,17 @@ public final class FontManager extends PSObjectDict {
      * Retrieves a set of TeX strings specified by the filename.
      * 
      * @param filename The filename.
+     * @param vm The vm.
      * 
      * @return The TeX strings dictionary.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public static PSObjectDict getTexStringDict(final String filename) {
+    public static PSObjectDict getTexStringDict(final String filename,
+            final VM vm) throws PSErrorVMError {
+        
         Properties props = allTexStrings.get(filename);
-        PSObjectDict texStringDict = new PSObjectDict();
+        PSObjectDict texStringDict = new PSObjectDict(vm);
         
         for (Enumeration<Object> e = props.keys(); e.hasMoreElements();) {
             String key = e.nextElement().toString();
@@ -346,11 +357,14 @@ public final class FontManager extends PSObjectDict {
      * are multiple matches the set with lowest order is selected.
      * 
      * @param fontname The font name.
+     * @param vm The virtual memory manager.
      * 
      * @return the TeX strings dictionary for the requested font name.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
     public static PSObjectDict getTexStringDictByFontname(
-            final String fontname) {
+            final String fontname, final VM vm) throws PSErrorVMError {
         
         String matchName = "default";
         int matchOrder = Integer.MAX_VALUE; 
@@ -367,7 +381,7 @@ public final class FontManager extends PSObjectDict {
                 matchOrder = order;
             }
         }
-        return getTexStringDict(matchName);
+        return getTexStringDict(matchName, vm);
     }
     
     /**

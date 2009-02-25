@@ -20,9 +20,10 @@
 package net.sf.eps2pgf.ps.resources.colors;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
-import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
@@ -55,16 +56,16 @@ public class CIEBasedABC extends CIEBased {
      * Define a new CIE-based ABC color space.
      * 
      * @param arr The array describing the new color space.
+     * @param interp The interpreter.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public CIEBasedABC(final PSObjectArray arr) throws PSError, ProgramError {
-        if (!arr.get(0).eq(FAMILYNAME)) {
-            throw new PSErrorTypeCheck();
-        }
+    public CIEBasedABC(final PSObjectArray arr, final Interpreter interp)
+            throws PSError, ProgramError {
         
-        setDict(checkEntries(arr.get(1).toDict()));
+        super(arr, interp);
+        checkEntries(getDict(), interp);
     }
     
     /**
@@ -72,35 +73,31 @@ public class CIEBasedABC extends CIEBased {
      * defined default values are added.
      * 
      * @param dict The dictionary.
-     * 
-     * @return The checked dictionary.
+     * @param interp The interpreter.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    static PSObjectDict checkEntries(final PSObjectDict dict)
-        throws PSError, ProgramError {
+    static void checkEntries(final PSObjectDict dict,
+            final Interpreter interp) throws PSError, ProgramError {
         
+        VM vm = interp.getVm();
         if (!dict.known(RANGEABC)) {
             double[] defaultRange = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
-            dict.setKey(RANGEABC, new PSObjectArray(defaultRange));
+            dict.setKey(RANGEABC, new PSObjectArray(defaultRange, vm));
         }
         if (!dict.known(DECODEABC)) {
-            PSObjectArray defaultDecode = new PSObjectArray();
-            defaultDecode.addToEnd(new PSObjectArray("{}", null));
-            defaultDecode.addToEnd(new PSObjectArray("{}", null));
-            defaultDecode.addToEnd(new PSObjectArray("{}", null));
+            PSObjectArray defaultDecode = new PSObjectArray(vm);
+            defaultDecode.addToEnd(new PSObjectArray("{}", interp));
+            defaultDecode.addToEnd(new PSObjectArray("{}", interp));
+            defaultDecode.addToEnd(new PSObjectArray("{}", interp));
             dict.setKey(DECODEABC, defaultDecode);
         }
         if (!dict.known(MATRIXABC)) {
             double[] defaultMatrix
                     =  {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
-            dict.setKey(MATRIXABC, new PSObjectArray(defaultMatrix));
+            dict.setKey(MATRIXABC, new PSObjectArray(defaultMatrix, vm));
         }
-        
-        checkCommonEntries(dict);
-        
-        return dict;
     }
     
     /**

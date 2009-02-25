@@ -28,7 +28,10 @@ import java.util.Formatter;
 import net.sf.eps2pgf.Main;
 import net.sf.eps2pgf.io.RandomAccessOutputStream;
 import net.sf.eps2pgf.ps.Image;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.filters.ASCII85Encode;
 import net.sf.eps2pgf.ps.resources.filters.FlateEncode;
@@ -55,18 +58,19 @@ public final class EpsImageCreator {
      * @param img Bitmap image to must be converted to EPS and written to the
      * OutputStream.
      * @param title Title of figure (used in EPS header)
+     * @param vm The virtual memory manager.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      */
     public static void writeImage(final OutputStream out, final Image img,
-            final String title) throws IOException, PSError {
+            final String title, final VM vm) throws IOException, PSError {
         
         RandomAccessOutputStream outBuf = new RandomAccessOutputStream(out);
         
         writeHeader(outBuf, img, title);
         writeScaling(outBuf, img);
-        writeColorSpace(outBuf, img);
+        writeColorSpace(outBuf, img, vm);
         writeImageDict(outBuf, img);
 
         OutputStream ascii85Out = new ASCII85Encode(outBuf, null);
@@ -140,14 +144,18 @@ public final class EpsImageCreator {
      * @param out OutputStream to which EPS image is written.
      * @param img Bitmap image to must be converted to EPS and written to the
      * OutputStream.
+     * @param vm The virtual memory manager.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSErrorVMError A virtual memory error occurred.
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
     private static void writeColorSpace(final RandomAccessOutputStream out,
-            final Image img) throws IOException {
+            final Image img, final VM vm) throws IOException, PSErrorVMError,
+            PSErrorRangeCheck {
         
         PSColor colorSpace = img.getColorSpace();
-        out.write(colorSpace.getColorSpace().isis());
+        out.write(colorSpace.getColorSpace(vm).isis());
         out.write(" setcolorspace\n");
     }
     

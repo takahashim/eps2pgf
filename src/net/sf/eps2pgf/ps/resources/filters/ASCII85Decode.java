@@ -85,13 +85,16 @@ public class ASCII85Decode extends InputStream {
         decodedPtr = 5;
         goodChars = 0;
 
-        PSObject obj = dict.lookup(FilterManager.KEY_CLOSESOURCE);
-        if (obj != null) {
-            closeSource = obj.toBool();
+        if (dict != null) {
+            PSObject obj = dict.lookup(FilterManager.KEY_CLOSESOURCE);
+            if (obj != null) {
+                closeSource = obj.toBool();
+            } else {
+                closeSource = false;
+            }
         } else {
             closeSource = false;
         }
-
     }
     
     /**

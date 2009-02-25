@@ -18,12 +18,11 @@
 
 package net.sf.eps2pgf.ps.resources.colors;
 
-import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * CMYK color.
@@ -31,7 +30,7 @@ import net.sf.eps2pgf.util.MapCloneable;
  * @author Wagenaars
  *
  */
-public class DeviceCMYK extends PSColor implements MapCloneable {
+public class DeviceCMYK extends PSColor implements Cloneable {
     
     /** Name of this color space family. */
     public static final PSObjectName FAMILYNAME
@@ -44,36 +43,7 @@ public class DeviceCMYK extends PSColor implements MapCloneable {
      * Instantiates a new CMYK color.
      */
     public DeviceCMYK() {
-        try {
-            setColor(DEFAULT_LEVELS);
-        } catch (PSError e) {
-            // this can never happen
-        } catch (ProgramError e) {
-            // this can never happen
-        }
-    }
-
-    /**
-     * Creates an exact deep copy of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return an exact deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @Override
-    public DeviceCMYK clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (DeviceCMYK) cloneMap.get(this);
-        }
-        
-        DeviceCMYK copy = (DeviceCMYK) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        return copy;
+        super(DEFAULT_LEVELS);
     }
 
     /**
@@ -90,11 +60,18 @@ public class DeviceCMYK extends PSColor implements MapCloneable {
     /**
      * Gets a PostScript array describing the color space of this color.
      * 
+     * @param vm The VM manager.
+     * 
      * @return array describing color space.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
     @Override
-    public PSObjectArray getColorSpace() {
-        PSObjectArray array = new PSObjectArray();
+    public PSObjectArray getColorSpace(final VM vm) throws PSErrorVMError,
+            PSErrorRangeCheck {
+        
+        PSObjectArray array = new PSObjectArray(vm);
         array.addToEnd(new PSObjectName("DeviceCMYK", true));
         return array;
     }

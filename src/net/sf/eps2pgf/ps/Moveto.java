@@ -18,15 +18,11 @@
 
 package net.sf.eps2pgf.ps;
 
-import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
-
 /**
  * Path section representing a PostScript moveto operator.
  * @author Paul Wagenaars
  */
-public class Moveto extends PathSection implements MapCloneable {
+public class Moveto extends PathSection implements Cloneable {
     
     /**
      * Create a new Movoto instance.
@@ -52,38 +48,4 @@ public class Moveto extends PathSection implements MapCloneable {
             setParam(i, Double.NaN);
         }
     }
-
-    /**
-     * Create a string representation of this object.
-     * 
-     * @return String representation of this object.
-     */
-    @Override
-    public String isis() {
-        return String.format("%.4g %.4g moveto", getParam(0), getParam(1));
-    }
-    
-    /**
-     * Create a clone of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Returns clone of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @Override
-    public Moveto clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (Moveto) cloneMap.get(this);
-        }
-
-        Moveto copy = (Moveto) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        return copy;
-    }
-
 }

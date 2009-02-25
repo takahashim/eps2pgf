@@ -19,22 +19,22 @@
 package net.sf.eps2pgf.ps.resources.colors;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
-import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
+import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 /**
  * Implements Indexed color space.
  */
-public class Indexed extends PSColor implements MapCloneable {
+public class Indexed extends PSColor implements Cloneable {
     
     /** Name of this color space family. */
     public static final PSObjectName FAMILYNAME
@@ -57,21 +57,20 @@ public class Indexed extends PSColor implements MapCloneable {
      * Create a new indexed color.
      * 
      * @param obj Object describing this color
+     * @param interp The interpreter
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public Indexed(final PSObject obj) throws PSError, ProgramError {
-        // Indexed color spaces must be defined using an array
-        if (!(obj instanceof PSObjectArray)) {
-            throw new PSErrorTypeCheck();
-        }
+    public Indexed(final PSObject obj, final Interpreter interp)
+            throws PSError, ProgramError {
         
         // Save the array specifying this color space
-        PSObjectArray colorArray = (PSObjectArray) obj;
+        PSObjectArray colorArray = obj.toArray();
         
         // Extract base color space
-        currentColor = ColorManager.autoSetColorSpace(colorArray.get(1));
+        currentColor = ColorManager.autoSetColorSpace(colorArray.get(1),
+                interp);
         
         // Extract the hival.
         hival = colorArray.get(2).toInt();
@@ -107,29 +106,13 @@ public class Indexed extends PSColor implements MapCloneable {
     /**
      * Creates an exact deep copy of this object.
      * 
-     * @param cloneMap The clone map.
-     * 
      * @return an exact deep copy of this object.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public Indexed clone(CloneMappings cloneMap) throws ProgramError {
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (Indexed) cloneMap.get(this);
-        }
-
-        Indexed copy = (Indexed) super.clone(cloneMap);
-        cloneMap.add(this, copy);
+    public Indexed clone() {
+        Indexed copy = (Indexed) super.clone();
         
-        if (cloneMap.containsKey(currentColor)) {
-            copy.currentColor = (PSColor) cloneMap.get(currentColor);
-        } else {
-            copy.currentColor = currentColor.clone(cloneMap);
-            cloneMap.add(currentColor, copy.currentColor);
-        }
+        copy.currentColor = currentColor.clone();
         copy.levels = levels.clone();
         
         return copy;
@@ -160,18 +143,26 @@ public class Indexed extends PSColor implements MapCloneable {
     /**
      * Gets a PostScript array describing the color space of this color.
      * 
+     * @param vm The VM manager
+     * 
      * @return array describing color space.
+     * 
+     * @throws PSErrorVMError Virtual memory error.
      */
     @Override
-    public PSObjectArray getColorSpace() {
-        PSObjectArray array = new PSObjectArray();
-        array.addToEnd(new PSObjectName("Indexed", true));
-        array.addToEnd(currentColor.getColorSpace());
-        array.addToEnd(new PSObjectInt(hival));
+    public PSObjectArray getColorSpace(final VM vm) throws PSErrorVMError {
+        PSObjectArray array = new PSObjectArray(vm);
+        try {
+            array.addToEnd(new PSObjectName("Indexed", true));
+            array.addToEnd(currentColor.getColorSpace(vm));
+            array.addToEnd(new PSObjectInt(hival));
+        } catch (PSErrorRangeCheck e) {
+            // this can never happen
+        }
 
         try {
             int m = currentColor.getNrComponents();
-            PSObjectString str = new PSObjectString(m * (hival + 1));
+            PSObjectString str = new PSObjectString(m * (hival + 1), vm);
             for (int i = 0; i <= hival; i++) {
                 for (int j = 0; j < m; j++) {
                     char chr = (char) Math.round(levels[i][j] * 255.0);

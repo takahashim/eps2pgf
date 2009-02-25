@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
@@ -29,8 +30,6 @@ import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
-import net.sf.eps2pgf.util.CloneMappings;
-import net.sf.eps2pgf.util.MapCloneable;
 
 import org.fontbox.afm.FontMetric;
 
@@ -39,7 +38,7 @@ import org.fontbox.afm.FontMetric;
  * PostScript object.
  * @author Paul Wagenaars
  */
-public class PSObjectFontMetrics extends PSObject implements MapCloneable {
+public class PSObjectFontMetrics extends PSObject {
     
     /** Stores all font metrics. */
     private FontMetric fontMetrics;
@@ -76,11 +75,12 @@ public class PSObjectFontMetrics extends PSObject implements MapCloneable {
      * corresponding font dictionary entries.
      * 
      * @param fontDict Font dictionary of the font.
+     * @param vm The virtual memory manager.
      * 
      * @throws PSError a PostScript error occurred
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectFontMetrics(final PSObjectDict fontDict)
+    public PSObjectFontMetrics(final PSObjectDict fontDict, final VM vm)
             throws PSError, ProgramError {
         
         int fontType;
@@ -94,40 +94,15 @@ public class PSObjectFontMetrics extends PSObject implements MapCloneable {
         
         switch (fontType) {
             case 1:
-                Type1.load(this, fontDict);
+                Type1.load(this, fontDict, vm);
                 break;
             case 3:
-                Type3.load(this, fontDict);
+                Type3.load(this, fontDict, vm);
                 break;
             default:
                 throw new PSErrorUnregistered("type " + fontType + " fonts");
         }
             
-    }
-    
-    /**
-     * Creates a (deep) copy of this object.
-     * 
-     * @param cloneMap The clone map.
-     * 
-     * @return Deep copy of this object
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    @Override
-    public PSObjectFontMetrics clone(CloneMappings cloneMap)
-            throws ProgramError {
-        
-        if (cloneMap == null) {
-            cloneMap = new CloneMappings();
-        } else if (cloneMap.containsKey(this)) {
-            return (PSObjectFontMetrics) cloneMap.get(this);
-        }
-        
-        PSObjectFontMetrics copy = (PSObjectFontMetrics) super.clone(cloneMap);
-        cloneMap.add(this, copy);
-        
-        return copy;
     }
     
     /**
