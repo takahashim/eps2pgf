@@ -92,7 +92,7 @@ public class VM implements Cloneable {
             throws PSErrorVMError {
         
         ObjectId id = new ObjectId();
-        if (id.getInGlobalVm()) {
+        if (id.isInGlobalVm()) {
             arraysGlobal.put(id, obj);
         } else {
             arraysLocal.put(id, obj);
@@ -113,7 +113,7 @@ public class VM implements Cloneable {
             throws PSErrorVMError {
         
         ObjectId id = new ObjectId();
-        if (id.getInGlobalVm()) {
+        if (id.isInGlobalVm()) {
             dictsGlobal.put(id, obj);
         } else {
             dictsLocal.put(id, obj);
@@ -151,7 +151,7 @@ public class VM implements Cloneable {
             throws PSErrorVMError {
         
         ObjectId id = new ObjectId();
-        if (id.getInGlobalVm()) {
+        if (id.isInGlobalVm()) {
             stringsGlobal.put(id, obj);
         } else {
             stringsLocal.put(id, obj);
@@ -209,7 +209,7 @@ public class VM implements Cloneable {
      * @return The requested array object.
      */
     public List<PSObject> getArrayObj(final ObjectId id) {
-        if (id.getInGlobalVm()) {
+        if (id.isInGlobalVm()) {
             return arraysGlobal.get(id);
         } else {
             return arraysLocal.get(id);
@@ -224,7 +224,7 @@ public class VM implements Cloneable {
      * @return The requested dictionary object.
      */
     public Map<PSObject, PSObject> getDictObj(final ObjectId id) {
-        if (id.getInGlobalVm()) {
+        if (id.isInGlobalVm()) {
             return dictsGlobal.get(id);
         } else {
             return dictsLocal.get(id);
@@ -241,7 +241,7 @@ public class VM implements Cloneable {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public VM getSaveObj(final ObjectId id) throws ProgramError {
-        if (id.getInGlobalVm()) {
+        if (id.isInGlobalVm()) {
             throw new ProgramError("Save object with global object ID.");
         } else {
             return savesLocal.get(id);
@@ -256,7 +256,7 @@ public class VM implements Cloneable {
      * @return The requested string object.
      */
     public StringBuilder getStringObj(final ObjectId id) {
-        if (id.getInGlobalVm()) {
+        if (id.isInGlobalVm()) {
             return stringsGlobal.get(id);
         } else {
             return stringsLocal.get(id);
@@ -361,7 +361,7 @@ public class VM implements Cloneable {
          * 
          * @return True if in global VM, false if in local VM.
          */
-        public boolean getInGlobalVm() {
+        public boolean isInGlobalVm() {
             return inGlobalVM;
         }
         
@@ -382,7 +382,7 @@ public class VM implements Cloneable {
         @Override
         public String toString() {
             String globLoc;
-            if (getInGlobalVm()) {
+            if (isInGlobalVm()) {
                 globLoc = "G";
             } else {
                 globLoc = "L";

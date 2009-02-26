@@ -56,6 +56,18 @@ public abstract class PSObjectComposite extends PSObject {
     }
     
     /**
+     * PostScript operator: gcheck.
+     * 
+     * @return Returns true if the operand is a simple object, or if it is
+     * composite and its value resides in global VM. It returns false if the
+     * operand is composite and its value resides in local VM. 
+     */
+    @Override
+    public boolean gcheck() {
+        return getId().isInGlobalVm();
+    }
+    
+    /**
      * Gets the VM object associated with this object.
      * 
      * @return The VM.

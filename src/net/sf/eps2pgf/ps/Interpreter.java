@@ -2329,6 +2329,17 @@ public class Interpreter {
     }
     
     /**
+     * PostScript op: gcheck.
+     * 
+     * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
+     */
+    public void op_gcheck() throws PSErrorStackUnderflow {
+        PSObject any = opStack.pop();
+        boolean inGlobal = any.gcheck();
+        opStack.push(new PSObjectBool(inGlobal));
+    }
+    
+    /**
      * PostScript op: ge.
      * 
      * @throws PSError A PostScript error occurred.

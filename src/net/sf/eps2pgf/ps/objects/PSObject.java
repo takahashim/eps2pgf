@@ -278,6 +278,17 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
+     * PostScript operator: gcheck.
+     * 
+     * @return Returns true if the operand is a simple object, or if it is
+     * composite and its value resides in global VM. It returns false if the
+     * operand is composite and its value resides in local VM. 
+     */
+    public boolean gcheck() {
+        return true;
+    }
+    
+    /**
      * PostScript operator: get
      * Gets a single element from this object.
      * @param index Index/key of object to get
