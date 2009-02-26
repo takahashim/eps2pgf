@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorVMError;
@@ -297,10 +298,15 @@ public class PSObjectDict extends PSObjectComposite implements Cloneable {
      * @param value New value
      * 
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorInvalidAccess A PostScript invalidaccess error occurred.
      */
     @Override
     public void put(final PSObject key, final PSObject value)
-            throws PSErrorTypeCheck {
+            throws PSErrorTypeCheck, PSErrorInvalidAccess {
+        
+        if (gcheck() && !value.gcheck()) {
+            throw new PSErrorInvalidAccess();
+        }
         
         setKey(key, value);
     }

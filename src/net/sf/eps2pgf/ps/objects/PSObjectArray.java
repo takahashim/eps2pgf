@@ -30,6 +30,7 @@ import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Parser;
 import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
@@ -514,10 +515,15 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * 
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorInvalidAccess A PostScript invalidaccess error occurred.
      */
     @Override
     public void put(final PSObject index, final PSObject value)
-            throws PSErrorRangeCheck, PSErrorTypeCheck {
+            throws PSErrorRangeCheck, PSErrorTypeCheck, PSErrorInvalidAccess {
+        
+        if (gcheck() && !value.gcheck()) {
+            throw new PSErrorInvalidAccess();
+        }
         
         put(index.toInt(), value);
     }

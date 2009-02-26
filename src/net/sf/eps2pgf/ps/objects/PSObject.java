@@ -476,9 +476,10 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * 
      * @throws PSErrorRangeCheck Invalid index or key.
      * @throws PSErrorTypeCheck Can not 'put' anything in this object type.
+     * @throws PSErrorInvalidAccess PostScript error invalidaccess. 
      */
     public void put(final PSObject index, final PSObject value)
-            throws PSErrorRangeCheck, PSErrorTypeCheck {
+            throws PSErrorRangeCheck, PSErrorTypeCheck, PSErrorInvalidAccess {
         
         throw new PSErrorTypeCheck();
     }
