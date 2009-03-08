@@ -1101,13 +1101,15 @@ public class GraphicsState implements Cloneable {
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      * @throws PSErrorInvalidAccess A PostScript invalidaccess error occurred.
+     * @throws PSErrorVMError Virtual memory error.
      */
     public void setColorTransfer(final PSObjectArray redproc,
             final PSObjectArray greenproc, final PSObjectArray blueproc,
             final PSObjectArray grayproc)
-            throws ProgramError, PSErrorInvalidAccess {
+            throws ProgramError, PSErrorInvalidAccess, PSErrorVMError {
         
         try {
+            transfer = new PSObjectArray(4, interp.getVm());
             transfer.put(0, redproc);
             transfer.put(1, greenproc);
             transfer.put(2, blueproc);
@@ -1125,10 +1127,12 @@ public class GraphicsState implements Cloneable {
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      * @throws PSErrorInvalidAccess A PostScript invalidaccess error occurred.
+     * @throws PSErrorVMError Virtual memory error.
      */
     public void setTransfer(final PSObjectArray proc) throws ProgramError,
-            PSErrorInvalidAccess {
+            PSErrorInvalidAccess, PSErrorVMError {
         
+        transfer = new PSObjectArray(4, interp.getVm());
         for (int i = 0; i < 4; i++) {
             try {
                 transfer.put(i, proc);

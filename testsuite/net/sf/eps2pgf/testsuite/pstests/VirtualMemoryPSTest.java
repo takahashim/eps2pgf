@@ -173,16 +173,6 @@ public class VirtualMemoryPSTest {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void localGlobalVM2() throws Exception {
-        String cmd = "{save 3 array dup /a def exch restore} stopped"
-            + " 3 1 roll pop pop"
-            + " true setglobal save 3 array dup /b def exch restore"
-            + " type /arraytype eq";
-        assertTrue(Common.testString(interp, cmd, 2));
-    }
-    
-    /** Test. @throws Exception the exception */
-    @Test
     public void gcheck1() throws Exception {
         String cmd = "1 gcheck"
             + " /lstr (string1) def"

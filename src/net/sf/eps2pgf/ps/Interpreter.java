@@ -343,7 +343,6 @@ public class Interpreter {
                 try {
                     executeObject(obj, false);
                 } catch (PSError e) {
-                    System.out.println("-> "); //TODO rm line
                     opStack = opStackCopy;
                     opStack.push(obj);
                     PSObjectDict errordict = 
