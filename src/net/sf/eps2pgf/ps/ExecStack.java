@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,18 +32,23 @@ import net.sf.eps2pgf.ps.objects.PSObjectFile;
  * Execution stack. Stack of objects that await processing by the interpreter.
  * @author Paul Wagenaars
  */
+//TODO implement execstack as subclass of ArrayStack
 public class ExecStack {
     /** Execution stack (see PostScript manual for more info). */
     private PSObjectArray stack;
     
+    /** VM belonging to this execution stack.*/
+    private VM vm;
+    
     /**
      * Create a new execution stack.
      * 
-     * @param vm The virtual memory manager.
+     * @param virtualMemory The virtual memory manager.
      * 
      * @throws PSErrorVMError Virtual memory error.
      */
-    public ExecStack(final VM vm) throws PSErrorVMError {
+    public ExecStack(final VM virtualMemory) throws PSErrorVMError {
+        vm = virtualMemory;
         stack = new PSObjectArray(vm);
     }
     
@@ -131,7 +136,7 @@ public class ExecStack {
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void push(final PSObject obj) throws ProgramError {
+    public void push(PSObject obj) throws ProgramError {
         try {
             stack.addToEnd(obj);
         } catch (PSErrorRangeCheck e) {

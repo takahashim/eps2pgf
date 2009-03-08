@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorNoCurrentPoint;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
@@ -1099,10 +1100,12 @@ public class GraphicsState implements Cloneable {
      * @param grayproc The gray transfer function.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorInvalidAccess A PostScript invalidaccess error occurred.
      */
     public void setColorTransfer(final PSObjectArray redproc,
             final PSObjectArray greenproc, final PSObjectArray blueproc,
-            final PSObjectArray grayproc) throws ProgramError {
+            final PSObjectArray grayproc)
+            throws ProgramError, PSErrorInvalidAccess {
         
         try {
             transfer.put(0, redproc);
@@ -1121,8 +1124,11 @@ public class GraphicsState implements Cloneable {
      * @param proc The new transfer procedure.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorInvalidAccess A PostScript invalidaccess error occurred.
      */
-    public void setTransfer(final PSObjectArray proc) throws ProgramError {
+    public void setTransfer(final PSObjectArray proc) throws ProgramError,
+            PSErrorInvalidAccess {
+        
         for (int i = 0; i < 4; i++) {
             try {
                 transfer.put(i, proc);

@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -306,6 +306,9 @@ public class Interpreter {
      */
     public void start() throws ProgramError, PSError, IOException {
         try {
+            // Make sure that the allocation mode start in local
+            getVm().setGlobal(false);
+            
             run();
             
             // Do some error reporting using the handleerror procedure if an
@@ -332,14 +335,15 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void run() throws PSError, ProgramError {
-        while (this.getExecStack().size() > 0) {
-            PSObject obj = this.getExecStack().getNextToken(this);
+        while (getExecStack().size() > 0) {
+            PSObject obj = getExecStack().getNextToken(this);
             if (obj != null) {
                 interpCounter++;
                 ArrayStack<PSObject> opStackCopy = getOpStack().clone();
                 try {
                     executeObject(obj, false);
                 } catch (PSError e) {
+                    System.out.println("-> "); //TODO rm line
                     opStack = opStackCopy;
                     opStack.push(obj);
                     PSObjectDict errordict = 
@@ -3829,8 +3833,8 @@ public class Interpreter {
             PSErrorTypeCheck {
         
         boolean bool = getOpStack().pop().toBool();
-        PSObjectDict systemDict = dictStack.lookup("systemdict").toDict();
-        systemDict.setKey("currentpacking", new PSObjectBool(bool));
+        PSObjectDict dict = dictStack.lookup("userdict").toDict();
+        dict.setKey("currentpacking", new PSObjectBool(bool));
     }
     
     /**

@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,6 +138,13 @@ public class VirtualMemoryPSTest {
             + " b 0 get 100 eq exch 0 get 100 eq";
         assertTrue(Common.testString(interp, cmd, 4));
     }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void saveRestore9() throws Exception {
+        String cmd = "save /test [1 2 3] def restore /test where not";
+        assertTrue(Common.testString(interp, cmd, 1));
+    }
 
     /** Test. @throws Exception the exception */
     @Test
@@ -178,9 +185,29 @@ public class VirtualMemoryPSTest {
     @Test
     public void gcheck1() throws Exception {
         String cmd = "1 gcheck"
-            + " (abc) gcheck not"
-            + " true setglobal (def) false setglobal gcheck";
-        assertTrue(Common.testString(interp, cmd, 3));
+            + " /lstr (string1) def"
+            + " /ldict 10 dict def"
+            + " /larray [1 2 3] def"
+            + " true setglobal"
+            + " /gstr (string2) def"
+            + " /gdict 5 dict def"
+            + " /garray [1 2 3] def"
+            + " false setglobal"
+            + " lstr gcheck not"
+            + " ldict gcheck not"
+            + " larray gcheck not"
+            + " gstr gcheck"
+            + " gdict gcheck"
+            + " garray gcheck";
+        assertTrue(Common.testString(interp, cmd, 7));
+    }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void gcheck2() throws Exception {
+        String cmd = "{100 array execstack dup length 1 sub get gcheck not}"
+            + " stopped not";
+        assertTrue(Common.testString(interp, cmd, 2));
     }
     
     

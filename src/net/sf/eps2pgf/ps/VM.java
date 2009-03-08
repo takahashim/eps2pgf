@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@
 
 package net.sf.eps2pgf.ps;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -41,7 +43,7 @@ public class VM implements Cloneable {
      * assigned negative IDs, and when in local mode (=false) objects are
      * assigned positive IDs.
      */
-    private boolean isGlobal = false;
+    private boolean isGlobal = true;
     
     /** Map that holds all composite values of local array objects. */
     private WeakHashMap<ObjectId, List<PSObject>> arraysLocal =
@@ -173,10 +175,21 @@ public class VM implements Cloneable {
             copy = null;
         }
         
-        copy.arraysLocal =
-            new WeakHashMap<ObjectId, List<PSObject>>(arraysLocal);
-        copy.dictsLocal =
-            new WeakHashMap<ObjectId, Map<PSObject, PSObject>>(dictsLocal);
+        copy.arraysLocal = new WeakHashMap<ObjectId, List<PSObject>>();
+        for (Map.Entry<ObjectId, List<PSObject>> e : arraysLocal.entrySet()) {
+            List<PSObject> copyValue = new ArrayList<PSObject>(e.getValue());
+            copy.arraysLocal.put(e.getKey(), copyValue);
+        }
+        
+        copy.dictsLocal = new WeakHashMap<ObjectId, Map<PSObject, PSObject>>();
+        for (Map.Entry<ObjectId, Map<PSObject, PSObject>> e
+                : dictsLocal.entrySet()) {
+            
+            Map<PSObject, PSObject> copyValue =
+                new HashMap<PSObject, PSObject>(e.getValue());
+            copy.dictsLocal.put(e.getKey(), copyValue);
+        }
+        
         // The strings are not copied (see PostScript manual)
         
         return copy;
@@ -269,7 +282,6 @@ public class VM implements Cloneable {
      * @param snapshot The snapshot.
      */
     public void restoreFromSnapshot(final VM snapshot) {
-        //TODO we need to check if the restore is valid
         isGlobal = snapshot.isGlobal;
         
         arraysLocal = snapshot.arraysLocal;
@@ -285,6 +297,35 @@ public class VM implements Cloneable {
      */
     public void setGlobal(boolean newGlobal) {
         isGlobal = newGlobal;
+    }
+    
+    /**
+     * Checks whether this VM contains a reference to a given object ID.
+     * 
+     * @param id The object ID for which to look.
+     * 
+     * @return True, if this VM has a reference to the object ID.
+     * 
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public boolean hasReference(final ObjectId id) throws ProgramError {
+        Object obj = getArrayObj(id);
+        if (obj != null) {
+            return true;
+        }
+        obj = getDictObj(id);
+        if (obj != null) {
+            return true;
+        }
+        obj = getSaveObj(id);
+        if (obj != null) {
+            return true;
+        }
+        obj = getStringObj(id);
+        if (obj != null) {
+            return true;
+        }
+        return false;
     }
     
     /**

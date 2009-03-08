@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,17 +54,8 @@ public class DictStack {
     public static final PSObjectName KEY_INTERNALDICT =
         new PSObjectName("/eps2pgfinternaldict");
     
-    /** Dictionary stack (except for the permanent dictionaries). */
+    /** Dictionary stack. (0: systemdict, 1: globaldict, 2:userdict */
     private ArrayStack<PSObjectDict> dictStack = new ArrayStack<PSObjectDict>();
-    
-    /** User dictionary. */
-    private PSObjectDict userdict;
-    
-    /** Global dictionary. */
-    private PSObjectDict globaldict;
-    
-    /** System dictionary. */
-    private PSObjectDict systemdict;
     
     /** Interpreter to which this dictionary stack belongs. */
     private Interpreter interp;
@@ -98,9 +89,19 @@ public class DictStack {
      */
     public DictStack(final Interpreter aInterp) throws PSError, ProgramError {
         interp = aInterp;
-        userdict = new PSObjectDict(interp.getVm());
-        globaldict = new PSObjectDict(interp.getVm());
-        systemdict = new PSObjectDict(interp.getVm());
+        
+        // The user dictionary must be allocated in local VM
+        interp.getVm().setGlobal(false);
+        PSObjectDict userdict = new PSObjectDict(interp.getVm());
+        
+        // The rest must be allocated in global VM
+        interp.getVm().setGlobal(true);
+        PSObjectDict globaldict = new PSObjectDict(interp.getVm());
+        PSObjectDict systemdict = new PSObjectDict(interp.getVm());
+        
+        dictStack.push(systemdict);
+        dictStack.push(globaldict);
+        dictStack.push(userdict);
         
         fillSystemDict();
         defineQuickAccessConstants();
@@ -123,13 +124,10 @@ public class DictStack {
      * @throws PSErrorStackUnderflow Tried to pop an object from an empty stack.
      */
     public void checkAccess(final boolean execute, final boolean read,
-            final boolean write)
-            throws PSErrorInvalidAccess, PSErrorStackUnderflow {
-        if (dictStack.size() > 0) {
-            dictStack.peek().checkAccess(execute, read, write);
-        } else {
-            userdict.checkAccess(execute, read, write);
-        }
+            final boolean write) throws PSErrorInvalidAccess,
+            PSErrorStackUnderflow {
+        
+        dictStack.peek().checkAccess(execute, read, write);
     }
     
     /**
@@ -138,11 +136,11 @@ public class DictStack {
      */
     public void cleardictstack() {
         try {
-            while (true) {
+            while (dictStack.size() > 3) {
                 dictStack.pop();
             }
         } catch (PSErrorStackUnderflow e) {
-            // we reached the end of the stack, it's empty now.
+            // this can never happen
         }
     }
     
@@ -152,7 +150,7 @@ public class DictStack {
      * @return Returns the number of dictionaries on the stack
      */
     int countdictstack() {
-        return 3 + dictStack.size();
+        return dictStack.size();
     }
     
     /**
@@ -166,7 +164,7 @@ public class DictStack {
             PSObjectDict dict = dictStack.peek();
             dict.setKey(key, value);
         } catch (PSErrorStackUnderflow e) {
-            userdict.setKey(key, value);
+            // this can never happen
         }
     }
     
@@ -178,22 +176,21 @@ public class DictStack {
      * 
      * @param array Array to which the dictionaries will be stored
      * 
+     * @return Subarray of <code>array</code> with all dictionaries
+     * 
+     * @throws PSErrorInvalidAccess A PostScript invalid access error occurred.
      * @throws PSErrorRangeCheck <CODE>array</CODE> is too short to store all
      * dictionaries.
-     * 
-     * @return Subarray of <code>array</code> with all dictionaries
      */
     public PSObjectArray dictstack(final PSObjectArray array)
-            throws PSErrorRangeCheck {
-        int n = countdictstack();
+            throws PSErrorRangeCheck, PSErrorInvalidAccess {
+        
+        int n = dictStack.size();
         if (n > array.length()) {
             throw new PSErrorRangeCheck();
         }
-        array.put(0, systemdict);
-        array.put(1, globaldict);
-        array.put(2, userdict);
-        for (int i = 0; i < dictStack.size(); i++) {
-            array.put(i + 3, dictStack.get(i));
+        for (int i = 0; i < n; i++) {
+            array.put(i, dictStack.get(i));
         }
         
         return array.getinterval(0, n);
@@ -231,34 +228,15 @@ public class DictStack {
     }
     
     /**
-     * Write a representation of the full dictionary stack to the standard
-     * output.
-     * 
-     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
-     */
-    public void dumpFull() throws PSErrorRangeCheck {
-        System.out.println("----- Dictionary stack");
-        for (int i = dictStack.size() - 1; i >= 0; i--) {
-            PSObjectDict dict = dictStack.get(i);
-            System.out.println("  --- dict" + i);
-            dict.dumpFull("    - ");
-        }
-        System.out.println("  --- userdict");
-        userdict.dumpFull("    - ");
-        System.out.println("  --- systemdict");
-        System.out.println("    - " + systemdict.length()
-                + " key->value pairs.");
-        System.out.println("----- End of dictionary stack");
-    }
-
-    /**
      * Fill the system dictionary with all operators and other values.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     private void fillSystemDict() throws PSError, ProgramError {
-
+        PSObjectDict systemdict = dictStack.get(0);
+        PSObjectDict globaldict = dictStack.get(1);
+        PSObjectDict userdict = dictStack.get(2);
         PSObjectArray emptyProc = new PSObjectArray("{}", interp);
 
         // Add operators
@@ -288,7 +266,8 @@ public class DictStack {
             systemdict.setKey(name, op);
         }
         
-        // add errordict dictionary
+        // add errordict dictionary (must be in local VM)
+        interp.getVm().setGlobal(false);
         PSObjectDict errordict = new PSObjectDict(interp.getVm());
         PSObjectName[] errs = PSError.getAllPSErrors();
         for (int i = 0; i < errs.length; i++) {
@@ -300,8 +279,10 @@ public class DictStack {
         errordict.setKey("handleerror",
                 new PSObjectArray("{eps2pgfhandleerror}", interp));
         systemdict.setKey("errordict", errordict);
+        interp.getVm().setGlobal(true);
         
-        // Add $error dictionary
+        // Add $error dictionary (must be in local VM)
+        interp.getVm().setGlobal(false);
         PSObjectDict dollarerror = new PSObjectDict(interp.getVm());
         dollarerror.setKey("newerror", new PSObjectBool(false));
         dollarerror.setKey("errorname", emptyProc);
@@ -313,19 +294,24 @@ public class DictStack {
         dollarerror.setKey("recordstacks", new PSObjectBool(true));
         dollarerror.setKey("binary", new PSObjectBool(false));
         systemdict.setKey("$error", dollarerror);
+        interp.getVm().setGlobal(true);
         
-        // add permanent dictionaries
+        // add permanent dictionaries in global VM
         systemdict.setKey("systemdict", systemdict);
         systemdict.setKey("userdict", userdict);
         systemdict.setKey("globaldict", globaldict);
-        systemdict.setKey("statusdict", new PSObjectDict(interp.getVm()));
-        systemdict.setKey("FontDirectory",
-                interp.getResourceManager().getFontManager());
         systemdict.setKey("GlobalFontDirectory",
                 interp.getResourceManager().getFontManager());
         systemdict.setKey("SharedFontDirectory",
                 interp.getResourceManager().getFontManager());
         systemdict.setKey(KEY_INTERNALDICT, new PSObjectDict(interp.getVm()));
+        
+        // add permanent dictionaries in local VM
+        interp.getVm().setGlobal(false);
+        systemdict.setKey("statusdict", new PSObjectDict(interp.getVm()));
+        systemdict.setKey("FontDirectory",
+                interp.getResourceManager().getFontManager());
+        interp.getVm().setGlobal(true);
         
         // add encoding vectors
         systemdict.setKey("ISOLatin1Encoding",
@@ -384,7 +370,8 @@ public class DictStack {
         try {
             return dictStack.peek();
         } catch (PSErrorStackUnderflow e) {
-            return userdict;
+            // this can never happen
+            return null;
         }
     }
     
@@ -419,21 +406,6 @@ public class DictStack {
             }
         }
         
-        // Then look in the permanent dictionary userdict
-        if (userdict.known(key)) {
-            return userdict;
-        }
-        
-        // Then look in up in the permanent dictionary globaldict
-        if (globaldict.known(key)) {
-            return globaldict;
-        }
-        
-        // Finally, look in the permanent dictionary systemdict
-        if (systemdict.known(key)) {
-            return systemdict;
-        }
-        
         return null;
     }
     
@@ -459,7 +431,6 @@ public class DictStack {
         }
         return false;
     }
-    
     
     /**
      * Checks whether an object is an continuation function.
@@ -509,7 +480,7 @@ public class DictStack {
      * found.
      */
     public PSObject lookup(final String key) {
-        return this.lookup(new PSObjectName(key, true));
+        return lookup(new PSObjectName(key, true));
     }
     
     /**
@@ -522,6 +493,7 @@ public class DictStack {
      */
     public void store(final PSObject key, final PSObject value)
             throws PSErrorTypeCheck {
+        
         PSObjectDict dict = where(key);
         if (dict == null) {
             // Key is currently not defined in any dictionary. So define it in
@@ -529,7 +501,15 @@ public class DictStack {
             def(key, value);
         } else {
             dict.setKey(key, value);
-        }        
+        }
     }
     
+    /**
+     * Gets the complete dictionary stack.
+     * 
+     * @return The dictionary stack.
+     */
+    public ArrayStack<PSObjectDict> getStack() {
+        return dictStack;
+    }
 }

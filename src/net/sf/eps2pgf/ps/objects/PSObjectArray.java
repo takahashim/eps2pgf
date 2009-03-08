@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -535,12 +535,18 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * @param value New value
      * 
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorInvalidAccess A PostScript invalid access error occurred.
      */
     public void put(final int index, final PSObject value)
-            throws PSErrorRangeCheck {
+            throws PSErrorRangeCheck, PSErrorInvalidAccess {
         
         if ((index < 0) || (index >= size())) {
             throw new PSErrorRangeCheck();
+        }
+        if (value instanceof PSObjectComposite) {
+            if (gcheck() && !value.gcheck()) {
+                throw new PSErrorInvalidAccess();
+            }
         }
         getArray().set(index + offset, value);
     }
@@ -596,10 +602,11 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * @param value The value.
      * 
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorInvalidAccess the PS error invalid access
      */
     //TODO rename this method to putReal(..., ...)
     public void setReal(final int index, final double value)
-            throws PSErrorRangeCheck {
+            throws PSErrorRangeCheck, PSErrorInvalidAccess {
         
         put(index, new PSObjectReal(value));
     }
@@ -722,13 +729,7 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
             list.add(0, new PSObjectBool(false));
         } else {
             list = new ArrayList<PSObject>(3);
-            if (nr == 1) {
-                PSObjectArray empty = new PSObjectArray(getVm());
-                empty.setLiteral(isLiteral());
-                list.add(0, empty);
-            } else {
-                list.add(0, new PSObjectArray(this, 1, nr - 1));
-            }
+            list.add(0, new PSObjectArray(this, 1, nr - 1));
             list.add(1, get(0));
             list.add(2, new PSObjectBool(true));
         }

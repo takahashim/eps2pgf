@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -304,8 +304,15 @@ public class PSObjectDict extends PSObjectComposite implements Cloneable {
     public void put(final PSObject key, final PSObject value)
             throws PSErrorTypeCheck, PSErrorInvalidAccess {
         
-        if (gcheck() && !value.gcheck()) {
-            throw new PSErrorInvalidAccess();
+        if (key instanceof PSObjectComposite) {
+            if (gcheck() && !key.gcheck()) {
+                throw new PSErrorInvalidAccess();
+            }
+        }
+        if (value instanceof PSObjectComposite) {
+            if (gcheck() && !value.gcheck()) {
+                throw new PSErrorInvalidAccess();
+            }
         }
         
         setKey(key, value);

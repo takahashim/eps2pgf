@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,9 @@ public class PSObjectSave extends PSObjectComposite implements Cloneable {
             throws PSErrorVMError, ProgramError {
         
         super(interp.getVm());
+        
         interpCount = interp.getInterpCounter();
-        getVm().addSaveObj(interp.getVm().clone());
+        setId(getVm().addSaveObj(interp.getVm().clone()));
         
         int interpId = interp.hashCode();
         ArrayList<PSObjectSave> saveObjs;
@@ -73,7 +74,7 @@ public class PSObjectSave extends PSObjectComposite implements Cloneable {
         }
         saveObjs.add(this);
     }
-
+    
     /**
      * Create a new save object. The new object is a shallow copy of the
      * supplied save object.
@@ -82,6 +83,7 @@ public class PSObjectSave extends PSObjectComposite implements Cloneable {
      */
     public PSObjectSave(final PSObjectSave saveObj) {
         super(saveObj.getVm(), saveObj.getId());
+        
         interpCount = saveObj.interpCount;
         valid = saveObj.valid;
     }
@@ -157,16 +159,22 @@ public class PSObjectSave extends PSObjectComposite implements Cloneable {
         }
         
         VM savedVm = getVm().getSaveObj(getId());
+        
+        // Before we do the actual restore we look through the operand,
+        // execution and dictionary stack to see if they contain a reference
+        // to a composite object to would be discarded by this restore.
+        // Do the actual restore
         interp.getVm().restoreFromSnapshot(savedVm);
         
         // Invalidate this object and all newer save objects
         valid = false;
         int interpId = interp.hashCode();
         ArrayList<PSObjectSave> saveObjs = allSaveObjs.get(interpId);
-        for (PSObjectSave current : saveObjs) {
-            if (current.interpCount > interpCount) {
-                current.valid = false;
-                saveObjs.remove(current);
+        for (int i = saveObjs.size() - 1; i >= 0; i--) {
+            PSObjectSave currentObj = saveObjs.get(i);
+            if (currentObj.interpCount > interpCount) {
+                currentObj.valid = false;
+                saveObjs.remove(i);
             }
         }
     }

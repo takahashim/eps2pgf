@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public abstract class PSObjectComposite extends PSObject {
      * 
      * @return The shared object's ID.
      */
-    protected ObjectId getId() {
+    public ObjectId getId() {
         return objectId;
     }
     

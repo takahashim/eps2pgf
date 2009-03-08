@@ -1,7 +1,7 @@
 /*
  * This file is part of Eps2pgf.
  *
- * Copyright 2007-2009 Paul Wagenaars <paul@wagenaars.org>
+ * Copyright 2007-2009 Paul Wagenaars
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package net.sf.eps2pgf.ps.objects;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefinedResult;
@@ -134,9 +135,10 @@ public class PSObjectMatrix extends PSObjectArray implements Cloneable {
      * 
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorInvalidAccess A PostScript invalid access error occurred.
      */
     public void concat(final PSObjectMatrix conc)
-            throws PSErrorRangeCheck, PSErrorTypeCheck {
+            throws PSErrorRangeCheck, PSErrorTypeCheck, PSErrorInvalidAccess {
         // [a b c d tx ty] [a b 0 ; c d 0 ; tx ty 1]
         double a = conc.getReal(0) * getReal(0) + conc.getReal(1) * getReal(2);
         double b = conc.getReal(0) * getReal(1) + conc.getReal(1) * getReal(3);
@@ -294,9 +296,10 @@ public class PSObjectMatrix extends PSObjectArray implements Cloneable {
      * @throws PSErrorUndefinedResult the PS error undefined result
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorInvalidAccess A PostScript invalid access error occurred.
      */
     public void invert() throws PSErrorUndefinedResult, PSErrorRangeCheck,
-            PSErrorTypeCheck {
+            PSErrorTypeCheck, PSErrorInvalidAccess {
         
         double a = getReal(0);
         double b = getReal(1);
@@ -372,9 +375,10 @@ public class PSObjectMatrix extends PSObjectArray implements Cloneable {
      * 
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorInvalidAccess A PostScript invalid access error occurred.
      */
     public void rotate(final double angle) throws PSErrorRangeCheck,
-            PSErrorTypeCheck {
+            PSErrorTypeCheck, PSErrorInvalidAccess {
         
         // [a b c d xx yy]
         double cosa = Math.cos(angle * Math.PI / 180);
@@ -400,9 +404,10 @@ public class PSObjectMatrix extends PSObjectArray implements Cloneable {
      * 
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorInvalidAccess A PostScript invalid access error occurred.
      */
     public void scale(final double sx, final double sy)
-            throws PSErrorRangeCheck, PSErrorTypeCheck {
+            throws PSErrorRangeCheck, PSErrorTypeCheck, PSErrorInvalidAccess {
         
         // [a b c d xx yy]
         setReal(0, sx * getReal(0));
@@ -468,9 +473,10 @@ public class PSObjectMatrix extends PSObjectArray implements Cloneable {
      * 
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     * @throws PSErrorInvalidAccess A PostScript invalid access error occurred.
      */
     public void translate(final double tx, final double ty)
-            throws PSErrorRangeCheck, PSErrorTypeCheck {
+            throws PSErrorRangeCheck, PSErrorTypeCheck, PSErrorInvalidAccess {
         
         // [a b c d xx yy]
         setReal(4, tx * getReal(0) + ty * getReal(2) + getReal(4));
