@@ -3330,6 +3330,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_restore() throws PSError, IOException, ProgramError {
+        log.fine("Operator: restore");
         PSObjectSave save = getOpStack().pop().toSave();
         save.restore(this);
         gstate.restoreAllGstate(false);
@@ -3431,6 +3432,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_save() throws PSError, IOException, ProgramError {
+        log.fine("Operator: save");
         getOpStack().push(new PSObjectSave(this));
         gstate.saveGstate(false);
     }
