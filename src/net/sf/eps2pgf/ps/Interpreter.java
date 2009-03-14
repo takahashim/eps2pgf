@@ -159,7 +159,7 @@ public class Interpreter {
         OutputDevice output;
         switch (opts.getOutputType()) {
             case PGF:
-                output = new PGFDevice(outputWriter, options, vm);
+                output = new PGFDevice(outputWriter, this);
                 break;
             case LOL:
                 output = new LOLDevice(outputWriter, vm);

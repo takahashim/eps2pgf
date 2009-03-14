@@ -39,11 +39,11 @@ import net.sf.eps2pgf.ps.Closepath;
 import net.sf.eps2pgf.ps.Curveto;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Lineto;
 import net.sf.eps2pgf.ps.Moveto;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.PathSection;
-import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
@@ -132,26 +132,18 @@ public class PGFDevice implements OutputDevice, Cloneable {
     /** Output file. */
     private Writer out;
     
-    /** Program options (may also contain options for this device). */
-    private Options options;
-    
-    /** Virtual memory manager. */
-    private VM vm;
+    /** Interpreter to which this device belongs. */
+    private Interpreter interp;
     
     /**
      * Creates a new instance of PGFExport.
      * 
      * @param wOut Writer to where the PGF code will be written.
-     * @param pOptions Program options (may also contain options for this
-     * device).
-     * @param vmManager The virtual memory manager.
+     * @param interpreter The interpreter.
      */
-    public PGFDevice(final Writer wOut, final Options pOptions,
-            final VM vmManager) {
-        
-        vm = vmManager;
+    public PGFDevice(final Writer wOut, final Interpreter interpreter) {
         out = wOut;
-        options = pOptions;
+        interp = interpreter;
     }
     
     /**
@@ -165,7 +157,7 @@ public class PGFDevice implements OutputDevice, Cloneable {
      */
     public PSObjectMatrix defaultCTM() throws PSErrorVMError, ProgramError {
         return new PSObjectMatrix(25.4 * 1000.0 / 72.0, 0.0, 0.0,
-                25.4 * 1000.0 / 72.0, 0.0, 0.0, vm);
+                25.4 * 1000.0 / 72.0, 0.0, 0.0, interp.getVm());
     }
     
     /**
@@ -840,6 +832,7 @@ public class PGFDevice implements OutputDevice, Cloneable {
     public void image(final Image img)
             throws PSError, IOException, ProgramError {
         
+        Options options = interp.getOptions();
         String filename = options.getOutputFile().getName();
         String basename;
         int dot = filename.lastIndexOf('.');
@@ -857,13 +850,16 @@ public class PGFDevice implements OutputDevice, Cloneable {
         try {
             OutputStream epsOut = new BufferedOutputStream(
                     new FileOutputStream(epsFile));
-            EpsImageCreator.writeImage(epsOut, img, epsFile.getName(), vm);
+            EpsImageCreator.writeImage(epsOut, img, epsFile.getName(),
+                    interp.getVm());
             epsOut.close();
+            
             OutputStream pdfOut = new BufferedOutputStream(
                     new FileOutputStream(pdfFile));
-            PdfImageCreator pdfImgCreator = new PdfImageCreator(vm);
+            PdfImageCreator pdfImgCreator = new PdfImageCreator(interp.getVm());
             pdfImgCreator.writeImage(pdfOut, img, pdfFile.getName());
             pdfOut.close();
+            
             double[][] bbox = img.getDeviceBbox();
             int[] cornerMap = img.getCornerMap();
             double llx = bbox[cornerMap[0]][0];
