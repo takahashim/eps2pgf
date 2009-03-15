@@ -23,12 +23,11 @@ import java.io.IOException;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
+import net.sf.eps2pgf.ps.Matrix;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
-import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
-import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 
 /**
  * Interface for exporters (e.g. PGF and TikZ)
@@ -62,10 +61,8 @@ public interface OutputDevice extends Cloneable {
      * coordinates to device space).
      * 
      * @return Default transformation matrix.
-     * @throws PSErrorVMError A virtual memory error occurred. 
-     * @throws ProgramError A program error indicates a bug.
      */
-    PSObjectMatrix defaultCTM() throws PSErrorVMError, ProgramError;
+    Matrix defaultCTM();
     
     /**
      * Initialize before any other methods are called. Normally, this method

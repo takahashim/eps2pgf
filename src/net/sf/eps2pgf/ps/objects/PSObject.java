@@ -679,21 +679,6 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
     }
     
     /**
-     * Convert this object to a matrix, if possible.
-     * 
-     * @throws PSErrorRangeCheck This object does not have the correct number of
-     * elements. A matrix should have six elements.
-     * @throws PSErrorTypeCheck Unable to convert this object type to a matrix.
-     * 
-     * @return Matrix representation of this object
-     */
-    public PSObjectMatrix toMatrix() throws PSErrorRangeCheck,
-            PSErrorTypeCheck {
-        
-        throw new PSErrorTypeCheck();
-    }
-    
-    /**
      * Convert this object to a name object, if possible.
      * 
      * @throws PSErrorTypeCheck Unable to convert this object to a name.

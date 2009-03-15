@@ -29,7 +29,6 @@ import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFile;
-import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
@@ -109,10 +108,10 @@ public class Image {
     private boolean interpolate;
     
     /** Matrix describing transformation from user space to image space. */
-    private PSObjectMatrix imageMatrix;
+    private Matrix imageMatrix;
     
     /** Transformation matrix from user space to device space. */
-    private PSObjectMatrix ctm;
+    private Matrix ctm;
     
     /** ColorSpace of loaded image. It can be Gray, RGB or CMYK. If the source
      * image was in a different color space, it is converted to RGB. */
@@ -225,7 +224,7 @@ public class Image {
         bitsPerComponent = dict.get(BITS_PER_COMPONENT).toInt();
         
         // Read info about how it is included in the PostScript document
-        imageMatrix = dict.get(IMAGE_MATRIX).toMatrix();
+        imageMatrix = dict.get(IMAGE_MATRIX).toArray().toMatrix();
         if (dict.known(INTERPOLATE)) {
             interpolate = dict.get(INTERPOLATE).toBool();
         } else {

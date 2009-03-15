@@ -24,14 +24,11 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
+import net.sf.eps2pgf.ps.Matrix;
 import net.sf.eps2pgf.ps.Path;
-import net.sf.eps2pgf.ps.VM;
-import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
-import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 
 /**
  * Device that writes only the labels to the output.
@@ -48,18 +45,13 @@ public class LOLDevice implements OutputDevice, Cloneable {
     /** Output is written to this writer. */
     private Writer out;
     
-    /** Virtual memory manager. */
-    private VM vm;
-
     /**
      * Instantiates a new lOL device.
      * 
      * @param pOut Output will be written to this object.
-     * @param virtualMemory The virtual memory manager.
      */
-    public LOLDevice(final Writer pOut, final VM virtualMemory) {
+    public LOLDevice(final Writer pOut) {
         out = pOut;
-        vm = virtualMemory;
     }
 
     /**
@@ -95,12 +87,9 @@ public class LOLDevice implements OutputDevice, Cloneable {
      * coordinates to device space).
      * 
      * @return Default transformation matrix.
-     * 
-     * @throws PSErrorVMError Virtual memory error.
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectMatrix defaultCTM() throws PSErrorVMError, ProgramError {
-        return new PSObjectMatrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0, vm);
+    public Matrix defaultCTM() {
+        return new Matrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
     }
 
     /**

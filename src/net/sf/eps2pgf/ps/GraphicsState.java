@@ -31,7 +31,6 @@ import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFont;
-import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 import net.sf.eps2pgf.ps.resources.colors.ColorManager;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
@@ -50,7 +49,7 @@ public class GraphicsState implements Cloneable {
      * files to micrometers.
      * [a b c d tx ty] -> x' = a*x + b*y + tx ; y' = c*x + d*y * ty
      */
-    private PSObjectMatrix ctm;
+    private Matrix ctm;
     
     /** Current position in pt (before CTM is applied). */
     private double[] position = new double[2];
@@ -65,7 +64,7 @@ public class GraphicsState implements Cloneable {
     private PSColor color;
     
     /** Current font. */
-    private PSObjectFont font;
+    private PSObjectFont font; //TODO remove PSObjects from gstate
     
     /** Current line width (in user space coordinates). */
     private double lineWidth = 1.0;
@@ -80,7 +79,7 @@ public class GraphicsState implements Cloneable {
     private double miterLimit = 10.0;
     
     /** Current dash pattern. */
-    private PSObjectArray dashPattern;
+    private PSObjectArray dashPattern; //TODO remove PSObjects from gstate
     
     /** Current dash offset. */
     private double dashOffset = 0.0;
@@ -92,26 +91,26 @@ public class GraphicsState implements Cloneable {
     // Device dependent parameters
     //
     /** Current color rendering. */
-    private PSObjectDict colorRendering;
+    private PSObjectDict colorRendering; //TODO remove PSObjects from gstate
     
     /** Current overprint. */
     private boolean overprint = false;
     
     /** Current black generation function. */
-    private PSObjectArray blackGeneration;
+    private PSObjectArray blackGeneration; //TODO remove PSObjects from gstate
     
     /** Current undercolor removal function. */
-    private PSObjectArray undercolorRemoval;
+    private PSObjectArray undercolorRemoval; //TODO remove PSObjects from gstate
     
     /**
      * Current transfer functions to convert colors to device settings.
      * The array contains four procedures:
      * {redproc greenproc blueproc grayproc}
      */
-    private PSObjectArray transfer;
+    private PSObjectArray transfer; //TODO remove PSObjects from gstate
     
     /** Current halftone. */
-    private PSObject halftone;
+    private PSObject halftone; //TODO remove PSObjects from gstate
     
     /** Current flatness of curves. */
     private double flatness = 1.0;
@@ -143,7 +142,7 @@ public class GraphicsState implements Cloneable {
         interp = interpreter;
 
         colorRendering = new PSObjectDict(interp.getVm());
-        ctm = new PSObjectMatrix(interp.getVm());
+        ctm = new Matrix();
         dashPattern = new PSObjectArray(interp.getVm());
         device = wDevice;
         halftone = new PSObjectDict(interp.getVm());
@@ -560,10 +559,10 @@ public class GraphicsState implements Cloneable {
     public void flattenpath() throws PSError, ProgramError {
         // Maximum difference between normal and flattened path. Defined in
         // device space coordinates. Assume a device resolution of 1200 dpi.
-        double deviceScale = this.device.defaultCTM().getMeanScaling();
-        double maxError = this.flatness * 72.0 / 1200.0 * deviceScale;
+        double deviceScale = device.defaultCTM().getMeanScaling();
+        double maxError = flatness * 72.0 / 1200.0 * deviceScale;
 
-        this.path = this.path.flattenpath(maxError);
+        path = path.flattenpath(maxError);
     }
     
     /**
@@ -586,23 +585,9 @@ public class GraphicsState implements Cloneable {
      * of all transformations applied by the PostScript program.
      * 
      * @return The mean scaling applied by the user.
-     * 
-     * @throws PSErrorVMError A virtual memory error occurred.
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public double getMeanUserScaling() throws PSErrorVMError, ProgramError {
-        double scaling = Double.NaN;
-        try {
-            scaling = ctm.getMeanScaling()
-                        / device.defaultCTM().getMeanScaling();
-        } catch (PSErrorRangeCheck e) {
-            // this can never happen, since none of the matrices above are
-            // controlled by the is user.
-        } catch (PSErrorTypeCheck e) {
-            // this can never happen, since none of the matrices above are
-            // controlled by the is user.
-        }
-        return scaling;
+    public double getMeanUserScaling() {
+        return ctm.getMeanScaling() / device.defaultCTM().getMeanScaling();
     }
     
     /**
@@ -612,7 +597,7 @@ public class GraphicsState implements Cloneable {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void initmatrix() throws PSErrorVMError, ProgramError {
-        this.ctm = this.device.defaultCTM();
+        ctm = device.defaultCTM();
     }
     
     /**
@@ -807,7 +792,7 @@ public class GraphicsState implements Cloneable {
      * 
      * @param pCtm the ctm to set
      */
-    public void setCtm(final PSObjectMatrix pCtm) {
+    public void setCtm(final Matrix pCtm) {
         ctm = pCtm;
     }
 
@@ -815,7 +800,7 @@ public class GraphicsState implements Cloneable {
      * Gets the current transformation matrix (CTM).
      * @return the ctm
      */
-    public PSObjectMatrix getCtm() {
+    public Matrix getCtm() {
         return ctm;
     }
     

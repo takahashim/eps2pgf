@@ -42,16 +42,15 @@ import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Lineto;
 import net.sf.eps2pgf.ps.Moveto;
+import net.sf.eps2pgf.ps.Matrix;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.PathSection;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
-import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
-import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.shadings.RadialShading;
 import net.sf.eps2pgf.ps.resources.shadings.Shading;
@@ -151,13 +150,10 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * coordinates to device space).
      * 
      * @return Default transformation matrix.
-     * 
-     * @throws PSErrorVMError Virtual memory error.
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectMatrix defaultCTM() throws PSErrorVMError, ProgramError {
-        return new PSObjectMatrix(25.4 * 1000.0 / 72.0, 0.0, 0.0,
-                25.4 * 1000.0 / 72.0, 0.0, 0.0, interp.getVm());
+    public Matrix defaultCTM() {
+        return new Matrix(25.4 * 1000.0 / 72.0, 0.0, 0.0,
+                25.4 * 1000.0 / 72.0, 0.0, 0.0);
     }
     
     /**

@@ -20,15 +20,13 @@ package net.sf.eps2pgf.ps.resources.outputdevices;
 
 import java.io.IOException;
 
-import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
+import net.sf.eps2pgf.ps.Matrix;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSErrorNoCurrentPoint;
-import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
-import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 
 /**
  * Cache device, used to create glyphs.
@@ -123,12 +121,9 @@ public class CacheDevice implements OutputDevice, Cloneable {
      * coordinates to device space).
      * 
      * @return Default transformation matrix.
-     * 
-     * @throws PSErrorVMError A virtual memory error occurred.
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectMatrix defaultCTM() throws PSErrorVMError, ProgramError {
-        return new PSObjectMatrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0, vm);
+    public Matrix defaultCTM() {
+        return new Matrix(1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
     }
     
     /**

@@ -52,7 +52,6 @@ import net.sf.eps2pgf.ps.objects.PSObjectFile;
 import net.sf.eps2pgf.ps.objects.PSObjectFont;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectMark;
-import net.sf.eps2pgf.ps.objects.PSObjectMatrix;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectNull;
 import net.sf.eps2pgf.ps.objects.PSObjectOperator;
@@ -162,7 +161,7 @@ public class Interpreter {
                 output = new PGFDevice(outputWriter, this);
                 break;
             case LOL:
-                output = new LOLDevice(outputWriter, vm);
+                output = new LOLDevice(outputWriter);
                 break;
             default:
                 throw new ProgramError("Unknown output device ("
@@ -189,7 +188,7 @@ public class Interpreter {
         options = new Options();
 
         // Create graphics state stack with output device
-        OutputDevice output = new NullDevice(vm);
+        OutputDevice output = new NullDevice();
         gstate = new GstateStack(output, this);
         
         // "Infinite" bounding box (square box from (-10m,-10m) to (10m,10m))
@@ -900,7 +899,8 @@ public class Interpreter {
         }
         
         // Read last four arguments
-        PSObjectMatrix matrix = getOpStack().pop().toMatrix();
+        PSObjectArray matrix = getOpStack().pop().toArray();
+        Matrix.checkArray(matrix);
         int bitsPerComponent = getOpStack().pop().toInt();
         int height = getOpStack().pop().toInt();
         int width = getOpStack().pop().toInt();
@@ -931,7 +931,7 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_concat() throws PSError {
-        PSObjectMatrix matrix = getOpStack().pop().toMatrix();
+        Matrix matrix = getOpStack().pop().toArray().toMatrix();
         gstate.current().getCtm().concat(matrix);
         gstate.current().updatePosition();
     }
@@ -942,12 +942,12 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_concatmatrix() throws PSError {
-        PSObjectMatrix matrix3 = getOpStack().pop().toMatrix();
-        PSObjectMatrix matrix2 = getOpStack().pop().toMatrix();
-        PSObjectMatrix matrix1 = getOpStack().pop().toMatrix();
-        matrix3.copy(matrix2);
-        matrix3.concat(matrix1);
-        getOpStack().push(matrix3);
+        PSObjectArray array3 = getOpStack().pop().toArray();
+        Matrix matrix2 = getOpStack().pop().toArray().toMatrix();
+        Matrix matrix1 = getOpStack().pop().toArray().toMatrix();
+        matrix2.concat(matrix1);
+        array3.copy(matrix2);
+        getOpStack().push(array3);
     }
     
     /**
@@ -1194,7 +1194,7 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_currentmatrix() throws PSError {
-        PSObjectMatrix matrix = getOpStack().pop().toMatrix();
+        PSObjectArray matrix = getOpStack().pop().toArray();
         matrix.copy(gstate.current().getCtm());
         getOpStack().push(matrix);
     }
@@ -1483,7 +1483,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_defaultmatrix() throws PSError, ProgramError {
-        PSObjectMatrix matrix = getOpStack().pop().toMatrix();
+        PSObjectArray matrix = getOpStack().pop().toArray();
         matrix.copy(gstate.current().getDevice().defaultCTM());
         getOpStack().push(matrix);
     }
@@ -1559,11 +1559,11 @@ public class Interpreter {
      */
     public void op_dtransform() throws PSError {
         PSObject obj = getOpStack().pop();
-        PSObjectMatrix matrix = null;
+        Matrix matrix = null;
         try {
-            matrix = obj.toMatrix();
+            matrix = obj.toArray().toMatrix();
         } catch (PSErrorTypeCheck e) {
-            //
+            /* empty block */
         }
         double dy;
         if (matrix == null) {
@@ -1938,7 +1938,7 @@ public class Interpreter {
         ArrayStack<PSObject> cs = getContStack();
         ArrayStack<PSObject> os = getOpStack();
         ExecStack es = getExecStack();
-        PSObjectMatrix ctm = gstate.current().getCtm();
+        Matrix ctm = gstate.current().getCtm();
         
         try {
             // Get arguments from continuation stack.
@@ -2440,8 +2440,8 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_identmatrix() throws PSError, ProgramError {
-        PSObjectMatrix matrix = getOpStack().pop().toMatrix();
-        matrix.copy(new PSObjectMatrix(vm));
+        PSObjectArray matrix = getOpStack().pop().toArray();
+        matrix.copy(new Matrix());
         getOpStack().push(matrix);
     }
     
@@ -2465,9 +2465,9 @@ public class Interpreter {
      */
     public void op_idtransform() throws PSError {
         PSObject obj = getOpStack().pop();
-        PSObjectMatrix matrix = null;
+        Matrix matrix = null;
         try {
-            matrix = obj.toMatrix();
+            matrix = obj.toArray().toMatrix();
         } catch (PSErrorTypeCheck e) {
             
         }
@@ -2536,7 +2536,8 @@ public class Interpreter {
         } else {
             // We have the five argument image operand
             // width height bits/sample matrix datasrc image.
-            PSObjectMatrix matrix = getOpStack().pop().toMatrix();
+            PSObjectArray matrix = getOpStack().pop().toArray();
+            Matrix.checkArray(matrix);
             int bitsPerSample = getOpStack().pop().toInt();
             int height = getOpStack().pop().toInt();
             int width = getOpStack().pop().toInt();
@@ -2586,10 +2587,10 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_invertmatrix() throws PSError {
-        PSObjectMatrix matrix2 = getOpStack().pop().toMatrix();
-        PSObjectMatrix matrix1 = getOpStack().pop().toMatrix();
+        PSObjectArray matrix2 = getOpStack().pop().toArray();
+        Matrix matrix1 = getOpStack().pop().toArray().toMatrix();
+        matrix1.invert();
         matrix2.copy(matrix1);
-        matrix2.invert();
         getOpStack().push(matrix2);
     }
     
@@ -2649,9 +2650,9 @@ public class Interpreter {
      */
     public void op_itransform() throws PSError {
         PSObject obj = getOpStack().pop();
-        PSObjectMatrix matrix = null;
+        Matrix matrix = null;
         try {
-            matrix = obj.toMatrix();
+            matrix = obj.toArray().toMatrix();
         } catch (PSErrorTypeCheck e) {
             
         }
@@ -2803,17 +2804,19 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_makefont() throws PSError, ProgramError {
-        PSObjectMatrix matrix = getOpStack().pop().toMatrix();
+        Matrix matrix = getOpStack().pop().toArray().toMatrix();
         PSObjectDict font = getOpStack().pop().toDict();
         font = font.clone();
-        PSObjectMatrix fontMatrix = font.lookup("FontMatrix").toMatrix();
+        PSObjectArray fontMatrixArray = font.lookup("FontMatrix").toArray();
+        Matrix fontMatrix = fontMatrixArray.toMatrix();
         
         // Concatenate matrix to fontMatrix and store it back in font
         fontMatrix.concat(matrix);
-        font.setKey("FontMatrix", fontMatrix);
+        fontMatrixArray.copy(fontMatrix);
+        font.setKey("FontMatrix", fontMatrixArray);
         
         // Calculate the fontsize in LaTeX points
-        PSObjectMatrix ctm = gstate.current().getCtm().clone();
+        Matrix ctm = gstate.current().getCtm().clone();
         ctm.concat(fontMatrix);
         double fontSize = ctm.getMeanScaling() / 2.54 * 72.27;
         font.setKey("FontSize", new PSObjectReal(fontSize));
@@ -2827,7 +2830,7 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_makepattern() throws PSError {
-        //PSObjectMatrix matrix = getOpStack().pop().toMatrix();
+        //Matrix matrix = getOpStack().pop().toMatrix();
         //PSObjectDict dict = getOpStack().pop().toDict();
         throw new PSErrorUnregistered("makepattern operator");
     }
@@ -2846,7 +2849,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_matrix() throws PSError, ProgramError {
-        getOpStack().push(new PSObjectMatrix(vm));
+        getOpStack().push((new Matrix()).toArray(vm));
     }
     
     /**
@@ -2964,7 +2967,7 @@ public class Interpreter {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void op_nulldevice() throws PSErrorVMError, ProgramError {
-        OutputDevice nullDevice = new NullDevice(vm);
+        OutputDevice nullDevice = new NullDevice();
         gstate.current().setDevice(nullDevice);
         gstate.current().initmatrix();
     }
@@ -3257,9 +3260,9 @@ public class Interpreter {
         op_gsave();
         
         // Check whether the top-most object is a matrix
-        PSObjectMatrix matrix = null;
+        Matrix matrix = null;
         try {
-            matrix = getOpStack().peek().toMatrix();
+            matrix = getOpStack().peek().toArray().toMatrix();
             getOpStack().pop();
         } catch (PSErrorTypeCheck e) {
             /* apparently the first object is not a matrix */
@@ -3270,8 +3273,8 @@ public class Interpreter {
         rectPath();
         
         if (matrix != null) {
-            getOpStack().push(matrix);
-            op_concat();
+            gstate.current().getCtm().concat(matrix);
+            gstate.current().updatePosition();
         }
         
         op_stroke();
@@ -3402,10 +3405,12 @@ public class Interpreter {
         PSObject obj = getOpStack().pop();
         double angle;
         if (obj instanceof PSObjectArray) {
-            PSObjectMatrix matrix = obj.toMatrix();
+            PSObjectArray array = obj.toArray();
+            Matrix matrix = array.toMatrix();
             angle = getOpStack().pop().toReal();
             matrix.rotate(angle);
-            getOpStack().push(matrix);
+            array.copy(matrix);
+            getOpStack().push(array);
         } else {
             angle = obj.toReal();
             gstate.current().getCtm().rotate(angle);
@@ -3446,11 +3451,13 @@ public class Interpreter {
         PSObject obj = getOpStack().pop();
         double sx, sy;
         if (obj instanceof PSObjectArray) {
-            PSObjectMatrix matrix = obj.toMatrix();
+            PSObjectArray array = obj.toArray();
+            Matrix matrix = array.toMatrix();
             sy = getOpStack().pop().toReal();
             sx = getOpStack().pop().toReal();
             matrix.scale(sx, sy);
-            getOpStack().push(matrix);
+            array.copy(matrix);
+            getOpStack().push(array);
         } else {
             sy = obj.toReal();
             sx = getOpStack().pop().toReal();
@@ -3792,8 +3799,9 @@ public class Interpreter {
      * @throws PSError A PostScript error occurred.
      */
     public void op_setmatrix() throws PSError {
-        PSObjectMatrix matrix = getOpStack().pop().toMatrix();
+        Matrix matrix = getOpStack().pop().toArray().toMatrix();
         gstate.current().getCtm().copy(matrix);
+        gstate.current().updatePosition();
     }
     
     /**
@@ -4201,9 +4209,9 @@ public class Interpreter {
      */
     public void op_transform() throws PSError {
         PSObject obj = getOpStack().pop();
-        PSObjectMatrix matrix = null;
+        Matrix matrix = null;
         try {
-            matrix = obj.toMatrix();
+            matrix = obj.toArray().toMatrix();
         } catch (PSErrorTypeCheck e) {
             
         }
@@ -4229,11 +4237,13 @@ public class Interpreter {
         PSObject obj = getOpStack().pop();
         double tx, ty;
         if (obj instanceof PSObjectArray) {
-            PSObjectMatrix matrix = obj.toMatrix();
+            PSObjectArray array = obj.toArray();
+            Matrix matrix = array.toMatrix();
             ty = getOpStack().pop().toReal();
             tx = getOpStack().pop().toReal();
             matrix.translate(tx, ty);
-            getOpStack().push(matrix);
+            array.copy(matrix);
+            getOpStack().push(array);
         } else {
             ty = obj.toReal();
             tx = getOpStack().pop().toReal();

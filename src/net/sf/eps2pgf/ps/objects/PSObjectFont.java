@@ -32,6 +32,7 @@ import org.fontbox.afm.FontMetric;
 import org.fontbox.util.BoundingBox;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.Matrix;
 import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
@@ -136,10 +137,11 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
      */
     public PSObjectFont(final VM vm) throws PSErrorVMError, ProgramError {
         super(vm);
+        
         setFID();
         setKey(KEY_FONTTYPE, new PSObjectInt(1));
         setKey(KEY_FONTMATRIX,
-                new PSObjectMatrix(0.001, 0, 0, 0.001, 0, 0, vm));
+                new Matrix(0.001, 0, 0, 0.001, 0, 0).toArray(vm));
     }
     
     /**
@@ -177,7 +179,7 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
         // Setting the dictionary keys with font info
         setKey(KEY_FONTTYPE, new PSObjectInt(1));
         setKey(KEY_FONTMATRIX,
-                new PSObjectMatrix(0.001, 0, 0, 0.001, 0, 0, vm));
+                new Matrix(0.001, 0, 0, 0.001, 0, 0).toArray(vm));
         setKey(KEY_FONTNAME, new PSObjectName(fontName, true));
         setFID();
         String encoding = props.getProperty("encoding", "Standard");
@@ -471,10 +473,10 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
-    public PSObjectMatrix getFontMatrix() throws PSErrorTypeCheck,
+    public Matrix getFontMatrix() throws PSErrorTypeCheck,
             PSErrorRangeCheck {
         
-        return lookup(KEY_FONTMATRIX).toMatrix();
+        return lookup(KEY_FONTMATRIX).toArray().toMatrix();
     }
     
     /**
@@ -521,7 +523,8 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
      * @throws PSErrorRangeCheck the PS error range check
      */
     public double getFontSize() throws PSErrorTypeCheck, PSErrorRangeCheck {
-        return lookup(KEY_FONTMATRIX).toMatrix().getMeanScaling() * 1000;
+        return lookup(KEY_FONTMATRIX).toArray().toMatrix().getMeanScaling()
+                * 1000.0;
     }
     
     /**

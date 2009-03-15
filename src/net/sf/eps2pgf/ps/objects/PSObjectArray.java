@@ -27,6 +27,7 @@ import java.util.List;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.ps.Matrix;
 import net.sf.eps2pgf.ps.Parser;
 import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
@@ -111,16 +112,18 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * 
      * @throws PSErrorVMError Virtual memory error
      */
-    //TODO is this method still required???
     public PSObjectArray(final double[] dblArray, final VM virtualMemory)
             throws PSErrorVMError {
         
-        this(new ArrayList<PSObject>(dblArray.length), 0, dblArray.length,
-                virtualMemory);
-        List<PSObject> list = getArray();
+        super(virtualMemory);
+        
+        offset = 0;
+        count = dblArray.length;
+        List<PSObject> list = new ArrayList<PSObject>(dblArray.length);
         for (int i = 0; i < dblArray.length; i++) {
             list.add(new PSObjectReal(dblArray[i]));
         }
+        setArray(list);
     }
     
     /**
@@ -298,6 +301,33 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
         PSObjectArray tArray = obj1.toArray();
         putinterval(0, tArray);
         return getinterval(0, tArray.length());
+    }
+    
+    /**
+     * PostScript operator copy. Copies values from obj1 to this object.
+     * 
+     * @param matrix Values are copied from this matrix.
+     * 
+     * @return Returns subsequence of this object
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     */
+    public final PSObject copy(final Matrix matrix) throws PSErrorRangeCheck {
+        // Check the size
+        if (size() != 6) {
+            throw new PSErrorRangeCheck();
+        }
+        
+        // Copy the values.
+        try {
+            for (int i = 0; i < 6; i++) {
+                put(i, new PSObjectReal(matrix.get(i)));
+            }
+        } catch (PSErrorInvalidAccess e) {
+            // this can never happen
+        }
+        
+        return getinterval(0, 6);
     }
     
     /**
@@ -682,10 +712,8 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    @Override
-    public PSObjectMatrix toMatrix() throws PSErrorRangeCheck,
-            PSErrorTypeCheck {
-        return new PSObjectMatrix(this);
+    public Matrix toMatrix() throws PSErrorRangeCheck, PSErrorTypeCheck {
+        return new Matrix(this);
     }
     
     /**
