@@ -22,6 +22,7 @@ package net.sf.eps2pgf.ps.resources.encodings;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.resources.ResourceManager;
 
@@ -36,6 +37,42 @@ public final class EncodingManager {
     // Make constants for some commonly used symbols
     /** .notdef symbol. */
     public static final PSObjectName SYMB_NOTDEF = new PSObjectName("/.notdef");
+    
+    /** space symbol. */
+    public static final PSObjectName SYMB_SPACE = new PSObjectName("/space");
+    
+    /** exclam symbol. */
+    public static final PSObjectName SYMB_EXCLAM = new PSObjectName("/exclam");
+    
+    /** zero symbol. */
+    public static final PSObjectName SYMB_ZERO = new PSObjectName("/zero");
+    
+    /** one symbol. */
+    public static final PSObjectName SYMB_ONE = new PSObjectName("/one");
+    
+    /** two symbol. */
+    public static final PSObjectName SYMB_TWO = new PSObjectName("/two");
+    
+    /** three symbol. */
+    public static final PSObjectName SYMB_THREE = new PSObjectName("/three");
+    
+    /** four symbol. */
+    public static final PSObjectName SYMB_FOUR = new PSObjectName("/four");
+    
+    /** five symbol. */
+    public static final PSObjectName SYMB_FIVE = new PSObjectName("/five");
+    
+    /** six symbol. */
+    public static final PSObjectName SYMB_SIX = new PSObjectName("/six");
+    
+    /** seven symbol. */
+    public static final PSObjectName SYMB_SEVEN = new PSObjectName("/seven");
+    
+    /** eight symbol. */
+    public static final PSObjectName SYMB_EIGHT = new PSObjectName("/eight");
+    
+    /** nine symbol. */
+    public static final PSObjectName SYMB_NINE = new PSObjectName("/nine");
     
     /**
      * "Hidden" constructor.
@@ -60,16 +97,15 @@ public final class EncodingManager {
             throws PSError, ProgramError {
         
         manager.defineResource(ResourceManager.CAT_ENCODING, 
-                new PSObjectName("/StandardEncoding"), 
-                StandardEncoding.get(vm));
+                StandardEncoding.NAME, 
+                new PSObjectArray(StandardEncoding.get(), vm));
         
         manager.defineResource(ResourceManager.CAT_ENCODING, 
-                new PSObjectName("/ISOLatin1Encoding"),
-                ISOLatin1Encoding.get(vm));
+                ISOLatin1Encoding.NAME,
+                new PSObjectArray(ISOLatin1Encoding.get(), vm));
         
         manager.defineResource(ResourceManager.CAT_ENCODING, 
-                new PSObjectName("/SymbolEncoding"), 
-                SymbolEncoding.get(vm));
-
+                SymbolEncoding.NAME, 
+                new PSObjectArray(SymbolEncoding.get(), vm));
     }
 }

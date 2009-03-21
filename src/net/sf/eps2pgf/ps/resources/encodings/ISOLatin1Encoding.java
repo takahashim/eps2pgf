@@ -18,11 +18,6 @@
 
 package net.sf.eps2pgf.ps.resources.encodings;
 
-import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.ps.VM;
-import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
-import net.sf.eps2pgf.ps.errors.PSErrorVMError;
-import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 
 /**
@@ -33,8 +28,9 @@ import net.sf.eps2pgf.ps.objects.PSObjectName;
  */
 public final class ISOLatin1Encoding {
     
-    /** Encoding vector. */
-    private static PSObjectArray vector = null;
+    /** Name of this encoding. */
+    public static final PSObjectName NAME =
+        new PSObjectName("/ISOLatin1Encoding");
     
     /**
      * "Hidden" constructor.
@@ -44,298 +40,269 @@ public final class ISOLatin1Encoding {
     }
     
     /**
-     * Initialize the encoding vector.
-     * 
-     * @param vm The virtual memory manager.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     * @throws PSErrorVMError Virtual memory error.
-     */
-    private static void initializeVector(final VM vm)
-            throws ProgramError, PSErrorVMError {
-        
-        vector = new PSObjectArray(vm);
-        try {
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //000
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //001
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //002
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //003
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //004
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //005
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //006
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //007
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //010
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //011
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //012
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //013
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //014
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //015
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //016
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //017
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //020
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //021
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //022
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //023
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //024
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //025
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //026
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //027
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //030
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //031
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //032
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //033
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //034
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //035
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //036
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //037
-            vector.addToEnd(new PSObjectName("/space"));       //040
-            vector.addToEnd(new PSObjectName("/exclam"));      //041
-            vector.addToEnd(new PSObjectName("/quotedbl"));    //042
-            vector.addToEnd(new PSObjectName("/numbersign"));  //043
-            vector.addToEnd(new PSObjectName("/dollar"));      //044
-            vector.addToEnd(new PSObjectName("/percent"));     //045
-            vector.addToEnd(new PSObjectName("/ampersand"));   //046
-            vector.addToEnd(new PSObjectName("/quoteright"));  //047
-            vector.addToEnd(new PSObjectName("/parenleft"));   //050
-            vector.addToEnd(new PSObjectName("/parenright"));  //051
-            vector.addToEnd(new PSObjectName("/asterisk"));    //052
-            vector.addToEnd(new PSObjectName("/plus"));        //053
-            vector.addToEnd(new PSObjectName("/comma"));       //054
-            vector.addToEnd(new PSObjectName("/minus"));       //055
-            vector.addToEnd(new PSObjectName("/period"));      //056
-            vector.addToEnd(new PSObjectName("/slash"));       //057
-            vector.addToEnd(new PSObjectName("/zero"));        //060
-            vector.addToEnd(new PSObjectName("/one"));         //061
-            vector.addToEnd(new PSObjectName("/two"));         //062
-            vector.addToEnd(new PSObjectName("/three"));       //063
-            vector.addToEnd(new PSObjectName("/four"));        //064
-            vector.addToEnd(new PSObjectName("/five"));        //065
-            vector.addToEnd(new PSObjectName("/six"));         //066
-            vector.addToEnd(new PSObjectName("/seven"));       //067
-            vector.addToEnd(new PSObjectName("/eight"));       //070
-            vector.addToEnd(new PSObjectName("/nine"));        //071
-            vector.addToEnd(new PSObjectName("/colon"));       //072
-            vector.addToEnd(new PSObjectName("/semicolon"));   //073
-            vector.addToEnd(new PSObjectName("/less"));        //074
-            vector.addToEnd(new PSObjectName("/equal"));       //075
-            vector.addToEnd(new PSObjectName("/greater"));     //076
-            vector.addToEnd(new PSObjectName("/question"));    //077
-            vector.addToEnd(new PSObjectName("/at"));          //100
-            vector.addToEnd(new PSObjectName("/A"));           //101
-            vector.addToEnd(new PSObjectName("/B"));           //102
-            vector.addToEnd(new PSObjectName("/C"));           //103
-            vector.addToEnd(new PSObjectName("/D"));           //104
-            vector.addToEnd(new PSObjectName("/E"));           //105
-            vector.addToEnd(new PSObjectName("/F"));           //106
-            vector.addToEnd(new PSObjectName("/G"));           //107
-            vector.addToEnd(new PSObjectName("/H"));           //110
-            vector.addToEnd(new PSObjectName("/I"));           //111
-            vector.addToEnd(new PSObjectName("/J"));           //112
-            vector.addToEnd(new PSObjectName("/K"));           //113
-            vector.addToEnd(new PSObjectName("/L"));           //114
-            vector.addToEnd(new PSObjectName("/M"));           //115
-            vector.addToEnd(new PSObjectName("/N"));           //116
-            vector.addToEnd(new PSObjectName("/O"));           //117
-            vector.addToEnd(new PSObjectName("/P"));           //120
-            vector.addToEnd(new PSObjectName("/Q"));           //121
-            vector.addToEnd(new PSObjectName("/R"));           //122
-            vector.addToEnd(new PSObjectName("/S"));           //123
-            vector.addToEnd(new PSObjectName("/T"));           //124
-            vector.addToEnd(new PSObjectName("/U"));           //125
-            vector.addToEnd(new PSObjectName("/V"));           //126
-            vector.addToEnd(new PSObjectName("/W"));           //127
-            vector.addToEnd(new PSObjectName("/X"));           //130
-            vector.addToEnd(new PSObjectName("/Y"));           //131
-            vector.addToEnd(new PSObjectName("/Z"));           //132
-            vector.addToEnd(new PSObjectName("/bracketleft")); //133
-            vector.addToEnd(new PSObjectName("/backslash"));   //134
-            vector.addToEnd(new PSObjectName("/bracketright")); //135
-            vector.addToEnd(new PSObjectName("/asciicircum")); //136
-            vector.addToEnd(new PSObjectName("/underscore"));  //137
-            vector.addToEnd(new PSObjectName("/quoteleft"));   //140
-            vector.addToEnd(new PSObjectName("/a"));           //141
-            vector.addToEnd(new PSObjectName("/b"));           //142
-            vector.addToEnd(new PSObjectName("/c"));           //143
-            vector.addToEnd(new PSObjectName("/d"));           //144
-            vector.addToEnd(new PSObjectName("/e"));           //145
-            vector.addToEnd(new PSObjectName("/f"));           //146
-            vector.addToEnd(new PSObjectName("/g"));           //147
-            vector.addToEnd(new PSObjectName("/h"));           //150
-            vector.addToEnd(new PSObjectName("/i"));           //151
-            vector.addToEnd(new PSObjectName("/j"));           //152
-            vector.addToEnd(new PSObjectName("/k"));           //153
-            vector.addToEnd(new PSObjectName("/l"));           //154
-            vector.addToEnd(new PSObjectName("/m"));           //155
-            vector.addToEnd(new PSObjectName("/n"));           //156
-            vector.addToEnd(new PSObjectName("/o"));           //157
-            vector.addToEnd(new PSObjectName("/p"));           //160
-            vector.addToEnd(new PSObjectName("/q"));           //161
-            vector.addToEnd(new PSObjectName("/r"));           //162
-            vector.addToEnd(new PSObjectName("/s"));           //163
-            vector.addToEnd(new PSObjectName("/t"));           //164
-            vector.addToEnd(new PSObjectName("/u"));           //165
-            vector.addToEnd(new PSObjectName("/v"));           //166
-            vector.addToEnd(new PSObjectName("/w"));           //167
-            vector.addToEnd(new PSObjectName("/x"));           //170
-            vector.addToEnd(new PSObjectName("/y"));           //171
-            vector.addToEnd(new PSObjectName("/z"));           //172
-            vector.addToEnd(new PSObjectName("/braceleft"));   //173
-            vector.addToEnd(new PSObjectName("/bar"));         //174
-            vector.addToEnd(new PSObjectName("/braceright"));  //175
-            vector.addToEnd(new PSObjectName("/asciitilde"));  //176
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //177
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //200
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //201
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //202
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //203
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //204
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //205
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //206
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //207
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //210
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //211
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //212
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //213
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //214
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //215
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //216
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //217
-            vector.addToEnd(new PSObjectName("/dotlessi"));    //220
-            vector.addToEnd(new PSObjectName("/grave"));       //221
-            vector.addToEnd(new PSObjectName("/acute"));       //222
-            vector.addToEnd(new PSObjectName("/circumflex"));  //223
-            vector.addToEnd(new PSObjectName("/tilde"));       //224
-            vector.addToEnd(new PSObjectName("/macron"));      //225
-            vector.addToEnd(new PSObjectName("/breve"));       //226
-            vector.addToEnd(new PSObjectName("/dotaccent"));   //227
-            vector.addToEnd(new PSObjectName("/dieresis"));    //230
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //231
-            vector.addToEnd(new PSObjectName("/ring"));        //232
-            vector.addToEnd(new PSObjectName("/cedilla"));     //233
-            vector.addToEnd(EncodingManager.SYMB_NOTDEF);     //234
-            vector.addToEnd(new PSObjectName("/hungarumlaut")); //235
-            vector.addToEnd(new PSObjectName("/ogonek"));      //236
-            vector.addToEnd(new PSObjectName("/caron"));       //237
-            vector.addToEnd(new PSObjectName("/space"));       //240
-            vector.addToEnd(new PSObjectName("/exclamdown"));  //241
-            vector.addToEnd(new PSObjectName("/cent"));        //242
-            vector.addToEnd(new PSObjectName("/sterling"));    //243
-            vector.addToEnd(new PSObjectName("/currency"));    //244
-            vector.addToEnd(new PSObjectName("/yen"));         //245
-            vector.addToEnd(new PSObjectName("/brokenbar"));   //246
-            vector.addToEnd(new PSObjectName("/section"));     //247
-            vector.addToEnd(new PSObjectName("/dieresis"));    //250
-            vector.addToEnd(new PSObjectName("/copyright"));   //251
-            vector.addToEnd(new PSObjectName("/ordfeminine")); //252
-            vector.addToEnd(new PSObjectName("/guillemotleft")); //253
-            vector.addToEnd(new PSObjectName("/logicalnot"));  //254
-            vector.addToEnd(new PSObjectName("/hyphen"));      //255
-            vector.addToEnd(new PSObjectName("/registered"));  //256
-            vector.addToEnd(new PSObjectName("/macron"));      //257
-            vector.addToEnd(new PSObjectName("/degree"));      //260
-            vector.addToEnd(new PSObjectName("/plusminus"));   //261
-            vector.addToEnd(new PSObjectName("/twosuperior")); //262
-            vector.addToEnd(new PSObjectName("/threesuperior")); //263
-            vector.addToEnd(new PSObjectName("/acute"));       //264
-            vector.addToEnd(new PSObjectName("/mu"));          //265
-            vector.addToEnd(new PSObjectName("/paragraph"));   //266
-            vector.addToEnd(new PSObjectName("/periodcentered")); //267
-            vector.addToEnd(new PSObjectName("/cedilla"));     //270
-            vector.addToEnd(new PSObjectName("/onesuperior")); //271
-            vector.addToEnd(new PSObjectName("/ordmasculine")); //272
-            vector.addToEnd(new PSObjectName("/guillemotright")); //273
-            vector.addToEnd(new PSObjectName("/onequarter"));  //274
-            vector.addToEnd(new PSObjectName("/onehalf"));     //275        
-            vector.addToEnd(new PSObjectName("/threequarters")); //276        
-            vector.addToEnd(new PSObjectName("/questiondown")); //277
-            vector.addToEnd(new PSObjectName("/Agrave"));      //300
-            vector.addToEnd(new PSObjectName("/Aacute"));      //301
-            vector.addToEnd(new PSObjectName("/Acircumflex")); //302
-            vector.addToEnd(new PSObjectName("/Atilde"));      //303
-            vector.addToEnd(new PSObjectName("/Adieresis"));   //304
-            vector.addToEnd(new PSObjectName("/Aring"));       //305
-            vector.addToEnd(new PSObjectName("/AE"));          //306
-            vector.addToEnd(new PSObjectName("/Ccedilla"));    //307
-            vector.addToEnd(new PSObjectName("/Egrave"));      //310
-            vector.addToEnd(new PSObjectName("/Eacute"));      //311
-            vector.addToEnd(new PSObjectName("/Ecircumflex")); //312
-            vector.addToEnd(new PSObjectName("/Edieresis"));   //313
-            vector.addToEnd(new PSObjectName("/Igrave"));      //314
-            vector.addToEnd(new PSObjectName("/Iacute"));      //315
-            vector.addToEnd(new PSObjectName("/Icircumflex")); //316
-            vector.addToEnd(new PSObjectName("/Idieresis"));   //317
-            vector.addToEnd(new PSObjectName("/Eth"));         //320
-            vector.addToEnd(new PSObjectName("/Ntilde"));      //321
-            vector.addToEnd(new PSObjectName("/Ograve"));      //322
-            vector.addToEnd(new PSObjectName("/Oacute"));      //323
-            vector.addToEnd(new PSObjectName("/Ocircumflex")); //324
-            vector.addToEnd(new PSObjectName("/Otilde"));      //325
-            vector.addToEnd(new PSObjectName("/Odieresis"));   //326
-            vector.addToEnd(new PSObjectName("/multiply"));    //327
-            vector.addToEnd(new PSObjectName("/Oslash"));      //330
-            vector.addToEnd(new PSObjectName("/Ugrave"));      //331
-            vector.addToEnd(new PSObjectName("/Uacute"));      //332
-            vector.addToEnd(new PSObjectName("/Ucircumflex")); //333
-            vector.addToEnd(new PSObjectName("/Udieresis"));   //334
-            vector.addToEnd(new PSObjectName("/Yacute"));      //335
-            vector.addToEnd(new PSObjectName("/Thorn"));       //336
-            vector.addToEnd(new PSObjectName("/germandbls"));  //337
-            vector.addToEnd(new PSObjectName("/agrave"));      //340
-            vector.addToEnd(new PSObjectName("/aacute"));      //341
-            vector.addToEnd(new PSObjectName("/acircumflex")); //342
-            vector.addToEnd(new PSObjectName("/atilde"));      //343
-            vector.addToEnd(new PSObjectName("/adieresis"));   //344
-            vector.addToEnd(new PSObjectName("/aring"));       //345
-            vector.addToEnd(new PSObjectName("/ae"));          //346
-            vector.addToEnd(new PSObjectName("/ccedilla"));    //347
-            vector.addToEnd(new PSObjectName("/egrave"));      //350
-            vector.addToEnd(new PSObjectName("/eacute"));      //351
-            vector.addToEnd(new PSObjectName("/ecircumflex")); //352
-            vector.addToEnd(new PSObjectName("/edieresis"));   //353
-            vector.addToEnd(new PSObjectName("/igrave"));      //354
-            vector.addToEnd(new PSObjectName("/iacute"));      //355
-            vector.addToEnd(new PSObjectName("/icircumflex")); //356
-            vector.addToEnd(new PSObjectName("/idieresis"));   //357
-            vector.addToEnd(new PSObjectName("/eth"));         //360
-            vector.addToEnd(new PSObjectName("/ntilde"));      //361
-            vector.addToEnd(new PSObjectName("/ograve"));      //362
-            vector.addToEnd(new PSObjectName("/oacute"));      //363
-            vector.addToEnd(new PSObjectName("/ocircumflex")); //364
-            vector.addToEnd(new PSObjectName("/otilde"));      //365
-            vector.addToEnd(new PSObjectName("/odieresis"));   //366
-            vector.addToEnd(new PSObjectName("/divide"));      //367
-            vector.addToEnd(new PSObjectName("/oslash"));      //370
-            vector.addToEnd(new PSObjectName("/ugrave"));      //371
-            vector.addToEnd(new PSObjectName("/uacute"));      //372
-            vector.addToEnd(new PSObjectName("/ucircumflex")); //373
-            vector.addToEnd(new PSObjectName("/udieresis"));   //374
-            vector.addToEnd(new PSObjectName("/yacute"));      //375
-            vector.addToEnd(new PSObjectName("/thorn"));       //376
-            vector.addToEnd(new PSObjectName("/ydieresis"));   //377
-        } catch (PSErrorRangeCheck e) {
-            throw new ProgramError("A range check error occurred where it"
-                    + " shouldn't.");
-        }
-    }
-    
-    /**
-     * Gets the encoding vector.
-     * 
-     * @param vm The virtual memory manager.
+     * Gets a copy of the encoding vector.
      * 
      * @return The vector.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     * @throws PSErrorVMError Virtual memory error.
      */
-    public static PSObjectArray get(final VM vm)
-            throws ProgramError, PSErrorVMError {
-        
-        if (vector == null) {
-            initializeVector(vm);
-        }
+    public static PSObjectName[] get() {
+        PSObjectName[] vector = new PSObjectName[256];
+        vector[0000] = EncodingManager.SYMB_NOTDEF;     //000
+        vector[0001] = EncodingManager.SYMB_NOTDEF;     //001
+        vector[0002] = EncodingManager.SYMB_NOTDEF;     //002
+        vector[0003] = EncodingManager.SYMB_NOTDEF;     //003
+        vector[0004] = EncodingManager.SYMB_NOTDEF;     //004
+        vector[0005] = EncodingManager.SYMB_NOTDEF;     //005
+        vector[0006] = EncodingManager.SYMB_NOTDEF;     //006
+        vector[0007] = EncodingManager.SYMB_NOTDEF;     //007
+        vector[0010] = EncodingManager.SYMB_NOTDEF;     //010
+        vector[0011] = EncodingManager.SYMB_NOTDEF;     //011
+        vector[0012] = EncodingManager.SYMB_NOTDEF;     //012
+        vector[0013] = EncodingManager.SYMB_NOTDEF;     //013
+        vector[0014] = EncodingManager.SYMB_NOTDEF;     //014
+        vector[0015] = EncodingManager.SYMB_NOTDEF;     //015
+        vector[0016] = EncodingManager.SYMB_NOTDEF;     //016
+        vector[0017] = EncodingManager.SYMB_NOTDEF;     //017
+        vector[0020] = EncodingManager.SYMB_NOTDEF;     //020
+        vector[0021] = EncodingManager.SYMB_NOTDEF;     //021
+        vector[0022] = EncodingManager.SYMB_NOTDEF;     //022
+        vector[0023] = EncodingManager.SYMB_NOTDEF;     //023
+        vector[0024] = EncodingManager.SYMB_NOTDEF;     //024
+        vector[0025] = EncodingManager.SYMB_NOTDEF;     //025
+        vector[0026] = EncodingManager.SYMB_NOTDEF;     //026
+        vector[0027] = EncodingManager.SYMB_NOTDEF;     //027
+        vector[0030] = EncodingManager.SYMB_NOTDEF;     //030
+        vector[0031] = EncodingManager.SYMB_NOTDEF;     //031
+        vector[0032] = EncodingManager.SYMB_NOTDEF;     //032
+        vector[0033] = EncodingManager.SYMB_NOTDEF;     //033
+        vector[0034] = EncodingManager.SYMB_NOTDEF;     //034
+        vector[0035] = EncodingManager.SYMB_NOTDEF;     //035
+        vector[0036] = EncodingManager.SYMB_NOTDEF;     //036
+        vector[0037] = EncodingManager.SYMB_NOTDEF;     //037
+        vector[0040] = EncodingManager.SYMB_SPACE;       //040
+        vector[0041] = EncodingManager.SYMB_EXCLAM;      //041
+        vector[0042] = new PSObjectName("/quotedbl");    //042
+        vector[0043] = new PSObjectName("/numbersign");  //043
+        vector[0044] = new PSObjectName("/dollar");      //044
+        vector[0045] = new PSObjectName("/percent");     //045
+        vector[0046] = new PSObjectName("/ampersand");   //046
+        vector[0047] = new PSObjectName("/quoteright");  //047
+        vector[0050] = new PSObjectName("/parenleft");   //050
+        vector[0051] = new PSObjectName("/parenright");  //051
+        vector[0052] = new PSObjectName("/asterisk");    //052
+        vector[0053] = new PSObjectName("/plus");        //053
+        vector[0054] = new PSObjectName("/comma");       //054
+        vector[0055] = new PSObjectName("/minus");       //055
+        vector[0056] = new PSObjectName("/period");      //056
+        vector[0057] = new PSObjectName("/slash");       //057
+        vector[0060] = EncodingManager.SYMB_ZERO;        //060
+        vector[0061] = EncodingManager.SYMB_ONE;         //061
+        vector[0062] = EncodingManager.SYMB_TWO;         //062
+        vector[0063] = EncodingManager.SYMB_THREE;       //063
+        vector[0064] = EncodingManager.SYMB_FOUR;        //064
+        vector[0065] = EncodingManager.SYMB_FIVE;        //065
+        vector[0066] = EncodingManager.SYMB_SIX;         //066
+        vector[0067] = EncodingManager.SYMB_SEVEN;       //067
+        vector[0070] = EncodingManager.SYMB_EIGHT;       //070
+        vector[0071] = EncodingManager.SYMB_NINE;        //071
+        vector[0072] = new PSObjectName("/colon");       //072
+        vector[0073] = new PSObjectName("/semicolon");   //073
+        vector[0074] = new PSObjectName("/less");        //074
+        vector[0075] = new PSObjectName("/equal");       //075
+        vector[0076] = new PSObjectName("/greater");     //076
+        vector[0077] = new PSObjectName("/question");    //077
+        vector[0100] = new PSObjectName("/at");          //100
+        vector[0101] = new PSObjectName("/A");           //101
+        vector[0102] = new PSObjectName("/B");           //102
+        vector[0103] = new PSObjectName("/C");           //103
+        vector[0104] = new PSObjectName("/D");           //104
+        vector[0105] = new PSObjectName("/E");           //105
+        vector[0106] = new PSObjectName("/F");           //106
+        vector[0107] = new PSObjectName("/G");           //107
+        vector[0110] = new PSObjectName("/H");           //110
+        vector[0111] = new PSObjectName("/I");           //111
+        vector[0112] = new PSObjectName("/J");           //112
+        vector[0113] = new PSObjectName("/K");           //113
+        vector[0114] = new PSObjectName("/L");           //114
+        vector[0115] = new PSObjectName("/M");           //115
+        vector[0116] = new PSObjectName("/N");           //116
+        vector[0117] = new PSObjectName("/O");           //117
+        vector[0120] = new PSObjectName("/P");           //120
+        vector[0121] = new PSObjectName("/Q");           //121
+        vector[0122] = new PSObjectName("/R");           //122
+        vector[0123] = new PSObjectName("/S");           //123
+        vector[0124] = new PSObjectName("/T");           //124
+        vector[0125] = new PSObjectName("/U");           //125
+        vector[0126] = new PSObjectName("/V");           //126
+        vector[0127] = new PSObjectName("/W");           //127
+        vector[0130] = new PSObjectName("/X");           //130
+        vector[0131] = new PSObjectName("/Y");           //131
+        vector[0132] = new PSObjectName("/Z");           //132
+        vector[0133] = new PSObjectName("/bracketleft"); //133
+        vector[0134] = new PSObjectName("/backslash");   //134
+        vector[0135] = new PSObjectName("/bracketright"); //135
+        vector[0136] = new PSObjectName("/asciicircum"); //136
+        vector[0137] = new PSObjectName("/underscore");  //137
+        vector[0140] = new PSObjectName("/quoteleft");   //140
+        vector[0141] = new PSObjectName("/a");           //141
+        vector[0142] = new PSObjectName("/b");           //142
+        vector[0143] = new PSObjectName("/c");           //143
+        vector[0144] = new PSObjectName("/d");           //144
+        vector[0145] = new PSObjectName("/e");           //145
+        vector[0146] = new PSObjectName("/f");           //146
+        vector[0147] = new PSObjectName("/g");           //147
+        vector[0150] = new PSObjectName("/h");           //150
+        vector[0151] = new PSObjectName("/i");           //151
+        vector[0152] = new PSObjectName("/j");           //152
+        vector[0153] = new PSObjectName("/k");           //153
+        vector[0154] = new PSObjectName("/l");           //154
+        vector[0155] = new PSObjectName("/m");           //155
+        vector[0156] = new PSObjectName("/n");           //156
+        vector[0157] = new PSObjectName("/o");           //157
+        vector[0160] = new PSObjectName("/p");           //160
+        vector[0161] = new PSObjectName("/q");           //161
+        vector[0162] = new PSObjectName("/r");           //162
+        vector[0163] = new PSObjectName("/s");           //163
+        vector[0164] = new PSObjectName("/t");           //164
+        vector[0165] = new PSObjectName("/u");           //165
+        vector[0166] = new PSObjectName("/v");           //166
+        vector[0167] = new PSObjectName("/w");           //167
+        vector[0170] = new PSObjectName("/x");           //170
+        vector[0171] = new PSObjectName("/y");           //171
+        vector[0172] = new PSObjectName("/z");           //172
+        vector[0173] = new PSObjectName("/braceleft");   //173
+        vector[0174] = new PSObjectName("/bar");         //174
+        vector[0175] = new PSObjectName("/braceright");  //175
+        vector[0176] = new PSObjectName("/asciitilde");  //176
+        vector[0177] = EncodingManager.SYMB_NOTDEF;     //177
+        vector[0200] = EncodingManager.SYMB_NOTDEF;     //200
+        vector[0201] = EncodingManager.SYMB_NOTDEF;     //201
+        vector[0202] = EncodingManager.SYMB_NOTDEF;     //202
+        vector[0203] = EncodingManager.SYMB_NOTDEF;     //203
+        vector[0204] = EncodingManager.SYMB_NOTDEF;     //204
+        vector[0205] = EncodingManager.SYMB_NOTDEF;     //205
+        vector[0206] = EncodingManager.SYMB_NOTDEF;     //206
+        vector[0207] = EncodingManager.SYMB_NOTDEF;     //207
+        vector[0210] = EncodingManager.SYMB_NOTDEF;     //210
+        vector[0211] = EncodingManager.SYMB_NOTDEF;     //211
+        vector[0212] = EncodingManager.SYMB_NOTDEF;     //212
+        vector[0213] = EncodingManager.SYMB_NOTDEF;     //213
+        vector[0214] = EncodingManager.SYMB_NOTDEF;     //214
+        vector[0215] = EncodingManager.SYMB_NOTDEF;     //215
+        vector[0216] = EncodingManager.SYMB_NOTDEF;     //216
+        vector[0217] = EncodingManager.SYMB_NOTDEF;     //217
+        vector[0220] = new PSObjectName("/dotlessi");    //220
+        vector[0221] = new PSObjectName("/grave");       //221
+        vector[0222] = new PSObjectName("/acute");       //222
+        vector[0223] = new PSObjectName("/circumflex");  //223
+        vector[0224] = new PSObjectName("/tilde");       //224
+        vector[0225] = new PSObjectName("/macron");      //225
+        vector[0226] = new PSObjectName("/breve");       //226
+        vector[0227] = new PSObjectName("/dotaccent");   //227
+        vector[0230] = new PSObjectName("/dieresis");    //230
+        vector[0231] = EncodingManager.SYMB_NOTDEF;     //231
+        vector[0232] = new PSObjectName("/ring");        //232
+        vector[0233] = new PSObjectName("/cedilla");     //233
+        vector[0234] = EncodingManager.SYMB_NOTDEF;     //234
+        vector[0235] = new PSObjectName("/hungarumlaut"); //235
+        vector[0236] = new PSObjectName("/ogonek");      //236
+        vector[0237] = new PSObjectName("/caron");       //237
+        vector[0240] = new PSObjectName("/space");       //240
+        vector[0241] = new PSObjectName("/exclamdown");  //241
+        vector[0242] = new PSObjectName("/cent");        //242
+        vector[0243] = new PSObjectName("/sterling");    //243
+        vector[0244] = new PSObjectName("/currency");    //244
+        vector[0245] = new PSObjectName("/yen");         //245
+        vector[0246] = new PSObjectName("/brokenbar");   //246
+        vector[0247] = new PSObjectName("/section");     //247
+        vector[0250] = new PSObjectName("/dieresis");    //250
+        vector[0251] = new PSObjectName("/copyright");   //251
+        vector[0252] = new PSObjectName("/ordfeminine"); //252
+        vector[0253] = new PSObjectName("/guillemotleft"); //253
+        vector[0254] = new PSObjectName("/logicalnot");  //254
+        vector[0255] = new PSObjectName("/hyphen");      //255
+        vector[0256] = new PSObjectName("/registered");  //256
+        vector[0257] = new PSObjectName("/macron");      //257
+        vector[0260] = new PSObjectName("/degree");      //260
+        vector[0261] = new PSObjectName("/plusminus");   //261
+        vector[0262] = new PSObjectName("/twosuperior"); //262
+        vector[0263] = new PSObjectName("/threesuperior"); //263
+        vector[0264] = new PSObjectName("/acute");       //264
+        vector[0265] = new PSObjectName("/mu");          //265
+        vector[0266] = new PSObjectName("/paragraph");   //266
+        vector[0267] = new PSObjectName("/periodcentered"); //267
+        vector[0270] = new PSObjectName("/cedilla");     //270
+        vector[0271] = new PSObjectName("/onesuperior"); //271
+        vector[0272] = new PSObjectName("/ordmasculine"); //272
+        vector[0273] = new PSObjectName("/guillemotright"); //273
+        vector[0274] = new PSObjectName("/onequarter");  //274
+        vector[0275] = new PSObjectName("/onehalf");     //275        
+        vector[0276] = new PSObjectName("/threequarters"); //276        
+        vector[0277] = new PSObjectName("/questiondown"); //277
+        vector[0300] = new PSObjectName("/Agrave");      //300
+        vector[0301] = new PSObjectName("/Aacute");      //301
+        vector[0302] = new PSObjectName("/Acircumflex"); //302
+        vector[0303] = new PSObjectName("/Atilde");      //303
+        vector[0304] = new PSObjectName("/Adieresis");   //304
+        vector[0305] = new PSObjectName("/Aring");       //305
+        vector[0306] = new PSObjectName("/AE");          //306
+        vector[0307] = new PSObjectName("/Ccedilla");    //307
+        vector[0310] = new PSObjectName("/Egrave");      //310
+        vector[0311] = new PSObjectName("/Eacute");      //311
+        vector[0312] = new PSObjectName("/Ecircumflex"); //312
+        vector[0313] = new PSObjectName("/Edieresis");   //313
+        vector[0314] = new PSObjectName("/Igrave");      //314
+        vector[0315] = new PSObjectName("/Iacute");      //315
+        vector[0316] = new PSObjectName("/Icircumflex"); //316
+        vector[0317] = new PSObjectName("/Idieresis");   //317
+        vector[0320] = new PSObjectName("/Eth");         //320
+        vector[0321] = new PSObjectName("/Ntilde");      //321
+        vector[0322] = new PSObjectName("/Ograve");      //322
+        vector[0323] = new PSObjectName("/Oacute");      //323
+        vector[0324] = new PSObjectName("/Ocircumflex"); //324
+        vector[0325] = new PSObjectName("/Otilde");      //325
+        vector[0326] = new PSObjectName("/Odieresis");   //326
+        vector[0327] = new PSObjectName("/multiply");    //327
+        vector[0330] = new PSObjectName("/Oslash");      //330
+        vector[0331] = new PSObjectName("/Ugrave");      //331
+        vector[0332] = new PSObjectName("/Uacute");      //332
+        vector[0333] = new PSObjectName("/Ucircumflex"); //333
+        vector[0334] = new PSObjectName("/Udieresis");   //334
+        vector[0335] = new PSObjectName("/Yacute");      //335
+        vector[0336] = new PSObjectName("/Thorn");       //336
+        vector[0337] = new PSObjectName("/germandbls");  //337
+        vector[0340] = new PSObjectName("/agrave");      //340
+        vector[0341] = new PSObjectName("/aacute");      //341
+        vector[0342] = new PSObjectName("/acircumflex"); //342
+        vector[0343] = new PSObjectName("/atilde");      //343
+        vector[0344] = new PSObjectName("/adieresis");   //344
+        vector[0345] = new PSObjectName("/aring");       //345
+        vector[0346] = new PSObjectName("/ae");          //346
+        vector[0347] = new PSObjectName("/ccedilla");    //347
+        vector[0350] = new PSObjectName("/egrave");      //350
+        vector[0351] = new PSObjectName("/eacute");      //351
+        vector[0352] = new PSObjectName("/ecircumflex"); //352
+        vector[0353] = new PSObjectName("/edieresis");   //353
+        vector[0354] = new PSObjectName("/igrave");      //354
+        vector[0355] = new PSObjectName("/iacute");      //355
+        vector[0356] = new PSObjectName("/icircumflex"); //356
+        vector[0357] = new PSObjectName("/idieresis");   //357
+        vector[0360] = new PSObjectName("/eth");         //360
+        vector[0361] = new PSObjectName("/ntilde");      //361
+        vector[0362] = new PSObjectName("/ograve");      //362
+        vector[0363] = new PSObjectName("/oacute");      //363
+        vector[0364] = new PSObjectName("/ocircumflex"); //364
+        vector[0365] = new PSObjectName("/otilde");      //365
+        vector[0366] = new PSObjectName("/odieresis");   //366
+        vector[0367] = new PSObjectName("/divide");      //367
+        vector[0370] = new PSObjectName("/oslash");      //370
+        vector[0371] = new PSObjectName("/ugrave");      //371
+        vector[0372] = new PSObjectName("/uacute");      //372
+        vector[0373] = new PSObjectName("/ucircumflex"); //373
+        vector[0374] = new PSObjectName("/udieresis");   //374
+        vector[0375] = new PSObjectName("/yacute");      //375
+        vector[0376] = new PSObjectName("/thorn");       //376
+        vector[0377] = new PSObjectName("/ydieresis");   //377
         
         return vector;
     }
-    
 }

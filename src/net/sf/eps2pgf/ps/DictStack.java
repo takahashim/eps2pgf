@@ -37,6 +37,7 @@ import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
 import net.sf.eps2pgf.ps.objects.PSObjectOperator;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
+import net.sf.eps2pgf.ps.resources.ResourceManager;
 import net.sf.eps2pgf.ps.resources.encodings.ISOLatin1Encoding;
 import net.sf.eps2pgf.ps.resources.encodings.StandardEncoding;
 import net.sf.eps2pgf.ps.resources.encodings.SymbolEncoding;
@@ -81,14 +82,16 @@ public class DictStack {
     /**
      * Create a new dictionary stack.
      * 
-     * @param aInterp The interpreter with which this dictionary stack is
+     * @param interpreter The interpreter with which this dictionary stack is
      * associated.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public DictStack(final Interpreter aInterp) throws PSError, ProgramError {
-        interp = aInterp;
+    public DictStack(final Interpreter interpreter)
+            throws PSError, ProgramError {
+        
+        interp = interpreter;
         
         // The user dictionary must be allocated in local VM
         interp.getVm().setGlobal(false);
@@ -314,11 +317,16 @@ public class DictStack {
         interp.getVm().setGlobal(true);
         
         // add encoding vectors
-        systemdict.setKey("ISOLatin1Encoding",
-                ISOLatin1Encoding.get(interp.getVm()));
-        systemdict.setKey("StandardEncoding",
-                StandardEncoding.get(interp.getVm()));
-        systemdict.setKey("SymbolEncoding", SymbolEncoding.get(interp.getVm()));
+        ResourceManager rm = interp.getResourceManager();
+        systemdict.setKey(ISOLatin1Encoding.NAME,
+                rm.findResource(ResourceManager.CAT_ENCODING,
+                        ISOLatin1Encoding.NAME));
+        systemdict.setKey(StandardEncoding.NAME,
+                rm.findResource(ResourceManager.CAT_ENCODING,
+                        StandardEncoding.NAME));
+        systemdict.setKey(SymbolEncoding.NAME,
+                rm.findResource(ResourceManager.CAT_ENCODING,
+                        SymbolEncoding.NAME));
         
         // Add some dummy operators that set the page size. These are sometimes
         // used.

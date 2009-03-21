@@ -184,11 +184,12 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
         setFID();
         String encoding = props.getProperty("encoding", "Standard");
         if (encoding.equals("Standard")) {
-            setKey(KEY_ENCODING, StandardEncoding.get(vm));
+            setKey(KEY_ENCODING, new PSObjectArray(StandardEncoding.get(), vm));
         } else if (encoding.equals("ISOLatin1")) {
-            setKey(KEY_ENCODING, ISOLatin1Encoding.get(vm));
+            setKey(KEY_ENCODING,
+                    new PSObjectArray(ISOLatin1Encoding.get(), vm));
         } else if (encoding.equals("Symbol")) {
-            setKey(KEY_ENCODING, SymbolEncoding.get(vm));
+            setKey(KEY_ENCODING, new PSObjectArray(SymbolEncoding.get(), vm));
         } else {
             LOG.severe("Unknown encoding: " + encoding);
             throw new PSErrorInvalidFont();
