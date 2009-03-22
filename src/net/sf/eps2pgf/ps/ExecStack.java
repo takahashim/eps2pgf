@@ -32,7 +32,6 @@ import net.sf.eps2pgf.ps.objects.PSObjectFile;
  * Execution stack. Stack of objects that await processing by the interpreter.
  * @author Paul Wagenaars
  */
-//TODO implement execstack as subclass of ArrayStack
 public class ExecStack {
     /** Execution stack (see PostScript manual for more info). */
     private PSObjectArray stack;
