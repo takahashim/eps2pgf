@@ -167,13 +167,12 @@ public class Interpreter {
                 throw new ProgramError("Unknown output device ("
                         + opts.getOutputType() + ").");
         }
-        gstate = new GstateStack(output, this);
         
+        gstate = new GstateStack(output, this);
+        textHandler = new TextHandler(gstate, textReplace, opts.getTextmode());
         header = fileHeader;
         
-        // Text handler
-        textHandler = new TextHandler(gstate, textReplace, opts.getTextmode());
-        
+        // Initialization procedure that is the same for all constructors
         initialize();
     }
     
@@ -191,15 +190,14 @@ public class Interpreter {
         OutputDevice output = new NullDevice();
         gstate = new GstateStack(output, this);
         
-        // "Infinite" bounding box (square box from (-10m,-10m) to (10m,10m))
-        double[] bbox = {-28346.46, -28346.46, 28346.46, 28346.46};
-        header = new DSCHeader(bbox);
-        
         // Text handler
         textHandler = new TextHandler(gstate);
         
-        //TODO remove initialize function and put everything in a single
-        // constructor and call that constructor from here.
+        // "Infinite" bounding box (square box from (-10m,-10m) to (10m,10m))
+        double[] bbox = {-28346.46, -28346.46, 28346.46, 28346.46};
+        header = new DSCHeader(bbox);
+     
+        // Initialization procedure that is the same for all constructors
         try {
             initialize();
         } catch (IOException e) {
