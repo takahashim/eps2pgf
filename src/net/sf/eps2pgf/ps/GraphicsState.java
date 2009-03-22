@@ -19,6 +19,7 @@
 package net.sf.eps2pgf.ps;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
@@ -79,7 +80,7 @@ public class GraphicsState implements Cloneable {
     private double miterLimit = 10.0;
     
     /** Current dash pattern. */
-    private PSObjectArray dashPattern; //TODO remove PSObjects from gstate
+    private ArrayList<Double> dashPattern = new ArrayList<Double>();
     
     /** Current dash offset. */
     private double dashOffset = 0.0;
@@ -91,26 +92,26 @@ public class GraphicsState implements Cloneable {
     // Device dependent parameters
     //
     /** Current color rendering. */
-    private PSObjectDict colorRendering; //TODO remove PSObjects from gstate
+    private PSObjectDict colorRendering;
     
     /** Current overprint. */
     private boolean overprint = false;
     
     /** Current black generation function. */
-    private PSObjectArray blackGeneration; //TODO remove PSObjects from gstate
+    private PSObjectArray blackGeneration;
     
     /** Current undercolor removal function. */
-    private PSObjectArray undercolorRemoval; //TODO remove PSObjects from gstate
+    private PSObjectArray undercolorRemoval;
     
     /**
      * Current transfer functions to convert colors to device settings.
      * The array contains four procedures:
      * {redproc greenproc blueproc grayproc}
      */
-    private PSObjectArray transfer; //TODO remove PSObjects from gstate
+    private PSObjectArray transfer;
     
     /** Current halftone. */
-    private PSObject halftone; //TODO remove PSObjects from gstate
+    private PSObject halftone;
     
     /** Current flatness of curves. */
     private double flatness = 1.0;
@@ -143,7 +144,6 @@ public class GraphicsState implements Cloneable {
 
         colorRendering = new PSObjectDict(interp.getVm());
         ctm = new Matrix();
-        dashPattern = new PSObjectArray(interp.getVm());
         device = wDevice;
         halftone = new PSObjectDict(interp.getVm());
                 
@@ -352,7 +352,7 @@ public class GraphicsState implements Cloneable {
         copy.colorRendering = colorRendering.clone();
         copy.ctm = ctm.clone();
         // dashOffset is primitive, it doesn't need to be cloned explicitly.
-        copy.dashPattern = dashPattern.clone();
+        copy.dashPattern = new ArrayList<Double>(dashPattern);
         copy.device = device.clone();
         // flatness is primitive, it doesn't need to be cloned explicitely.
         copy.font = font.clone();
@@ -944,10 +944,27 @@ public class GraphicsState implements Cloneable {
     /**
      * Sets the dash pattern.
      * 
-     * @param pDashPattern the dashPattern to set
+     * @param newDashPattern the dashPattern to set
+     * 
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
      */
-    public void setDashPattern(final PSObjectArray pDashPattern) {
-        dashPattern = pDashPattern;
+    public void setDashPattern(final PSObjectArray newDashPattern)
+            throws PSErrorTypeCheck, PSErrorRangeCheck {
+        
+        // Make sure that the dash pattern array has the same length as the new
+        // dash pattern.
+        while (dashPattern.size() < newDashPattern.size()) {
+            dashPattern.add(Double.NaN);
+        }
+        while (dashPattern.size() > newDashPattern.size()) {
+            dashPattern.remove(dashPattern.size() - 1);
+        }
+        
+        // Copy the value from the new pattern.
+        for (int i = 0; i < dashPattern.size(); i++) {
+            dashPattern.set(i, newDashPattern.get(i).toReal());
+        }
     }
 
     /**
@@ -955,7 +972,7 @@ public class GraphicsState implements Cloneable {
      * 
      * @return the dashPattern
      */
-    public PSObjectArray getDashPattern() {
+    public ArrayList<Double> getDashPattern() {
         return dashPattern;
     }
 

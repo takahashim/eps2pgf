@@ -29,6 +29,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import net.sf.eps2pgf.Options;
@@ -49,7 +50,6 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
-import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.shadings.RadialShading;
@@ -521,7 +521,7 @@ public class PGFDevice implements OutputDevice, Cloneable {
 
         double scaling = gstate.getCtm().getMeanScaling();
         double gsOffset = gstate.getDashOffset();
-        PSObjectArray gsPattern = gstate.getDashPattern();
+        List<Double> gsPattern = gstate.getDashPattern();
         int gsN = gsPattern.size();
 
         // Check whether anything was changed
@@ -533,7 +533,7 @@ public class PGFDevice implements OutputDevice, Cloneable {
                 dashChanged = true;
             } else {
                 for (int i = 0; i < gsN; i++) {
-                    double val1 = gsPattern.getReal(i) * scaling;
+                    double val1 = gsPattern.get(i) * scaling;
                     double val2 = currentDashPattern.get(i);
                     if (Math.abs(val1 - val2) > 1e-10) {
                         dashChanged = true;
@@ -561,7 +561,7 @@ public class PGFDevice implements OutputDevice, Cloneable {
             
             // Determine the new dash pattern.
             for (int i = 0; i < gsN; i++) {
-                currentDashPattern.set(i, gsPattern.getReal(i) * scaling);
+                currentDashPattern.set(i, gsPattern.get(i) * scaling);
             }
             
             // Write the new dash pattern and offset to the output document.

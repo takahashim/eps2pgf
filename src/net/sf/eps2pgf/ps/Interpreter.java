@@ -1110,9 +1110,19 @@ public class Interpreter {
      * PostScript op: currentdash.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
+     * @throws PSErrorInvalidAccess the PS error invalid access
+     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
+     * @throws PSErrorVMError Virtual memory error.
      */
-    public void op_currentdash() throws ProgramError {
-        opStack.push(gstate.current().getDashPattern().clone());
+    public void op_currentdash() throws ProgramError, PSErrorRangeCheck,
+            PSErrorInvalidAccess, PSErrorVMError {
+        
+        List<Double> pattern = gstate.current().getDashPattern();
+        PSObjectArray arr = new PSObjectArray(pattern.size(), getVm());
+        for (int i = 0; i < pattern.size(); i++) {
+            arr.put(i, new PSObjectReal(pattern.get(i)));
+        }
+        opStack.push(arr);
         opStack.push(new PSObjectReal(gstate.current().getDashOffset()));
     }
     
