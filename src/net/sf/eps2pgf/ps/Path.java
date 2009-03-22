@@ -139,7 +139,7 @@ public class Path implements Cloneable {
             }
         }
         
-        Closepath closepath = new Closepath(position);
+        Closepath closepath = new Closepath();
         getSections().add(closepath);
 
         return position;
