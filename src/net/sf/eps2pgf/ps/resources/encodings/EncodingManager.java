@@ -36,43 +36,90 @@ public final class EncodingManager {
     
     // Make constants for some commonly used symbols
     /** .notdef symbol. */
-    public static final PSObjectName SYMB_NOTDEF = new PSObjectName("/.notdef");
+    public static final PSObjectName S_NOTDEF = new PSObjectName("/.notdef");
     
     /** space symbol. */
-    public static final PSObjectName SYMB_SPACE = new PSObjectName("/space");
+    public static final PSObjectName S_SPACE = new PSObjectName("/space");
     
     /** exclam symbol. */
-    public static final PSObjectName SYMB_EXCLAM = new PSObjectName("/exclam");
+    public static final PSObjectName S_EXCLAM = new PSObjectName("/exclam");
+    
+    /** quotedbl symbol. */
+    public static final PSObjectName S_QUOTEDBL = new PSObjectName("/quotedbl");
+    
+    /** numbersign symbol. */
+    public static final PSObjectName S_NUMBERSIGN =
+        new PSObjectName("/numbersign");
+    
+    /** dollar symbol. */
+    public static final PSObjectName S_DOLLAR = new PSObjectName("/dollar");
+    
+    /** percent symbol. */
+    public static final PSObjectName S_PERCENT = new PSObjectName("/percent");
+    
+    /** ampersand symbol. */
+    public static final PSObjectName S_AMPERSAND =
+        new PSObjectName("/ampersand");
+    
+    /** quoteright symbol. */
+    public static final PSObjectName S_QUOTERIGHT =
+        new PSObjectName("/quoteright");
+    
+    /** parenleft symbol. */
+    public static final PSObjectName S_PARENLEFT =
+        new PSObjectName("/parenleft");
+    
+    /** parenright symbol. */
+    public static final PSObjectName S_PARENRIGHT =
+        new PSObjectName("/parenright");
+    
+    /** asterisk symbol. */
+    public static final PSObjectName S_ASTERISK = new PSObjectName("/asterisk");
+    
+    /** plus symbol. */
+    public static final PSObjectName S_PLUS = new PSObjectName("/plus");
+    
+    /** comma symbol. */
+    public static final PSObjectName S_COMMA = new PSObjectName("/comma");
+    
+    /** minus symbol. */
+    public static final PSObjectName S_MINUS = new PSObjectName("/minus");
+    
+    /** period symbol. */
+    public static final PSObjectName S_PERIOD = new PSObjectName("/period");
+    
+    /** slash symbol. */
+    public static final PSObjectName S_SLASH = new PSObjectName("/slash");
     
     /** zero symbol. */
-    public static final PSObjectName SYMB_ZERO = new PSObjectName("/zero");
+    public static final PSObjectName S_ZERO = new PSObjectName("/zero");
     
     /** one symbol. */
-    public static final PSObjectName SYMB_ONE = new PSObjectName("/one");
+    public static final PSObjectName S_ONE = new PSObjectName("/one");
     
     /** two symbol. */
-    public static final PSObjectName SYMB_TWO = new PSObjectName("/two");
+    public static final PSObjectName S_TWO = new PSObjectName("/two");
     
     /** three symbol. */
-    public static final PSObjectName SYMB_THREE = new PSObjectName("/three");
+    public static final PSObjectName S_THREE = new PSObjectName("/three");
     
     /** four symbol. */
-    public static final PSObjectName SYMB_FOUR = new PSObjectName("/four");
+    public static final PSObjectName S_FOUR = new PSObjectName("/four");
     
     /** five symbol. */
-    public static final PSObjectName SYMB_FIVE = new PSObjectName("/five");
+    public static final PSObjectName S_FIVE = new PSObjectName("/five");
     
     /** six symbol. */
-    public static final PSObjectName SYMB_SIX = new PSObjectName("/six");
+    public static final PSObjectName S_SIX = new PSObjectName("/six");
     
     /** seven symbol. */
-    public static final PSObjectName SYMB_SEVEN = new PSObjectName("/seven");
+    public static final PSObjectName S_SEVEN = new PSObjectName("/seven");
     
     /** eight symbol. */
-    public static final PSObjectName SYMB_EIGHT = new PSObjectName("/eight");
+    public static final PSObjectName S_EIGHT = new PSObjectName("/eight");
     
     /** nine symbol. */
-    public static final PSObjectName SYMB_NINE = new PSObjectName("/nine");
+    public static final PSObjectName S_NINE = new PSObjectName("/nine");
     
     /**
      * "Hidden" constructor.
