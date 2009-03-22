@@ -131,6 +131,16 @@ public class TypePSTest {
 
     /** Type test. @throws Exception the exception */
     @Test
+    public void cvx4() throws Exception {
+        String cmd = "mark dup cvx xcheck exch xcheck not"
+            + " true dup cvx xcheck exch xcheck not"
+            + " false dup cvx xcheck exch xcheck not"
+            + " null dup cvx xcheck exch xcheck not";
+        assertTrue(Common.testString(interp, cmd, 8));
+    }
+
+    /** Type test. @throws Exception the exception */
+    @Test
     public void xcheck1() throws Exception {
         String cmd = "/koe xcheck false eq  [1 2 3] xcheck false eq"
             + " {1 2 3} xcheck true eq";

@@ -64,7 +64,7 @@ public class GraphicsState implements Cloneable {
     private PSColor color;
     
     /** Current font. */
-    private PSObjectFont font; //TODO remove PSObjects from gstate
+    private PSObjectFont font;
     
     /** Current line width (in user space coordinates). */
     private double lineWidth = 1.0;

@@ -153,8 +153,6 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * 
      * @throws PSErrorVMError Virtual memory error
      */
-    //TODO Is this constructor actually used?
-    //TODO Do I need to construct a new List<> object, or can I use the old one
     public PSObjectArray(final List<PSObject> objs, final VM virtualMemory)
             throws PSErrorVMError {
         
@@ -623,22 +621,6 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
         }
         
         return element; 
-    }
-    
-    /**
-     * Replaces a value in this matrix.
-     * 
-     * @param index The index.
-     * @param value The value.
-     * 
-     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
-     * @throws PSErrorInvalidAccess the PS error invalid access
-     */
-    //TODO rename this method to putReal(..., ...)
-    public void setReal(final int index, final double value)
-            throws PSErrorRangeCheck, PSErrorInvalidAccess {
-        
-        put(index, new PSObjectReal(value));
     }
     
     /**
