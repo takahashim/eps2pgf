@@ -145,11 +145,7 @@ public class PSObjectDict extends PSObjectComposite implements Cloneable {
      */
     @Override
     public boolean equals(final Object obj) {
-        if (obj instanceof PSObject) {
-            return eq((PSObject) obj);
-        } else {
-            return false;
-        }
+        return (this == obj);
     }
     
     /**
@@ -244,7 +240,7 @@ public class PSObjectDict extends PSObjectComposite implements Cloneable {
      * @return Returns true when the key is known, returns false otherwise
      */
     public boolean known(final String key) {
-        return getMap().containsKey(new PSObjectName(key, true));
+        return known(new PSObjectName(key, true));
     }
     
     /**
@@ -278,7 +274,7 @@ public class PSObjectDict extends PSObjectComposite implements Cloneable {
      * @param key Key of the entry to look up.
      */
     public PSObject lookup(final String key) {
-        return getMap().get(new PSObjectName(key, true));
+        return lookup(new PSObjectName(key, true));
     }
     
     /**
@@ -378,26 +374,6 @@ public class PSObjectDict extends PSObjectComposite implements Cloneable {
     }
     
     /**
-     * Set a key in the dictionary.
-     * 
-     * @param key Key of the new dictionary entry.
-     * @param value Value of the new dictionary item. Will be converted to a
-     * PSObjectString.
-     * 
-     * @return Created PSObjectString.
-     * 
-     * @throws PSErrorVMError Virtual memory error.
-     */
-    //TODO is this method used anywhere?
-    public PSObjectString setKey(final PSObject key, final String value)
-            throws PSErrorVMError {
-        
-        PSObjectString psoValue = new PSObjectString(value, getVm());
-        getMap().put(key, psoValue);
-        return psoValue;
-    }
-    
-    /**
      * Convert this object to a dictionary, if possible.
      * @return This dictionary.
      */
@@ -462,7 +438,7 @@ public class PSObjectDict extends PSObjectComposite implements Cloneable {
      * 
      * @return map The map.
      */
-    private Map<PSObject, PSObject> getMap() {
+    protected Map<PSObject, PSObject> getMap() {
         return getVm().getDictObj(getId());
     }
     

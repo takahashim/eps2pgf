@@ -60,70 +60,106 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
     /** The log. */
     private static final Logger LOG =
                                     Logger.getLogger("net.sourceforge.eps2pgf");
-    
+
+    //
     // Standard fields in font dictionary
+    //
     /** The fontinfo field name. */
-    public static final String KEY_FONTINFO = "FontInfo";
+    public static final PSObjectName KEY_FONTINFO =
+        new PSObjectName("/FontInfo");
     
     /** The fontname field name. */
-    public static final String KEY_FONTNAME = "FontName";
+    public static final PSObjectName KEY_FONTNAME =
+        new PSObjectName("/FontName");
     
     /** The encoding field name. */
-    public static final String KEY_ENCODING = "Encoding";
+    public static final PSObjectName KEY_ENCODING =
+        new PSObjectName("/Encoding");
     
     /** The painttype field name. */
-    public static final String KEY_PAINTTYPE = "PaintType";
+    public static final PSObjectName KEY_PAINTTYPE =
+        new PSObjectName("/PaintType");
     
     /** The fonttype field name. */
-    public static final String KEY_FONTTYPE = "FontType";
+    public static final PSObjectName KEY_FONTTYPE =
+        new PSObjectName("/FontType");
     
     /** The fontmatrix field name. */
-    public static final String KEY_FONTMATRIX = "FontMatrix";
+    public static final PSObjectName KEY_FONTMATRIX =
+        new PSObjectName("/FontMatrix");
     
     /** The fontbbox field name. */
-    public static final String KEY_FONTBBOX = "FontBBox";
+    public static final PSObjectName KEY_FONTBBOX =
+        new PSObjectName("/FontBBox");
     
     /** The uniqueid field name. */
-    public static final String KEY_UNIQUEID = "UniqueID";
+    public static final PSObjectName KEY_UNIQUEID =
+        new PSObjectName("/UniqueID");
     
     /** The metrics field name. */
-    public static final String KEY_METRICS = "Metrics";
+    public static final PSObjectName KEY_METRICS =
+        new PSObjectName("/Metrics");
     
     /** The strokewidth field name. */
-    public static final String KEY_STROKEWIDTH = "StrokeWidth";
+    public static final PSObjectName KEY_STROKEWIDTH =
+        new PSObjectName("/StrokeWidth");
     
     /** The private field name. */
-    public static final String KEY_PRIVATE = "Private";
+    public static final PSObjectName KEY_PRIVATE =
+        new PSObjectName("/Private");
     
     /** The charstrings field name. */
-    public static final String KEY_CHARSTRINGS = "CharStrings";
+    public static final PSObjectName KEY_CHARSTRINGS =
+        new PSObjectName("/CharStrings");
     
     /** The fid field name. */
-    public static final String KEY_FID = "FID";
+    public static final PSObjectName KEY_FID =
+        new PSObjectName("/FID");
     
+    //
     // Standard fields in Private Dictionary
+    //
     /** The subrs field name. */
-    public static final String KEY_PRV_SUBRS = "Subrs";
+    public static final PSObjectName KEY_PRV_SUBRS =
+        new PSObjectName("/Subrs");
     
+    //
     // Eps2pgf specific fields in font dictionary
+    //
     /** The latexprecode field name. */
-    public static final String KEY_LATEXPRECODE = "LatexPreCode";
+    public static final PSObjectName KEY_LATEXPRECODE =
+        new PSObjectName("/LatexPreCode");
     
     /** The latexpostcode field name. */
-    public static final String KEY_LATEXPOSTCODE = "LatexPostCode";
+    public static final PSObjectName KEY_LATEXPOSTCODE =
+        new PSObjectName("/LatexPostCode");
     
     /** The afm field name. */
-    public static final String KEY_AFM = "AFM";
+    public static final PSObjectName KEY_AFM =
+        new PSObjectName("/AFM");
     
     /** The texstrings field name. */
-    public static final String KEY_TEXSTRINGS = "TexStrings";
+    public static final PSObjectName KEY_TEXSTRINGS =
+        new PSObjectName("/TexStrings");
     
+    //
     // Field specific for Type 3 fonts
+    //
     /** The BuildGlyph field name. */
-    public static final String KEY_BUILDGLYPH = "BuildGlyph";
+    public static final PSObjectName KEY_BUILDGLYPH =
+        new PSObjectName("/BuildGlyph");
     
     /** The BuildChar field name. */
-    public static final String KEY_BUILDCHAR = "BuildChar";
+    public static final PSObjectName KEY_BUILDCHAR =
+        new PSObjectName("/BuildChar");
+    
+    
+    //
+    // Some parameters are not stored in the dictionary for efficiency reasons
+    // and to prevent problems with save/restore.
+    //
+    /** FontMatrix variable. */
+    private Matrix fontMatrix;
     
 
     /**
@@ -141,7 +177,7 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
         setFID();
         setKey(KEY_FONTTYPE, new PSObjectInt(1));
         setKey(KEY_FONTMATRIX,
-                new Matrix(0.001, 0, 0, 0.001, 0, 0).toArray(vm));
+                (new Matrix(0.001, 0, 0, 0.001, 0, 0)).toArray(vm));
     }
     
     /**
@@ -179,7 +215,7 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
         // Setting the dictionary keys with font info
         setKey(KEY_FONTTYPE, new PSObjectInt(1));
         setKey(KEY_FONTMATRIX,
-                new Matrix(0.001, 0, 0, 0.001, 0, 0).toArray(vm));
+                (new Matrix(0.001, 0, 0, 0.001, 0, 0)).toArray(vm));
         setKey(KEY_FONTNAME, new PSObjectName(fontName, true));
         setFID();
         String encoding = props.getProperty("encoding", "Standard");
@@ -196,8 +232,12 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
         }
         setKey(KEY_PAINTTYPE, new PSObjectInt(2));
         
-        setKey(KEY_LATEXPRECODE, props.getProperty("latexprecode", ""));
-        setKey(KEY_LATEXPOSTCODE, props.getProperty("latexpostcode", ""));
+        setKey(KEY_LATEXPRECODE,
+                new PSObjectString(props.getProperty("latexprecode", ""),
+                        getVm()));
+        setKey(KEY_LATEXPOSTCODE,
+                new PSObjectString(props.getProperty("latexpostcode", ""),
+                        getVm()));
         
         String texStringName = props.getProperty("texstrings", "default");
         setKey(KEY_TEXSTRINGS, FontManager.getTexStringDict(texStringName, vm));
@@ -241,6 +281,12 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
         boolean alreadyValid = true;
         
         String fontname = getFontName();
+
+        // Copy the "special" variables from the dictionary to their own
+        // variables.
+        if (known(KEY_FONTMATRIX)) {
+            fontMatrix = lookup(KEY_FONTMATRIX).toArray().toMatrix();
+        }
         
         // See if texstrings are defined for this font. If not, copy standard
         // texstrings.
@@ -279,8 +325,8 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
                     post = fontTypes[i][2] + post;
                 }
             }
-            setKey(KEY_LATEXPRECODE, pre);
-            setKey(KEY_LATEXPOSTCODE, post);
+            setKey(KEY_LATEXPRECODE, new PSObjectString(pre, getVm()));
+            setKey(KEY_LATEXPOSTCODE, new PSObjectString(post, getVm()));
             alreadyValid = false;
         }
         
@@ -343,9 +389,39 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
      */
     @Override
     public PSObjectFont clone() {
-        return (PSObjectFont) super.clone();
+        PSObjectFont copy;
+        copy = (PSObjectFont) super.clone();
+        
+        if (fontMatrix != null) {
+            copy.fontMatrix = fontMatrix.clone();
+        }
+        
+        return copy;
     }
-
+    
+    /**
+     * Indicates whether some other object is equal to this one.
+     * Required when used as index in PSObjectDict
+     * 
+     * @param obj The object to compare to.
+     * 
+     * @return True, if equal.
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        return (this == obj);
+    }
+    
+    /**
+     * Returns a hash code value for the object.
+     * 
+     * @return Hash code of this object.
+     */
+    @Override
+    public int hashCode() {
+        return getMap().hashCode();
+    }
+    
     /**
      * Get the bounding box of a text (defined by a series of charStrings.
      * 
@@ -470,14 +546,9 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
      * Return the FontMatrix.
      * 
      * @return FontMatrix defined by this font
-     * 
-     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
-     * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
-    public Matrix getFontMatrix() throws PSErrorTypeCheck,
-            PSErrorRangeCheck {
-        
-        return lookup(KEY_FONTMATRIX).toArray().toMatrix();
+    public Matrix getFontMatrix() {
+        return fontMatrix;
     }
     
     /**
@@ -524,8 +595,7 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
      * @throws PSErrorRangeCheck the PS error range check
      */
     public double getFontSize() throws PSErrorTypeCheck, PSErrorRangeCheck {
-        return lookup(KEY_FONTMATRIX).toArray().toMatrix().getMeanScaling()
-                * 1000.0;
+        return fontMatrix.getMeanScaling() * 1000.0;
     }
     
     /**
@@ -599,6 +669,31 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
     }
     
     /**
+     * Looks up a key in this dictionary.
+     * 
+     * @return Object associated with the key, <code>null</code> if no object is
+     * associated with this key.
+     * 
+     * @param key Key of the entry to look up.
+     */
+    @Override
+    public PSObject lookup(final PSObject key) {
+        // If this is one of the special keys we also store it in a local
+        // variable, return that variable.
+        try {
+            if (KEY_FONTMATRIX.eq(key)) {
+                return fontMatrix.toArray(getVm());
+            }
+        } catch (PSErrorVMError e) {
+            /* empty block */
+        } catch (NullPointerException e) {
+            /* empty block */
+        }
+        
+        return super.lookup(key);
+    }
+    
+    /**
      * Check if this font already has a font ID (FID). If not, set the font ID
      * for this font to the next available ID.
      * 
@@ -614,7 +709,38 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
     }
     
     /**
-     * Return this object.
+     * Sets a key in the dictionary.
+     * 
+     * @param key Key of the new dictionary entry.
+     * @param value Value of the new dictionary entry.
+     */
+    @Override
+    public void setKey(final PSObject key, final PSObject value) {
+        // If this is one of the special keys we also store it in a local
+        // variable.
+        if (KEY_FONTMATRIX.eq(key)) {
+            try {
+                fontMatrix = value.toArray().toMatrix();
+            } catch (PSError e) {
+                fontMatrix = null;
+            }
+        }
+        
+        super.setKey(key, value);
+    }
+    
+    /**
+     * Return this object as regular dictionary.
+     * 
+     * @return This object
+     */
+    @Override
+    public PSObjectDict toDict() {
+        return this;
+    }
+
+    /**
+     * Return this object as font dictionary.
      * 
      * @return This object
      */

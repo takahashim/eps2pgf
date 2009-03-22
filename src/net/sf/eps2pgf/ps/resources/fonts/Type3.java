@@ -76,7 +76,8 @@ public final class Type3 {
                     + " is not a procedure");
         }
         
-        // Create a temporary in which the characters will be processed
+        // Create a temporary interpreter in which the characters will be
+        // processed.
         try {
             Interpreter fi = new Interpreter();
             
