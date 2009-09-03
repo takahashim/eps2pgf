@@ -281,11 +281,7 @@ public class PSObjectFile extends PSObject implements Cloneable {
             throws PSError, ProgramError {
         
         PSObject any;
-        try {
-            any = Parser.convertSingle(inStr, interp);
-        } catch (IOException e) {
-            throw new PSErrorIOError();
-        }
+        any = Parser.convertSingle(inStr, interp);
         List<PSObject> retList = new ArrayList<PSObject>();
         if (any != null) {
             retList.add(any);

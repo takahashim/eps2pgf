@@ -18,8 +18,6 @@
 
 package net.sf.eps2pgf.io;
 
-import java.io.IOException;
-
 import org.fontbox.util.BoundingBox;
 
 import net.sf.eps2pgf.Options;
@@ -187,13 +185,12 @@ public class TextHandler {
      * 
      * @return Displacement vector [dx, dy] in user space coordinates
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws ProgramError Program can not continue execution.
      * @throws PSError A PostScript error occurred.
      */
     public final double[] showText(final OutputDevice exp,
             final PSObjectString string)
-            throws PSError, IOException, ProgramError {
+            throws PSError, ProgramError {
         return showText(exp, string, false);
     }
     
@@ -207,13 +204,12 @@ public class TextHandler {
      * 
      * @return Displacement vector [dx, dy] in user space coordinates
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws ProgramError Program can not continue execution.
      * @throws PSError A PostScript error occurred.
      */
     public final double[] showText(final OutputDevice exp,
             final PSObjectString string, final boolean noOutput) 
-            throws PSError, IOException, ProgramError {     
+            throws PSError, ProgramError {     
         
         PSObjectFont currentFont = gstate.current().getFont();
         

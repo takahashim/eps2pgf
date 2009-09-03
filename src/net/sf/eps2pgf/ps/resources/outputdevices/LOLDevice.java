@@ -28,6 +28,7 @@ import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Matrix;
 import net.sf.eps2pgf.ps.Path;
+import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 
 /**
@@ -194,25 +195,29 @@ public class LOLDevice implements OutputDevice, Cloneable {
      * @param position Text anchor point in [micrometer, micrometer]
      * @param angle Text angle in degrees
      * @param fontsize in PostScript pt (= 1/72 inch). If fontsize is NaN, the
-     *        font size is not set and completely determined by LaTeX.
+     * font size is not set and completely determined by LaTeX.
      * @param anchor String with two characters:
-     *               t - top, c - center, B - baseline b - bottom
-     *               l - left, c - center, r - right
-     *               e.g. Br = baseline,right
+     * t - top, c - center, B - baseline b - bottom
+     * l - left, c - center, r - right
+     * e.g. Br = baseline,right
      * @param gstate Current graphics state.
-     *               
-     * @throws IOException Unable to write output
+     * 
+     * @throws PSErrorIOError PostScript IO error.
      */
     public void show(final String text, final double[] position,
             final double angle, final double fontsize, final String anchor,
-            final GraphicsState gstate) throws IOException {
+            final GraphicsState gstate) throws PSErrorIOError {
         
-        out.write(String.format("\\overlaylabel(%s,%s)[%s][%s]{%s}%%\n",
-                FLOAT_FORMAT.format(position[0]),
-                FLOAT_FORMAT.format(position[1]),
-                anchor,
-                FLOAT_FORMAT.format(angle),
-                text));
+        try {
+            out.write(String.format("\\overlaylabel(%s,%s)[%s][%s]{%s}%%\n",
+                    FLOAT_FORMAT.format(position[0]),
+                    FLOAT_FORMAT.format(position[1]),
+                    anchor,
+                    FLOAT_FORMAT.format(angle),
+                    text));
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
 
     /**
@@ -235,10 +240,8 @@ public class LOLDevice implements OutputDevice, Cloneable {
      * Adds a bitmap image to the output.
      * 
      * @param img The bitmap image to add.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void image(final Image img) throws IOException {
+    public void image(final Image img) {
         /* empty block */
     }
 }

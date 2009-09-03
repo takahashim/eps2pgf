@@ -74,13 +74,13 @@ public final class AllFigures {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void autocad_columbia() throws Exception {
+    public void autocadColumbia() throws Exception {
         assertTrue(Common.testFigure(conv, "autocad_columbia.ps"));
     }
     
     /** Test. @throws Exception the exception */
     @Test
-    public void autocad_nozzle() throws Exception {
+    public void autocadNozzle() throws Exception {
         assertTrue(Common.testFigure(conv, "autocad_nozzle.ps"));
     }
     
@@ -92,7 +92,7 @@ public final class AllFigures {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void coreldraw_Graphic1() throws Exception {
+    public void coreldrawGraphic1() throws Exception {
         Options opts = conv.getOpts();
         opts.setTextmode(Options.TextMode.DIRECT_COPY);
         assertTrue(Common.testFigure(conv, "coreldraw_Graphic1.eps"));
@@ -100,7 +100,7 @@ public final class AllFigures {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void creohn_Sheep_in_gray() throws Exception {
+    public void creohnSheepInGray() throws Exception {
         assertTrue(Common.testFigure(conv, "creohn_Sheep_in_gray.eps"));
     }
     
@@ -124,19 +124,19 @@ public final class AllFigures {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void illustrator_vw() throws Exception {
+    public void illustratorVw() throws Exception {
         assertTrue(Common.testFigure(conv, "illustrator_vw.ps"));
     }
     
     /** Test. @throws Exception the exception */
     @Test
-    public void ipe_figure1() throws Exception {
+    public void ipeFigure1() throws Exception {
         assertTrue(Common.testFigure(conv, "ipe-figure1.eps"));
     }
     
     /** Test. @throws Exception the exception */
     @Test
-    public void maple_cubic() throws Exception {
+    public void mapleCubic() throws Exception {
         assertTrue(Common.testFigure(conv, "maple_cubic.eps"));
     }
     
@@ -148,7 +148,7 @@ public final class AllFigures {
     
     /** Test. @throws Exception the exception */
     @Test
-    public void mathPSfrag_ex_auto_psfrag() throws Exception {
+    public void mathPSfragExAutoPsfrag() throws Exception {
         Options opts = conv.getOpts();
         opts.setTextreplacefile(new File("%figureDir%",
                 "MathPSfrag_ex_auto-psfrag.tex"));
@@ -157,7 +157,7 @@ public final class AllFigures {
 
     /** Test. @throws Exception the exception */
     @Test
-    public void rect_test() throws Exception {
+    public void rectTest() throws Exception {
         assertTrue(Common.testFigure(conv, "rect_test.eps"));
     }
 
@@ -169,7 +169,7 @@ public final class AllFigures {
 
     /** Test. @throws Exception the exception */
     @Test
-    public void showtext_mathematica1() throws Exception {
+    public void showtextMathematica1() throws Exception {
         assertTrue(Common.testFigure(conv, "showtext_mathematica1.ps"));
     }
 
@@ -181,13 +181,13 @@ public final class AllFigures {
 
     /** Test. @throws Exception the exception */
     @Test
-    public void matlab_bitmap1() throws Exception {
+    public void matlabBitmap1() throws Exception {
         assertTrue(Common.testFigure(conv, "matlab_bitmap1.eps"));
     }
 
     /** Test. @throws Exception the exception */
     @Test
-    public void ciebased_colorspace() throws Exception {
+    public void ciebasedColorspace() throws Exception {
         assertTrue(Common.testFigure(conv, "CIEBased.eps"));
     }
 

@@ -18,7 +18,6 @@
 
 package net.sf.eps2pgf.ps;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import net.sf.eps2pgf.ProgramError;
@@ -724,12 +723,11 @@ public class GraphicsState implements Cloneable {
      * 
      * @param newColor Parameters of new color (defined in current color space)
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void setcolor(final double[] newColor)
-            throws IOException, PSError, ProgramError {
+            throws PSError, ProgramError {
         
         color.setColor(newColor);
     }
@@ -750,12 +748,9 @@ public class GraphicsState implements Cloneable {
      * an array starting with a literal name.
      * 
      * @throws PSError A PostScript error has occurred.
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void setcolorspace(final PSObject obj)
-            throws PSError, IOException, ProgramError {
-        
+    public void setcolorspace(final PSObject obj) throws PSError, ProgramError {
         color = ColorManager.autoSetColorSpace(obj, interp);
     }
     

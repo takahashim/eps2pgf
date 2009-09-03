@@ -295,7 +295,7 @@ public class VM implements Cloneable {
      * 
      * @param newGlobal New allocation mode. True = global, false = local.
      */
-    public void setGlobal(boolean newGlobal) {
+    public void setGlobal(final boolean newGlobal) {
         isGlobal = newGlobal;
     }
     
@@ -411,7 +411,7 @@ public class VM implements Cloneable {
          * 
          * @param global True if in global VM, false if in local VM.
          */
-        private void setInGlobalVM(boolean global) {
+        private void setInGlobalVM(final boolean global) {
             inGlobalVM = global;
         }
         

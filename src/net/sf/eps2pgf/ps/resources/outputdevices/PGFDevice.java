@@ -172,25 +172,34 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * Initialize before any other methods are called. Normally, this method
      * writes a header.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    public void init() throws IOException {
-        out.write("% Created by " + net.sf.eps2pgf.Main.getNameVersion() + " ");
-        Date now = new Date();
-        out.write("on " + now  + "\n");
-        out.write("\\begin{pgfpicture}\n");
+    public void init() throws PSError {
+        try {
+            out.write("% Created by " + net.sf.eps2pgf.Main.getNameVersion()
+                    + " ");
+            Date now = new Date();
+            out.write("on " + now  + "\n");
+            out.write("\\begin{pgfpicture}\n");
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
     
     /**
      * Finalize writing. Normally, this method writes a footer.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    public void finish() throws IOException {
-        while (scopeDepth[0] > 0) {
-            endScope();
+    public void finish() throws PSError {
+        try {
+            while (scopeDepth[0] > 0) {
+                endScope();
+            }
+            out.write("\\end{pgfpicture}\n");
+        } catch (IOException e) {
+            throw new PSErrorIOError();
         }
-        out.write("\\end{pgfpicture}\n");
     }
     
     /**
@@ -198,43 +207,47 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * 
      * @param path The path.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
-     * (yet) implemented.
+     * @throws PSError A PostScript error occurred.
      */
-    void writePath(final Path path) throws IOException, PSErrorUnregistered {
-        for (int i = 0; i < path.getSections().size(); i++) {
-            PathSection section = path.getSections().get(i);
-            if (section instanceof Moveto) {
-                // If the path ends with a moveto, the moveto is ignored.
-                if (i < (path.getSections().size() - 1)) {
+    void writePath(final Path path) throws PSError {
+        try {
+            for (int i = 0; i < path.getSections().size(); i++) {
+                PathSection section = path.getSections().get(i);
+                if (section instanceof Moveto) {
+                    // If the path ends with a moveto, the moveto is ignored.
+                    if (i < (path.getSections().size() - 1)) {
+                        String x =
+                            COOR_FORMAT.format(1e-4 * section.getParam(0));
+                        String y =
+                            COOR_FORMAT.format(1e-4 * section.getParam(1));
+                        out.write("\\pgfpathmoveto{\\pgfqpoint{" + x + "cm}{"
+                                + y + "cm}}\n");
+                    }
+                } else if (section instanceof Lineto) {
                     String x = COOR_FORMAT.format(1e-4 * section.getParam(0));
                     String y = COOR_FORMAT.format(1e-4 * section.getParam(1));
-                    out.write("\\pgfpathmoveto{\\pgfqpoint{" + x + "cm}{" + y
+                    out.write("\\pgfpathlineto{\\pgfqpoint{" + x + "cm}{" + y
                             + "cm}}\n");
+                } else if (section instanceof Curveto) {
+                    String x1 = COOR_FORMAT.format(1e-4 * section.getParam(0));
+                    String y1 = COOR_FORMAT.format(1e-4 * section.getParam(1));
+                    String x2 = COOR_FORMAT.format(1e-4 * section.getParam(2));
+                    String y2 = COOR_FORMAT.format(1e-4 * section.getParam(3));
+                    String x3 = COOR_FORMAT.format(1e-4 * section.getParam(4));
+                    String y3 = COOR_FORMAT.format(1e-4 * section.getParam(5));
+                    out.write("\\pgfpathcurveto");
+                    out.write("{\\pgfqpoint{" + x1 + "cm}{" + y1 + "cm}}");
+                    out.write("{\\pgfqpoint{" + x2 + "cm}{" + y2 + "cm}}");
+                    out.write("{\\pgfqpoint{" + x3 + "cm}{" + y3 + "cm}}\n");
+                } else if (section instanceof Closepath) {
+                    out.write("\\pgfpathclose\n");
+                } else {
+                    throw new PSErrorUnregistered("Can't handle "
+                            + section.getClass().getName());
                 }
-            } else if (section instanceof Lineto) {
-                String x = COOR_FORMAT.format(1e-4 * section.getParam(0));
-                String y = COOR_FORMAT.format(1e-4 * section.getParam(1));
-                out.write("\\pgfpathlineto{\\pgfqpoint{" + x + "cm}{" + y
-                        + "cm}}\n");
-            } else if (section instanceof Curveto) {
-                String x1 = COOR_FORMAT.format(1e-4 * section.getParam(0));
-                String y1 = COOR_FORMAT.format(1e-4 * section.getParam(1));
-                String x2 = COOR_FORMAT.format(1e-4 * section.getParam(2));
-                String y2 = COOR_FORMAT.format(1e-4 * section.getParam(3));
-                String x3 = COOR_FORMAT.format(1e-4 * section.getParam(4));
-                String y3 = COOR_FORMAT.format(1e-4 * section.getParam(5));
-                out.write("\\pgfpathcurveto");
-                out.write("{\\pgfqpoint{" + x1 + "cm}{" + y1 + "cm}}");
-                out.write("{\\pgfqpoint{" + x2 + "cm}{" + y2 + "cm}}");
-                out.write("{\\pgfqpoint{" + x3 + "cm}{" + y3 + "cm}}\n");
-            } else if (section instanceof Closepath) {
-                out.write("\\pgfpathclose\n");
-            } else {
-                throw new PSErrorUnregistered("Can't handle "
-                        + section.getClass().getName());
             }
+        } catch (IOException e) {
+            throw new PSErrorIOError();
         }
     }
     
@@ -243,21 +256,24 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * 
      * @param gstate Current graphics state.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void stroke(final GraphicsState gstate)
-            throws IOException, PSError, ProgramError {
-        
-        updateDash(gstate);
-        updateLineWidth(gstate);
-        updateLineCap(gstate);
-        updateLineJoin(gstate);
-        updateMiterLimit(gstate);
-        updateColor(gstate);
-        writePath(gstate.getPath());
-        out.write("\\pgfusepath{stroke}\n");
+            throws PSError, ProgramError {
+
+        try {
+            updateDash(gstate);
+            updateLineWidth(gstate);
+            updateLineCap(gstate);
+            updateLineJoin(gstate);
+            updateMiterLimit(gstate);
+            updateColor(gstate);
+            writePath(gstate.getPath());
+            out.write("\\pgfusepath{stroke}\n");
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
     
     /**
@@ -267,14 +283,15 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * 
      * @param clipPath the clip path
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
-     *                              (yet) implemented.
+     * @throws PSError A PostScript error occurred.
      */
-    public void clip(final Path clipPath)
-            throws IOException, PSErrorUnregistered {
-        writePath(clipPath);
-        out.write("\\pgfusepath{clip}\n");
+    public void clip(final Path clipPath) throws PSError {
+        try {
+            writePath(clipPath);
+            out.write("\\pgfusepath{clip}\n");
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
     
     /**
@@ -303,16 +320,17 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * 
      * @param gstate Current graphics state.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void fill(final GraphicsState gstate)
-            throws IOException, PSError, ProgramError {
-        
-        updateColor(gstate);
-        writePath(gstate.getPath());
-        out.write("\\pgfusepath{fill}\n");
+    public void fill(final GraphicsState gstate) throws PSError, ProgramError {
+        try {
+            updateColor(gstate);
+            writePath(gstate.getPath());
+            out.write("\\pgfusepath{fill}\n");
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
     
     /**
@@ -322,15 +340,15 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * 
      * @param gstate The current graphics state.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * (yet) implemented.
      * @throws PSError A PostScript error occurred.
      */
-    public void eoclip(final GraphicsState gstate)
-            throws IOException, PSError {
-        
-        writePath(gstate.getClippingPath());
-        out.write("\\pgfseteorule\\pgfusepath{clip}\\pgfsetnonzerorule\n");
+    public void eoclip(final GraphicsState gstate) throws PSError {
+        try {
+            writePath(gstate.getClippingPath());
+            out.write("\\pgfseteorule\\pgfusepath{clip}\\pgfsetnonzerorule\n");
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
     
     /**
@@ -339,16 +357,19 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * 
      * @param gstate The current graphics state.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void eofill(final GraphicsState gstate)
-            throws IOException, PSError, ProgramError {
+    public void eofill(final GraphicsState gstate) throws PSError,
+        ProgramError {
         
-        updateColor(gstate);
-        writePath(gstate.getPath());
-        out.write("\\pgfseteorule\\pgfusepath{fill}\\pgfsetnonzerorule\n");
+        try {
+            updateColor(gstate);
+            writePath(gstate.getPath());
+            out.write("\\pgfseteorule\\pgfusepath{fill}\\pgfsetnonzerorule\n");
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
     
     /**
@@ -358,18 +379,18 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * @param gstate Current graphics state.
      * 
      * @throws PSError A PostScript error occurred.
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void shfill(final PSObjectDict dict, final GraphicsState gstate)
-            throws PSError, IOException, ProgramError {
+            throws PSError, ProgramError {
         
         updateColor(gstate);
         Shading shading = Shading.newShading(dict);
         if (shading instanceof RadialShading) {
             radialShading((RadialShading) shading, gstate);
         } else {
-            throw new PSErrorUnregistered("Shading of this type " + shading);
+            throw new PSErrorUnregistered("Shading of this type "
+                    + shading);
         }
     }
     
@@ -379,11 +400,11 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * @param shading The shading.
      * @param gstate The graphics state.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      */
     void radialShading(final RadialShading shading, final GraphicsState gstate)
-            throws IOException, PSError {
+            throws PSError {
+        
         // Convert coordinates and radii from user space to coordinate space
         // PGF does not support the Extend parameters for shadings. So we
         // try to emulate the effect.
@@ -403,49 +424,53 @@ public class PGFDevice implements OutputDevice, Cloneable {
             coor1 = gstate.getCtm().transform(shading.getCoord(maxS));
         }
         
-        startScope();
-        out.write("\\pgfdeclareradialshading{eps2pgfshading}{\\pgfqpoint{");
-        out.write(COOR_FORMAT.format(1e-4 * (coor0[0] - coor1[0]) / xScale)
-                + "cm}{");
-        out.write(COOR_FORMAT.format(1e-4 * (coor0[1] - coor1[1]) / yScale)
-                + "cm}}{");
-        double[] sFit = shading.fitLinearSegmentsOnColor(0.01);        
-        for (int i = 0; i < sFit.length; i++) {
-            if (i > 0) {
-                out.write(";");
+        try {
+            startScope();
+            out.write("\\pgfdeclareradialshading{eps2pgfshading}{\\pgfqpoint{");
+            out.write(COOR_FORMAT.format(1e-4 * (coor0[0] - coor1[0]) / xScale)
+                    + "cm}{");
+            out.write(COOR_FORMAT.format(1e-4 * (coor0[1] - coor1[1]) / yScale)
+                    + "cm}}{");
+            double[] sFit = shading.fitLinearSegmentsOnColor(0.01);        
+            for (int i = 0; i < sFit.length; i++) {
+                if (i > 0) {
+                    out.write(";");
+                }
+                double r = scaling * shading.getRadius(sFit[i]);
+                double[] color = shading.getColor(sFit[i]);
+                out.write("rgb(" + LENGTH_FORMAT.format(1e-4 * r) + "cm)=");
+                out.write("(" + COLOR_FORMAT.format(color[0]));
+                out.write("," + COLOR_FORMAT.format(color[1]));
+                out.write("," + COLOR_FORMAT.format(color[2]) + ")");
             }
-            double r = scaling * shading.getRadius(sFit[i]);
-            double[] color = shading.getColor(sFit[i]);
-            out.write("rgb(" + LENGTH_FORMAT.format(1e-4 * r) + "cm)=");
-            out.write("(" + COLOR_FORMAT.format(color[0]));
-            out.write("," + COLOR_FORMAT.format(color[1]));
-            out.write("," + COLOR_FORMAT.format(color[2]) + ")");
+            if (maxS > 1.0) {
+                double r = scaling * shading.getRadius(maxS);
+                double[] color = shading.getColor(1.0);
+                out.write(";rgb(" + LENGTH_FORMAT.format(1e-4 * r) + "cm)=");
+                out.write("(" + COLOR_FORMAT.format(color[0]));
+                out.write("," + COLOR_FORMAT.format(color[1]));
+                out.write("," + COLOR_FORMAT.format(color[2]) + ")");
+            }
+            out.write("}");
+            out.write("\\pgflowlevelobj{");
+            out.write("\\pgftransformshift{\\pgfqpoint{");
+            out.write(LENGTH_FORMAT.format(1e-4 * coor1[0]) + "cm}{");
+            out.write(LENGTH_FORMAT.format(1e-4 * coor1[1]) + "cm}}");
+            if (Math.abs(angle) > 1e-10) {
+                out.write("\\pgftransformrotate{" + COOR_FORMAT.format(angle)
+                        + "}");
+            }
+            if (Math.abs(xScale - 1.0) > 1e-10) {
+                out.write("\\pgftransformxscale{" + xScale + "}");
+            }
+            if (Math.abs(yScale - 1.0) > 1e-10) {
+                out.write("\\pgftransformyscale{" + yScale + "}");
+            }
+            out.write("}{\\pgfuseshading{eps2pgfshading}}");
+            endScope();
+        } catch (IOException e) {
+            throw new PSErrorIOError();
         }
-        if (maxS > 1.0) {
-            double r = scaling * shading.getRadius(maxS);
-            double[] color = shading.getColor(1.0);
-            out.write(";rgb(" + LENGTH_FORMAT.format(1e-4 * r) + "cm)=");
-            out.write("(" + COLOR_FORMAT.format(color[0]));
-            out.write("," + COLOR_FORMAT.format(color[1]));
-            out.write("," + COLOR_FORMAT.format(color[2]) + ")");
-        }
-        out.write("}");
-        out.write("\\pgflowlevelobj{");
-        out.write("\\pgftransformshift{\\pgfqpoint{");
-        out.write(LENGTH_FORMAT.format(1e-4 * coor1[0]) + "cm}{");
-        out.write(LENGTH_FORMAT.format(1e-4 * coor1[1]) + "cm}}");
-        if (Math.abs(angle) > 1e-10) {
-            out.write("\\pgftransformrotate{" + COOR_FORMAT.format(angle)
-                    + "}");
-        }
-        if (Math.abs(xScale - 1.0) > 1e-10) {
-            out.write("\\pgftransformxscale{" + xScale + "}");
-        }
-        if (Math.abs(yScale - 1.0) > 1e-10) {
-            out.write("\\pgftransformyscale{" + yScale + "}");
-        }
-        out.write("}{\\pgfuseshading{eps2pgfshading}}");
-        endScope();
     }
     
     /**
@@ -453,28 +478,29 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * 
      * @param gstate The current graphics state.
      * 
-     * @throws IOException Unable to write output
      * @throws PSError A PostScript error occurred.
      */
-    private void updateLineCap(final GraphicsState gstate)
-            throws IOException, PSError {
-        
-        int cap = gstate.getLineCap();
-        if (cap != currentLineCap) {
-            switch (cap) {
-                case 0:
-                    out.write("\\pgfsetbuttcap\n");
-                    break;
-                case 1:
-                    out.write("\\pgfsetroundcap\n");
-                    break;
-                case 2:
-                    out.write("\\pgfsetrectcap\n");
-                    break;
-                default:
-                    throw new PSErrorRangeCheck();
+    private void updateLineCap(final GraphicsState gstate) throws PSError {
+        try {
+            int cap = gstate.getLineCap();
+            if (cap != currentLineCap) {
+                switch (cap) {
+                    case 0:
+                        out.write("\\pgfsetbuttcap\n");
+                        break;
+                    case 1:
+                        out.write("\\pgfsetroundcap\n");
+                        break;
+                    case 2:
+                        out.write("\\pgfsetrectcap\n");
+                        break;
+                    default:
+                        throw new PSErrorRangeCheck();
+                }
+                currentLineCap = cap;
             }
-            currentLineCap = cap;
+        } catch (IOException e) {
+            throw new PSErrorIOError();
         }
     }
     
@@ -483,29 +509,30 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * 
      * @param gstate The current graphics state.
      * 
-     * @throws IOException Unable to write output
      * @throws PSError A PostScript error occurred.
      */
-    private void updateLineJoin(final GraphicsState gstate)
-            throws IOException, PSError {
-        
-        int join = gstate.getLineJoin();
-        if (currentLineJoin != join) {
-            switch (join) {
-                case 0:
-                    out.write("\\pgfsetmiterjoin\n");
-                    break;
-                case 1:
-                    out.write("\\pgfsetroundjoin\n");
-                    break;
-                case 2:
-                    out.write("\\pgfsetbeveljoin\n");
-                    break;
-                default:
-                    throw new PSErrorRangeCheck();
+    private void updateLineJoin(final GraphicsState gstate) throws PSError {
+        try {
+            int join = gstate.getLineJoin();
+            if (currentLineJoin != join) {
+                switch (join) {
+                    case 0:
+                        out.write("\\pgfsetmiterjoin\n");
+                        break;
+                    case 1:
+                        out.write("\\pgfsetroundjoin\n");
+                        break;
+                    case 2:
+                        out.write("\\pgfsetbeveljoin\n");
+                        break;
+                    default:
+                        throw new PSErrorRangeCheck();
+                }
+                currentLineJoin = join;
             }
-            currentLineJoin = join;
-        }        
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
     
     /**
@@ -513,12 +540,9 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * 
      * @param gstate Current graphics state
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      */
-    private void updateDash(final GraphicsState gstate)
-            throws IOException, PSError {
-
+    private void updateDash(final GraphicsState gstate) throws PSError {
         double scaling = gstate.getCtm().getMeanScaling();
         double gsOffset = gstate.getDashOffset();
         List<Double> gsPattern = gstate.getDashPattern();
@@ -565,13 +589,17 @@ public class PGFDevice implements OutputDevice, Cloneable {
             }
             
             // Write the new dash pattern and offset to the output document.
-            out.write("\\pgfsetdash{");
-            for (int i = 0; i < gsN; i++) {
-                out.write("{" + LENGTH_FORMAT.format(
-                        1e-4 * currentDashPattern.get(i)) + "cm}");
+            try {
+                out.write("\\pgfsetdash{");
+                for (int i = 0; i < gsN; i++) {
+                    out.write("{" + LENGTH_FORMAT.format(
+                            1e-4 * currentDashPattern.get(i)) + "cm}");
+                }
+                out.write("}{" + LENGTH_FORMAT.format(1e-4 * currentDashOffset)
+                            + "cm}\n");
+            } catch (IOException e) {
+                throw new PSErrorIOError();
             }
-            out.write("}{" + LENGTH_FORMAT.format(1e-4 * currentDashOffset)
-                        + "cm}\n");
         }
     }
     
@@ -582,18 +610,19 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * @param gstate The graphics state.
      * 
      * @throws PSError A PostScript error occurred.
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    private void updateLineWidth(final GraphicsState gstate)
-            throws PSError, IOException {
-        
+    private void updateLineWidth(final GraphicsState gstate) throws PSError {
         double gsWidth = gstate.getLineWidth()
                                        * gstate.getCtm().getMeanScaling();
-        
-        if (Math.abs(gsWidth - currentLineWidth) > 1e-10) {
-            out.write("\\pgfsetlinewidth{"
-                    + LENGTH_FORMAT.format(1e-3 * gsWidth) + "mm}\n");
-            currentLineWidth = gsWidth;
+
+        try {
+            if (Math.abs(gsWidth - currentLineWidth) > 1e-10) {
+                out.write("\\pgfsetlinewidth{"
+                        + LENGTH_FORMAT.format(1e-3 * gsWidth) + "mm}\n");
+                currentLineWidth = gsWidth;
+            }
+        } catch (IOException e) {
+            throw new PSErrorIOError();
         }
     }
     
@@ -602,39 +631,48 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * 
      * @param gstate The current graphics state.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      */
-    private void updateMiterLimit(final GraphicsState gstate)
-            throws IOException, PSError {
-        
+    private void updateMiterLimit(final GraphicsState gstate) throws PSError {
         double gsLimit = gstate.getMiterLimit();
-        
-        if (Math.abs(currentMiterLimit - gsLimit) > 1e-6) {
-            out.write("\\pgfsetmiterlimit{" + gsLimit + "}\n");
-            currentMiterLimit = gsLimit;
+
+        try {
+            if (Math.abs(currentMiterLimit - gsLimit) > 1e-6) {
+                out.write("\\pgfsetmiterlimit{" + gsLimit + "}\n");
+                currentMiterLimit = gsLimit;
+            }
+        } catch (IOException e) {
+            throw new PSErrorIOError();
         }
     }
     
    /**
-     * Starts a new scope.
-     * 
-     * @throws IOException Unable to write output
-     */
-    public void startScope() throws IOException {
-        out.write("\\begin{pgfscope}\n");
-        scopeDepth[0] = scopeDepth[0] + 1;
+    * Starts a new scope.
+    * 
+    * @throws PSError A PostScript error occurred.
+    */
+    public void startScope() throws PSError {
+        try {
+            out.write("\\begin{pgfscope}\n");
+            scopeDepth[0] = scopeDepth[0] + 1;
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
     
     /**
      * Ends the current scope scope.
      * 
-     * @throws IOException There was an error write to the output
+     * @throws PSError A PostScript error occurred.
      */
-    public void endScope() throws IOException {
-        if (scopeDepth[0] > 0) {
-            out.write("\\end{pgfscope}\n");
-            scopeDepth[0] = scopeDepth[0] - 1;
+    public void endScope() throws PSError {
+        try {
+            if (scopeDepth[0] > 0) {
+                out.write("\\end{pgfscope}\n");
+                scopeDepth[0] = scopeDepth[0] - 1;
+            }
+        } catch (IOException e) {
+            throw new PSErrorIOError();
         }
     }
 
@@ -643,12 +681,11 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * 
      * @param gstate Current graphics state.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     private void updateColor(final GraphicsState gstate)
-            throws IOException, PSError, ProgramError {
+            throws PSError, ProgramError {
         
         PSColor gsColor = gstate.getColor();
         int n = gsColor.getNrComponents();
@@ -673,29 +710,33 @@ public class PGFDevice implements OutputDevice, Cloneable {
         if (colorChanged) {
             // Write new color to the output document. 
             String prefColSpace = gsColor.getPreferredColorSpace();
-            if (prefColSpace.equals("CMYK")) {
-                double[] cmyk = gsColor.getCMYK();
-                out.write("\\definecolor{eps2pgf_color}{cmyk}{"
-                        + COLOR_FORMAT.format(cmyk[0])
-                        + "," + COLOR_FORMAT.format(cmyk[1])
-                        + "," + COLOR_FORMAT.format(cmyk[2])
-                        + "," + COLOR_FORMAT.format(cmyk[3]) + "}");
-            } else if (prefColSpace.equals("RGB")) {
-                double[] rgb = gsColor.getRGB();
-                out.write("\\definecolor{eps2pgf_color}{rgb}{"
-                        + COLOR_FORMAT.format(rgb[0])
-                        + "," + COLOR_FORMAT.format(rgb[1])
-                        + "," + COLOR_FORMAT.format(rgb[2]) + "}");
-            } else if (prefColSpace.equals("Gray")) {
-                double gray = gsColor.getGray();
-                out.write("\\definecolor{eps2pgf_color}{gray}{"
-                        + COLOR_FORMAT.format(gray) + "}");
-            } else {
-                throw new ProgramError("Invalid preferred color space: "
-                        + prefColSpace);
+            try {
+                if (prefColSpace.equals("CMYK")) {
+                    double[] cmyk = gsColor.getCMYK();
+                    out.write("\\definecolor{eps2pgf_color}{cmyk}{"
+                            + COLOR_FORMAT.format(cmyk[0])
+                            + "," + COLOR_FORMAT.format(cmyk[1])
+                            + "," + COLOR_FORMAT.format(cmyk[2])
+                            + "," + COLOR_FORMAT.format(cmyk[3]) + "}");
+                } else if (prefColSpace.equals("RGB")) {
+                    double[] rgb = gsColor.getRGB();
+                    out.write("\\definecolor{eps2pgf_color}{rgb}{"
+                            + COLOR_FORMAT.format(rgb[0])
+                            + "," + COLOR_FORMAT.format(rgb[1])
+                            + "," + COLOR_FORMAT.format(rgb[2]) + "}");
+                } else if (prefColSpace.equals("Gray")) {
+                    double gray = gsColor.getGray();
+                    out.write("\\definecolor{eps2pgf_color}{gray}{"
+                            + COLOR_FORMAT.format(gray) + "}");
+                } else {
+                    throw new ProgramError("Invalid preferred color space: "
+                            + prefColSpace);
+                }
+                out.write("\\pgfsetstrokecolor{eps2pgf_color}");
+                out.write("\\pgfsetfillcolor{eps2pgf_color}\n");
+            } catch (IOException e) {
+                throw new PSErrorIOError();
             }
-            out.write("\\pgfsetstrokecolor{eps2pgf_color}");
-            out.write("\\pgfsetfillcolor{eps2pgf_color}\n");
             
             // Make sure that the currentColor array has the same size as
             // gsColor.
@@ -732,14 +773,13 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * e.g. Br = baseline,right
      * @param gstate The current graphics state.
      * 
-     * @throws IOException Unable to write output
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void show(final String text, final double[] position,
             final double angle, final double pFontsize, final String anchor,
             final GraphicsState gstate)
-            throws IOException, PSError, ProgramError {
+            throws PSError, ProgramError {
         
         updateColor(gstate);
         
@@ -778,8 +818,14 @@ public class PGFDevice implements OutputDevice, Cloneable {
         if (!Double.isNaN(fontsize)) {
             texText += "}";
         }
-        out.write(String.format("\\pgftext[%sx=%scm,y=%scm,rotate=%s]{%s}\n",
-                posOpts, x, y, angStr, texText));
+        
+        try {
+            out.write(String.format(
+                    "\\pgftext[%sx=%scm,y=%scm,rotate=%s]{%s}\n",
+                    posOpts, x, y, angStr, texText));
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
     
     /**
@@ -788,12 +834,16 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * @param x X-coordinate (micrometer)
      * @param y Y-coordinate (micrometer)
      * 
-     * @throws IOException Unable to write output
+     * @throws PSError A PostScript error occurred.
      */
-    public void drawDot(final double x, final double y) throws IOException {
-        out.write("\\begin{pgfscope}\\pgfsetfillcolor{red}\\pgfpathcircle{"
-                + "\\pgfqpoint{" + 1e-4 * x + "cm}{" + 1e-4 * y
-                + "cm}}{0.5pt}\\pgfusepath{fill}\\end{pgfscope}\n");
+    public void drawDot(final double x, final double y) throws PSError {
+        try {
+            out.write("\\begin{pgfscope}\\pgfsetfillcolor{red}\\pgfpathcircle{"
+                    + "\\pgfqpoint{" + 1e-4 * x + "cm}{" + 1e-4 * y
+                    + "cm}}{0.5pt}\\pgfusepath{fill}\\end{pgfscope}\n");
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
     
     /**
@@ -804,16 +854,22 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * @param upperRight X- and Y-coordinate (in micrometer) of upper right
      * corner.
      * 
-     * @throws IOException Unable to write output
+     * @throws PSError A PostScript error occurred.
      */
     public void drawRect(final double[] lowerLeft, final double[] upperRight)
-            throws IOException {
-        out.write("\\begin{pgfscope}\\pgfsetstrokecolor{blue}"
-                + "\\pgfsetlinewidth{0.1pt}\\pgfpathrectangle{\\pgfqpoint{"
-                + 1e-4 * lowerLeft[0] + "cm}{" + 1e-4 * lowerLeft[1]
-                + "cm}}{\\pgfqpoint{" + 1e-4 * (upperRight[0] - lowerLeft[0])
-                + "cm}{" + 1e-4 * (upperRight[1] - lowerLeft[1])
-                + "cm}}\\pgfusepath{stroke}\\end{pgfscope}\n");
+            throws PSError {
+        
+        try {
+            out.write("\\begin{pgfscope}\\pgfsetstrokecolor{blue}"
+                    + "\\pgfsetlinewidth{0.1pt}\\pgfpathrectangle{\\pgfqpoint{"
+                    + 1e-4 * lowerLeft[0] + "cm}{" + 1e-4 * lowerLeft[1]
+                    + "cm}}{\\pgfqpoint{"
+                    + 1e-4 * (upperRight[0] - lowerLeft[0])
+                    + "cm}{" + 1e-4 * (upperRight[1] - lowerLeft[1])
+                    + "cm}}\\pgfusepath{stroke}\\end{pgfscope}\n");
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
     }
 
     /**
@@ -821,13 +877,10 @@ public class PGFDevice implements OutputDevice, Cloneable {
      * 
      * @param img The bitmap image to add.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void image(final Image img)
-            throws PSError, IOException, ProgramError {
-        
+    public void image(final Image img) throws PSError, ProgramError {
         Options options = interp.getOptions();
         String filename = options.getOutputFile().getName();
         String basename;

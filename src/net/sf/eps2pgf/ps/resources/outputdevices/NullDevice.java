@@ -18,8 +18,6 @@
 
 package net.sf.eps2pgf.ps.resources.outputdevices;
 
-import java.io.IOException;
-
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Matrix;
@@ -203,10 +201,8 @@ public class NullDevice implements OutputDevice, Cloneable {
      * Adds a bitmap image to the output.
      * 
      * @param img The bitmap image to add.
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void image(final Image img) throws IOException {
+    public void image(final Image img) {
         /* empty block */
     }
 }

@@ -838,7 +838,7 @@ public class PSObjectString extends PSObjectComposite implements Cloneable {
         PSObject any;
         try {
             any = Parser.convertSingle(inStream, interp);
-        } catch (IOException e) {
+        } catch (PSErrorIOError e) {
             any = null;
         }
         

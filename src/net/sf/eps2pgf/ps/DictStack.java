@@ -18,9 +18,6 @@
 
 package net.sf.eps2pgf.ps;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-
 import net.sf.eps2pgf.Main;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
@@ -57,6 +54,9 @@ public class DictStack {
     
     /** Dictionary stack. (0: systemdict, 1: globaldict, 2:userdict */
     private ArrayStack<PSObjectDict> dictStack = new ArrayStack<PSObjectDict>();
+    
+    /** System dictionary, quick access pointer to system dictionary. */
+    private PSObjectDict systemdict;
     
     /** Interpreter to which this dictionary stack belongs. */
     private Interpreter interp;
@@ -100,14 +100,14 @@ public class DictStack {
         // The rest must be allocated in global VM
         interp.getVm().setGlobal(true);
         PSObjectDict globaldict = new PSObjectDict(interp.getVm());
-        PSObjectDict systemdict = new PSObjectDict(interp.getVm());
+        systemdict = new PSObjectDict(interp.getVm());
         
         dictStack.push(systemdict);
         dictStack.push(globaldict);
         dictStack.push(userdict);
         
         fillSystemDict();
-        defineQuickAccessConstants();
+        //defineQuickAccessConstants(); //TODO rm line
         try {
             systemdict.readonly();
         } catch (PSErrorTypeCheck e) {
@@ -206,6 +206,8 @@ public class DictStack {
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
+    //TODO move content of this method to operator container class for eps2pgf*
+    //operators.
     private void defineQuickAccessConstants() throws ProgramError {
         try {
             // Looping context procedures
@@ -236,39 +238,12 @@ public class DictStack {
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
+    //TODO move filling of dictionary stack to the classes to which they belong
     private void fillSystemDict() throws PSError, ProgramError {
-        PSObjectDict systemdict = dictStack.get(0);
         PSObjectDict globaldict = dictStack.get(1);
         PSObjectDict userdict = dictStack.get(2);
         PSObjectArray emptyProc = new PSObjectArray("{}", interp);
 
-        // Add operators
-        Method[] mthds = interp.getClass().getMethods();
-        HashMap<String, String> replaceNames = new HashMap<String, String>();
-        replaceNames.put("sqBrackLeft",  "[");
-        replaceNames.put("sqBrackRight", "]");
-        replaceNames.put("dblLessBrackets", "<<");
-        replaceNames.put("dblGreaterBrackets", ">>");
-        replaceNames.put("isis", "==");
-        
-        for (int i = 0; i < mthds.length; i++) {
-            Method mthd = mthds[i];
-            String name = mthd.getName();
-            
-            // PostScript operator methods start with op_ All other methods
-            // can be skipped.
-            if (!name.startsWith("op_")) {
-                continue;
-            }
-            
-            name = name.substring(3);
-            if (replaceNames.containsKey(name)) {
-                name = replaceNames.get(name);
-            }
-            PSObjectOperator op = new PSObjectOperator(name, mthd);
-            systemdict.setKey(name, op);
-        }
-        
         // add errordict dictionary (must be in local VM)
         interp.getVm().setGlobal(false);
         PSObjectDict errordict = new PSObjectDict(interp.getVm());
@@ -519,5 +494,14 @@ public class DictStack {
      */
     public ArrayStack<PSObjectDict> getStack() {
         return dictStack;
+    }
+    
+    /**
+     * Gets the system dictionary.
+     * 
+     * @return The dictionary stack.
+     */
+    public PSObjectDict getSystemDict() {
+        return systemdict;
     }
 }

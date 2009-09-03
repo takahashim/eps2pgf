@@ -18,15 +18,12 @@
 
 package net.sf.eps2pgf.ps.resources.outputdevices;
 
-import java.io.IOException;
-
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Matrix;
 import net.sf.eps2pgf.ps.Path;
 import net.sf.eps2pgf.ps.errors.PSError;
-import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 
 /**
@@ -42,11 +39,9 @@ public interface OutputDevice extends Cloneable {
      * 
      * @param clipPath the clip path
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws PSErrorUnregistered the PS error unregistered
+     * @throws PSError A PostScript error occurred.
      */
-    void clip(Path clipPath)
-            throws IOException, PSErrorUnregistered;
+    void clip(Path clipPath) throws PSError;
     
     /**
      * Returns a exact deep copy of this output device.
@@ -69,16 +64,15 @@ public interface OutputDevice extends Cloneable {
      * writes a header.
      * 
      * @throws PSError A PostScript error occurred.
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    void init() throws PSError, IOException;
+    void init() throws PSError;
     
     /**
      * Finalize writing. Normally, this method writes a footer.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    void finish() throws IOException;
+    void finish() throws PSError;
     
     /**
      * Fills a path using the non-zero rule.
@@ -86,11 +80,10 @@ public interface OutputDevice extends Cloneable {
      * 
      * @param gstate Current graphics state.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    void fill(GraphicsState gstate) throws IOException, PSError, ProgramError;
+    void fill(GraphicsState gstate) throws PSError, ProgramError;
 
     /**
      * Set the current clipping path in the graphics state as clipping path in
@@ -99,10 +92,9 @@ public interface OutputDevice extends Cloneable {
      * 
      * @param gstate Current graphics state.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      */
-    void eoclip(GraphicsState gstate) throws IOException, PSError;
+    void eoclip(GraphicsState gstate) throws PSError;
     
     /**
      * Fills a path using the even-odd rule.
@@ -110,11 +102,10 @@ public interface OutputDevice extends Cloneable {
      * 
      * @param gstate The current graphics state.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    void eofill(GraphicsState gstate) throws IOException, PSError, ProgramError;
+    void eofill(GraphicsState gstate) throws PSError, ProgramError;
     
     /**
      * Internal Eps2pgf command: eps2pgfgetmetrics
@@ -132,22 +123,20 @@ public interface OutputDevice extends Cloneable {
      * @param gstate Current graphics state.
      * 
      * @throws PSError A PostScript error occurred.
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     void shfill(PSObjectDict dict, GraphicsState gstate)
-            throws PSError, IOException, ProgramError;
+            throws PSError, ProgramError;
 
     /**
      * Implements PostScript stroke operator.
      * 
      * @param gstate Current graphics state.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    void stroke(GraphicsState gstate) throws IOException, PSError, ProgramError;
+    void stroke(GraphicsState gstate) throws PSError, ProgramError;
     
     /**
      * Draws a red dot (useful for debugging, don't use otherwise).
@@ -155,9 +144,9 @@ public interface OutputDevice extends Cloneable {
      * @param x X-coordinate of dot.
      * @param y Y-coordinate of dot.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    void drawDot(double x, double y) throws IOException;
+    void drawDot(double x, double y) throws PSError;
     
     /**
      * Draws a blue rectangle (useful for debugging, don't use otherwise).
@@ -165,9 +154,9 @@ public interface OutputDevice extends Cloneable {
      * @param lowerLeft Lower-left coordinate.
      * @param upperRight Upper-right coordinate.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    void drawRect(double[] lowerLeft, double[] upperRight) throws IOException;
+    void drawRect(double[] lowerLeft, double[] upperRight) throws PSError;
 
     /**
      * Draws text.
@@ -183,37 +172,35 @@ public interface OutputDevice extends Cloneable {
      * e.g. Br = baseline,right
      * @param gstate Current graphics state.
      * 
-     * @throws IOException Unable to write output
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     void show(String text, double[] position, double angle,
             double fontsize, String anchor, final GraphicsState gstate)
-            throws IOException, PSError, ProgramError;
+            throws PSError, ProgramError;
 
     /**
      * Starts a new scope.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    void startScope() throws IOException;
+    void startScope() throws PSError;
     
     /**
      * Ends the current scope.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
-    void endScope() throws IOException;
+    void endScope() throws PSError;
     
     /**
      * Adds a bitmap image to the output.
      * 
      * @param img The bitmap image to add.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    void image(final Image img) throws PSError, IOException, ProgramError;
+    void image(final Image img) throws PSError, ProgramError;
     
 }

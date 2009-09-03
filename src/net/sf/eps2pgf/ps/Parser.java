@@ -25,6 +25,7 @@ import java.util.List;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
@@ -57,19 +58,18 @@ public final class Parser {
      * 
      * @return List with PostScript objects
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public static List<PSObject> convertAll(final InputStream in,
-            final Interpreter interp) throws IOException, PSError,
-            ProgramError {
+            final Interpreter interp) throws PSError, ProgramError {
         
         List<PSObject> seq = new ArrayList<PSObject>();
         PSObject obj;
         while ((obj = convertSingle(in, interp)) != null) {
             seq.add(obj);
         }
+        
         return seq;
     }
     
@@ -82,13 +82,11 @@ public final class Parser {
      * @return Object read from in reader or 'null' if there were no more
      * objects.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public static PSObject convertSingle(final InputStream in, 
-            final Interpreter interp) throws IOException, PSError,
-            ProgramError {
+            final Interpreter interp) throws PSError, ProgramError {
         
         StringBuilder strSoFar = new StringBuilder();
         boolean inComment = false;
@@ -104,182 +102,188 @@ public final class Parser {
         String lastTwo;
         
         int charsThisConvert = 0;
-        while ((readChar = in.read()) != -1) {
-            charsThisConvert++;
-            
-            // Escaped backslashes should not be treated as special characters.
-            // Therefore, we replace escaped backslashes in 'prevChr' with \000
-            // Note: \134 (octal) is the code of the backslash in ASCII.
-            if ((chr == '\134') && (prevChr == '\134')) {
-                prevChr = '\000';
-            } else {
-                prevChr = chr;
-            }
-            chr = (char) readChar;
-            
-            if (charsThisConvert > 1) {
-                lastTwo = Character.toString(prevChr) + Character.toString(chr);
-            } else {
-                lastTwo = Character.toString(chr);
-            }
-            boolean tokenBefore = false;
-            boolean appendCurrentChar = true;
-            boolean tokenAfter = false;
-            
-            // If we are in a comment, we only need to stop for a new line
-            // or form feed.
-            if (inComment) {
-                appendCurrentChar = false;
-                if ((chr == 10) || (chr == 12) || (chr == 13)) {
-                    inComment = false;
-                }
-            } else if (inString) {
-                //
-                // In a string
-                //
-                if ((chr == ')') && !lastTwo.equals("\\)")) {
-                    stringDepth--;
-                    if (stringDepth == 0) {
-                        inString = false;
-                        if (!inProc) {
-                            tokenAfter = true;
-                        }
-                    }
-                } else if ((chr == '(') && !lastTwo.equals("\\(")) {
-                    stringDepth++;
-                }
-            } else if (inHexString) {
-                //
-                // End of the hex string
-                //
-                if (chr == '>') {
-                    inHexString = false;
-                    tokenAfter = true;
-                }
-            } else if (inB85String) {
-                //
-                // End of base-85 string
-                //
-                if (lastTwo.equals("~>")) {
-                    inB85String = false;
-                    tokenAfter = true;
-                }
-            } else if (chr == '%') {
-                //
-                // start of comment
-                //
-                appendCurrentChar = false;
-                inComment = true;
-            } else if (inProc) {
-                //
-                // In a procedure
-                //
+        try {
+            while ((readChar = in.read()) != -1) {
+                charsThisConvert++;
                 
-                // End of the procedure
-                if (chr == '}') {
-                    procDepth--;
-                    if (procDepth == 0) {
+                // Escaped backslashes should not be treated as special
+                // characters. Therefore, we replace escaped backslashes in
+                // 'prevChr' with \000
+                // Note: \134 (octal) is the code of the backslash in ASCII.
+                if ((chr == '\134') && (prevChr == '\134')) {
+                    prevChr = '\000';
+                } else {
+                    prevChr = chr;
+                }
+                chr = (char) readChar;
+                
+                if (charsThisConvert > 1) {
+                    lastTwo = Character.toString(prevChr)
+                                + Character.toString(chr);
+                } else {
+                    lastTwo = Character.toString(chr);
+                }
+                boolean tokenBefore = false;
+                boolean appendCurrentChar = true;
+                boolean tokenAfter = false;
+                
+                // If we are in a comment, we only need to stop for a new line
+                // or form feed.
+                if (inComment) {
+                    appendCurrentChar = false;
+                    if ((chr == 10) || (chr == 12) || (chr == 13)) {
+                        inComment = false;
+                    }
+                } else if (inString) {
+                    //
+                    // In a string
+                    //
+                    if ((chr == ')') && !lastTwo.equals("\\)")) {
+                        stringDepth--;
+                        if (stringDepth == 0) {
+                            inString = false;
+                            if (!inProc) {
+                                tokenAfter = true;
+                            }
+                        }
+                    } else if ((chr == '(') && !lastTwo.equals("\\(")) {
+                        stringDepth++;
+                    }
+                } else if (inHexString) {
+                    //
+                    // End of the hex string
+                    //
+                    if (chr == '>') {
+                        inHexString = false;
                         tokenAfter = true;
-                        inProc = false;
+                    }
+                } else if (inB85String) {
+                    //
+                    // End of base-85 string
+                    //
+                    if (lastTwo.equals("~>")) {
+                        inB85String = false;
+                        tokenAfter = true;
+                    }
+                } else if (chr == '%') {
+                    //
+                    // start of comment
+                    //
+                    appendCurrentChar = false;
+                    inComment = true;
+                } else if (inProc) {
+                    //
+                    // In a procedure
+                    //
+                    
+                    // End of the procedure
+                    if (chr == '}') {
+                        procDepth--;
+                        if (procDepth == 0) {
+                            tokenAfter = true;
+                            inProc = false;
+                        }
+                    } else if (chr == '(') {
+                        //
+                        // A string in a procedure
+                        //
+                        stringDepth++;
+                        inString = true;
+                    } else if (chr == '{') {
+                        //
+                        // a procedure in a procedure
+                        //
+                        procDepth++;
                     }
                 } else if (chr == '(') {
                     //
-                    // A string in a procedure
+                    // start of string
                     //
                     stringDepth++;
                     inString = true;
-                } else if (chr == '{') {
+                    tokenBefore = true;
+                } else if ((chr == '[') || (chr == ']')) {
                     //
-                    // a procedure in a procedure
+                    // start or end of array
                     //
+                    tokenBefore = true;
+                    tokenAfter = true;
+                } else if ((chr == '/') && (prevChr != '/')) {
+                    //
+                    // Start of literal
+                    //
+                    tokenBefore = true;
+                } else if ((chr == '{') && !inString) {
+                    //
+                    // Start of procedure .. {
+                    //
+                    tokenBefore = true;
+                    inProc = true;
                     procDepth++;
-                }
-            } else if (chr == '(') {
-                //
-                // start of string
-                //
-                stringDepth++;
-                inString = true;
-                tokenBefore = true;
-            } else if ((chr == '[') || (chr == ']')) {
-                //
-                // start or end of array
-                //
-                tokenBefore = true;
-                tokenAfter = true;
-            } else if ((chr == '/') && (prevChr != '/')) {
-                //
-                // Start of literal
-                //
-                tokenBefore = true;
-            } else if ((chr == '{') && !inString) {
-                //
-                // Start of procedure .. {
-                //
-                tokenBefore = true;
-                inProc = true;
-                procDepth++;
-            } else if (chr == '<') {
-                //
-                // start of hex string, base-85 string or dictionary
-                //
-                if (prevChr == '<') {
-                    tokenAfter = true;
-                } else {
+                } else if (chr == '<') {
+                    //
+                    // start of hex string, base-85 string or dictionary
+                    //
+                    if (prevChr == '<') {
+                        tokenAfter = true;
+                    } else {
+                        tokenBefore = true;
+                    }
+                } else if ((prevChr == '<') && (chr == '~')) {
+                    //
+                    // second char of base-85 string
+                    //
+                    inB85String = true;
+                } else if (prevChr == '<') {
+                    //
+                    // second char of hex string
+                    //
+                    inHexString = true;
+                } else if (chr == '>') {
+                    //
+                    // end of dictionary >>
+                    //
+                    if (prevChr == '>') {
+                        tokenAfter = true;
+                    } else {
+                        tokenBefore = true;
+                    }
+                } else if (Character.isWhitespace(chr)) {
+                    //
+                    // object ended by whitespace
+                    //
+                    appendCurrentChar = false;
                     tokenBefore = true;
                 }
-            } else if ((prevChr == '<') && (chr == '~')) {
+                
                 //
-                // second char of base-85 string
+                // Create token, append current character
                 //
-                inB85String = true;
-            } else if (prevChr == '<') {
-                //
-                // second char of hex string
-                //
-                inHexString = true;
-            } else if (chr == '>') {
-                //
-                // end of dictionary >>
-                //
-                if (prevChr == '>') {
-                    tokenAfter = true;
-                } else {
-                    tokenBefore = true;
+                if (tokenBefore && (strSoFar.length() > 0)) {
+                    if (!Character.isWhitespace(chr)) {
+                        in.reset();
+                        charsThisConvert--;
+                    }
+                    PSObject newObj = convertToPSObject(strSoFar.toString(),
+                            interp);
+                    charsLastConvert = charsThisConvert;
+                    return newObj;
                 }
-            } else if (Character.isWhitespace(chr)) {
-                //
-                // object ended by whitespace
-                //
-                appendCurrentChar = false;
-                tokenBefore = true;
-            }
-            
-            //
-            // Create token, append current character
-            //
-            if (tokenBefore && (strSoFar.length() > 0)) {
-                if (!Character.isWhitespace(chr)) {
-                    in.reset();
-                    charsThisConvert--;
+                if (appendCurrentChar) {
+                    strSoFar.append(chr);
                 }
-                PSObject newObj = convertToPSObject(strSoFar.toString(),
-                        interp);
-                charsLastConvert = charsThisConvert;
-                return newObj;
-            }
-            if (appendCurrentChar) {
-                strSoFar.append(chr);
-            }
-            if (tokenAfter && (strSoFar.length() > 0)) {
-                PSObject newObj = convertToPSObject(strSoFar.toString(),
-                        interp);
-                charsLastConvert = charsThisConvert;
-                return newObj;
-            }
-            
-            in.mark(1);
-        } // end of loop through all characters
+                if (tokenAfter && (strSoFar.length() > 0)) {
+                    PSObject newObj = convertToPSObject(strSoFar.toString(),
+                            interp);
+                    charsLastConvert = charsThisConvert;
+                    return newObj;
+                }
+                
+                in.mark(1);
+            } // end of loop through all characters
+        } catch (IOException e) {
+            throw new PSErrorIOError();
+        }
         
         if (strSoFar.length() > 0) {
                 PSObject newObj = convertToPSObject(strSoFar.toString(),
@@ -300,13 +304,11 @@ public final class Parser {
      * 
      * @return the PS object
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     static PSObject convertToPSObject(final String str,
-            final Interpreter interp) throws IOException, PSError,
-            ProgramError {
+            final Interpreter interp) throws PSError, ProgramError {
         
         if (PSObjectInt.isType(str)) {
             return new PSObjectInt(str);

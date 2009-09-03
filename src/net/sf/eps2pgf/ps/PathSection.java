@@ -114,7 +114,7 @@ public class PathSection extends PSObject implements Cloneable {
      * @return true, if equals
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if ((obj != null) && (this.getClass().equals(obj.getClass()))) {
             PathSection secObj = (PathSection) obj;
             for (int i = 0; i < params.length; i++) {

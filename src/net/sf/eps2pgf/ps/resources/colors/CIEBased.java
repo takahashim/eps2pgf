@@ -105,7 +105,7 @@ public abstract class CIEBased extends PSColor {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      * @throws PSError A PostScript error occurred.
      */
-    private static PSObjectDict checkCommonEntries(PSObjectDict dict, 
+    private static PSObjectDict checkCommonEntries(final PSObjectDict dict, 
             final Interpreter interp) throws ProgramError, PSError {
         
         VM vm = interp.getVm();

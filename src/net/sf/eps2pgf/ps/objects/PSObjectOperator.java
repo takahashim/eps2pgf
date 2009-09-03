@@ -18,7 +18,8 @@
 
 package net.sf.eps2pgf.ps.objects;
 
-import java.lang.reflect.Method;
+import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.errors.PSError;
 
 /**
  * Object that represents a PostScript operator. Either a built-in or
@@ -26,35 +27,32 @@ import java.lang.reflect.Method;
  * 
  * @author Paul Wagenaars
  */
-public class PSObjectOperator extends PSObject implements Cloneable {
+public abstract class PSObjectOperator extends PSObject implements Cloneable {
     
-    /** Name of this operator. */
-    private String name;
-    
-    /** Method with which this object is associated. */
-    private Method opMethod;
-    
+    /** Name of this operator. Don't access directly, use getName() instead. */
+    private String name = "";
+
+
     /**
-     * Creates a new instance of PSObjectOperator.
-     * 
-     * @param pName The name of the operator.
-     * @param op The method associated with this operator.
+     * Create a new operator object.
      */
-    public PSObjectOperator(final String pName, final Method op) {
-        name = pName;
-        opMethod = op;
+    public PSObjectOperator() {
         setLiteral(false);
     }
     
     /**
-     * Create new operator object.
+     * Create a clone of this object.
      * 
-     * @param obj New object is shallow copy of this object.
+     * @return A clone of this object.
      */
-    public PSObjectOperator(final PSObjectOperator obj) {
-        name = obj.name;
-        opMethod = obj.opMethod;
-        copyCommonAttributes(obj);
+    @Override
+    public PSObjectOperator clone() {
+        PSObjectOperator copy = (PSObjectOperator) super.clone();
+        
+        // all fields of this object are primitive, so there is no need to clone
+        // them explicitly.
+        
+        return copy;
     }
     
     /**
@@ -75,14 +73,46 @@ public class PSObjectOperator extends PSObject implements Cloneable {
     }
     
     /**
+     * Gets the name of this operator, which is whatever comes after the first
+     * character of the name of this operator class. For example the class Oabs
+     * has operator name "abs".
+     * 
+     * @return The name of this operator.
+     */
+    public String getName() {
+        if (name.length() == 0) {
+            name = getClass().getSimpleName().substring(1);
+        }
+
+        return name;
+    }
+    
+    /**
+     * Changes the name for this operator.
+     * 
+     * @param newName The new name.
+     */
+    public void setName(final String newName) {
+        name = newName;
+    }
+    
+    /**
      * Returns a hash code value for the object.
      * 
      * @return Hash code of this object.
      */
     @Override
     public int hashCode() {
-        return opMethod.hashCode();
+        return getName().hashCode();
     }
+    
+    /**
+     * Invokes this PostScript operator.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError A program error occurred.
+     */
+    public abstract void invoke() throws PSError, ProgramError;
     
     /**
      * Return PostScript text representation of this object. See the
@@ -92,7 +122,7 @@ public class PSObjectOperator extends PSObject implements Cloneable {
      */
     @Override
     public String isis() {
-        return "--" + name + "--";
+        return "--" + getName() + "--";
     }
     
     /**
@@ -103,7 +133,7 @@ public class PSObjectOperator extends PSObject implements Cloneable {
      */
     @Override
     public String cvs() {
-        return name;
+        return getName();
     }
     
     /**
@@ -114,7 +144,7 @@ public class PSObjectOperator extends PSObject implements Cloneable {
      */
     @Override
     public PSObjectOperator dup() {
-        return new PSObjectOperator(this);
+        return clone();
     }
     
     /**
@@ -127,15 +157,6 @@ public class PSObjectOperator extends PSObject implements Cloneable {
         return "operatortype";
     }
 
-    /**
-     * Returns the method associated with this operator.
-     * 
-     * @return the opMethod
-     */
-    public Method getOpMethod() {
-        return opMethod;
-    }
-    
     /**
      * Return this object if it is an operator, throw PSErrorTypeCheck
      * otherwise.

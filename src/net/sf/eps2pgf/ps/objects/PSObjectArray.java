@@ -18,7 +18,6 @@
 
 package net.sf.eps2pgf.ps.objects;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -184,14 +183,9 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
         }
         InputStream inStream =
             new PSStringInputStream(new PSObjectString(str, getVm()));
-        try {
-            setArray(Parser.convertAll(inStream, interp));
-            count = getArray().size();
-            offset = 0;
-        } catch (IOException e) {
-            throw new ProgramError("An IOException occured in"
-                    + " PSObjectArray(String)");
-        }
+        setArray(Parser.convertAll(inStream, interp));
+        count = getArray().size();
+        offset = 0;
     }
     
     /**

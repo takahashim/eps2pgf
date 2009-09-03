@@ -18,9 +18,8 @@
 
 package net.sf.eps2pgf.ps;
 
-import java.io.IOException;
-
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorStackUnderflow;
 import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.resources.outputdevices.OutputDevice;
@@ -79,10 +78,10 @@ public class GstateStack {
      * operator. False if called as a result of 'save' operator.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
     public void saveGstate(final boolean savedByGSave)
-            throws ProgramError, IOException {
+            throws PSError, ProgramError {
         
         stack.push(current().clone());
         if (savedByGSave) {
@@ -104,10 +103,10 @@ public class GstateStack {
      * operator, SAVE: saved by 'save' operator.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
     public byte restoreGstate(final boolean calledByGRestore)
-            throws ProgramError, IOException {
+            throws PSError, ProgramError {
         
         // If the stack is empty we do nothing.
         if (stack.isEmpty()) {
@@ -155,10 +154,10 @@ public class GstateStack {
      * operator. False, if called as result of 'restore' operator.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws PSError A PostScript error occurred.
      */
     public void restoreAllGstate(final boolean forGrestoreall)
-            throws ProgramError, IOException {
+            throws PSError, ProgramError {
         
         while (restoreGstate(forGrestoreall) == GSAVE) {
             /* empty block */

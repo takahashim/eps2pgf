@@ -429,7 +429,9 @@ public class PSObjectDict extends PSObjectComposite implements Cloneable {
      * 
      * @throws PSErrorVMError Virtual memory error.
      */
-    private void setMap(Map<PSObject, PSObject> map) throws PSErrorVMError {
+    private void setMap(final Map<PSObject, PSObject> map)
+            throws PSErrorVMError {
+        
         setId(getVm().addDictObj(map));
     }
 

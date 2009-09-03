@@ -105,10 +105,6 @@ public class Converter {
             in.close();
             out.close();
             throw e;
-        } catch (IOException e) {
-            in.close();
-            out.close();
-            throw e;
         }
 
         in.close();

@@ -18,8 +18,6 @@
 
 package net.sf.eps2pgf.ps.resources.outputdevices;
 
-import java.io.IOException;
-
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
 import net.sf.eps2pgf.ps.Matrix;
@@ -297,9 +295,8 @@ public class CacheDevice implements OutputDevice, Cloneable {
      * 
      * @param img The bitmap image to add.
      * 
-     * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void image(final Image img) throws IOException {
+    public void image(final Image img) {
         double[] imgBbox = new double[4];
         double[][] imgCorners = img.getDeviceBbox();
         imgBbox[0] = Math.min(imgCorners[0][0], Math.min(imgCorners[1][0],

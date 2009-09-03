@@ -151,13 +151,13 @@ public class SkipTexCommentsReader extends Reader {
     public int read(final char[] cbuf, final int off, final int len)
             throws IOException {
         
+        // CHECKSTYLE:OFF
         /*
          * The code below is copied from InputStream.java from the Apache
          * Harmony class library, with some small adjustments for Eps2pgf.
          * 
          * Copyright 2006, 2007 The Apache Software Foundation
          * 
-         * CHECKSTYLE:OFF
          */
         
         // avoid int overflow, check null cbuf
@@ -182,7 +182,7 @@ public class SkipTexCommentsReader extends Reader {
             cbuf[off + i] = (char) c;
         }
         return len;
-        /* CHECKSTYLE:ON */
+        // CHECKSTYLE:ON
     }
     
     /**
