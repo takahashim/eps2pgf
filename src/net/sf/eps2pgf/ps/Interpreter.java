@@ -397,7 +397,7 @@ public class Interpreter {
             }
         } catch (PSError e) {
             throw new ProgramError("Encountered a PostScript error were they"
-                    + " should not occur.");
+                    + " should not occur. ");
         } finally {
             this.gstate.current().getDevice().finish();
         }

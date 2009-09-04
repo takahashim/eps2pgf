@@ -106,8 +106,10 @@ public class PSObjectString extends PSObjectComposite implements Cloneable {
      * 
      * @throws PSError A PostScript error occurred.
      */
+    // CHECKSTYLE:OFF
     public PSObjectString(String str, final boolean isPostScript,
             final VM virtualMemory) throws PSError {
+    // CHECKSTYLE:ON
         
         super(virtualMemory);
         if (isPostScript) {

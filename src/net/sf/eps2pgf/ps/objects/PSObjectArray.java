@@ -168,8 +168,10 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * @throws PSError PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
+    // CHECKSTYLE:OFF
     public PSObjectArray(String str, final Interpreter interp)
             throws ProgramError, PSError {
+     // CHECKSTYLE:ON
         
         super(interp.getVm());
         

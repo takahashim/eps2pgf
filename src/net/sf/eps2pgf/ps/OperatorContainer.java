@@ -54,7 +54,7 @@ public class OperatorContainer {
         
         PSObjectDict systemdict;
         try {
-            systemdict = interp.getDictStack().lookup("systemdict").toDict();
+            systemdict = getDictStack().lookup("systemdict").toDict();
         } catch (PSError e) {
             throw new ProgramError("Unable to find the system dictionary.");
         }
@@ -69,6 +69,12 @@ public class OperatorContainer {
                     cls[i].getConstructor(getClass());
                 PSObjectOperator op = cons.newInstance(this);
                 String name = op.getName();
+                
+                if (systemdict.known(name)) {
+                    throw new ProgramError("Trying to add " + name
+                            + " to systemdict, but it is already defined in"
+                            + " systemdict.");
+                }
                 systemdict.setKey(name, op);
                 
             } catch (InstantiationException e) {

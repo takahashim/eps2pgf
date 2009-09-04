@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.logging.Logger;
 
-import net.sf.eps2pgf.Main;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
@@ -149,22 +148,6 @@ public final class OperatorsPtoR extends OperatorContainer {
         @Override
         public void invoke() throws PSError, ProgramError {
             getOpStack().pop();
-        }
-    }
-
-    /**
-     * PostScript op: product.
-     */
-    public class Oproduct extends PSObjectOperator {
-        /**
-         * Invokes this operator.
-         *
-         * @throws PSError A PostScript error occurred.
-         * @throws ProgramError This shouldn't happen, it indicates a bug.
-         */
-        @Override
-        public void invoke() throws PSError, ProgramError {
-            getOpStack().push(new PSObjectString(Main.APP_NAME, getVm()));
         }
     }
 

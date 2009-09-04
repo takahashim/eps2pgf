@@ -135,7 +135,7 @@ public class ExecStack {
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public void push(PSObject obj) throws ProgramError {
+    public void push(final PSObject obj) throws ProgramError {
         try {
             stack.addToEnd(obj);
         } catch (PSErrorRangeCheck e) {

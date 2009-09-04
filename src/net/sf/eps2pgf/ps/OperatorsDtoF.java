@@ -368,25 +368,6 @@ public final class OperatorsDtoF extends OperatorContainer {
     }
     
     /**
-     * PostScript op: errordict.
-     * 
-     * @throws PSErrorUnregistered Encountered a PostScript feature that is not
-     * (yet) implemented.
-     */
-    public class Oerrordict extends PSObjectOperator {
-        /**
-         * Invokes this operator.
-         * 
-         * @throws PSError A PostScript error occurred.
-         * @throws ProgramError This shouldn't happen, it indicates a bug.
-         */
-        @Override
-        public void invoke() throws PSError, ProgramError {
-            throw new PSErrorUnregistered("errordict operator");
-        }
-    }
-    
-    /**
      * PostScript op: eq.
      * 
      * @throws PSError A PostScript error occurred.

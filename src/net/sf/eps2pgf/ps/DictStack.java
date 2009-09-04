@@ -332,7 +332,7 @@ public class DictStack {
                 new PSObjectString(version, interp.getVm()));
         systemdict.setKey("revision", new PSObjectInt(revision));
         systemdict.setKey("serialnumber", new PSObjectInt(0));
-        systemdict.setKey("product", "Eps2pgf");
+        systemdict.setKey("product", Main.APP_NAME);
     }
     
     /**
