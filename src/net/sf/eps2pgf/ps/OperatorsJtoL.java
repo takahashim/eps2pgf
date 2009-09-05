@@ -219,7 +219,7 @@ public final class OperatorsJtoL extends OperatorContainer {
             ExecStack es = getExecStack();
             ArrayStack<PSObject> cs = getContStack();
             
-            es.push(getDictStack().eps2pgfLoop);
+            es.push(getOpsEps2pgf().eps2pgfLoop);
             
             cs.push(new PSObjectNull());
             cs.push(getOpStack().pop());

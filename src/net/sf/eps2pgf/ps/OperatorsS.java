@@ -921,15 +921,16 @@ public final class OperatorsS extends OperatorContainer {
          */
         @Override
         public void invoke() throws PSError, ProgramError {
+            OperatorsEps2pgf opse = getOpsEps2pgf();
             ExecStack es = getExecStack();
             PSObject obj;
-            DictStack ds = getDictStack();
             while ((obj = es.pop()) != null) {
-                if (obj == ds.eps2pgfStopped) {
+                if (obj == opse.eps2pgfStopped) {
                     // Set 'newerror' in $error to indicate that an "error"
                     // occurred.
                     try {
-                        PSObjectDict dollarError = ds.lookup("$error").toDict();
+                        PSObjectDict dollarError =
+                            getDictStack().lookup("$error").toDict();
                         dollarError.setKey("newerror", true);
                     } catch (PSErrorTypeCheck e) {
                         throw new ProgramError("$error is not a dictionary.");
@@ -939,7 +940,7 @@ public final class OperatorsS extends OperatorContainer {
                     // so that it gets executed.
                     es.push(obj);
                     break;
-                } else if (ds.isContinuationFunction(obj)) {
+                } else if (opse.isContinuationFunction(obj)) {
                     // Pop continuation stack down to a Null object. These are
                     // the arguments for the continuation function just popped
                     // from the execution stack.
@@ -972,10 +973,10 @@ public final class OperatorsS extends OperatorContainer {
         @Override
         public void invoke() throws PSError, ProgramError {
             // Push proc and continuation function on stack
-            getExecStack().push(getDictStack().eps2pgfStopped);
+            getExecStack().push(getOpsEps2pgf().eps2pgfStopped);
             getExecStack().push(getOpStack().pop());
     
-            // Push arguments of continutation function on c stack
+            // Push arguments of continuation function on c stack
             getContStack().push(new PSObjectNull());
         }
     }

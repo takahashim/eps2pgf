@@ -106,7 +106,7 @@ public final class OperatorsPtoR extends OperatorContainer {
             }
             
             // Push objects on execution stack
-            getExecStack().push(getDictStack().eps2pgfPathforall);
+            getExecStack().push(getOpsEps2pgf().eps2pgfPathforall);
         
             // Push arguments on continuation stack
             ArrayStack<PSObject> cs = getContStack();
@@ -491,7 +491,7 @@ public final class OperatorsPtoR extends OperatorContainer {
             cs.push(objN);
             cs.push(proc);
             
-            getExecStack().push(getDictStack().eps2pgfRepeat);
+            getExecStack().push(getOpsEps2pgf().eps2pgfRepeat);
         }
     }
 

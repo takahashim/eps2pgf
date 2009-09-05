@@ -200,6 +200,15 @@ public class OperatorContainer {
     }
     
     /**
+     * Gets the class implementation internal eps2pgf operators.
+     * 
+     * @return The operator class.
+     */
+    public OperatorsEps2pgf getOpsEps2pgf() {
+        return interp.getOpsEps2pgf();
+    }
+    
+    /**
      * Get the resource manager.
      * 
      * @return the resource manager.

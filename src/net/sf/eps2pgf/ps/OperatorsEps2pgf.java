@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.errors.PSError;
+import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectBool;
@@ -38,6 +39,24 @@ import net.sf.eps2pgf.util.ArrayStack;
  */
 public final class OperatorsEps2pgf extends OperatorContainer {
     
+    /**
+     * Quick access constant.
+     */
+    // CHECKSTYLE:OFF
+    public PSObjectOperator eps2pgfCshow;
+    public PSObjectOperator eps2pgfFilenameforall;
+    public PSObjectOperator eps2pgfFor;
+    public PSObjectOperator eps2pgfForall;
+    public PSObjectOperator eps2pgfKshow;
+    public PSObjectOperator eps2pgfLoop;
+    public PSObjectOperator eps2pgfPathforall;
+    public PSObjectOperator eps2pgfRepeat;
+    public PSObjectOperator eps2pgfResourceforall;
+    public PSObjectOperator eps2pgfStopped;
+    public PSObjectOperator eps2pgfEexec;
+    // CHECKSTYLE:ON
+    
+    
     /** Log information. */
     private final Logger log = Logger.getLogger("net.sourceforge.eps2pgf");
 
@@ -53,32 +72,83 @@ public final class OperatorsEps2pgf extends OperatorContainer {
         
         super(interpreter);
         
-        //TODO register some functions as quick access functions
-//        private void defineQuickAccessConstants() throws ProgramError {
-//            try {
-//                // Looping context procedures
-//                eps2pgfCshow = lookup("eps2pgfcshow").toOperator();
-//                eps2pgfFilenameforall =
-//                    lookup("eps2pgffilenameforall").toOperator();
-//                eps2pgfFor = lookup("eps2pgffor").toOperator();
-//                eps2pgfForall = lookup("eps2pgfforall").toOperator();
-//                eps2pgfKshow = lookup("eps2pgfkshow").toOperator();
-//                eps2pgfLoop = lookup("eps2pgfloop").toOperator();
-//                eps2pgfPathforall = lookup("eps2pgfpathforall").toOperator();
-//                eps2pgfRepeat = lookup("eps2pgfrepeat").toOperator();
-//                eps2pgfResourceforall =
-//                    lookup("eps2pgfresourceforall").toOperator();
-//
-//                // Other continuation functions
-//                eps2pgfEexec = lookup("eps2pgfeexec").toOperator();
-//                eps2pgfStopped = lookup("eps2pgfstopped").toOperator();
-//            } catch (PSErrorTypeCheck e) {
-//                throw new ProgramError("Object in dictstack has incorrect"
-//                        + " type for quick access constants.");
-//            }
-//        }
-
+        try {
+            DictStack dictStack = getDictStack();
+            // Looping context procedures
+            eps2pgfCshow = dictStack.lookup("eps2pgfcshow").toOperator();
+            eps2pgfFilenameforall =
+                dictStack.lookup("eps2pgffilenameforall").toOperator();
+            eps2pgfFor = dictStack.lookup("eps2pgffor").toOperator();
+            eps2pgfForall = dictStack.lookup("eps2pgfforall").toOperator();
+            eps2pgfKshow = dictStack.lookup("eps2pgfkshow").toOperator();
+            eps2pgfLoop = dictStack.lookup("eps2pgfloop").toOperator();
+            eps2pgfPathforall =
+                dictStack.lookup("eps2pgfpathforall").toOperator();
+            eps2pgfRepeat = dictStack.lookup("eps2pgfrepeat").toOperator();
+            eps2pgfResourceforall =
+                dictStack.lookup("eps2pgfresourceforall").toOperator();
+            
+            // Other continuation functions
+            eps2pgfEexec = dictStack.lookup("eps2pgfeexec").toOperator();
+            eps2pgfStopped = dictStack.lookup("eps2pgfstopped").toOperator();
+        } catch (PSErrorTypeCheck e) {
+            throw new ProgramError("Object in dictstack has incorrect"
+                    + " type for quick access constants.");
+        }
     }
+    
+    /**
+     * Checks whether an object is an operator defining a looping context. See
+     * PostScript manual under 'exit' operator for info which operators these
+     * are.
+     * 
+     * @param obj The object to check.
+     * 
+     * @return True when object defines looping context, false otherwise.
+     */
+    public boolean isLoopingContext(final PSObject obj) {
+        if (obj instanceof PSObjectOperator) {
+            if ((obj == eps2pgfFor)
+                    || (obj == eps2pgfForall)
+                    || (obj == eps2pgfLoop)
+                    || (obj == eps2pgfRepeat)
+                    || (obj == eps2pgfCshow)
+                    || (obj == eps2pgfFilenameforall)
+                    || (obj == eps2pgfKshow)
+                    || (obj == eps2pgfPathforall)
+                    || (obj == eps2pgfResourceforall)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Checks whether an object is an continuation function.
+     * 
+     * @param obj The object to check.
+     * 
+     * @return True when object is continuation function, false otherwise.
+     */
+    public boolean isContinuationFunction(final PSObject obj) {
+        if (obj instanceof PSObjectOperator) {
+            if ((obj == eps2pgfFor)
+                    || (obj == eps2pgfForall)
+                    || (obj == eps2pgfLoop)
+                    || (obj == eps2pgfRepeat)
+                    || (obj == eps2pgfCshow)
+                    || (obj == eps2pgfFilenameforall)
+                    || (obj == eps2pgfKshow)
+                    || (obj == eps2pgfPathforall)
+                    || (obj == eps2pgfResourceforall)
+                    || (obj == eps2pgfStopped)
+                    || (obj == eps2pgfEexec)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     
     /**
      * Internal Eps2pgf operator. Continuation function for 'for' operator.
@@ -128,7 +198,7 @@ public final class OperatorsEps2pgf extends OperatorContainer {
                     }
                     
                     // Push objects to execution stack
-                    es.push(getDictStack().eps2pgfFor);
+                    es.push(eps2pgfFor);
                     es.push(proc);
                     
                     // Push arguments to continuation stack
@@ -179,7 +249,7 @@ public final class OperatorsEps2pgf extends OperatorContainer {
                     }
                     
                     // Push objects on execution stack
-                    es.push(getDictStack().eps2pgfForall);
+                    es.push(eps2pgfForall);
                     es.push(proc);
                     
                     // Push arguments on continuation stack
@@ -432,7 +502,7 @@ public final class OperatorsEps2pgf extends OperatorContainer {
                 PSObject proc = cs.pop();
                 cs.pop().toNull();
                 
-                es.push(getDictStack().eps2pgfLoop);
+                es.push(eps2pgfLoop);
                 es.push(proc);
                 
                 cs.push(new PSObjectNull());
@@ -500,7 +570,7 @@ public final class OperatorsEps2pgf extends OperatorContainer {
                     }
                     
                     // Push objects on execution stack
-                    es.push(getDictStack().eps2pgfPathforall);
+                    es.push(eps2pgfPathforall);
                     es.push(proc);
                 
                     // Push arguments on continuation stack
@@ -545,7 +615,7 @@ public final class OperatorsEps2pgf extends OperatorContainer {
                 
                 if (repeatCount > 0) {
                     // Push objects on execution stack
-                    es.push(getDictStack().eps2pgfRepeat);
+                    es.push(eps2pgfRepeat);
                     es.push(proc);
                 
                     // Push objects on continuation stack

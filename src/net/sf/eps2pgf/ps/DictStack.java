@@ -32,7 +32,6 @@ import net.sf.eps2pgf.ps.objects.PSObjectBool;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectName;
-import net.sf.eps2pgf.ps.objects.PSObjectOperator;
 import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.ResourceManager;
 import net.sf.eps2pgf.ps.resources.encodings.ISOLatin1Encoding;
@@ -62,24 +61,6 @@ public class DictStack {
     private Interpreter interp;
     
     /**
-     * Quick access constant. See documentation for
-     * defineQuickAccessConstants() method for more information.
-     */
-    // CHECKSTYLE:OFF
-    public PSObjectOperator eps2pgfCshow;
-    public PSObjectOperator eps2pgfFilenameforall;
-    public PSObjectOperator eps2pgfFor;
-    public PSObjectOperator eps2pgfForall;
-    public PSObjectOperator eps2pgfKshow;
-    public PSObjectOperator eps2pgfLoop;
-    public PSObjectOperator eps2pgfPathforall;
-    public PSObjectOperator eps2pgfRepeat;
-    public PSObjectOperator eps2pgfResourceforall;
-    public PSObjectOperator eps2pgfStopped;
-    public PSObjectOperator eps2pgfEexec;
-    // CHECKSTYLE:ON
-    
-    /**
      * Create a new dictionary stack.
      * 
      * @param interpreter The interpreter with which this dictionary stack is
@@ -107,7 +88,6 @@ public class DictStack {
         dictStack.push(userdict);
         
         fillSystemDict();
-        //defineQuickAccessConstants(); //TODO rm line
         try {
             systemdict.readonly();
         } catch (PSErrorTypeCheck e) {
@@ -197,39 +177,6 @@ public class DictStack {
         }
         
         return array.getinterval(0, n);
-    }
-    
-    /**
-     * Defines some constants that are associated with values in the systemdict.
-     * This allows faster access to these values. This is for example useful for
-     * the internal eps2pgf* operators.
-     * 
-     * @throws ProgramError This shouldn't happen, it indicates a bug.
-     */
-    //TODO move content of this method to operator container class for eps2pgf*
-    //operators.
-    private void defineQuickAccessConstants() throws ProgramError {
-        try {
-            // Looping context procedures
-            eps2pgfCshow = lookup("eps2pgfcshow").toOperator();
-            eps2pgfFilenameforall =
-                lookup("eps2pgffilenameforall").toOperator();
-            eps2pgfFor = lookup("eps2pgffor").toOperator();
-            eps2pgfForall = lookup("eps2pgfforall").toOperator();
-            eps2pgfKshow = lookup("eps2pgfkshow").toOperator();
-            eps2pgfLoop = lookup("eps2pgfloop").toOperator();
-            eps2pgfPathforall = lookup("eps2pgfpathforall").toOperator();
-            eps2pgfRepeat = lookup("eps2pgfrepeat").toOperator();
-            eps2pgfResourceforall =
-                lookup("eps2pgfresourceforall").toOperator();
-
-            // Other continuation functions
-            eps2pgfEexec = lookup("eps2pgfeexec").toOperator();
-            eps2pgfStopped = lookup("eps2pgfstopped").toOperator();
-        } catch (PSErrorTypeCheck e) {
-            throw new ProgramError("Object in dictstack has incorrect type for"
-                    + " quick access constants.");
-        }
     }
     
     /**
@@ -392,49 +339,6 @@ public class DictStack {
         return null;
     }
     
-    
-    /**
-     * Checks whether an object is an operator defining a looping context. See
-     * PostScript manual under 'exit' operator for info which operators these
-     * are.
-     * 
-     * @param obj The object to check.
-     * 
-     * @return True when object defines looping context, false otherwise.
-     */
-    public boolean isLoopingContext(final PSObject obj) {
-        if (obj instanceof PSObjectOperator) {
-            if ((obj == eps2pgfFor) || (obj == eps2pgfForall)
-                    || (obj == eps2pgfLoop) || (obj == eps2pgfRepeat)
-                    || (obj == eps2pgfCshow) || (obj == eps2pgfFilenameforall)
-                    || (obj == eps2pgfKshow) || (obj == eps2pgfPathforall)
-                    || (obj == eps2pgfResourceforall)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    /**
-     * Checks whether an object is an continuation function.
-     * 
-     * @param obj The object to check.
-     * 
-     * @return True when object is continuation function, false otherwise.
-     */
-    public boolean isContinuationFunction(final PSObject obj) {
-        if (obj instanceof PSObjectOperator) {
-            if ((obj == eps2pgfFor) || (obj == eps2pgfForall)
-                    || (obj == eps2pgfLoop) || (obj == eps2pgfRepeat)
-                    || (obj == eps2pgfCshow) || (obj == eps2pgfFilenameforall)
-                    || (obj == eps2pgfKshow) || (obj == eps2pgfPathforall)
-                    || (obj == eps2pgfResourceforall)
-                    || (obj == eps2pgfStopped) || (obj == eps2pgfEexec)) {
-                return true;
-            }
-        }
-        return false;
-    }
     
     
     /**

@@ -300,7 +300,7 @@ public final class OperatorsDtoF extends OperatorContainer {
             getDictStack().pushDict(
                     getDictStack().lookup("systemdict").toDict());
             
-            getExecStack().push(getDictStack().eps2pgfEexec);
+            getExecStack().push(getOpsEps2pgf().eps2pgfEexec);
             getContStack().push(new PSObjectNull());
             
             getExecStack().push(eexecFile);
@@ -489,9 +489,9 @@ public final class OperatorsDtoF extends OperatorContainer {
         public void invoke() throws PSError, ProgramError {
             ExecStack es = getExecStack();
             PSObject obj;
-            DictStack ds = getDictStack();
+            OperatorsEps2pgf opse = getOpsEps2pgf();
             while ((obj = es.pop()) != null) {
-                if (ds.isLoopingContext(obj)) {
+                if (opse.isLoopingContext(obj)) {
                     // Also pop down the continuation stack
                     try {
                         ArrayStack<PSObject> cs = getContStack();
@@ -506,7 +506,7 @@ public final class OperatorsDtoF extends OperatorContainer {
                     
                     return;
                     
-                } else if (obj == ds.eps2pgfStopped) {
+                } else if (obj == opse.eps2pgfStopped) {
                     // Push obj back on execution stack to make sure we're still
                     // in the 'stopped' context.
                     es.push(obj);
@@ -777,7 +777,7 @@ public final class OperatorsDtoF extends OperatorContainer {
             }
             
             // Push continuation function to execution stack
-            getExecStack().push(getDictStack().eps2pgfFor);
+            getExecStack().push(getOpsEps2pgf().eps2pgfFor);
             
             // Push arguments to continuation stack
             ArrayStack<PSObject> cs = getContStack();
@@ -822,7 +822,7 @@ public final class OperatorsDtoF extends OperatorContainer {
             cs.push(itemListArray);
             cs.push(proc);
     
-            es.push(getDictStack().eps2pgfForall);
+            es.push(getOpsEps2pgf().eps2pgfForall);
         }
     }
 
