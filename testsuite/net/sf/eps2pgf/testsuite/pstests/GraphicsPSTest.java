@@ -380,5 +380,20 @@ public class GraphicsPSTest {
         assertTrue(Common.testString(interp, cmd, 5));
     }
     
+    /** Test. @throws Exception the exception */
+    @Test
+    public void cieColorSpace() throws Exception {
+        String cmd = "[ /CIEBasedABC << /DecodeLMN [ { dup 0.03928 le"
+        		+ " {12.92321 div} {0.055 add 1.055 div 2.4 exp} ifelse"
+        		+ " } bind dup dup ] /DecodeABC"
+        		+ " [ {1.8 exp} {1.8 exp} {1.8 exp} ]"
+        		+ " /MatrixLMN [0.412457 0.212673 0.019334"
+        		+ " 0.357576 0.715152 0.119192 0.180437 0.072175 0.950301]"
+        		+ " /WhitePoint [0.9505 1.0 1.0890] >> ] setcolorspace"
+        		+ " 0.01 0.50 0.18 setcolor"
+        		+ " currentcolor 0.18 eq 3 1 roll 0.5 eq 3 1 roll 0.01 eq";
+        assertTrue(Common.testString(interp, cmd, 3));
+    }
+    
 
 }

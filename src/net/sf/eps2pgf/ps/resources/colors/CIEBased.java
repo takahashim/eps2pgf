@@ -61,10 +61,9 @@ public abstract class CIEBased extends PSColor {
     protected static final PSObjectName BLACKPOINT
         = new PSObjectName("/BlackPoint");
     
-    /** Local interpreter in which decode procedures are executed. */
-    private static Interpreter localInterp = null;
+    /** Reference to the interpreter to which this colorspace is associated. */
+    private Interpreter interp = null;
     
-
     /** Color space dictionary. */
     private PSObjectDict dict;
     
@@ -76,13 +75,15 @@ public abstract class CIEBased extends PSColor {
      * Creates a new CIE based color.
      * 
      * @param arr The color definition array.
-     * @param interp The interpreter to which this color belongs.
+     * @param aInterp The interpreter to which this color belongs.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    protected CIEBased(final PSObjectArray arr, final Interpreter interp)
+    protected CIEBased(final PSObjectArray arr, final Interpreter aInterp)
             throws PSError, ProgramError {
+        
+        interp = aInterp;
         
         if (!arr.get(0).eq(getFamilyName())) {
             throw new PSErrorTypeCheck();
@@ -145,17 +146,12 @@ public abstract class CIEBased extends PSColor {
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    protected static double decode(final double input, final PSObjectArray proc)
+    protected double decode(final double input, final PSObjectArray proc)
             throws PSError, ProgramError {
         
-        if (localInterp == null) {
-            localInterp = new Interpreter();
-        }
-        
-        localInterp.getOpStack().push(new PSObjectReal(input));
-        localInterp.getExecStack().push(proc);
-        localInterp.run();
-        return localInterp.getOpStack().pop().toReal();
+        interp.getOpStack().push(new PSObjectReal(input));
+        interp.runObject(proc);
+        return interp.getOpStack().pop().toReal(); 
     }
     
     /**

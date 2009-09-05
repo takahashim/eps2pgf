@@ -528,12 +528,6 @@ public class Interpreter {
         }  // end of check whether object is literal
     }
     
-    //TODO remove operators from main Interpreter class and put them in several
-    //      sub-classes: e.g. InterpreterOpsA, InterpreterOpsB, etc... Each of
-    //      these classes is passed the actual Interpreter upon construction.
-    //      This means that all operator implementations must be changed to
-    //      refer to the interp.<vars> instead of <vars> directly.
-    
     /**
      * Gets an operator from the system dictionary (WARNING: it always uses the
      * system dictionary, even if an operator has been redefined).
