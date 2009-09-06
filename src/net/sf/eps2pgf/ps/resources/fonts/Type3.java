@@ -79,6 +79,7 @@ public final class Type3 {
         // Create a temporary interpreter in which the characters will be
         // processed.
         try {
+            //TODO implement this with runObject on current interpreter
             Interpreter fi = new Interpreter();
             
             // Load some often used procedures to make execution faster

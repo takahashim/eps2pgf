@@ -24,6 +24,9 @@ package net.sf.eps2pgf.ps.objects;
  */
 public class PSObjectNull extends PSObject implements Cloneable {
     
+    /** Executable null object. Used internally by Eps2pgf. **/
+    private static PSObjectNull execNull = null;
+    
     /**
      * Create a new null object.
      */
@@ -79,6 +82,22 @@ public class PSObjectNull extends PSObject implements Cloneable {
         } else {
             return false;
         }
+    }
+    
+    /**
+     * Gets the executable null object. This is not a standard PostScript object
+     * because null objects are always literal. This object is used internally
+     * by Eps2pgf as NOP (no operation).
+     * 
+     * @return An executable null object.
+     */
+    public static PSObjectNull getExecNull() {
+        if (execNull == null) {
+            execNull = new PSObjectNull();
+            execNull.setLiteral(false);
+        }
+        
+        return execNull;
     }
     
     /**

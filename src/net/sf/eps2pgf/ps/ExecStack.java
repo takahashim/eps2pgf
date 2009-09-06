@@ -27,6 +27,7 @@ import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectFile;
+import net.sf.eps2pgf.ps.objects.PSObjectNull;
 
 /**
  * Execution stack. Stack of objects that await processing by the interpreter.
@@ -74,6 +75,9 @@ public class ExecStack {
      * stack.
      * 
      * @param interp The interpreter.
+     * @param stopAt Stop and return from this function when this item is at the
+     * top of the execution stack. If this is <code>null</code> the entire
+     * execution stack is executed.
      * 
      * @return Returns next token. Returns <code>null</code> when there are no
      * more tokens left on the top item on the stack. This empty top
@@ -82,17 +86,17 @@ public class ExecStack {
      * @throws PSError There was a PostScript error retrieving the next token.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObject getNextToken(final Interpreter interp)
-            throws PSError, ProgramError {
+    public PSObject getNextToken(final Interpreter interp,
+            final PSObject stopAt) throws PSError, ProgramError {
         
         // Check for empty stack
         if (stack.size() == 0) {
-            return null;
+            return PSObjectNull.getExecNull();
         }
         
         // Loop through all object on the stack until we find a token
         PSObject top;
-        while ((top = getTop()) != null) {
+        while ((top = getTop()) != stopAt) {
             List<PSObject> list = top.token(interp);
             if (list.size() == 2) {
                 return list.get(0);
@@ -105,11 +109,10 @@ public class ExecStack {
                 return list.get(1);
             } else {
                 pop();
-                return null;
             }
         }
         
-        return null;
+        return PSObjectNull.getExecNull();
     }
     
     /**
@@ -163,7 +166,6 @@ public class ExecStack {
         try {
             return stack.get(nrItems - 1);
         } catch (PSErrorRangeCheck e) {
-            // This can never happen.
             return null;
         }
     }

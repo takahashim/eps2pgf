@@ -404,27 +404,42 @@ public class Interpreter {
     }
     
     /**
-     * Execute all objects on the execution stack one by one.
+     * Execute objects on the execution stack one by one until the execution
+     * stack is empty.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public void run() throws PSError, ProgramError {
-        while (getExecStack().size() > 0) {
-            PSObject obj = getExecStack().getNextToken(this);
-            if (obj != null) {
-                interpCounter++;
-                ArrayStack<PSObject> opStackCopy = getOpStack().clone();
-                try {
-                    executeObject(obj, false);
-                } catch (PSError e) {
-                    opStack = opStackCopy;
-                    opStack.push(obj);
-                    PSObjectDict errordict = 
-                        dictStack.lookup("errordict").toDict();
-                    PSObject errorproc = errordict.get(e.getErrorName());
-                    execStack.push(errorproc);
-                }
+        run(null);
+    }
+    
+    /**
+     * Execute objects on the execution stack one by one until the specified
+     * item is at the top of the execution stack.
+     * 
+     * @param stopAt Stop and return from this function when this item is at the
+     * top of the execution stack. If this is <code>null</code> the entire
+     * execution stack is executed.
+     * 
+     * @throws PSError A PostScript error occurred.
+     * @throws ProgramError This shouldn't happen, it indicates a bug.
+     */
+    public void run(final PSObject stopAt) throws PSError, ProgramError {
+        ExecStack es = getExecStack();
+        while (es.getTop() != stopAt) {
+            PSObject obj = es.getNextToken(this, stopAt);
+            interpCounter++;
+            ArrayStack<PSObject> opStackCopy = getOpStack().clone();
+            try {
+                executeObject(obj, false);
+            } catch (PSError e) {
+                opStack = opStackCopy;
+                opStack.push(obj);
+                PSObjectDict errordict = 
+                    dictStack.lookup("errordict").toDict();
+                PSObject errorproc = errordict.get(e.getErrorName());
+                execStack.push(errorproc);
             }
         }
     }
@@ -441,27 +456,10 @@ public class Interpreter {
      */
     public void runObject(final PSObject objectToRun)
             throws PSError, ProgramError {
-        //TODO reimplement methods that use this method. I think it's better to
-        //     implement them by working with the stack directly.
+        
         PSObject topAtStart = execStack.getTop();
-        executeObject(objectToRun);
-        try {
-            while (execStack.getTop() != topAtStart) {
-                PSObject obj = getExecStack().getNextToken(this);
-                if (obj != null) {
-                    executeObject(obj, false);
-                } else {
-                    break;
-                }
-            }
-        } catch (PSError e) {
-            // There was an error. Restore the execution stack to its original
-            // state. After that the error is thrown again.
-            while (execStack.getTop() != topAtStart) {
-                getExecStack().pop();
-            }
-            throw e;
-        }
+        getExecStack().push(objectToRun);
+        run(topAtStart);
     }
     
     /**
