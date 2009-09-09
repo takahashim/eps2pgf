@@ -40,6 +40,14 @@ import net.sf.eps2pgf.ps.resources.colors.PSColor;
 public final class OperatorsGtoI extends OperatorContainer {
     
     /**
+     * Quick access for a few operators.
+     */
+    // CHECKSTYLE:OFF
+    public PSObjectOperator gsave;
+    public PSObjectOperator grestore;
+    //CHECKSTYLE:ON
+    
+    /**
      * Create a new set of operators and add them to the system dictionary of
      * the interpreter.
      * 
@@ -49,6 +57,14 @@ public final class OperatorsGtoI extends OperatorContainer {
      */
     public OperatorsGtoI(final Interpreter interpreter) throws ProgramError {
         super(interpreter);
+        try {
+            DictStack dictStack = getDictStack();
+            gsave = dictStack.lookup("gsave").toOperator();
+            grestore = dictStack.lookup("grestore").toOperator();
+        } catch (PSErrorTypeCheck e) {
+            throw new ProgramError("Object in dictstack has incorrect"
+                    + " type for quick access constants.");
+        }
     }
     
     /**
@@ -349,7 +365,7 @@ public final class OperatorsGtoI extends OperatorContainer {
                 int height = getOpStack().pop().toInt();
                 int width = getOpStack().pop().toInt();
                 
-                dict = new PSObjectDict(getVm());
+                dict = new PSObjectDict(getInterp());
                 dict.setKey(Image.IMAGE_TYPE, new PSObjectInt(1));
                 dict.setKey(Image.WIDTH, new PSObjectInt(width));
                 dict.setKey(Image.HEIGHT, new PSObjectInt(height));
@@ -358,7 +374,8 @@ public final class OperatorsGtoI extends OperatorContainer {
                 dict.setKey(Image.BITS_PER_COMPONENT,
                         new PSObjectInt(bitsPerSample));
                 double[] decode = {0.0, 1.0};
-                dict.setKey(Image.DECODE, new PSObjectArray(decode, getVm()));
+                dict.setKey(Image.DECODE,
+                        new PSObjectArray(decode, getInterp()));
                 colorSpace = new DeviceGray();
             }
             

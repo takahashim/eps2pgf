@@ -260,19 +260,19 @@ public final class ResourceManager {
         
         interp = interpreter;
         
-        fontManager = new FontManager(interp.getVm());
+        fontManager = new FontManager(interp);
         
         // Set the generic implementation dictionary for each resource category.
         PSObjectDict genericDict = createGenericDict(CAT_GENERIC);
-        PSObjectDict categoryDict = new PSObjectDict(interp.getVm());
+        PSObjectDict categoryDict = new PSObjectDict(interp);
         categoryDict.setKey(CAT_GENERIC, genericDict);
         categoryDict.setKey(CAT_CATEGORY, genericDict);
         
-        resources = new PSObjectDict(interp.getVm());
+        resources = new PSObjectDict(interp);
         resources.setKey(CAT_CATEGORY, categoryDict);
         resources.setKey(CAT_GENERIC, genericDict);
         
-        EncodingManager.initialize(this, interp.getVm());
+        EncodingManager.initialize(this, interp);
     }
     
     /**
@@ -287,7 +287,7 @@ public final class ResourceManager {
             throws PSErrorVMError {
         
         // Create a generic procedure
-        PSObjectArray genericProc = new PSObjectArray(interp.getVm());
+        PSObjectArray genericProc = new PSObjectArray(interp);
         genericProc.setLiteral(false);
         try {
             genericProc.addToEnd(GENERIC_PROC_NAME);
@@ -296,7 +296,7 @@ public final class ResourceManager {
         }
         
         // Create the generic implementation dictionary
-        PSObjectDict dict = new PSObjectDict(interp.getVm());
+        PSObjectDict dict = new PSObjectDict(interp);
         dict.setKey(KEY_DEFINERESOURCE, genericProc);
         dict.setKey(KEY_UNDEFINERESOURCE, genericProc);
         dict.setKey(KEY_FINDRESOURCE, genericProc);
@@ -408,7 +408,7 @@ public final class ResourceManager {
                 catName = category;
             }
             
-            PSObjectDict dict = new PSObjectDict(interp.getVm());
+            PSObjectDict dict = new PSObjectDict(interp);
             resources.setKey(catName, dict);
             return dict;
         }
@@ -656,7 +656,7 @@ public final class ResourceManager {
             supported = resourceDict.known(key);
         }
         
-        PSObjectArray ret = new PSObjectArray(interp.getVm());
+        PSObjectArray ret = new PSObjectArray(interp);
         if (supported) {
             ret.addToEnd(new PSObjectInt(0));
             ret.addToEnd(new PSObjectInt(0));

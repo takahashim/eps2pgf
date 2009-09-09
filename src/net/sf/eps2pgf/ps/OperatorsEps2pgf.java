@@ -54,6 +54,7 @@ public final class OperatorsEps2pgf extends OperatorContainer {
     public PSObjectOperator eps2pgfResourceforall;
     public PSObjectOperator eps2pgfStopped;
     public PSObjectOperator eps2pgfEexec;
+    public PSObjectOperator eps2pgfGetmetrics;
     // CHECKSTYLE:ON
     
     
@@ -91,6 +92,11 @@ public final class OperatorsEps2pgf extends OperatorContainer {
             // Other continuation functions
             eps2pgfEexec = dictStack.lookup("eps2pgfeexec").toOperator();
             eps2pgfStopped = dictStack.lookup("eps2pgfstopped").toOperator();
+            
+            // Other functions
+            eps2pgfGetmetrics =
+                dictStack.lookup("eps2pgfgetmetrics").toOperator();
+            
         } catch (PSErrorTypeCheck e) {
             throw new ProgramError("Object in dictstack has incorrect"
                     + " type for quick access constants.");
@@ -311,7 +317,7 @@ public final class OperatorsEps2pgf extends OperatorContainer {
         public void invoke() throws PSError, ProgramError {
             double[] metrics =
                 getGstate().current().getDevice().eps2pgfGetMetrics();
-            PSObjectArray array = new PSObjectArray(metrics, getVm());
+            PSObjectArray array = new PSObjectArray(metrics, getInterp());
             getOpStack().push(array);
         }
     }
@@ -385,20 +391,20 @@ public final class OperatorsEps2pgf extends OperatorContainer {
             
             boolean recordStacks = dollarError.get("recordstacks").toBool();
             if (recordStacks) {
-                PSObjectArray arr = new PSObjectArray(getVm());
+                PSObjectArray arr = new PSObjectArray(getInterp());
                 for (int i = 0; i < os.size(); i++) {
                     arr.addToEnd(os.peek(os.size() - i - 1));
                 }
                 dollarError.setKey("ostack", arr);
                 
-                os.push(new PSObjectArray(getExecStack().size(), getVm()));
+                os.push(new PSObjectArray(getExecStack().size(), getInterp()));
                 getInterp().executeOperator("execstack");
                 PSObjectArray estack = os.pop().toArray();
                 estack = estack.getinterval(0, estack.size() - 1);
                 dollarError.setKey("estack", estack);
                 
                 os.push(new PSObjectArray(getDictStack().countdictstack(),
-                                          getVm()));
+                                          getInterp()));
                 getInterp().executeOperator("dictstack");
                 dollarError.setKey("dstack", getOpStack().pop());
             }

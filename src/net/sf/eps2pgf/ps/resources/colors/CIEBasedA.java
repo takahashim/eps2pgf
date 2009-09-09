@@ -21,7 +21,6 @@ package net.sf.eps2pgf.ps.resources.colors;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.Interpreter;
-import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
@@ -81,17 +80,16 @@ public class CIEBasedA extends CIEBased {
     private static void checkEntries(final PSObjectDict dict,
             final Interpreter interp) throws PSError, ProgramError {
         
-        VM vm = interp.getVm();
         if (!dict.known(RANGEA)) {
             double[] defaultRange = {0.0, 1.0};
-            dict.setKey(RANGEA, new PSObjectArray(defaultRange, vm));
+            dict.setKey(RANGEA, new PSObjectArray(defaultRange, interp));
         }
         if (!dict.known(DECODEA)) {
             dict.setKey(DECODEA, new PSObjectArray("{}", interp));
         }
         if (!dict.known(MATRIXA)) {
             double[] defaultMatrix =  {1.0, 1.0, 1.0};
-            dict.setKey(MATRIXA, new PSObjectArray(defaultMatrix, vm));
+            dict.setKey(MATRIXA, new PSObjectArray(defaultMatrix, interp));
         }
     }
     

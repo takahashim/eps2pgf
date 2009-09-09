@@ -57,8 +57,8 @@ public final class Common {
             final String postscriptCommands, final int nrStackObj)
             throws Exception {
         
-        PSObjectFile cmds = new PSObjectFile(
-                new StringInputStream(postscriptCommands), interp.getVm());
+        PSObjectFile cmds =
+            new PSObjectFile(new StringInputStream(postscriptCommands), interp);
 
         PSObjectArray he = new PSObjectArray("{errordict /handleerror"
                 + " {/errorhandled true def eps2pgfhandleerror} put}", interp);

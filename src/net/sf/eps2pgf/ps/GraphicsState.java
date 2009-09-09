@@ -141,15 +141,15 @@ public class GraphicsState implements Cloneable {
         
         interp = interpreter;
 
-        colorRendering = new PSObjectDict(interp.getVm());
+        colorRendering = new PSObjectDict(interp);
         ctm = new Matrix();
         device = wDevice;
-        halftone = new PSObjectDict(interp.getVm());
+        halftone = new PSObjectDict(interp);
                 
         initmatrix();
         path = new Path(parentGraphicsStack);
         clippingPath = new Path(parentGraphicsStack);
-        font = new PSObjectFont(interp.getVm());
+        font = new PSObjectFont(interp);
         
         try {
             blackGeneration = new PSObjectArray("{}", interp);
@@ -1106,7 +1106,7 @@ public class GraphicsState implements Cloneable {
             throws ProgramError, PSErrorInvalidAccess, PSErrorVMError {
         
         try {
-            transfer = new PSObjectArray(4, interp.getVm());
+            transfer = new PSObjectArray(4, interp);
             transfer.put(0, redproc);
             transfer.put(1, greenproc);
             transfer.put(2, blueproc);
@@ -1129,7 +1129,7 @@ public class GraphicsState implements Cloneable {
     public void setTransfer(final PSObjectArray proc) throws ProgramError,
             PSErrorInvalidAccess, PSErrorVMError {
         
-        transfer = new PSObjectArray(4, interp.getVm());
+        transfer = new PSObjectArray(4, interp);
         for (int i = 0; i < 4; i++) {
             try {
                 transfer.put(i, proc);

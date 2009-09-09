@@ -71,7 +71,7 @@ public class Interpreter {
     private final ArrayStack<PSObject> contStack = new ArrayStack<PSObject>();
     
     /** Execution stack. */
-    private final ExecStack execStack = new ExecStack(vm);
+    private final ExecStack execStack = new ExecStack(this);
     
     /** Operators starting with A to C. */
     private final OperatorsAtoC opsAC = new OperatorsAtoC(this);
@@ -428,7 +428,7 @@ public class Interpreter {
     public void run(final PSObject stopAt) throws PSError, ProgramError {
         ExecStack es = getExecStack();
         while (es.getTop() != stopAt) {
-            PSObject obj = es.getNextToken(this, stopAt);
+            PSObject obj = es.getNextToken(stopAt);
             interpCounter++;
             ArrayStack<PSObject> opStackCopy = getOpStack().clone();
             try {

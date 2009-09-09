@@ -129,7 +129,7 @@ public final class OperatorsMtoO extends OperatorContainer {
          */
         @Override
         public void invoke() throws PSError, ProgramError {
-            getOpStack().push((new Matrix()).toArray(getVm()));
+            getOpStack().push((new Matrix()).toArray(getInterp()));
         }
     }
     

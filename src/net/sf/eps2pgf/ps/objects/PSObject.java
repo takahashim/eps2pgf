@@ -808,9 +808,6 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * Please note that this method does not perform a type check following the
      * official 'token' operator. This method will always return a result.
      * 
-     * @param interp The interpreter (only required in string or file objects
-     * containing immediately evaluated names).
-     * 
      * @return List with one or more objects. The following are possible:
      * 1 object : { "false boolean" }
      * 2 objects: { "next token", "true boolean" }
@@ -820,9 +817,7 @@ public abstract class PSObject implements Cloneable, Iterable<PSObject> {
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public List<PSObject> token(final Interpreter interp)
-            throws PSError, ProgramError {
-        
+    public List<PSObject> token() throws PSError, ProgramError {
         List<PSObject> list = new ArrayList<PSObject>(3);
         list.add(0, null);
         list.add(1, this);

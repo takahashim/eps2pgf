@@ -20,7 +20,7 @@ package net.sf.eps2pgf.ps.resources.filters;
 
 import java.io.InputStream;
 
-import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
@@ -84,14 +84,14 @@ public final class FilterManager {
      * 
      * @param stack The stack from which parameters are read.
      * @param name The name of the filter for which the parameters must be read.
-     * @param vm The virtual memory manager.
+     * @param interpreter The interpreter.
      * 
      * @return Dictionary with parameters.
      * 
      * @throws PSError A PostScript error occurred.
      */
     public static PSObjectDict getParameters(final PSObjectName name,
-            final ArrayStack<PSObject> stack, final VM vm)
+            final ArrayStack<PSObject> stack, final Interpreter interpreter)
             throws PSError {
         
         PSObjectDict dict;
@@ -99,9 +99,9 @@ public final class FilterManager {
         // There are some filters which have different possibilities for
         // arguments. 
         if (name.eq(FILTER_SUBFILEDECODE)) {
-            dict = getParametersSubFileDecode(name, stack, vm);
+            dict = getParametersSubFileDecode(name, stack, interpreter);
         } else if (name.eq(FILTER_RUNLENGTHENCODE)) {
-            dict = getParametersRunLengthEncode(name, stack, vm);
+            dict = getParametersRunLengthEncode(name, stack, interpreter);
         } else {
             // The parameters of the filter have the same possibilities:
             // For example for the DCTDecode filter:
@@ -112,7 +112,7 @@ public final class FilterManager {
                 dict = (PSObjectDict) obj;
             } else {
                 stack.push(obj);
-                dict = new PSObjectDict(vm);
+                dict = new PSObjectDict(interpreter);
             }
         }
         
@@ -131,7 +131,7 @@ public final class FilterManager {
      * 
      * @param stack The stack from which parameters are read.
      * @param name The name of the filter for which the parameters must be read.
-     * @param vm The virtual memory manager.
+     * @param interpreter The interpreter.
      * 
      * @return Dictionary with parameters.
      * 
@@ -139,7 +139,7 @@ public final class FilterManager {
      */
     private static PSObjectDict getParametersSubFileDecode(
             final PSObjectName name, final ArrayStack<PSObject> stack,
-            final VM vm) throws PSError {
+            final Interpreter interpreter) throws PSError {
         
         PSObjectDict dict;
         PSObject obj = stack.pop();
@@ -153,7 +153,7 @@ public final class FilterManager {
                 dict = (PSObjectDict) obj;
             } else {
                 stack.push(obj);
-                dict = new PSObjectDict(vm);
+                dict = new PSObjectDict(interpreter);
             }
             dict.setKey(SubFileDecode.KEY_EODSTRING, eodString);
             dict.setKey(SubFileDecode.KEY_EODCOUNT, eodCount);
@@ -173,7 +173,7 @@ public final class FilterManager {
      * 
      * @param stack The stack from which parameters are read.
      * @param name The name of the filter for which the parameters must be read.
-     * @param vm The virtual memory manager.
+     * @param interpreter The interpreter.
      * 
      * @return Dictionary with parameters.
      * 
@@ -181,7 +181,7 @@ public final class FilterManager {
      */
     private static PSObjectDict getParametersRunLengthEncode(
             final PSObjectName name, final ArrayStack<PSObject> stack,
-            final VM vm) throws PSError {
+            final Interpreter interpreter) throws PSError {
         
         int recordSize = stack.pop().toInt();
         PSObjectDict dict;
@@ -190,7 +190,7 @@ public final class FilterManager {
             dict = (PSObjectDict) obj;
         } else {
             stack.push(obj);
-            dict = new PSObjectDict(vm);
+            dict = new PSObjectDict(interpreter);
         }
         dict.setKey("RecordSize", new PSObjectInt(recordSize));
 
@@ -205,7 +205,7 @@ public final class FilterManager {
      * @param paramDict The dictionary with filter parameters
      * @param sourceOrTarget The data source or target (depending whether it's
      * a decode or encode filter).
-     * @param vm The virtual memory manager.
+     * @param interp The interp.
      * 
      * @return The new file object with encode/decode filter wrapped around it.
      * 
@@ -213,12 +213,12 @@ public final class FilterManager {
      */
     public static PSObjectFile filter(final PSObjectName filterName,
             final PSObjectDict paramDict, final PSObject sourceOrTarget,
-            final VM vm) throws PSError {
+            final Interpreter interp) throws PSError {
         
         String name = filterName.toString();
         
         if (name.endsWith("Decode")) {
-            return filterDecode(filterName, paramDict, sourceOrTarget, vm);
+            return filterDecode(filterName, paramDict, sourceOrTarget, interp);
         } else if (name.endsWith("Encode")) {
             return filterEncode(filterName, paramDict, sourceOrTarget);
         } else {
@@ -232,7 +232,7 @@ public final class FilterManager {
      * @param name The filter name.
      * @param paramDict The dictionary with filter parameters
      * @param source The raw data source.
-     * @param vm The virtual memory manager.
+     * @param interpreter The interpreter.
      * 
      * @return A new file object with decode filter wrapped around it.
      * 
@@ -240,7 +240,7 @@ public final class FilterManager {
      */
     private static PSObjectFile filterDecode(final PSObjectName name,
             final PSObjectDict paramDict, final PSObject source,
-            final VM vm) throws PSError {
+            final Interpreter interpreter) throws PSError {
         
         InputStream inStream;
         if (source instanceof PSObjectFile) {
@@ -270,7 +270,7 @@ public final class FilterManager {
             throw new PSErrorUnregistered("Decode filter or type " + name);
         }
         
-        return new PSObjectFile(filteredStream, vm);
+        return new PSObjectFile(filteredStream, interpreter);
     }
         
 

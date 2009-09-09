@@ -31,7 +31,7 @@ import net.sf.eps2pgf.Main;
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.RandomAccessOutputStream;
 import net.sf.eps2pgf.ps.Image;
-import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.filters.ASCII85Encode;
@@ -51,16 +51,16 @@ public final class PdfImageCreator {
     /** Offset (in file) of xref table. */
     private int xrefOffset;
     
-    /** Virtual memory manager. */
-    private VM vm;
+    /** Reference to the interpreter. */
+    private Interpreter interp;
     
     /**
      * Creates a new PDF image creator.
      * 
-     * @param vmManager The virtual memory manager.
+     * @param interpreter The interpreter.
      */
-    public PdfImageCreator(final VM vmManager) {
-        vm = vmManager;
+    public PdfImageCreator(final Interpreter interpreter) {
+        interp = interpreter;
     }
     
     /**
@@ -211,7 +211,7 @@ public final class PdfImageCreator {
         out.write(String.format("/Height %d\n", img.getOutputHeightPx()));
 
         out.write(String.format("/ColorSpace %s\n",
-                colorSpace.getColorSpace(vm).isis()));
+                colorSpace.getColorSpace(interp).isis()));
 
         out.write(String.format("/BitsPerComponent %d\n", 
                 img.getBitsPerComponent()));

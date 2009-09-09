@@ -64,7 +64,7 @@ public final class OperatorsSpecialChar extends OperatorContainer {
         @Override
         public void invoke() throws PSError, ProgramError {
             ArrayStack<PSObject> os = getOpStack();
-            PSObjectDict dict = new PSObjectDict(getVm());
+            PSObjectDict dict = new PSObjectDict(getInterp());
             while (true) {
                 PSObject value = os.pop();
                 if (value instanceof PSObjectMark) {
@@ -191,7 +191,7 @@ public final class OperatorsSpecialChar extends OperatorContainer {
                 objs[i] = getOpStack().pop();
             }
             getOpStack().pop();  // clear mark
-            getOpStack().push(new PSObjectArray(objs, getVm()));
+            getOpStack().push(new PSObjectArray(objs, getInterp()));
         }
         
         /**

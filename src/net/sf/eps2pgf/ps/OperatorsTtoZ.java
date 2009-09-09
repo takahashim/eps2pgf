@@ -75,7 +75,7 @@ public final class OperatorsTtoZ extends OperatorContainer {
                     && !(obj instanceof PSObjectFile)) {
                 throw new PSErrorTypeCheck();
             }
-            for (PSObject item : obj.token(getInterp())) {
+            for (PSObject item : obj.token()) {
                 getOpStack().push(item);
             }
         }

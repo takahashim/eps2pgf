@@ -897,15 +897,14 @@ public class PGFDevice implements OutputDevice, Cloneable {
         File pdfFile = new File(options.getOutputFile().getParent(), 
                 basename + ".pdf");
         try {
-            OutputStream epsOut = new BufferedOutputStream(
-                    new FileOutputStream(epsFile));
-            EpsImageCreator.writeImage(epsOut, img, epsFile.getName(),
-                    interp.getVm());
+            OutputStream epsOut =
+                new BufferedOutputStream(new FileOutputStream(epsFile));
+            EpsImageCreator.writeImage(epsOut, img, epsFile.getName(), interp);
             epsOut.close();
             
             OutputStream pdfOut = new BufferedOutputStream(
                     new FileOutputStream(pdfFile));
-            PdfImageCreator pdfImgCreator = new PdfImageCreator(interp.getVm());
+            PdfImageCreator pdfImgCreator = new PdfImageCreator(interp);
             pdfImgCreator.writeImage(pdfOut, img, pdfFile.getName());
             pdfOut.close();
             

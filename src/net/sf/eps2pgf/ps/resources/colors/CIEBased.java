@@ -20,7 +20,6 @@ package net.sf.eps2pgf.ps.resources.colors;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.Interpreter;
-import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
@@ -75,15 +74,15 @@ public abstract class CIEBased extends PSColor {
      * Creates a new CIE based color.
      * 
      * @param arr The color definition array.
-     * @param aInterp The interpreter to which this color belongs.
+     * @param interpreter The interpreter to which this color belongs.
      * 
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    protected CIEBased(final PSObjectArray arr, final Interpreter aInterp)
+    protected CIEBased(final PSObjectArray arr, final Interpreter interpreter)
             throws PSError, ProgramError {
         
-        interp = aInterp;
+        interp = interpreter;
         
         if (!arr.get(0).eq(getFamilyName())) {
             throw new PSErrorTypeCheck();
@@ -109,13 +108,12 @@ public abstract class CIEBased extends PSColor {
     private static PSObjectDict checkCommonEntries(final PSObjectDict dict, 
             final Interpreter interp) throws ProgramError, PSError {
         
-        VM vm = interp.getVm();
         if (!dict.known(RANGELMN)) {
             double[] defaultRange = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
-            dict.setKey(RANGELMN, new PSObjectArray(defaultRange, vm));
+            dict.setKey(RANGELMN, new PSObjectArray(defaultRange, interp));
         }
         if (!dict.known(DECODELMN)) {
-            PSObjectArray defaultDecode = new PSObjectArray(vm);
+            PSObjectArray defaultDecode = new PSObjectArray(interp);
             defaultDecode.addToEnd(new PSObjectArray("{}", interp));
             defaultDecode.addToEnd(new PSObjectArray("{}", interp));
             defaultDecode.addToEnd(new PSObjectArray("{}", interp));
@@ -124,12 +122,12 @@ public abstract class CIEBased extends PSColor {
         if (!dict.known(MATRIXLMN)) {
             double[] defaultMatrix
                     =  {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
-            dict.setKey(MATRIXLMN, new PSObjectArray(defaultMatrix, vm));
+            dict.setKey(MATRIXLMN, new PSObjectArray(defaultMatrix, interp));
         }
         dict.get(WHITEPOINT).toArray();
         if (!dict.known(BLACKPOINT)) {
             double[] defaultBlack = {0.0, 0.0, 0.0};
-            dict.setKey(BLACKPOINT, new PSObjectArray(defaultBlack, vm));
+            dict.setKey(BLACKPOINT, new PSObjectArray(defaultBlack, interp));
         }
         
         return dict;
@@ -157,7 +155,7 @@ public abstract class CIEBased extends PSColor {
     /**
      * Gets a PostScript array describing the color space of this color.
      * 
-     * @param vm The VM manager.
+     * @param interpreter The interpreter.
      * 
      * @return array describing color space.
      * 
@@ -165,10 +163,10 @@ public abstract class CIEBased extends PSColor {
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
     @Override
-    public PSObjectArray getColorSpace(final VM vm) throws PSErrorVMError,
-            PSErrorRangeCheck {
+    public PSObjectArray getColorSpace(final Interpreter interpreter)
+            throws PSErrorVMError, PSErrorRangeCheck {
         
-        PSObjectArray colSpace = new PSObjectArray(vm);
+        PSObjectArray colSpace = new PSObjectArray(interpreter);
         colSpace.addToEnd(getFamilyName());
         colSpace.addToEnd(getDict());
         return colSpace;

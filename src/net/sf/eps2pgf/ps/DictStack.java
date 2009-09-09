@@ -76,12 +76,12 @@ public class DictStack {
         
         // The user dictionary must be allocated in local VM
         interp.getVm().setGlobal(false);
-        PSObjectDict userdict = new PSObjectDict(interp.getVm());
+        PSObjectDict userdict = new PSObjectDict(interp);
         
         // The rest must be allocated in global VM
         interp.getVm().setGlobal(true);
-        PSObjectDict globaldict = new PSObjectDict(interp.getVm());
-        systemdict = new PSObjectDict(interp.getVm());
+        PSObjectDict globaldict = new PSObjectDict(interp);
+        systemdict = new PSObjectDict(interp);
         
         dictStack.push(systemdict);
         dictStack.push(globaldict);
@@ -193,7 +193,7 @@ public class DictStack {
 
         // add errordict dictionary (must be in local VM)
         interp.getVm().setGlobal(false);
-        PSObjectDict errordict = new PSObjectDict(interp.getVm());
+        PSObjectDict errordict = new PSObjectDict(interp);
         PSObjectName[] errs = PSError.getAllPSErrors();
         for (int i = 0; i < errs.length; i++) {
             String str = String.format("{%s eps2pgferrorproc stop}", 
@@ -208,7 +208,7 @@ public class DictStack {
         
         // Add $error dictionary (must be in local VM)
         interp.getVm().setGlobal(false);
-        PSObjectDict dollarerror = new PSObjectDict(interp.getVm());
+        PSObjectDict dollarerror = new PSObjectDict(interp);
         dollarerror.setKey("newerror", new PSObjectBool(false));
         dollarerror.setKey("errorname", emptyProc);
         dollarerror.setKey("command", emptyProc);
@@ -229,11 +229,11 @@ public class DictStack {
                 interp.getResourceManager().getFontManager());
         systemdict.setKey("SharedFontDirectory",
                 interp.getResourceManager().getFontManager());
-        systemdict.setKey(KEY_INTERNALDICT, new PSObjectDict(interp.getVm()));
+        systemdict.setKey(KEY_INTERNALDICT, new PSObjectDict(interp));
         
         // add permanent dictionaries in local VM
         interp.getVm().setGlobal(false);
-        systemdict.setKey("statusdict", new PSObjectDict(interp.getVm()));
+        systemdict.setKey("statusdict", new PSObjectDict(interp));
         systemdict.setKey("FontDirectory",
                 interp.getResourceManager().getFontManager());
         interp.getVm().setGlobal(true);
@@ -275,8 +275,7 @@ public class DictStack {
             version = "1";
             revision = 1;
         }
-        systemdict.setKey("version",
-                new PSObjectString(version, interp.getVm()));
+        systemdict.setKey("version", new PSObjectString(version, interp));
         systemdict.setKey("revision", new PSObjectInt(revision));
         systemdict.setKey("serialnumber", new PSObjectInt(0));
         systemdict.setKey("product", Main.APP_NAME);

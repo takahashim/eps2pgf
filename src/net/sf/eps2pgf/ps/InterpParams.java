@@ -73,7 +73,7 @@ public class InterpParams {
     public PSObjectDict currentUserParams()
             throws PSErrorVMError, PSErrorTypeCheck, ProgramError {
         
-        PSObjectDict newDict = new PSObjectDict(interp.getVm());
+        PSObjectDict newDict = new PSObjectDict(interp);
         PSObjectDict userParamsDict = getUserParamsDict();
         newDict.copy(userParamsDict);
         
@@ -114,7 +114,7 @@ public class InterpParams {
     public PSObjectDict currentSystemParams()
             throws ProgramError, PSErrorVMError, PSErrorTypeCheck {
         
-        PSObjectDict newDict = new PSObjectDict(interp.getVm());
+        PSObjectDict newDict = new PSObjectDict(interp);
         PSObjectDict systemParamsDict = getSystemParamsDict();
         newDict.copy(systemParamsDict);
         
@@ -158,7 +158,7 @@ public class InterpParams {
     public PSObjectDict currentDeviceParams(final String device)
             throws ProgramError, PSErrorVMError, PSErrorTypeCheck {
         
-        PSObjectDict newDict = new PSObjectDict(interp.getVm());
+        PSObjectDict newDict = new PSObjectDict(interp);
         PSObjectDict deviceParamsDict = getDeviceParamsDict(device);
         newDict.copy(deviceParamsDict);
         
@@ -208,7 +208,7 @@ public class InterpParams {
      * @throws PSErrorVMError Virtual memory error.
      */
     private PSObjectDict createDefaultUserParams() throws PSErrorVMError {
-        PSObjectDict dict = new PSObjectDict(interp.getVm());
+        PSObjectDict dict = new PSObjectDict(interp);
         
         dict.setKey("AccurateScreens", false);
         dict.setKey("HalftoneMode", 0);
@@ -270,7 +270,7 @@ public class InterpParams {
     private PSObjectDict createDefaultSystemParams()
             throws ProgramError, PSErrorVMError {
         
-        PSObjectDict dict = new PSObjectDict(interp.getVm());
+        PSObjectDict dict = new PSObjectDict(interp);
         dict.setKey("ByteOrder", false);
         dict.setKey("BuildTime", 0);
         dict.setKey("CurDisplayList", 0);
@@ -329,10 +329,10 @@ public class InterpParams {
             throws PSErrorVMError {
         
         if (deviceParams == null) {
-            deviceParams = new PSObjectDict(interp.getVm());
+            deviceParams = new PSObjectDict(interp);
         }
         if (!deviceParams.known(device)) {
-            deviceParams.setKey(device, new PSObjectDict(interp.getVm()));
+            deviceParams.setKey(device, new PSObjectDict(interp));
         }
         
         try {

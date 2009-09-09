@@ -639,7 +639,7 @@ public final class OperatorsAtoC extends OperatorContainer {
                 for (int i = (ncomp - 1); i >= 0; i++) {
                     sources[i] = osPop();
                 }
-                dataSource = new PSObjectArray(sources, getVm());
+                dataSource = new PSObjectArray(sources, getInterp());
             } else {
                 dataSource = osPop();
             }
@@ -652,7 +652,7 @@ public final class OperatorsAtoC extends OperatorContainer {
             int width = osPop().toInt();
             
             // Construct an image dictionary
-            PSObjectDict dict = new PSObjectDict(getVm());
+            PSObjectDict dict = new PSObjectDict(getInterp());
             dict.setKey(Image.IMAGE_TYPE, new PSObjectInt(1));
             dict.setKey(Image.WIDTH, new PSObjectInt(width));
             dict.setKey(Image.HEIGHT, new PSObjectInt(height));
@@ -665,7 +665,7 @@ public final class OperatorsAtoC extends OperatorContainer {
                 decode[2 * i] = 0.0;
                 decode[2 * i + 1] = 1.0;
             }
-            dict.setKey(Image.DECODE, new PSObjectArray(decode, getVm()));
+            dict.setKey(Image.DECODE, new PSObjectArray(decode, getInterp()));
             
             Image image = new Image(dict, getInterp(), colorSpace);
             gsCurrent().getDevice().image(image);
@@ -914,7 +914,7 @@ public final class OperatorsAtoC extends OperatorContainer {
          */
         @Override
         public void invoke() throws PSError, ProgramError {
-            osPush(gsCurrent().getColor().getColorSpace(getVm()));
+            osPush(gsCurrent().getColor().getColorSpace(getInterp()));
         }
     }
 
@@ -987,7 +987,7 @@ public final class OperatorsAtoC extends OperatorContainer {
         @Override
         public void invoke() throws PSError, ProgramError {
             List<Double> pattern = gsCurrent().getDashPattern();
-            PSObjectArray arr = new PSObjectArray(pattern.size(), getVm());
+            PSObjectArray arr = new PSObjectArray(pattern.size(), getInterp());
             for (int i = 0; i < pattern.size(); i++) {
                 arr.put(i, new PSObjectReal(pattern.get(i)));
             }
@@ -1010,7 +1010,7 @@ public final class OperatorsAtoC extends OperatorContainer {
         public void invoke() throws PSError, ProgramError {
             PSObjectFile file = getExecStack().getTopmostFile();
             if (file == null) {
-                file = new PSObjectFile(null, getVm());
+                file = new PSObjectFile(null, getInterp());
             } else {
                 file = file.dup();
             }
@@ -1170,7 +1170,7 @@ public final class OperatorsAtoC extends OperatorContainer {
         public void invoke() throws PSError, ProgramError {
             // Currently, this will always return an empty dictionary
             // indicating that there is no page.
-            PSObjectDict emptyDict = new PSObjectDict(getVm());
+            PSObjectDict emptyDict = new PSObjectDict(getInterp());
             osPush(emptyDict);
         }
     }
@@ -1450,7 +1450,7 @@ public final class OperatorsAtoC extends OperatorContainer {
             string.checkAccess(false, false, true);
             int radix = osPop().toInt();
             PSObject num = osPop();
-            osPush(new PSObjectString(num.cvrs(radix), getVm()));
+            osPush(new PSObjectString(num.cvrs(radix), getInterp()));
         }
     }
 

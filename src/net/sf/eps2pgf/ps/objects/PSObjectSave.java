@@ -51,20 +51,20 @@ public class PSObjectSave extends PSObjectComposite implements Cloneable {
     /**
      * Create a new save object from the current state of the interpreter.
      * 
-     * @param interp The interpreter.
+     * @param interpreter The interpreter.
      * 
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectSave(final Interpreter interp)
+    public PSObjectSave(final Interpreter interpreter)
             throws PSErrorVMError, ProgramError {
         
-        super(interp.getVm());
+        super(interpreter);
         
-        interpCount = interp.getInterpCounter();
-        setId(getVm().addSaveObj(interp.getVm().clone()));
+        interpCount = interpreter.getInterpCounter();
+        setId(getVm().addSaveObj(interpreter.getVm().clone()));
         
-        int interpId = interp.hashCode();
+        int interpId = interpreter.hashCode();
         ArrayList<PSObjectSave> saveObjs;
         if (!allSaveObjs.containsKey(interpId)) {
             saveObjs = new ArrayList<PSObjectSave>();
@@ -82,7 +82,7 @@ public class PSObjectSave extends PSObjectComposite implements Cloneable {
      * @param saveObj Save object to copy.
      */
     public PSObjectSave(final PSObjectSave saveObj) {
-        super(saveObj.getVm(), saveObj.getId());
+        super(saveObj.getInterp(), saveObj.getId());
         
         interpCount = saveObj.interpCount;
         valid = saveObj.valid;

@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
@@ -43,12 +43,12 @@ public class PSObjectDict extends PSObjectComposite implements Cloneable {
     /**
      * Creates a new instance of PSObjectDict.
      * 
-     * @param virtualMemory The VM manager.
+     * @param interpreter The interpreter.
      * 
      * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectDict(final VM virtualMemory) throws PSErrorVMError {
-        this(-1, virtualMemory);
+    public PSObjectDict(final Interpreter interpreter) throws PSErrorVMError {
+        this(-1, interpreter);
     }
     
     /**
@@ -56,14 +56,14 @@ public class PSObjectDict extends PSObjectComposite implements Cloneable {
      * 
      * @param pCapacity Maximum number of items that can be stored in this
      * dictionary. This value has no effect. The dictionary size is unlimited.
-     * @param virtualMemory The VM manager.
+     * @param interpreter The interpreter.
      * 
      * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectDict(final int pCapacity, final VM virtualMemory)
+    public PSObjectDict(final int pCapacity, final Interpreter interpreter)
             throws PSErrorVMError {
         
-        super(virtualMemory);
+        super(interpreter);
         setMap(new HashMap<PSObject, PSObject>());
         capacity = pCapacity;
     }
@@ -76,7 +76,7 @@ public class PSObjectDict extends PSObjectComposite implements Cloneable {
      * dictionary.
      */
     public PSObjectDict(final PSObjectDict dict) {
-        super(dict.getVm(), dict.getId());
+        super(dict.getInterp(), dict.getId());
         capacity = dict.capacity;
         copyCommonAttributes(dict);
     }
@@ -350,7 +350,8 @@ public class PSObjectDict extends PSObjectComposite implements Cloneable {
     public void setKey(final String key, final String value)
             throws PSErrorVMError {
         
-        setKey(new PSObjectName(key, true), new PSObjectString(value, getVm()));
+        setKey(new PSObjectName(key, true),
+                new PSObjectString(value, getInterp()));
     }
     
     /**

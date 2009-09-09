@@ -383,14 +383,16 @@ public class Matrix implements Cloneable {
     /**
      * Convert this matrix to PostScript array.
      * 
-     * @param vm The virtual memory manager that will manage the new array.
+     * @param interpreter The interpreter.
      * 
      * @return the PS object array
      * 
      * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectArray toArray(final VM vm) throws PSErrorVMError {
-        return new PSObjectArray(m, vm);
+    public PSObjectArray toArray(final Interpreter interpreter)
+            throws PSErrorVMError {
+        
+        return new PSObjectArray(m, interpreter);
     }
     
     /**

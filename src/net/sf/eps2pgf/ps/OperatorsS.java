@@ -994,7 +994,7 @@ public final class OperatorsS extends OperatorContainer {
         @Override
         public void invoke() throws PSError, ProgramError {
             int n = getOpStack().pop().toNonNegInt();
-            getOpStack().push(new PSObjectString(n, getVm()));
+            getOpStack().push(new PSObjectString(n, getInterp()));
         }
     }
    

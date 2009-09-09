@@ -27,7 +27,6 @@ import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Parser;
-import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
@@ -42,19 +41,19 @@ public class PSObjectFile extends PSObject implements Cloneable {
     /** Input stream from which data is read. */
     private InputStream inStr;
     
-    /** VM where this object's shared value is stored. */
-    private VM vm;
+    /** Interpreter to which this object belongs. */
+    private Interpreter interp;
     
     /**
      * Creates a new instance of PSObjectFile.
      * 
      * @param fileInputStream Reader to access the file
-     * @param virtualMemory The VM manager.
+     * @param interpreter The interpreter.
      */
     public PSObjectFile(final InputStream fileInputStream,
-            final VM virtualMemory) {
+            final Interpreter interpreter) {
         
-        vm = virtualMemory;
+        interp = interpreter;
         if (fileInputStream != null) {
             setStream(fileInputStream);
         } else {
@@ -85,7 +84,7 @@ public class PSObjectFile extends PSObject implements Cloneable {
      */
     @Override
     public PSObjectFile dup() {
-        PSObjectFile dupFile = new PSObjectFile(inStr, vm);
+        PSObjectFile dupFile = new PSObjectFile(inStr, interp);
         dupFile.copyCommonAttributes(this);
         return dupFile;
     }
@@ -197,7 +196,7 @@ public class PSObjectFile extends PSObject implements Cloneable {
             throw new PSErrorIOError();
         }
         
-        PSObjectArray ret = new PSObjectArray(vm);
+        PSObjectArray ret = new PSObjectArray(interp);
         ret.addToEnd(string.getinterval(0, charsRead));
         ret.addToEnd(new PSObjectBool(eofNotReached));
         
@@ -267,9 +266,6 @@ public class PSObjectFile extends PSObject implements Cloneable {
      * Reads characters from this object, interpreting them as PostScript
      * code, until it has scanned and constructed an entire object.
      * 
-     * @param interp The interpreter (only required in object contains
-     * immediately evaluated names).
-     * 
      * @return List with one or more objects. See PostScript manual under the
      * 'token' operator for more info.
      * 
@@ -277,9 +273,7 @@ public class PSObjectFile extends PSObject implements Cloneable {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public List<PSObject> token(final Interpreter interp)
-            throws PSError, ProgramError {
-        
+    public List<PSObject> token() throws PSError, ProgramError {
         PSObject any;
         any = Parser.convertSingle(inStr, interp);
         List<PSObject> retList = new ArrayList<PSObject>();

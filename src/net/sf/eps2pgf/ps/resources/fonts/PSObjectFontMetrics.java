@@ -21,8 +21,10 @@ package net.sf.eps2pgf.ps.resources.fonts;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.fontbox.afm.FontMetric;
+
 import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
@@ -30,8 +32,6 @@ import net.sf.eps2pgf.ps.errors.PSErrorUndefined;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
 import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
-
-import org.fontbox.afm.FontMetric;
 
 /**
  * Wrapper class to wrap font metric information loaded by FontBox in a
@@ -75,13 +75,13 @@ public class PSObjectFontMetrics extends PSObject {
      * corresponding font dictionary entries.
      * 
      * @param fontDict Font dictionary of the font.
-     * @param vm The virtual memory manager.
+     * @param interp The interpreter.
      * 
      * @throws PSError a PostScript error occurred
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectFontMetrics(final PSObjectDict fontDict, final VM vm)
-            throws PSError, ProgramError {
+    public PSObjectFontMetrics(final PSObjectDict fontDict, 
+            final Interpreter interp) throws PSError, ProgramError {
         
         int fontType;
         try {
@@ -94,10 +94,10 @@ public class PSObjectFontMetrics extends PSObject {
         
         switch (fontType) {
             case 1:
-                Type1.load(this, fontDict, vm);
+                Type1.load(this, fontDict, interp);
                 break;
             case 3:
-                Type3.load(this, fontDict, vm);
+                Type3.load(this, fontDict, interp);
                 break;
             default:
                 throw new PSErrorUnregistered("type " + fontType + " fonts");

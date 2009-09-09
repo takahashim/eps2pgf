@@ -28,7 +28,6 @@ import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Matrix;
 import net.sf.eps2pgf.ps.Parser;
-import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidAccess;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
@@ -58,15 +57,15 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * @param array The shared array object.
      * @param startIndex The index (in the shared object) of the first item.
      * @param length The (maximum) number of items.
-     * @param virtualMemory The VM.
+     * @param interpreter The interpreter.
      * 
      * @throws PSErrorVMError Virtual memory error.
      */
     private PSObjectArray(final List<PSObject> array, final int startIndex,
-            final int length, final VM virtualMemory) throws PSErrorVMError {
+            final int length, final Interpreter interpreter)
+            throws PSErrorVMError {
         
-        super(virtualMemory);
-        
+        super(interpreter);
         offset = startIndex;
         count = length;
         setArray(array);
@@ -75,12 +74,12 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
     /**
      * Create a new empty variable-size PostScript array.
      * 
-     * @param virtualMemory The VM manager.
+     * @param interpreter The interpreter.
      * 
      * @throws PSErrorVMError Virtual memory error
      */
-    public PSObjectArray(final VM virtualMemory) throws PSErrorVMError {
-        this(new ArrayList<PSObject>(), 0, -1, virtualMemory);
+    public PSObjectArray(final Interpreter interpreter) throws PSErrorVMError {
+        this(new ArrayList<PSObject>(), 0, -1, interpreter);
     }
     
     /**
@@ -88,14 +87,14 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * objects.
      * 
      * @param n Number of elements.
-     * @param virtualMemory The VM manager.
+     * @param interpreter The interpreter.
      * 
      * @throws PSErrorVMError Virtual memory error
      */
-    public PSObjectArray(final int n, final VM virtualMemory)
+    public PSObjectArray(final int n, final Interpreter interpreter)
             throws PSErrorVMError {
         
-        this(new ArrayList<PSObject>(n), 0, n, virtualMemory);
+        this(new ArrayList<PSObject>(n), 0, n, interpreter);
         List<PSObject> list = getArray();
         PSObjectNull nullObj = new PSObjectNull();
         for (int i = 0; i < n; i++) {
@@ -107,15 +106,14 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * Creates a new instance of PSObjectArray.
      * 
      * @param dblArray Array of doubles
-     * @param virtualMemory The VM manager.
+     * @param interpreter The interpreter.
      * 
      * @throws PSErrorVMError Virtual memory error
      */
-    public PSObjectArray(final double[] dblArray, final VM virtualMemory)
+    public PSObjectArray(final double[] dblArray, final Interpreter interpreter)
             throws PSErrorVMError {
         
-        super(virtualMemory);
-        
+        super(interpreter);
         offset = 0;
         count = dblArray.length;
         List<PSObject> list = new ArrayList<PSObject>(dblArray.length);
@@ -129,15 +127,14 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * Creates a new instance of PSObjectArray.
      * 
      * @param objs Objects that will be stored in the new array.
-     * @param virtualMemory The VM manager.
+     * @param interpreter The interpreter.
      * 
      * @throws PSErrorVMError Virtual memory error
      */
-    public PSObjectArray(final PSObject[] objs, final VM virtualMemory)
+    public PSObjectArray(final PSObject[] objs, final Interpreter interpreter)
             throws PSErrorVMError {
         
-        this(new ArrayList<PSObject>(objs.length), 0, objs.length,
-                virtualMemory);
+        this(new ArrayList<PSObject>(objs.length), 0, objs.length, interpreter);
         List<PSObject> list = getArray();
         for (int i = 0; i < objs.length; i++) {
             list.add(i, objs[i]);
@@ -148,32 +145,32 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * Creates a new instance of PSObjectArray.
      * 
      * @param objs Objects that will be stored in the new array.
-     * @param virtualMemory The VM manager.
+     * @param interpreter The interpreter.
      * 
      * @throws PSErrorVMError Virtual memory error
      */
-    public PSObjectArray(final List<PSObject> objs, final VM virtualMemory)
-            throws PSErrorVMError {
+    public PSObjectArray(final List<PSObject> objs,
+            final Interpreter interpreter) throws PSErrorVMError {
         
-        this(new ArrayList<PSObject>(objs), 0, objs.size(), virtualMemory);
+        this(new ArrayList<PSObject>(objs), 0, objs.size(), interpreter);
     }
     
     /**
      * Creates a new executable array object.
      * 
      * @param str String representing a valid procedure (executable array)
-     * @param interp The interpreter (only required if string contains
+     * @param interpreter The interpreter (only required if string contains
      * immediately evaluated names).
      * 
      * @throws PSError PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     // CHECKSTYLE:OFF
-    public PSObjectArray(String str, final Interpreter interp)
+    public PSObjectArray(String str, final Interpreter interpreter)
             throws ProgramError, PSError {
      // CHECKSTYLE:ON
         
-        super(interp.getVm());
+        super(interpreter);
         
         // quick check whether it is a literal or executable array
         if (str.charAt(0) == '{') {
@@ -184,8 +181,8 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
             str = str.substring(1, str.length() - 1);
         }
         InputStream inStream =
-            new PSStringInputStream(new PSObjectString(str, getVm()));
-        setArray(Parser.convertAll(inStream, interp));
+            new PSStringInputStream(new PSObjectString(str, getInterp()));
+        setArray(Parser.convertAll(inStream, interpreter));
         count = getArray().size();
         offset = 0;
     }
@@ -200,7 +197,7 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * @throws PSErrorRangeCheck Indices out of range.
      */
     public PSObjectArray(final PSObjectArray obj) throws PSErrorRangeCheck {
-        super(obj.getVm(), obj.getId());
+        super(obj.getInterp(), obj.getId());
         offset = obj.offset;
         count = obj.count;
         copyCommonAttributes(obj);
@@ -221,8 +218,7 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
     public PSObjectArray(final PSObjectArray obj, final int newOffset,
             final int newCount) throws PSErrorRangeCheck {
         
-        super(obj.getVm(), obj.getId());
-        
+        super(obj.getInterp(), obj.getId());
         if ((newCount != 0) || (newOffset != 0)) {
             if ((newOffset + newCount) > obj.size()) {
                 throw new PSErrorRangeCheck();
@@ -715,8 +711,6 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * Please note that this method does not perform a type check following the
      * offical 'token' operator. This method will always return a result.
      * 
-     * @param interp The interpreter. Not required, may be null.
-     * 
      * @return List with one or more objects. The following are possible:
      * 1 object : { "false boolean" }
      * 2 objects: { "next token", "true boolean" }
@@ -726,8 +720,7 @@ public class PSObjectArray extends PSObjectComposite implements Cloneable {
      * @throws PSError A PostScript error occurred.
      */
     @Override
-    public List<PSObject> token(final Interpreter interp) throws PSError {
-        
+    public List<PSObject> token() throws PSError {
         List<PSObject> list;
         int nr = size();
         if (nr == 0) {

@@ -28,7 +28,7 @@ import java.util.Formatter;
 import net.sf.eps2pgf.Main;
 import net.sf.eps2pgf.io.RandomAccessOutputStream;
 import net.sf.eps2pgf.ps.Image;
-import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorVMError;
@@ -58,19 +58,20 @@ public final class EpsImageCreator {
      * @param img Bitmap image to must be converted to EPS and written to the
      * OutputStream.
      * @param title Title of figure (used in EPS header)
-     * @param vm The virtual memory manager.
+     * @param interpreter The interpreter.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSError A PostScript error occurred.
      */
     public static void writeImage(final OutputStream out, final Image img,
-            final String title, final VM vm) throws IOException, PSError {
+            final String title, final Interpreter interpreter)
+            throws IOException, PSError {
         
         RandomAccessOutputStream outBuf = new RandomAccessOutputStream(out);
         
         writeHeader(outBuf, img, title);
         writeScaling(outBuf, img);
-        writeColorSpace(outBuf, img, vm);
+        writeColorSpace(outBuf, img, interpreter);
         writeImageDict(outBuf, img);
 
         OutputStream ascii85Out = new ASCII85Encode(outBuf, null);
@@ -144,18 +145,18 @@ public final class EpsImageCreator {
      * @param out OutputStream to which EPS image is written.
      * @param img Bitmap image to must be converted to EPS and written to the
      * OutputStream.
-     * @param vm The virtual memory manager.
+     * @param interpreter The interpreter.
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws PSErrorVMError A virtual memory error occurred.
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
     private static void writeColorSpace(final RandomAccessOutputStream out,
-            final Image img, final VM vm) throws IOException, PSErrorVMError,
-            PSErrorRangeCheck {
+            final Image img, final Interpreter interpreter)
+            throws IOException, PSErrorVMError, PSErrorRangeCheck {
         
         PSColor colorSpace = img.getColorSpace();
-        out.write(colorSpace.getColorSpace(vm).isis());
+        out.write(colorSpace.getColorSpace(interpreter).isis());
         out.write(" setcolorspace\n");
     }
     

@@ -18,7 +18,7 @@
 
 package net.sf.eps2pgf.ps.resources.colors;
 
-import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
@@ -60,7 +60,7 @@ public class DeviceCMYK extends PSColor implements Cloneable {
     /**
      * Gets a PostScript array describing the color space of this color.
      * 
-     * @param vm The VM manager.
+     * @param interpreter The interpreter.
      * 
      * @return array describing color space.
      * 
@@ -68,10 +68,10 @@ public class DeviceCMYK extends PSColor implements Cloneable {
      * @throws PSErrorRangeCheck A PostScript rangecheck error occurred.
      */
     @Override
-    public PSObjectArray getColorSpace(final VM vm) throws PSErrorVMError,
-            PSErrorRangeCheck {
+    public PSObjectArray getColorSpace(final Interpreter interpreter)
+            throws PSErrorVMError, PSErrorRangeCheck {
         
-        PSObjectArray array = new PSObjectArray(vm);
+        PSObjectArray array = new PSObjectArray(interpreter);
         array.addToEnd(new PSObjectName("DeviceCMYK", true));
         return array;
     }

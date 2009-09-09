@@ -100,7 +100,7 @@ public final class OperatorsPtoR extends OperatorContainer {
             PSObjectArray move = os.pop().toProc();
             
             ArrayList<PathSection> sects = gsCurrent().getPath().getSections();
-            PSObjectArray path = new PSObjectArray(getVm());
+            PSObjectArray path = new PSObjectArray(getInterp());
             for (int i = 0; i < sects.size(); i++) {
                 path.addToEnd(sects.get(i));
             }

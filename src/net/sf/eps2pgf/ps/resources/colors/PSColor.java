@@ -19,7 +19,7 @@
 package net.sf.eps2pgf.ps.resources.colors;
 
 import net.sf.eps2pgf.ProgramError;
-import net.sf.eps2pgf.ps.VM;
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorVMError;
@@ -87,15 +87,14 @@ public abstract class PSColor implements Cloneable {
     /**
      * Gets a PostScript array describing the color space of this color.
      * 
-     * @param virtualMemory The VM manager for the shared object of the created
-     * array.
+     * @param interpreter The interpreter.
      * 
      * @return array describing color space.
      * 
      * @throws PSErrorVMError Virtual memory error.
      * @throws PSErrorRangeCheck A PostScript rangecheck error.
      */
-    public abstract PSObjectArray getColorSpace(final VM virtualMemory)
+    public abstract PSObjectArray getColorSpace(final Interpreter interpreter)
             throws PSErrorVMError, PSErrorRangeCheck;
     
     /**

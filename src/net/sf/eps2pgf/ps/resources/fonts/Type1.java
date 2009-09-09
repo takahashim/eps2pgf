@@ -33,7 +33,6 @@ import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.ps.GstateStack;
 import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Path;
-import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
@@ -68,13 +67,13 @@ final class Type1 {
      * @param fontDict font dictionary describing a type 1 font
      * @param fMetrics The font metrics object where the loaded metrics will be
      * stored.
-     * @param vm The virtual memory manager.
+     * @param interpreter The interpreter.
      * 
      * @throws PSError a PostScript error occurred
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public static void load(final PSObjectFontMetrics fMetrics,
-            final PSObjectDict fontDict, final VM vm)
+            final PSObjectDict fontDict, final Interpreter interpreter)
             throws PSError, ProgramError {
         
         // Extract metrics information from character descriptions
@@ -96,7 +95,7 @@ final class Type1 {
         // Parse Subrs entry in private dictionary
         PSObjectArray subrsArray = privateDict.get(PSObjectFont.KEY_PRV_SUBRS)
                                                                      .toArray();
-        fMetrics.setSubrs(parseSubrs(subrsArray, vm));
+        fMetrics.setSubrs(parseSubrs(subrsArray, interpreter));
         
         fMetrics.setFontMetrics(new FontMetric());
         List<PSObject> items = charStrings.getItemList();
@@ -104,8 +103,9 @@ final class Type1 {
             for (int i = 1; i < items.size(); i += 2) {
                 PSObjectName charName = items.get(i).toName();
                 PSObjectString charString = items.get(i + 1).toPSString();
-                CharMetric charMetric = charString2CharMetric(fMetrics,
-                        charName.toString(), charString.toString(), vm);
+                CharMetric charMetric =
+                    charString2CharMetric(fMetrics,
+                       charName.toString(), charString.toString(), interpreter);
                 fMetrics.getFontMetrics().addCharMetric(charMetric);
             }
         } catch (PSError e) {
@@ -118,7 +118,7 @@ final class Type1 {
      * 
      * @param pSubrs Array with subroutines. Value of 'Subrs' entry in 'Private'
      * dictionary.
-     * @param vm The virtual memory manager.
+     * @param interpreter The interpreter.
      * 
      * @return List with all subroutines. Each subroutines consists of a list
      * with PostScript objects.
@@ -126,7 +126,7 @@ final class Type1 {
      * @throws PSError A PostScript error occured.
      */
     private static List<List<PSObject>> parseSubrs(final PSObjectArray pSubrs,
-            final VM vm) throws PSError {
+            final Interpreter interpreter) throws PSError {
         
         int nrSubrs = pSubrs.size();
         List<List<PSObject>> subrList = new ArrayList<List<PSObject>>(nrSubrs);
@@ -138,7 +138,7 @@ final class Type1 {
                 StringInputStream inStream =
                     new StringInputStream(inString.toString());
                 InputStream decodedStream = new EexecDecode(inStream, 4330,
-                        true, vm);
+                        true, interpreter);
                 subroutine = decodeCharString(decodedStream);
             } else if (inObj instanceof PSObjectNull) {
                 subroutine = new ArrayList<PSObject>();
@@ -156,7 +156,7 @@ final class Type1 {
      * @param charName The character name.
      * @param charString The character string.
      * @param fMetrics The font metrics.
-     * @param vm The virtual memory manager.
+     * @param interpreter The interpreter.
      * 
      * @return Character metric
      * 
@@ -165,12 +165,12 @@ final class Type1 {
      */
     public static CharMetric charString2CharMetric(
             final PSObjectFontMetrics fMetrics, final String charName,
-            final String charString, final VM vm)
+            final String charString, final Interpreter interpreter)
             throws PSError, ProgramError {
         
         StringInputStream strInStream = new StringInputStream(charString);
         InputStream decodedCharString =
-            new EexecDecode(strInStream, 4330, true, vm);
+            new EexecDecode(strInStream, 4330, true, interpreter);
         List<PSObject> tokens = decodeCharString(decodedCharString);
         double[] sb = new double[2];
         double[] w = new double[2];

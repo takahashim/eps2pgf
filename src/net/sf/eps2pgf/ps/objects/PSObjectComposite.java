@@ -18,6 +18,7 @@
 
 package net.sf.eps2pgf.ps.objects;
 
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.VM.ObjectId;
 
@@ -30,28 +31,34 @@ public abstract class PSObjectComposite extends PSObject {
     /** Object ID of object's shared value. */
     private ObjectId objectId;
     
-    /** VM where this object's shared value is stored. */
+    /** Interpreter to which this object belongs. */
+    private Interpreter interp;
+    
+    /** VM where this object's shared value is stored. Note that this value is
+     * just a copy from interp.getVm(). */
     private VM vm;
     
     /**
      * Creates a new composite object.
      * 
-     * @param virtualMemory The VM object in which the shared object will be
-     * stored.
+     * @param interpreter The interpreter.
      */
-    protected PSObjectComposite(final VM virtualMemory) {
-        vm = virtualMemory;
+    protected PSObjectComposite(final Interpreter interpreter) {
+        interp = interpreter;
+        vm = interp.getVm();
     }
     
     /**
      * Creates a new composite object.
      * 
-     * @param virtualMemory The VM object in which the shared object will be
-     * stored.
      * @param id Object ID to be associated with this composite object.
+     * @param interpreter The interpreter.
      */
-    protected PSObjectComposite(final VM virtualMemory, final ObjectId id) {
-        vm = virtualMemory;
+    protected PSObjectComposite(final Interpreter interpreter,
+            final ObjectId id) {
+        
+        interp = interpreter;
+        vm = interp.getVm();
         objectId = id;
     }
     
@@ -65,6 +72,15 @@ public abstract class PSObjectComposite extends PSObject {
     @Override
     public boolean gcheck() {
         return getId().isInGlobalVm();
+    }
+    
+    /**
+     * Gets the interpreter to which this object is associated.
+     * 
+     * @return The VM.
+     */
+    protected Interpreter getInterp() {
+        return interp;
     }
     
     /**

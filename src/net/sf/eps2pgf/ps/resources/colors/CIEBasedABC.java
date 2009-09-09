@@ -21,7 +21,6 @@ package net.sf.eps2pgf.ps.resources.colors;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.Interpreter;
-import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
@@ -81,13 +80,12 @@ public class CIEBasedABC extends CIEBased {
     static void checkEntries(final PSObjectDict dict,
             final Interpreter interp) throws PSError, ProgramError {
         
-        VM vm = interp.getVm();
         if (!dict.known(RANGEABC)) {
             double[] defaultRange = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
-            dict.setKey(RANGEABC, new PSObjectArray(defaultRange, vm));
+            dict.setKey(RANGEABC, new PSObjectArray(defaultRange, interp));
         }
         if (!dict.known(DECODEABC)) {
-            PSObjectArray defaultDecode = new PSObjectArray(vm);
+            PSObjectArray defaultDecode = new PSObjectArray(interp);
             defaultDecode.addToEnd(new PSObjectArray("{}", interp));
             defaultDecode.addToEnd(new PSObjectArray("{}", interp));
             defaultDecode.addToEnd(new PSObjectArray("{}", interp));
@@ -96,7 +94,7 @@ public class CIEBasedABC extends CIEBased {
         if (!dict.known(MATRIXABC)) {
             double[] defaultMatrix
                     =  {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
-            dict.setKey(MATRIXABC, new PSObjectArray(defaultMatrix, vm));
+            dict.setKey(MATRIXABC, new PSObjectArray(defaultMatrix, interp));
         }
     }
     

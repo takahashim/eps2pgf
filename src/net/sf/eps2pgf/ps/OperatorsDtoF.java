@@ -171,7 +171,7 @@ public final class OperatorsDtoF extends OperatorContainer {
         @Override
         public void invoke() throws PSError, ProgramError {
             int capacity = getOpStack().pop().toNonNegInt();
-            getOpStack().push(new PSObjectDict(capacity, getVm()));
+            getOpStack().push(new PSObjectDict(capacity, getInterp()));
         }
     }
     
@@ -294,8 +294,10 @@ public final class OperatorsDtoF extends OperatorContainer {
             } else {
                 throw new PSErrorTypeCheck();
             }
-            InputStream eexecInStream = new EexecDecode(rawInStream, getVm());
-            PSObjectFile eexecFile = new PSObjectFile(eexecInStream, getVm());
+            InputStream eexecInStream =
+                new EexecDecode(rawInStream, getInterp());
+            PSObjectFile eexecFile =
+                new PSObjectFile(eexecInStream, getInterp());
             
             getDictStack().pushDict(
                     getDictStack().lookup("systemdict").toDict());
@@ -612,13 +614,13 @@ public final class OperatorsDtoF extends OperatorContainer {
          */
         @Override
         public void invoke() throws PSError, ProgramError {
-            VM vm = getVm();
+            Interpreter interp = getInterp();
             PSObjectName name = getOpStack().pop().toName();
             PSObjectDict paramDict =
-                FilterManager.getParameters(name, getOpStack(), vm);
+                FilterManager.getParameters(name, getOpStack(), interp);
             PSObject sourceOrTarget = getOpStack().pop();
             PSObjectFile file =
-                FilterManager.filter(name, paramDict, sourceOrTarget, vm);
+                FilterManager.filter(name, paramDict, sourceOrTarget, interp);
             getOpStack().push(file);
         }
     }
@@ -815,7 +817,7 @@ public final class OperatorsDtoF extends OperatorContainer {
             
             List<PSObject> items = obj.getItemList();
             int nr = items.remove(0).toNonNegInt();
-            PSObjectArray itemListArray = new PSObjectArray(items, getVm());
+            PSObjectArray itemListArray = new PSObjectArray(items, getInterp());
             
             cs.push(new PSObjectNull());
             cs.push(new PSObjectInt(nr));

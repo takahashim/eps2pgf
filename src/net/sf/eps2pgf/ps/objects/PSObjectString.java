@@ -31,7 +31,6 @@ import net.sf.eps2pgf.io.PSStringInputStream;
 import net.sf.eps2pgf.io.StringInputStream;
 import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Parser;
-import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorIOError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
@@ -59,14 +58,14 @@ public class PSObjectString extends PSObjectComposite implements Cloneable {
      * Creates a new instance of PSObjectString.
      * 
      * @param str This object is initialized with a copy of this string.
-     * @param virtualMemory The virtual memory.
+     * @param interpreter The interpreter.
      * 
      * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectString(final String str, final VM virtualMemory)
+    public PSObjectString(final String str, final Interpreter interpreter)
             throws PSErrorVMError {
         
-        super(virtualMemory);
+        super(interpreter);
         offset = 0;
         count = str.length();
         setSharedString(new StringBuilder(str));
@@ -76,15 +75,15 @@ public class PSObjectString extends PSObjectComposite implements Cloneable {
      * Create a new PostScript string with n \u0000 characters.
      * 
      * @param n Number of \u0000 characters in the new string
-     * @param virtualMemory The VM manager.
+     * @param interpreter The interpreter.
      * 
      * @throws PSErrorRangeCheck <code>n</code> is less than zero
      * @throws PSErrorVMError Virtual memory error.
      */
-    public PSObjectString(final int n, final VM virtualMemory)
+    public PSObjectString(final int n, final Interpreter interpreter)
             throws PSErrorRangeCheck, PSErrorVMError {
         
-        super(virtualMemory);
+        super(interpreter);
         if (n < 0) {
             throw new PSErrorRangeCheck();
         }
@@ -102,16 +101,16 @@ public class PSObjectString extends PSObjectComposite implements Cloneable {
      * 
      * @param isPostScript Interpret the string as PostScript string?
      * @param str The string.
-     * @param virtualMemory The VM manager.
+     * @param interpreter The interpreter.
      * 
      * @throws PSError A PostScript error occurred.
      */
     // CHECKSTYLE:OFF
     public PSObjectString(String str, final boolean isPostScript,
-            final VM virtualMemory) throws PSError {
+            final Interpreter interpreter) throws PSError {
     // CHECKSTYLE:ON
         
-        super(virtualMemory);
+        super(interpreter);
         if (isPostScript) {
             int len = str.length();
             if ((len > 0) && (str.charAt(0) == '(')
@@ -148,7 +147,7 @@ public class PSObjectString extends PSObjectComposite implements Cloneable {
     public PSObjectString(final PSObjectString str, final int index,
             final int length) throws PSErrorRangeCheck {
         
-        super(str.getVm(), str.getId());
+        super(str.getInterp(), str.getId());
         if ((index < 0) || (length < 0)) {
             throw new PSErrorRangeCheck();
         }
@@ -269,7 +268,7 @@ public class PSObjectString extends PSObjectComposite implements Cloneable {
     public PSObjectArray decode(final PSObjectArray encoding)
             throws PSErrorRangeCheck, PSErrorVMError {
         
-        PSObjectArray arr = new PSObjectArray(getVm());
+        PSObjectArray arr = new PSObjectArray(getInterp());
         for (int i = 0; i < count; i++) {
             int chr = get(i);
             arr.addToEnd(encoding.get(chr));
@@ -823,9 +822,6 @@ public class PSObjectString extends PSObjectComposite implements Cloneable {
      * Reads characters from this object, interpreting them as PostScript
      * code, until it has scanned and constructed an entire object.
      * 
-     * @param interp The interpreter. (only required if string contains
-     * immediately evaluated names).
-     * 
      * @return List with one or more objects. See PostScript manual under the
      * 'token' operator for more info.
      * 
@@ -833,13 +829,11 @@ public class PSObjectString extends PSObjectComposite implements Cloneable {
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     @Override
-    public List<PSObject> token(final Interpreter interp)
-            throws PSError, ProgramError {
-        
+    public List<PSObject> token() throws PSError, ProgramError {
         InputStream inStream = new PSStringInputStream(this);
         PSObject any;
         try {
-            any = Parser.convertSingle(inStream, interp);
+            any = Parser.convertSingle(inStream, getInterp());
         } catch (PSErrorIOError e) {
             any = null;
         }
@@ -851,7 +845,7 @@ public class PSObjectString extends PSObjectComposite implements Cloneable {
             try {
                 post = getinterval(chrs, count - chrs);
             } catch (PSErrorRangeCheck e) {
-                post = new PSObjectString("", getVm());
+                post = new PSObjectString("", getInterp());
             }
             lst.add(post);
             lst.add(any);

@@ -32,8 +32,8 @@ import org.fontbox.afm.FontMetric;
 import org.fontbox.util.BoundingBox;
 
 import net.sf.eps2pgf.ProgramError;
+import net.sf.eps2pgf.ps.Interpreter;
 import net.sf.eps2pgf.ps.Matrix;
-import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
@@ -166,18 +166,20 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
      * Create a new empty instance. It sets the FID, font type and default
      * matrix.
      * 
-     * @param vm The VM manager.
+     * @param interpreter The interpreter.
      * 
      * @throws PSErrorVMError Virtual memory error.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObjectFont(final VM vm) throws PSErrorVMError, ProgramError {
-        super(vm);
+    public PSObjectFont(final Interpreter interpreter)
+            throws PSErrorVMError, ProgramError {
+        
+        super(interpreter);
         
         setFID();
         setKey(KEY_FONTTYPE, new PSObjectInt(1));
         setKey(KEY_FONTMATRIX,
-                (new Matrix(0.001, 0, 0, 0.001, 0, 0)).toArray(vm));
+                (new Matrix(0.001, 0, 0, 0.001, 0, 0)).toArray(getInterp()));
     }
     
     /**
@@ -185,18 +187,18 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
      * 
      * @param resourceDir Resource directory with font information
      * @param fontName Name of the font to load
-     * @param vm The VM manager.
+     * @param interpreter The interpreter
      * 
      * @throws PSErrorInvalidFont the PS error invalid font
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      * @throws PSErrorVMError Virtual memory error.
      */
     public PSObjectFont(final File resourceDir, final String fontName,
-            final VM vm) throws PSErrorVMError, PSErrorInvalidFont,
-            ProgramError {
+            final Interpreter interpreter)
+            throws PSErrorVMError, PSErrorInvalidFont, ProgramError {
         
-        super(vm);
-        
+        super(interpreter);
+
         File fontFile = new File(resourceDir, FontManager.FONTDESC_DIR_NAME
                 + File.separator + fontName + ".font");
 
@@ -215,17 +217,19 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
         // Setting the dictionary keys with font info
         setKey(KEY_FONTTYPE, new PSObjectInt(1));
         setKey(KEY_FONTMATRIX,
-                (new Matrix(0.001, 0, 0, 0.001, 0, 0)).toArray(vm));
+                (new Matrix(0.001, 0, 0, 0.001, 0, 0)).toArray(interpreter));
         setKey(KEY_FONTNAME, new PSObjectName(fontName, true));
         setFID();
         String encoding = props.getProperty("encoding", "Standard");
         if (encoding.equals("Standard")) {
-            setKey(KEY_ENCODING, new PSObjectArray(StandardEncoding.get(), vm));
+            setKey(KEY_ENCODING,
+                    new PSObjectArray(StandardEncoding.get(), interpreter));
         } else if (encoding.equals("ISOLatin1")) {
             setKey(KEY_ENCODING,
-                    new PSObjectArray(ISOLatin1Encoding.get(), vm));
+                    new PSObjectArray(ISOLatin1Encoding.get(), interpreter));
         } else if (encoding.equals("Symbol")) {
-            setKey(KEY_ENCODING, new PSObjectArray(SymbolEncoding.get(), vm));
+            setKey(KEY_ENCODING, new PSObjectArray(SymbolEncoding.get(),
+                    interpreter));
         } else {
             LOG.severe("Unknown encoding: " + encoding);
             throw new PSErrorInvalidFont();
@@ -234,13 +238,14 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
         
         setKey(KEY_LATEXPRECODE,
                 new PSObjectString(props.getProperty("latexprecode", ""),
-                        getVm()));
+                        getInterp()));
         setKey(KEY_LATEXPOSTCODE,
                 new PSObjectString(props.getProperty("latexpostcode", ""),
-                        getVm()));
+                        getInterp()));
         
         String texStringName = props.getProperty("texstrings", "default");
-        setKey(KEY_TEXSTRINGS, FontManager.getTexStringDict(texStringName, vm));
+        setKey(KEY_TEXSTRINGS,
+                FontManager.getTexStringDict(texStringName, interpreter));
         
         FontMetric fontMetrics = loadAfm(resourceDir, fontName);
         setKey(KEY_AFM, new PSObjectFontMetrics(fontMetrics));
@@ -248,7 +253,8 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
         // An AFM file does not specify CharStrings. Instead, we make a fake
         // entry.
         List< ? > charMetrics = fontMetrics.getCharMetrics();
-        PSObjectDict charStrings = new PSObjectDict(charMetrics.size(), vm);
+        PSObjectDict charStrings =
+            new PSObjectDict(charMetrics.size(), interpreter);
         for (Object obj : charMetrics) {
             if (obj instanceof CharMetric) {
                 CharMetric cm = (CharMetric) obj;
@@ -259,7 +265,7 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
     }
     
     /**
-     * Creates a new font dictionary with aDict as dictionary.
+     * Creates a new font dictionary with dict as dictionary.
      * 
      * @param dict Dictionary to use as font dictionary
      */
@@ -292,7 +298,7 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
         // texstrings.
         if (!known(KEY_TEXSTRINGS)) {
             setKey(KEY_TEXSTRINGS,
-                    FontManager.getTexStringDictByFontname(fontname, getVm()));
+                 FontManager.getTexStringDictByFontname(fontname, getInterp()));
             alreadyValid = false;
         }
         
@@ -325,8 +331,8 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
                     post = fontTypes[i][2] + post;
                 }
             }
-            setKey(KEY_LATEXPRECODE, new PSObjectString(pre, getVm()));
-            setKey(KEY_LATEXPOSTCODE, new PSObjectString(post, getVm()));
+            setKey(KEY_LATEXPRECODE, new PSObjectString(pre, getInterp()));
+            setKey(KEY_LATEXPOSTCODE, new PSObjectString(post, getInterp()));
             alreadyValid = false;
         }
         
@@ -335,7 +341,7 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
             // Apparently there are no metrics. Try to extract it from the 
             // character descriptions.
             alreadyValid = false;
-            setKey(KEY_AFM, new PSObjectFontMetrics(this, getVm()));
+            setKey(KEY_AFM, new PSObjectFontMetrics(this, getInterp()));
             LOG.fine("Creating font metrics for font " + getFontName());
         }
         
@@ -682,7 +688,7 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
         // variable, return that variable.
         try {
             if (KEY_FONTMATRIX.eq(key)) {
-                return fontMatrix.toArray(getVm());
+                return fontMatrix.toArray(getInterp());
             }
         } catch (PSErrorVMError e) {
             /* empty block */

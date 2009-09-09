@@ -20,7 +20,6 @@ package net.sf.eps2pgf.ps.resources.colors;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.Interpreter;
-import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorRangeCheck;
 import net.sf.eps2pgf.ps.errors.PSErrorUnregistered;
@@ -143,18 +142,20 @@ public class Indexed extends PSColor implements Cloneable {
     /**
      * Gets a PostScript array describing the color space of this color.
      * 
-     * @param vm The VM manager
+     * @param interp The interpreter.
      * 
      * @return array describing color space.
      * 
      * @throws PSErrorVMError Virtual memory error.
      */
     @Override
-    public PSObjectArray getColorSpace(final VM vm) throws PSErrorVMError {
-        PSObjectArray array = new PSObjectArray(vm);
+    public PSObjectArray getColorSpace(final Interpreter interp)
+            throws PSErrorVMError {
+        
+        PSObjectArray array = new PSObjectArray(interp);
         try {
             array.addToEnd(new PSObjectName("Indexed", true));
-            array.addToEnd(currentColor.getColorSpace(vm));
+            array.addToEnd(currentColor.getColorSpace(interp));
             array.addToEnd(new PSObjectInt(hival));
         } catch (PSErrorRangeCheck e) {
             // this can never happen
@@ -162,7 +163,7 @@ public class Indexed extends PSColor implements Cloneable {
 
         try {
             int m = currentColor.getNrComponents();
-            PSObjectString str = new PSObjectString(m * (hival + 1), vm);
+            PSObjectString str = new PSObjectString(m * (hival + 1), interp);
             for (int i = 0; i <= hival; i++) {
                 for (int j = 0; j < m; j++) {
                     char chr = (char) Math.round(levels[i][j] * 255.0);

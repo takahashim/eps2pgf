@@ -37,19 +37,15 @@ public class ExecStack {
     /** Execution stack (see PostScript manual for more info). */
     private PSObjectArray stack;
     
-    /** VM belonging to this execution stack.*/
-    private VM vm;
-    
     /**
      * Create a new execution stack.
      * 
-     * @param virtualMemory The virtual memory manager.
+     * @param interpreter The interpreter.
      * 
      * @throws PSErrorVMError Virtual memory error.
      */
-    public ExecStack(final VM virtualMemory) throws PSErrorVMError {
-        vm = virtualMemory;
-        stack = new PSObjectArray(vm);
+    public ExecStack(final Interpreter interpreter) throws PSErrorVMError {
+        stack = new PSObjectArray(interpreter);
     }
     
     /**
@@ -74,7 +70,6 @@ public class ExecStack {
      * Gets the next PostScript token from the top-most item on this execution
      * stack.
      * 
-     * @param interp The interpreter.
      * @param stopAt Stop and return from this function when this item is at the
      * top of the execution stack. If this is <code>null</code> the entire
      * execution stack is executed.
@@ -86,8 +81,8 @@ public class ExecStack {
      * @throws PSError There was a PostScript error retrieving the next token.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    public PSObject getNextToken(final Interpreter interp,
-            final PSObject stopAt) throws PSError, ProgramError {
+    public PSObject getNextToken(final PSObject stopAt)
+            throws PSError, ProgramError {
         
         // Check for empty stack
         if (stack.size() == 0) {
@@ -97,7 +92,7 @@ public class ExecStack {
         // Loop through all object on the stack until we find a token
         PSObject top;
         while ((top = getTop()) != stopAt) {
-            List<PSObject> list = top.token(interp);
+            List<PSObject> list = top.token();
             if (list.size() == 2) {
                 return list.get(0);
             } else if (list.size() == 3) {

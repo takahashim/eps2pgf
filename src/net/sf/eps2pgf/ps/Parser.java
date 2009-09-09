@@ -317,7 +317,7 @@ public final class Parser {
         } else if (PSObjectArray.isType(str)) {
             return new PSObjectArray(str, interp);
         } else if (PSObjectString.isType(str)) {
-            return new PSObjectString(str, true, interp.getVm());
+            return new PSObjectString(str, true, interp);
         } else {
             // At this we assume the object to be a name, either literal,
             // executable, or immediately evaluated.

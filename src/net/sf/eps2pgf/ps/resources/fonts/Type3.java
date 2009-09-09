@@ -27,7 +27,6 @@ import org.fontbox.util.BoundingBox;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.Interpreter;
-import net.sf.eps2pgf.ps.VM;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
@@ -37,7 +36,6 @@ import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFont;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
-import net.sf.eps2pgf.ps.objects.PSObjectString;
 
 /**
  * Utility class to load metrics of type 3 fonts.
@@ -57,13 +55,13 @@ public final class Type3 {
      * @param fontDict font dictionary describing a Type 3 font
      * @param fMetrics The font metrics object where the loaded metrics will be
      * written to.
-     * @param vm The virtual memory manager.
+     * @param interp The interpreter.
      * 
      * @throws PSError a PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
     public static void load(final PSObjectFontMetrics fMetrics, 
-            final PSObjectDict fontDict, final VM vm)
+            final PSObjectDict fontDict, final Interpreter interp)
             throws PSError, ProgramError {
         
         PSObjectArray buildGlyph;
@@ -76,110 +74,81 @@ public final class Type3 {
                     + " is not a procedure");
         }
         
-        // Create a temporary interpreter in which the characters will be
-        // processed.
-        try {
-            //TODO implement this with runObject on current interpreter
-            Interpreter fi = new Interpreter();
-            
-            // Load some often used procedures to make execution faster
-            fi.getExecStack().push(new PSObjectString("systemdict /gsave get "
-               + "systemdict /grestore get systemdict /eps2pgfgetmetrics get",
-               vm));
-            fi.run();
-            PSObject getmetrics = fi.getOpStack().pop();
-            PSObject grestore = fi.getOpStack().pop();
-            PSObject gsave = fi.getOpStack().pop();
-
-            // Create a list of all unique charNames and their corresponding 
-            // character codes.
-            List<PSObject> encoding = fontDict.get(PSObjectFont.KEY_ENCODING)
-                                                                 .getItemList();
-            encoding.remove(0);  // remove the first item, for an array it is
-                                 // always 1.
-            List<PSObject> charNames = new ArrayList<PSObject>();
-            List<Integer> charCodes = new ArrayList<Integer>();
-            for (int i = 0; i < encoding.size(); i++) {
-                PSObject charName = encoding.get(i);
-                // Check whether this character was processed already
-                if (charNames.contains(charName)) {
-                    continue;
-                }
-                charNames.add(charName);
-                charCodes.add(i);
+        // If BuildGlyph is not defined. Apparently this is an old
+        // (version 1) font. Instead we load the BuildChar procedure.
+        PSObjectArray buildChar = null;
+        if (buildGlyph == null) {
+            try {
+                buildChar =
+                    fontDict.get(PSObjectFont.KEY_BUILDCHAR).toProc();
+            } catch (PSErrorUndefined e) {
+                throw new PSErrorInvalidFont("Required entry ("
+                        + PSObjectFont.KEY_BUILDCHAR + ") is not defined");
+            } catch (PSErrorTypeCheck e) {
+                throw new PSErrorInvalidFont("Entry "
+                        + PSObjectFont.KEY_BUILDCHAR + " is not an array");
             }
-
-            // Next Step: fill the temporary interpreter with code to run the
-            // buildGlyph/Char procedures.
-            if (buildGlyph != null) {
-                for (int i = 0; i < charNames.size(); i++) {
-                    // Fill the execution stack with code
-                    fi.getExecStack().push(grestore);
-                    fi.getExecStack().push(getmetrics);
-                    fi.getExecStack().push(buildGlyph);
-                    fi.getExecStack().push(charNames.get(i));
-                    fi.getExecStack().push(fontDict);
-                    fi.getExecStack().push(gsave);
-                }
-            } else {
-                // BuildGlyph is not defined. Apparently this is an old
-                // (version 1) font. Instead we load the BuildChar procedure.
-                PSObjectArray buildChar;
-                try {
-                    buildChar = fontDict.get(PSObjectFont.KEY_BUILDCHAR)
-                                                                      .toProc();
-                } catch (PSErrorUndefined e) {
-                    throw new PSErrorInvalidFont("Required entry ("
-                            + PSObjectFont.KEY_BUILDCHAR + ") is not defined");
-                } catch (PSErrorTypeCheck e) {
-                    throw new PSErrorInvalidFont("Entry "
-                            + PSObjectFont.KEY_BUILDCHAR + " is not an array");
-                }
-                
-                for (int i = 0; i < charNames.size(); i++) {
-                    // Fill the execution stack with code
-                    fi.getExecStack().push(grestore);
-                    fi.getExecStack().push(getmetrics);
-                    fi.getExecStack().push(buildChar);
-                    fi.getExecStack().push(new PSObjectInt(charCodes.get(i)));
-                    fi.getExecStack().push(fontDict);
-                    fi.getExecStack().push(gsave);
-                }
-            }
-            
-            fi.run();
-            
-            fMetrics.setFontMetrics(new FontMetric());
-            for (int i = 0; i < charNames.size(); i++) {
-                String charName = charNames.get(i).toString();
-                PSObjectArray metrics = fi.getOpStack().pop().toArray();
-                
-                CharMetric charMetric = new CharMetric();
-                charMetric.setName(charName);
-                charMetric.setWx((float) metrics.get(0).toReal());
-                charMetric.setWy((float) metrics.get(1).toReal());
-                BoundingBox boundingBox = new BoundingBox();
-                boundingBox.setLowerLeftX((float) metrics.get(2).toReal());
-                boundingBox.setLowerLeftY((float) metrics.get(3).toReal());
-                boundingBox.setUpperRightX((float) metrics.get(4).toReal());
-                boundingBox.setUpperRightY((float) metrics.get(5).toReal());
-                charMetric.setBoundingBox(boundingBox);
-                fMetrics.getFontMetrics().addCharMetric(charMetric);
-            }
-
-        } catch (PSError e) {
-            // Catch all errors produces by the font code
-            throw new ProgramError("Exception occurred in loadType3, which"
-                    + " should not be possible.\n(Error generated by font: "
-                    + e + ")");
-        } catch (ProgramError e) {
-            // Catch all errors produces by the font code
-            throw new ProgramError("Exception occurred in loadType3, which"
-                    + " should not be possible.\n(Error generated by font: "
-                    + e + ")");
         }
         
+        // Create a list of all unique charNames and their corresponding 
+        // character codes.
+        List<PSObject> encoding =
+            fontDict.get(PSObjectFont.KEY_ENCODING).getItemList();
+        encoding.remove(0);  // remove the first item, for an array it is
+                             // always 1.
+        List<PSObject> charNames = new ArrayList<PSObject>();
+        List<Integer> charCodes = new ArrayList<Integer>();
+        for (int i = 0; i < encoding.size(); i++) {
+            PSObject charName = encoding.get(i);
+            // Check whether this character was processed already
+            if (charNames.contains(charName)) {
+                continue;
+            }
+            charNames.add(charName);
+            charCodes.add(i);
+        }
         
-    }
+        // Loop through all characters and execute their procedures
+        fMetrics.setFontMetrics(new FontMetric());
+        for (int i = 0; i < charNames.size(); i++) {
+            // Create a procedure to calculate the character metrics
+            PSObjectArray proc = new PSObjectArray(interp);
+            proc.addToEnd(interp.getOpsGI().grestore);
+            proc.addToEnd(interp.getOpsEps2pgf().eps2pgfGetmetrics);
+            if (buildGlyph != null) {
+                proc.addToEnd(buildGlyph);
+                proc.addToEnd(charNames.get(i));
+            } else {
+                proc.addToEnd(buildChar);
+                proc.addToEnd(new PSObjectInt(charCodes.get(i)));
+            }
+            proc.addToEnd(fontDict);
+            proc.addToEnd(interp.getOpsGI().gsave);
+            proc.cvx();
+            
+            // Execute the code
+            interp.runObject(proc);
+            
+            // Get the metrics
+            String charName = charNames.get(i).toString();
+            PSObjectArray metrics = interp.getOpStack().pop().toArray();
+            
+            // Create the metric object for this character
+            CharMetric charMetric = new CharMetric();
+            charMetric.setName(charName);
+            charMetric.setWx((float) metrics.get(0).toReal());
+            charMetric.setWy((float) metrics.get(1).toReal());
+            BoundingBox boundingBox = new BoundingBox();
+            boundingBox.setLowerLeftX((float) metrics.get(2).toReal());
+            boundingBox.setLowerLeftY((float) metrics.get(3).toReal());
+            boundingBox.setUpperRightX((float) metrics.get(4).toReal());
+            boundingBox.setUpperRightY((float) metrics.get(5).toReal());
+            charMetric.setBoundingBox(boundingBox);
+            
+            // Add the character metrics object to the font metrics object
+            fMetrics.getFontMetrics().addCharMetric(charMetric);
+            
+        }  // end of loop through all characters
+    } // end of load() method
 
 }
