@@ -60,6 +60,7 @@ public final class Type3 {
      * @throws PSError a PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
+    //TODO split this function up into a few smaller functions
     public static void load(final PSObjectFontMetrics fMetrics, 
             final PSObjectDict fontDict, final Interpreter interp)
             throws PSError, ProgramError {
@@ -112,21 +113,30 @@ public final class Type3 {
         fMetrics.setFontMetrics(new FontMetric());
         for (int i = 0; i < charNames.size(); i++) {
             // Create a procedure to calculate the character metrics
+            // Set up the procedure
             PSObjectArray proc = new PSObjectArray(interp);
-            proc.addToEnd(interp.getOpsGI().grestore);
-            proc.addToEnd(interp.getOpsEps2pgf().eps2pgfGetmetrics);
-            if (buildGlyph != null) {
-                proc.addToEnd(buildGlyph);
-                proc.addToEnd(charNames.get(i));
-            } else {
-                proc.addToEnd(buildChar);
-                proc.addToEnd(new PSObjectInt(charCodes.get(i)));
-            }
-            proc.addToEnd(fontDict);
             proc.addToEnd(interp.getOpsGI().gsave);
-            proc.cvx();
+            proc.addToEnd(fontDict);
+            
+            // Add the character name/code and copy the build glyph/char
+            if (buildGlyph != null) {
+                proc.addToEnd(charNames.get(i));
+                for (PSObject obj : buildGlyph) {
+                    proc.addToEnd(obj);
+                }
+            } else {
+                proc.addToEnd(new PSObjectInt(charCodes.get(i)));
+                for (PSObject obj : buildChar) {
+                    proc.addToEnd(obj);
+                }
+            }
+            
+            // Get the metrics and cleanup
+            proc.addToEnd(interp.getOpsEps2pgf().eps2pgfGetmetrics);           
+            proc.addToEnd(interp.getOpsGI().grestore);
             
             // Execute the code
+            proc.cvx();
             interp.runObject(proc);
             
             // Get the metrics
