@@ -60,54 +60,19 @@ public final class Type3 {
      * @throws PSError a PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    //TODO split this function up into a few smaller functions
     public static void load(final PSObjectFontMetrics fMetrics, 
             final PSObjectDict fontDict, final Interpreter interp)
             throws PSError, ProgramError {
-        
-        PSObjectArray buildGlyph;
-        try {
-            buildGlyph = fontDict.get(PSObjectFont.KEY_BUILDGLYPH).toProc();
-        } catch (PSErrorUndefined e) {
-            buildGlyph = null;
-        } catch (PSErrorTypeCheck e) {
-            throw new PSErrorInvalidFont("Entry " + PSObjectFont.KEY_BUILDGLYPH
-                    + " is not a procedure");
-        }
-        
-        // If BuildGlyph is not defined. Apparently this is an old
-        // (version 1) font. Instead we load the BuildChar procedure.
-        PSObjectArray buildChar = null;
-        if (buildGlyph == null) {
-            try {
-                buildChar =
-                    fontDict.get(PSObjectFont.KEY_BUILDCHAR).toProc();
-            } catch (PSErrorUndefined e) {
-                throw new PSErrorInvalidFont("Required entry ("
-                        + PSObjectFont.KEY_BUILDCHAR + ") is not defined");
-            } catch (PSErrorTypeCheck e) {
-                throw new PSErrorInvalidFont("Entry "
-                        + PSObjectFont.KEY_BUILDCHAR + " is not an array");
-            }
-        }
+
+        // Gets the BuildGlyph or the BuildChar procedure
+        PSObjectArray buildGlyph = getBuildGlyph(fontDict);
+        PSObjectArray buildChar = getBuildChar(fontDict, buildGlyph);
         
         // Create a list of all unique charNames and their corresponding 
         // character codes.
-        List<PSObject> encoding =
-            fontDict.get(PSObjectFont.KEY_ENCODING).getItemList();
-        encoding.remove(0);  // remove the first item, for an array it is
-                             // always 1.
         List<PSObject> charNames = new ArrayList<PSObject>();
         List<Integer> charCodes = new ArrayList<Integer>();
-        for (int i = 0; i < encoding.size(); i++) {
-            PSObject charName = encoding.get(i);
-            // Check whether this character was processed already
-            if (charNames.contains(charName)) {
-                continue;
-            }
-            charNames.add(charName);
-            charCodes.add(i);
-        }
+        getUniqueCharNamesAndCodes(fontDict, charNames, charCodes);
         
         // Loop through all characters and execute their procedures
         fMetrics.setFontMetrics(new FontMetric());
@@ -160,5 +125,99 @@ public final class Type3 {
             
         }  // end of loop through all characters
     } // end of load() method
+
+    
+    
+    /**
+     * Gets the BuildGlyph procedure.
+     * 
+     * @param fontDict The font dictionary.
+     * 
+     * @return The BuildGlyph procedure, or <code>null</code> if it is
+     * undefined.
+     * 
+     * @throws PSErrorInvalidFont Invalid BuildGlyph entry in font dictionary.
+     */
+    private static PSObjectArray getBuildGlyph(final PSObjectDict fontDict)
+            throws PSErrorInvalidFont {
+        
+        PSObjectArray buildGlyph;
+        try {
+            buildGlyph = fontDict.get(PSObjectFont.KEY_BUILDGLYPH).toProc();
+        } catch (PSErrorUndefined e) {
+            buildGlyph = null;
+        } catch (PSErrorTypeCheck e) {
+            throw new PSErrorInvalidFont("Entry " + PSObjectFont.KEY_BUILDGLYPH
+                    + " is not a procedure");
+        }
+        
+        return buildGlyph;
+    }
+    
+
+    /**
+     * Gets the BuildChar procedure.
+     * 
+     * @param fontDict The font dictionary.
+     * @param buildGlyph The BuildGlyph procedure from the font directory.
+     * 
+     * @return If BuildGlyph is equal to <code>null</code> the BuildChar
+     * procedure is returned. If BuildGlyph is not equal to <code>null</code>
+     * this function returns <code>null</code>.
+     * 
+     * @throws PSErrorInvalidFont Invalid or missing BuildChar entry in font
+     * dictionary.
+     */
+    private static PSObjectArray getBuildChar(final PSObjectDict fontDict,
+            final PSObjectArray buildGlyph) throws PSErrorInvalidFont {
+
+        PSObjectArray buildChar = null;
+        if (buildGlyph == null) {
+            try {
+                buildChar =
+                    fontDict.get(PSObjectFont.KEY_BUILDCHAR).toProc();
+            } catch (PSErrorUndefined e) {
+                throw new PSErrorInvalidFont("Required entry ("
+                        + PSObjectFont.KEY_BUILDCHAR + ") is not defined");
+            } catch (PSErrorTypeCheck e) {
+                throw new PSErrorInvalidFont("Entry "
+                        + PSObjectFont.KEY_BUILDCHAR + " is not an array");
+            }
+        }
+        
+        return buildChar;
+    }
+    
+    /**
+     * Creates a list of all unique charNames and their corresponding
+     * character codes. The new character names and codes are added to the
+     * <code>charNames</code> and <code>charCodes</code> lists passed to this
+     * function.
+     * 
+     * @param fontDict The font dictionary.
+     * @param charNames The character names list.
+     * @param charCodes The char codes list.
+     * 
+     * @throws PSErrorUndefined the PS error undefined
+     * @throws PSErrorTypeCheck A PostScript typecheck error occurred.
+     */
+    private static void getUniqueCharNamesAndCodes(final PSObjectDict fontDict,
+            final List<PSObject> charNames, final List<Integer> charCodes)
+            throws PSErrorTypeCheck, PSErrorUndefined {
+        
+        List<PSObject> encoding =
+            fontDict.get(PSObjectFont.KEY_ENCODING).getItemList();
+        encoding.remove(0);  // remove the first item, for an array it is
+                             // always 1.
+        for (int i = 0; i < encoding.size(); i++) {
+            PSObject charName = encoding.get(i);
+            // Check whether this character was processed already
+            if (charNames.contains(charName)) {
+                continue;
+            }
+            charNames.add(charName);
+            charCodes.add(i);
+        }
+    }
 
 }

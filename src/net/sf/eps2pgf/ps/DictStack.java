@@ -185,7 +185,6 @@ public class DictStack {
      * @throws PSError A PostScript error occurred.
      * @throws ProgramError This shouldn't happen, it indicates a bug.
      */
-    //TODO move filling of dictionary stack to the classes to which they belong
     private void fillSystemDict() throws PSError, ProgramError {
         PSObjectDict globaldict = dictStack.get(1);
         PSObjectDict userdict = dictStack.get(2);

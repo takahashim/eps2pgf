@@ -231,7 +231,6 @@ public class OperatorContainer {
      * 
      * @return The VM.
      */
-    //TODO Is this method still required?
     protected final VM getVm() {
         return interp.getVm();
     }
