@@ -26,8 +26,18 @@ This product contains code from the following projects:
   
 This product is comes with the following third-party components:
 
-  - 14 Core PostScript AFM files
+  - 35 Core PostScript AFM files
     License: see resources\afm\MustRead.html
+    Downloaded from <http://svn.services.openoffice.org/opengrok/raw/Current%20(trunk)/afms/download/Adobe-Core35_AFMs-314.tar.gz>
+    on 2009-05-26.
+    
+  - Bitstream Vera fonts
+  	Copyright (c) 2003 by Bitstream, Inc. All Rights Reserved. Bitstream
+  	Vera is a trademark of Bitstream, Inc.
+  	Esp2pgf includes AFM (font metrics) files generated from the original TTF
+  	files. The website and license of the original TTF files are:
+    Website: http://www.gnome.org/fonts/
+    License: see resources\afm\BitstreamVera_COPYRIGHT.TXT 
   
   - FontBox
     Copyright (c) 2003-2007, www.fontbox.org. All rights reserved.

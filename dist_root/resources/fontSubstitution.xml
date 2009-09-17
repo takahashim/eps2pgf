@@ -3,8 +3,12 @@
 <properties>
     <comment></comment>
     <entry key="ArialMT">Helvetica</entry>
-	<entry key="Palatino-Roman">Times-Roman</entry>
-	<entry key="Palatino-Italic">Times-Italic</entry>
-	<entry key="Palatino-Bold">Times-Bold</entry>
-	<entry key="Palatino-BoldItalic">Times-BoldItalic</entry>
+	<entry key="CenturySchL-Roma">NewCenturySchlbk-Roman</entry>
+	<entry key="CenturySchL-Bold">NewCenturySchlbk-Bold</entry>
+	<entry key="CenturySchL-Ital">NewCenturySchlbk-Italic</entry>
+	<entry key="CenturySchL-BoldItal">NewCenturySchlbk-BoldItalic</entry>
+	<entry key="/Century Schoolbook">NewCenturySchlbk-Roman</entry>
+	<entry key="/Century Schoolbook-Bold">NewCenturySchlbk-Bold</entry>
+	<entry key="/Century Schoolbook-Italic">NewCenturySchlbk-Italic</entry>
+	<entry key="/Century Schoolbook-BoldItalic">NewCenturySchlbk-BoldItalic</entry>
 </properties>

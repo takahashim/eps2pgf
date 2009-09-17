@@ -69,6 +69,8 @@ v0.8.0 (200?-??-??)
            ISOLatin1Encoding.
   - Fixed: save/restore now works exactly following PostScript manual. This
            involved huge internal changes.
+  - Added: font metrics for all 35 PostScript fonts (before only 14) and
+           the Bitstream Vera fonts.
 
 v0.7.0 (2008-08-24)
   - Added: feature #1856797 Bitmap images

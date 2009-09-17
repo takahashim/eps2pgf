@@ -9,7 +9,6 @@ FamilyName Helvetica
 Weight Medium
 ItalicAngle -12
 IsFixedPitch false
-CharacterSet ExtendedRoman
 FontBBox -170 -225 1116 931 
 UnderlinePosition -100
 UnderlineThickness 50
@@ -22,7 +21,7 @@ Ascender 718
 Descender -207
 StdHW 76
 StdVW 88
-StartCharMetrics 315
+StartCharMetrics 314
 C 32 ; WX 278 ; N space ; B 0 0 0 0 ;
 C 33 ; WX 278 ; N exclam ; B 90 0 340 718 ;
 C 34 ; WX 355 ; N quotedbl ; B 168 463 438 718 ;
@@ -337,7 +336,6 @@ C -1 ; WX 500 ; N zcaron ; B 31 0 571 734 ;
 C -1 ; WX 556 ; N ncommaaccent ; B 65 -225 573 538 ;
 C -1 ; WX 333 ; N onesuperior ; B 166 281 371 703 ;
 C -1 ; WX 278 ; N imacron ; B 95 0 417 684 ;
-C -1 ; WX 556 ; N Euro ; B 0 0 0 0 ;
 EndCharMetrics
 StartKernData
 StartKernPairs 2705

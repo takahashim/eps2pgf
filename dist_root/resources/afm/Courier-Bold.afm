@@ -9,7 +9,6 @@ FamilyName Courier
 Weight Bold
 ItalicAngle 0
 IsFixedPitch true
-CharacterSet ExtendedRoman
 FontBBox -113 -250 749 801 
 UnderlinePosition -100
 UnderlineThickness 50
@@ -22,7 +21,7 @@ Ascender 629
 Descender -157
 StdHW 84
 StdVW 106
-StartCharMetrics 315
+StartCharMetrics 314
 C 32 ; WX 600 ; N space ; B 0 0 0 0 ;
 C 33 ; WX 600 ; N exclam ; B 202 -15 398 572 ;
 C 34 ; WX 600 ; N quotedbl ; B 135 277 465 562 ;
@@ -337,6 +336,5 @@ C -1 ; WX 600 ; N zcaron ; B 81 0 520 667 ;
 C -1 ; WX 600 ; N ncommaaccent ; B 18 -250 592 454 ;
 C -1 ; WX 600 ; N onesuperior ; B 153 230 447 616 ;
 C -1 ; WX 600 ; N imacron ; B 77 0 523 585 ;
-C -1 ; WX 600 ; N Euro ; B 0 0 0 0 ;
 EndCharMetrics
 EndFontMetrics

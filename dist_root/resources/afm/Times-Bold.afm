@@ -9,7 +9,6 @@ FamilyName Times
 Weight Bold
 ItalicAngle 0
 IsFixedPitch false
-CharacterSet ExtendedRoman
 FontBBox -168 -218 1000 935 
 UnderlinePosition -100
 UnderlineThickness 50
@@ -22,7 +21,7 @@ Ascender 683
 Descender -217
 StdHW 44
 StdVW 139
-StartCharMetrics 315
+StartCharMetrics 314
 C 32 ; WX 250 ; N space ; B 0 0 0 0 ;
 C 33 ; WX 333 ; N exclam ; B 81 -13 251 691 ;
 C 34 ; WX 555 ; N quotedbl ; B 83 404 472 691 ;
@@ -337,7 +336,6 @@ C -1 ; WX 444 ; N zcaron ; B 21 0 420 704 ;
 C -1 ; WX 556 ; N ncommaaccent ; B 21 -218 539 473 ;
 C -1 ; WX 300 ; N onesuperior ; B 28 275 273 688 ;
 C -1 ; WX 278 ; N imacron ; B -8 0 272 637 ;
-C -1 ; WX 500 ; N Euro ; B 0 0 0 0 ;
 EndCharMetrics
 StartKernData
 StartKernPairs 2242
