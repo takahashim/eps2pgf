@@ -20,9 +20,6 @@ package net.sf.eps2pgf.ps.resources.outputdevices;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
 
 import net.sf.eps2pgf.ps.GraphicsState;
 import net.sf.eps2pgf.ps.Image;
@@ -38,10 +35,6 @@ import net.sf.eps2pgf.ps.objects.PSObjectDict;
  *
  */
 public class LOLDevice implements OutputDevice, Cloneable {
-    
-    /** Format for floating point number in the output.. */
-    static final DecimalFormat FLOAT_FORMAT = new DecimalFormat("#.###", 
-            new DecimalFormatSymbols(Locale.US));    
     
     /** Output is written to this writer. */
     private Writer out;
@@ -210,10 +203,10 @@ public class LOLDevice implements OutputDevice, Cloneable {
         
         try {
             out.write(String.format("\\overlaylabel(%s,%s)[%s][%s]{%s}%%\n",
-                    FLOAT_FORMAT.format(position[0]),
-                    FLOAT_FORMAT.format(position[1]),
+                    PGFDevice.COOR_FORMAT.format(position[0]),
+                    PGFDevice.COOR_FORMAT.format(position[1]),
                     anchor,
-                    FLOAT_FORMAT.format(angle),
+                    PGFDevice.ANGLE_FORMAT.format(angle),
                     text));
         } catch (IOException e) {
             throw new PSErrorIOError();

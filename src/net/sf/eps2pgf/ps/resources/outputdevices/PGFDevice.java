@@ -63,16 +63,20 @@ import net.sf.eps2pgf.ps.resources.shadings.Shading;
 public class PGFDevice implements OutputDevice, Cloneable {
     
     /** Coordinate format (used to format X- and Y-coordinates). */
-    static final DecimalFormat COOR_FORMAT = new DecimalFormat("#.###", 
-            new DecimalFormatSymbols(Locale.US));
+    public static final DecimalFormat COOR_FORMAT =
+        new DecimalFormat("#.###", new DecimalFormatSymbols(Locale.US));
     
     /** Length format (used to format line width, dash, etc...). */
-    static final DecimalFormat LENGTH_FORMAT = new DecimalFormat("#.###", 
-            new DecimalFormatSymbols(Locale.US));
+    public static final DecimalFormat LENGTH_FORMAT =
+        new DecimalFormat("#.###", new DecimalFormatSymbols(Locale.US));
+    
+    /** Used to express angles (in degrees). */
+    public static final DecimalFormat ANGLE_FORMAT =
+        new DecimalFormat("#.###", new DecimalFormatSymbols(Locale.US));
     
     /** Font size format (used to set font size in pt). */
-    static final DecimalFormat FONTSIZE_FORMAT = new DecimalFormat("#.##",
-            new DecimalFormatSymbols(Locale.US));
+    public static final DecimalFormat FONTSIZE_FORMAT =
+        new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US));
     
     /**
      * Colors (in range from 0.0 to 1.0) have at least 16-bit per channel
@@ -457,7 +461,7 @@ public class PGFDevice implements OutputDevice, Cloneable {
             out.write(LENGTH_FORMAT.format(1e-4 * coor1[0]) + "cm}{");
             out.write(LENGTH_FORMAT.format(1e-4 * coor1[1]) + "cm}}");
             if (Math.abs(angle) > 1e-10) {
-                out.write("\\pgftransformrotate{" + COOR_FORMAT.format(angle)
+                out.write("\\pgftransformrotate{" + ANGLE_FORMAT.format(angle)
                         + "}");
             }
             if (Math.abs(xScale - 1.0) > 1e-10) {
@@ -807,7 +811,7 @@ public class PGFDevice implements OutputDevice, Cloneable {
         // Convert fontsize in PostScript pt to TeX pt
         double fontsize = pFontsize / 72.0 * 72.27;
         
-        String angStr = LENGTH_FORMAT.format(angle);
+        String angStr = ANGLE_FORMAT.format(angle);
         
         String texText = "";
         if (!Double.isNaN(fontsize)) {
@@ -921,9 +925,10 @@ public class PGFDevice implements OutputDevice, Cloneable {
             double y = Math.min(Math.min(lly, uly), lry);
             String xStr = COOR_FORMAT.format(1e-4 * x);
             String yStr = COOR_FORMAT.format(1e-4 * y);
+            String angleStr = ANGLE_FORMAT.format(angle);
             out.write(String.format("\\pgftext[at=\\pgfqpoint{%scm}{%scm},left,"
-                    + "bottom]{\\includegraphics[angle=%f]{%s}}\n",
-                    xStr, yStr, angle, basename));
+                    + "bottom]{\\includegraphics[angle=%s]{%s}}\n",
+                    xStr, yStr, angleStr, basename));
         } catch (FileNotFoundException e) {
             throw new PSErrorIOError();
         } catch (IOException e) {

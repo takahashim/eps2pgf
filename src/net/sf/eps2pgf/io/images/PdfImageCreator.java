@@ -21,7 +21,6 @@ package net.sf.eps2pgf.io.images;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -36,6 +35,7 @@ import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.filters.ASCII85Encode;
 import net.sf.eps2pgf.ps.resources.filters.FlateEncode;
+import net.sf.eps2pgf.ps.resources.outputdevices.PGFDevice;
 
 /**
  * This class takes bitmap image and writes it to an OutputStream.
@@ -152,9 +152,9 @@ public final class PdfImageCreator {
         out.write("/Parent 3 0 R\n");
         double width = img.getOutputWidthPt();
         double height = img.getOutputHeightPt();
-        DecimalFormat format = new DecimalFormat("0.000");
-        out.write("/MediaBox [0.0 0.0 " + format.format(width) + " "
-                + format.format(height) + "]\n");
+        out.write("/MediaBox [0.0 0.0 "
+                + PGFDevice.COOR_FORMAT.format(width) + " "
+                + PGFDevice.COOR_FORMAT.format(height) + "]\n");
         out.write("/Contents 6 0 R\n");
         out.write("/Resources\n<<\n");
         out.write("/ProcSet [/PDF /ImageB /ImageC /ImageI]\n");

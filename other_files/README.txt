@@ -71,6 +71,8 @@ v0.8.0 (200?-??-??)
            involved huge internal changes.
   - Added: font metrics for all 35 PostScript fonts (before only 14) and
            the Bitstream Vera fonts.
+  - Fixed: bug #2854543 Eps2pgf shouldn't use system settings for decimal
+           separator.
 
 v0.7.0 (2008-08-24)
   - Added: feature #1856797 Bitmap images

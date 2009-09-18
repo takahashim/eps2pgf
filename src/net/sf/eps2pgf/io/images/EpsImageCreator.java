@@ -21,7 +21,6 @@ package net.sf.eps2pgf.io.images;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Formatter;
 
@@ -35,6 +34,7 @@ import net.sf.eps2pgf.ps.errors.PSErrorVMError;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 import net.sf.eps2pgf.ps.resources.filters.ASCII85Encode;
 import net.sf.eps2pgf.ps.resources.filters.FlateEncode;
+import net.sf.eps2pgf.ps.resources.outputdevices.PGFDevice;
 
 /**
  * This class takes bitmap image and writes it to an OutputStream.
@@ -113,9 +113,9 @@ public final class EpsImageCreator {
         double height = img.getOutputHeightPt();
         out.write("%%BoundingBox: 0 0 " + (int) Math.ceil(width));
         out.write(" " + (int) Math.ceil(height) + "\n");
-        DecimalFormat format = new DecimalFormat("0.000");
-        out.write("%%HiResBoundingBox: 0.0 0.0 " + format.format(width)
-                + " " + format.format(height));
+        out.write("%%HiResBoundingBox: 0.0 0.0 "
+                + PGFDevice.COOR_FORMAT.format(width)
+                + " " + PGFDevice.COOR_FORMAT.format(height));
         out.write("\n%%EndComments\n\n");
     }
     
@@ -132,10 +132,9 @@ public final class EpsImageCreator {
         
         double width = img.getOutputWidthPt();
         double height = img.getOutputHeightPt();        
-        DecimalFormat format = new DecimalFormat("0.###");
-        out.write(format.format(width));
+        out.write(PGFDevice.COOR_FORMAT.format(width));
         out.write(" ");
-        out.write(format.format(height));
+        out.write(PGFDevice.COOR_FORMAT.format(height));
         out.write(" scale\n");
     }
     
