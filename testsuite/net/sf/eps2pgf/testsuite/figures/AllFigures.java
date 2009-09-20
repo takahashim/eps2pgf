@@ -187,6 +187,12 @@ public final class AllFigures {
 
     /** Test. @throws Exception the exception */
     @Test
+    public void matplotlib1() throws Exception {
+        assertTrue(Common.testFigure(conv, "matplotlib1.eps"));
+    }
+
+    /** Test. @throws Exception the exception */
+    @Test
     public void ciebasedColorspace() throws Exception {
         assertTrue(Common.testFigure(conv, "CIEBased.eps"));
     }

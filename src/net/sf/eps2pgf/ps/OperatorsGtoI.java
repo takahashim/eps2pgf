@@ -27,9 +27,11 @@ import net.sf.eps2pgf.ps.objects.PSObject;
 import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectBool;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
+import net.sf.eps2pgf.ps.objects.PSObjectFont;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
 import net.sf.eps2pgf.ps.objects.PSObjectOperator;
 import net.sf.eps2pgf.ps.objects.PSObjectReal;
+import net.sf.eps2pgf.ps.objects.PSObjectString;
 import net.sf.eps2pgf.ps.resources.colors.DeviceGray;
 import net.sf.eps2pgf.ps.resources.colors.PSColor;
 
@@ -148,6 +150,32 @@ public final class OperatorsGtoI extends OperatorContainer {
             obj.checkAccess(false, true, false);
             
             getOpStack().push(obj.getinterval(index, count));
+        }
+    }
+    
+    /**
+     * Postscript op: glyphshow.
+     */
+    public class Oglyphshow extends PSObjectOperator {
+        /**
+         * Invokes this operator.
+         * 
+         * @throws PSError A PostScript error occurred.
+         * @throws ProgramError This shouldn't happen, it indicates a bug.
+         */
+        @Override
+        public void invoke() throws PSError, ProgramError {
+            PSObject nameOrCid = getOpStack().pop();
+            PSObjectFont font = getGstate().current().getFont();
+            
+            // Convert the name/CID to a string. This is done so that
+            // text replacements can be applied.
+            PSObjectString string = font.encodeChar(nameOrCid, getInterp());
+            
+            // Write the string to the output device
+            double[] dpos = getTextHandler().showText(
+                    getGstate().current().getDevice(), string);
+            getGstate().current().rmoveto(dpos[0], dpos[1]);
         }
     }
     

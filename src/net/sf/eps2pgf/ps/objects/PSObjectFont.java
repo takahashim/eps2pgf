@@ -406,6 +406,33 @@ public class PSObjectFont extends PSObjectDict implements Cloneable {
     }
     
     /**
+     * Converts a single character defined as character name or CID to a string
+     * with a single character.
+     * 
+     * @param nameOrCid The name or CID of the character.
+     * @param interp The interpreter.
+     * 
+     * @return The string with the character.
+     * 
+     * @throws PSError A PostScript error occurred.
+     */
+    public PSObjectString encodeChar(final PSObject nameOrCid,
+            final Interpreter interp) throws PSError {
+        
+        PSObjectArray enc = get(KEY_ENCODING).toArray();
+        
+        String string = "";
+        for (int i = 0; i < enc.size(); i++) {
+            if (nameOrCid.eq(enc.get(i))) {
+                string += (char) i;
+                break;
+            }
+        }
+        
+        return new PSObjectString(string, interp);
+    }
+    
+    /**
      * Indicates whether some other object is equal to this one.
      * Required when used as index in PSObjectDict
      * 

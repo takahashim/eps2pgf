@@ -74,6 +74,7 @@ v0.8.0 (200?-??-??)
   - Fixed: bug #2854543 Eps2pgf shouldn't use system settings for decimal
            separator.
   - Fixed: bug #2786463 Crash on empty argument in --text-replace file.
+  - Fixed: bug #2841338 Figure created by Matplotlib doesn't compile
 
 v0.7.0 (2008-08-24)
   - Added: feature #1856797 Bitmap images

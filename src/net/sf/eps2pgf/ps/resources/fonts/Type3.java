@@ -249,17 +249,22 @@ public final class Type3 {
                 
                 double scale = fontMatrix.getMeanScaling();
                 
-                String proc = "{ 0 ";
-                proc += PGFDevice.COOR_FORMAT.format(1.0 / scale);
+                String proc = "{ ";
+                proc += PGFDevice.COOR_FORMAT.format(0.2 / scale) + " ";
+                proc += PGFDevice.COOR_FORMAT.format(0.2 / scale);
+                proc += " moveto ";
+                proc += PGFDevice.COOR_FORMAT.format(0.2 / scale) + " ";
+                proc += PGFDevice.COOR_FORMAT.format(0.8 / scale);
                 proc += " lineto ";
-                proc += PGFDevice.COOR_FORMAT.format(1.0 / scale);
-                proc += " ";
-                proc += PGFDevice.COOR_FORMAT.format(1.0 / scale);
+                proc += PGFDevice.COOR_FORMAT.format(0.8 / scale) + " ";
+                proc += PGFDevice.COOR_FORMAT.format(0.8 / scale);
                 proc += " lineto ";
+                proc += PGFDevice.COOR_FORMAT.format(0.8 / scale) + " ";
+                proc += PGFDevice.COOR_FORMAT.format(0.2 / scale);
+                proc += " lineto closepath stroke ";
+                proc += PGFDevice.COOR_FORMAT.format(0.0 / scale) + " ";
                 proc += PGFDevice.COOR_FORMAT.format(1.0 / scale);
-                proc += " 0 lineto closepath stroke ";
-                proc += PGFDevice.COOR_FORMAT.format(1.0 / scale);
-                proc += " 0 moveto }";
+                proc += " moveto }";
                 
                 PSObjectArray arr = new PSObjectArray(proc, interp);
                 
