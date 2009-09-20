@@ -73,6 +73,7 @@ v0.8.0 (200?-??-??)
            the Bitstream Vera fonts.
   - Fixed: bug #2854543 Eps2pgf shouldn't use system settings for decimal
            separator.
+  - Fixed: bug #2786463 Crash on empty argument in --text-replace file.
 
 v0.7.0 (2008-08-24)
   - Added: feature #1856797 Bitmap images

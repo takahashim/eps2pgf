@@ -221,8 +221,11 @@ public class TextReplacements {
         while ((c = in.read()) != -1) {
             if ((c == '{') && (str.charAt(str.length() - 1) != '\\')) {
                 depth++;
-            } else if ((c == '}') && (str.charAt(str.length() - 1) != '\\')) {
-                depth--;
+            } else if (c == '}') {
+                if ((str.length() == 0)
+                        || (str.charAt(str.length() - 1) != '\\')) {
+                    depth--;
+                }
             }
             if (depth == 0) {
                 break;
