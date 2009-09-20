@@ -27,6 +27,7 @@ import org.fontbox.util.BoundingBox;
 
 import net.sf.eps2pgf.ProgramError;
 import net.sf.eps2pgf.ps.Interpreter;
+import net.sf.eps2pgf.ps.Matrix;
 import net.sf.eps2pgf.ps.errors.PSError;
 import net.sf.eps2pgf.ps.errors.PSErrorInvalidFont;
 import net.sf.eps2pgf.ps.errors.PSErrorTypeCheck;
@@ -36,6 +37,8 @@ import net.sf.eps2pgf.ps.objects.PSObjectArray;
 import net.sf.eps2pgf.ps.objects.PSObjectDict;
 import net.sf.eps2pgf.ps.objects.PSObjectFont;
 import net.sf.eps2pgf.ps.objects.PSObjectInt;
+import net.sf.eps2pgf.ps.resources.encodings.EncodingManager;
+import net.sf.eps2pgf.ps.resources.outputdevices.PGFDevice;
 
 /**
  * Utility class to load metrics of type 3 fonts.
@@ -63,6 +66,9 @@ public final class Type3 {
     public static void load(final PSObjectFontMetrics fMetrics, 
             final PSObjectDict fontDict, final Interpreter interp)
             throws PSError, ProgramError {
+        
+        // A fix for invalid font dictionaries.
+        fixMissingNotdef(fontDict, interp);
 
         // Gets the BuildGlyph or the BuildChar procedure
         PSObjectArray buildGlyph = getBuildGlyph(fontDict);
@@ -124,6 +130,7 @@ public final class Type3 {
             fMetrics.getFontMetrics().addCharMetric(charMetric);
             
         }  // end of loop through all characters
+        
     } // end of load() method
 
     
@@ -217,6 +224,51 @@ public final class Type3 {
             }
             charNames.add(charName);
             charCodes.add(i);
+        }
+    }
+    
+    /**
+     * Ensure that there is a .notdef entry if the font dictionary contains a
+     * CharStrings entry. This is a fix for incorrect Type 3, because they must
+     * always include define .notdef entry. This caused an infinite loop in at
+     * least one occasion.
+     * 
+     * @param fontDict The font dictionary.
+     * @param interp The interpreter.
+     */
+    private static void fixMissingNotdef(final PSObjectDict fontDict,
+            final Interpreter interp) {
+        
+        try {
+            PSObjectDict charDict =
+                fontDict.get(PSObjectFont.KEY_CHARSTRINGS).toDict();
+            
+            if (!charDict.known(EncodingManager.S_NOTDEF)) {
+                Matrix fontMatrix = fontDict.get(PSObjectFont.KEY_FONTMATRIX)
+                    .toArray().toMatrix();
+                
+                double scale = fontMatrix.getMeanScaling();
+                
+                String proc = "{ 0 ";
+                proc += PGFDevice.COOR_FORMAT.format(1.0 / scale);
+                proc += " lineto ";
+                proc += PGFDevice.COOR_FORMAT.format(1.0 / scale);
+                proc += " ";
+                proc += PGFDevice.COOR_FORMAT.format(1.0 / scale);
+                proc += " lineto ";
+                proc += PGFDevice.COOR_FORMAT.format(1.0 / scale);
+                proc += " 0 lineto closepath stroke ";
+                proc += PGFDevice.COOR_FORMAT.format(1.0 / scale);
+                proc += " 0 moveto }";
+                
+                PSObjectArray arr = new PSObjectArray(proc, interp);
+                
+                charDict.setKey(EncodingManager.S_NOTDEF, arr);
+            }
+        } catch (PSError e) {
+            /* empty block */
+        } catch (ProgramError e) {
+            /* empty block */
         }
     }
 
