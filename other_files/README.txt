@@ -75,6 +75,7 @@ v0.8.0 (200?-??-??)
            separator.
   - Fixed: bug #2786463 Crash on empty argument in --text-replace file.
   - Fixed: bug #2841338 Figure created by Matplotlib doesn't compile
+  - Fixed: bug #2831631 Figure created by fig2dev doesn't compile properly
 
 v0.7.0 (2008-08-24)
   - Added: feature #1856797 Bitmap images

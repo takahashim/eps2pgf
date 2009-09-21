@@ -317,6 +317,8 @@ public class GraphicsState implements Cloneable {
         double xt2 = x + r * Math.cos(ang2);
         double yt2 = y + r * Math.sin(ang2);
 
+        ang1 = Math.toDegrees(ang1);
+        ang2 = Math.toDegrees(ang2);
         arc(x, y, r, ang1, ang2, (ang2 > ang1));
         
         double[] ret = {xt1, yt1, xt2, yt2};

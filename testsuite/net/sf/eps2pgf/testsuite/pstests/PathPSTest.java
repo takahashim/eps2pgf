@@ -117,24 +117,46 @@ public class PathPSTest {
     @Test
     public void arcto1() throws Exception {
         String cmd = "0 0 moveto 0 4 4 4 1 arcto 4.0 eq  4 1 roll 1.0 eq"
-            + " 4 1 roll 3.0 eq  4 1 roll 0.0 eq";
-        assertTrue(Common.testString(interp, cmd, 4));
+            + " 4 1 roll 3.0 eq  4 1 roll 0.0 eq"
+            + " currentpoint"
+            + " 4.00 sub abs 0.001 lt 2 1 roll"
+            + " 1.00 sub abs 0.001 lt"; 
+        assertTrue(Common.testString(interp, cmd, 6));
     }
 
     /** Test. @throws Exception the exception */
     @Test
     public void arcto2() throws Exception {
         String cmd = "10 0 moveto 0 0 -10 0 1 arcto  0.0 eq  4 1 roll 0.0 eq"
-            + " 4 1 roll 0.0 eq  4 1 roll 0.0 eq";
-        assertTrue(Common.testString(interp, cmd, 4));
+            + " 4 1 roll 0.0 eq  4 1 roll 0.0 eq"
+            + " currentpoint"
+            + " 0.0 sub abs 0.001 lt 2 1 roll"
+            + " 0.0 sub abs 0.001 lt";
+        assertTrue(Common.testString(interp, cmd, 6));
     }
 
     /** Test. @throws Exception the exception */
     @Test
     public void arcto3() throws Exception {
         String cmd = "10 0 moveto 0 0 10 0 1 arcto  0.0 eq  4 1 roll 0.0 eq"
-            + " 4 1 roll 0.0 eq  4 1 roll 0.0 eq";
-        assertTrue(Common.testString(interp, cmd, 4));
+            + " 4 1 roll 0.0 eq  4 1 roll 0.0 eq"
+            + " currentpoint"
+            + " 0.0 sub abs 0.001 lt 2 1 roll"
+            + " 0.0 sub abs 0.001 lt";
+        assertTrue(Common.testString(interp, cmd, 6));
+    }
+    
+    /** Test. @throws Exception the exception */
+    @Test
+    public void arcto4() throws Exception {
+        String cmd = "0 0 moveto 90 0 100 10 10 arcto currentpoint"
+            + " 2.929 sub abs 0.001 lt 6 1 roll"
+            + " 92.929 sub abs 0.001 lt 6 1 roll"
+            + " 2.929 sub abs 0.001 lt 6 1 roll"
+            + " 92.929 sub abs 0.001 lt 6 1 roll"
+            + " 0.000 sub abs 0.001 lt 6 1 roll"
+            + " 85.858 sub abs 0.001 lt 6 1 roll";
+        assertTrue(Common.testString(interp, cmd, 6));
     }
 
     /** Test. @throws Exception the exception */
