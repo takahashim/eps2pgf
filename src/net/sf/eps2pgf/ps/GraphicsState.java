@@ -311,6 +311,16 @@ public class GraphicsState implements Cloneable {
 
         double ang1 = Math.PI + phi1 + posorneg * Math.PI / 2;
         double ang2 = Math.PI + phi2 - posorneg * Math.PI / 2;
+        if (ang1 > (2 * Math.PI + 1e-6)) {
+            ang1 = ang1 - 2 * Math.PI;
+        } else if (ang1 < -1e-6) {
+            ang1 = ang1 + 2 * Math.PI;
+        }
+        if (ang2 > (2 * Math.PI + 1e-6)) {
+            ang2 = ang2 - 2 * Math.PI;
+        } else if (ang2 < -1e-6) {
+            ang2 = ang2 + 2 * Math.PI;
+        }
 
         double xt1 = x + r * Math.cos(ang1);
         double yt1 = y + r * Math.sin(ang1);

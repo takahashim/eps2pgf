@@ -112,6 +112,12 @@ public final class AllFigures {
     
     /** Test. @throws Exception the exception */
     @Test
+    public void fig2dev1() throws Exception {
+        assertTrue(Common.testFigure(conv, "fig2dev1.eps"));
+    }
+    
+    /** Test. @throws Exception the exception */
+    @Test
     public void golfer() throws Exception {
         assertTrue(Common.testFigure(conv, "golfer.ps"));
     }
